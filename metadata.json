@@ -1,0 +1,6 @@
+{
+  "name": "LYUMOS CRM",
+  "description": "Next-Generation Student Management CRM for Education Centers",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
