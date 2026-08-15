@@ -1,230 +1,1213 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useCRM } from '../../context/CRMContext';
-import { 
-  X, Phone, Mail, UserCheck, Calendar, DollarSign, 
-  BookOpen, GraduationCap, MapPin, CheckCircle2, Clock, AlertCircle, Edit3, Trash2 
+import type { Student } from '../../types/crm';
+import {
+  X,
+  Phone,
+  Mail,
+  Calendar,
+  DollarSign,
+  BookOpen,
+  GraduationCap,
+  MapPin,
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  Edit3,
+  Trash2,
+  Save,
+  UserRound,
+  UserCheck,
+  WalletCards,
+  FileText,
+  ShieldCheck,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
+type MainTab = 'profile' | 'payments';
+
+interface EditFormState {
+  fullName: string;
+  birthDate: string;
+  gender: string;
+  phone: string;
+  email: string;
+  parentName: string;
+  parentPhone: string;
+  groupId: string;
+  monthlyFee: number;
+  status: string;
+  joinedDate: string;
+  address: string;
+  notes: string;
+}
+
+const fieldClass = `
+  w-full rounded-xl
+  border border-slate-700
+  bg-slate-800
+  px-3.5 py-2.5
+  text-sm text-white
+  outline-none
+  transition-all
+  focus:border-blue-500
+  focus:ring-2 focus:ring-blue-500/15
+`;
+
+const labelClass =
+  'mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-slate-400';
+
 export const StudentProfileModal: React.FC = () => {
-  const { 
-    selectedStudentId, 
-    setSelectedStudentId, 
-    students, 
-    deleteStudent, 
-    setIsReceivePaymentModalOpen, 
+  const {
+    selectedStudentId,
+    setSelectedStudentId,
+    students,
+    groups,
+    teachers,
+    updateStudent,
+    deleteStudent,
+    setIsReceivePaymentModalOpen,
     setPaymentModalDefaultStudentId,
-    settings 
+    settings,
   } = useCRM();
 
-  const [activeTab, setActiveTab] = useState<'payments' | 'info' | 'attendance'>('payments');
+  const [activeTab, setActiveTab] =
+    useState<MainTab>('profile');
 
-  if (!selectedStudentId) return null;
+  const [isEditing, setIsEditing] =
+    useState(false);
 
-  const student = students.find(s => s.id === selectedStudentId);
-  if (!student) return null;
+  const [form, setForm] =
+    useState<EditFormState>({
+      fullName: '',
+      birthDate: '',
+      gender: 'Male',
+      phone: '',
+      email: '',
+      parentName: '',
+      parentPhone: '',
+      groupId: '',
+      monthlyFee: 0,
+      status: 'Active',
+      joinedDate: '',
+      address: '',
+      notes: '',
+    });
 
-  const handleReceivePayment = () => {
-    setPaymentModalDefaultStudentId(student.id);
+  const student = students.find(
+    s => s.id === selectedStudentId
+  );
+
+  useEffect(() => {
+    if (!student) return;
+
+    setForm({
+      fullName: student.fullName ?? '',
+      birthDate: student.birthDate ?? '',
+      gender: student.gender ?? 'Male',
+      phone: student.phone ?? '',
+      email: student.email ?? '',
+      parentName: student.parentName ?? '',
+      parentPhone: student.parentPhone ?? '',
+      groupId: student.groupId ?? '',
+      monthlyFee: Number(student.monthlyFee ?? 0),
+      status: student.status ?? 'Active',
+      joinedDate: student.joinedDate ?? '',
+      address: student.address ?? '',
+      notes: student.notes ?? '',
+    });
+  }, [student?.id]);
+
+  if (!selectedStudentId || !student) {
+    return null;
+  }
+
+  const months = [
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+  ];
+
+  const selectedGroup =
+    groups.find(g => g.id === form.groupId);
+
+  const selectedTeacher =
+    teachers.find(
+      t => t.id === selectedGroup?.teacherId
+    );
+
+  const handlePayment = () => {
+    setPaymentModalDefaultStudentId(
+      student.id
+    );
+
     setIsReceivePaymentModalOpen(true);
-    confetti({ particleCount: 30, spread: 60, origin: { y: 0.7 } });
+
+    confetti({
+      particleCount: 25,
+      spread: 50,
+      origin: { y: 0.7 },
+    });
   };
 
-  const MONTHS = ["August", "September", "October", "November", "December", "January", "February", "March", "April", "May", "June", "July"];
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'Paid':
-        return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"><CheckCircle2 className="w-3 h-3" /> Paid</span>;
-      case 'Discount':
-        return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300"><CheckCircle2 className="w-3 h-3" /> Discount</span>;
-      case 'Overdue':
-        return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"><AlertCircle className="w-3 h-3" /> Overdue</span>;
-      case 'Frozen':
-        return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"><Clock className="w-3 h-3" /> Frozen</span>;
-      default:
-        return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"><Clock className="w-3 h-3" /> Unpaid</span>;
+  const handleSave = () => {
+    if (!form.fullName.trim()) {
+      alert('Student name is required');
+      return;
     }
+
+    updateStudent(student.id, {
+      fullName: form.fullName.trim(),
+      birthDate: form.birthDate,
+      gender:
+        form.gender as Student['gender'],
+      phone: form.phone.trim(),
+      email: form.email.trim(),
+      parentName: form.parentName.trim(),
+      parentPhone:
+        form.parentPhone.trim(),
+
+      groupId: form.groupId,
+
+      groupName:
+        selectedGroup?.name ??
+        student.groupName,
+
+      teacherId:
+        selectedGroup?.teacherId ??
+        student.teacherId,
+
+      teacherName:
+        selectedTeacher?.fullName ??
+        selectedGroup?.teacherName ??
+        student.teacherName,
+
+      monthlyFee:
+        Number(form.monthlyFee),
+
+      status:
+        form.status as Student['status'],
+
+      joinedDate: form.joinedDate,
+
+      address:
+        form.address.trim() || undefined,
+
+      notes:
+        form.notes.trim() || undefined,
+    });
+
+    setIsEditing(false);
+  };
+
+  const paymentBadge = (
+    status: string
+  ) => {
+    if (status === 'Paid') {
+      return (
+        <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2 py-1 text-[10px] font-bold text-emerald-400">
+          <CheckCircle2 className="h-3 w-3" />
+          Paid
+        </span>
+      );
+    }
+
+    if (status === 'Overdue') {
+      return (
+        <span className="inline-flex items-center gap-1 rounded-lg bg-rose-500/10 px-2 py-1 text-[10px] font-bold text-rose-400">
+          <AlertCircle className="h-3 w-3" />
+          Overdue
+        </span>
+      );
+    }
+
+    if (status === 'Discount') {
+      return (
+        <span className="inline-flex items-center gap-1 rounded-lg bg-blue-500/10 px-2 py-1 text-[10px] font-bold text-blue-400">
+          <CheckCircle2 className="h-3 w-3" />
+          Discount
+        </span>
+      );
+    }
+
+    return (
+      <span className="inline-flex items-center gap-1 rounded-lg bg-amber-500/10 px-2 py-1 text-[10px] font-bold text-amber-400">
+        <Clock className="h-3 w-3" />
+        Unpaid
+      </span>
+    );
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-      <div 
-        className="w-full max-w-3xl bg-white dark:bg-slate-900 rounded-[28px] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200"
-        onClick={e => e.stopPropagation()}
+    <div
+      onClick={() =>
+        setSelectedStudentId(null)
+      }
+      className="
+        fixed inset-0 z-50
+        flex items-center justify-center
+        bg-black/70
+        p-5
+        backdrop-blur-md
+      "
+    >
+      <div
+        onClick={e =>
+          e.stopPropagation()
+        }
+        className="
+          flex
+          h-[82vh]
+          w-full
+          max-w-4xl
+          flex-col
+          overflow-hidden
+          rounded-[26px]
+          border border-slate-700/60
+          bg-[#0b1322]
+          shadow-[0_30px_100px_rgba(0,0,0,.55)]
+        "
       >
-        {/* Header Profile Banner */}
-        <div className="relative p-6 bg-gradient-to-r from-blue-600 to-[#007AFF] text-white">
-          <button 
-            onClick={() => setSelectedStudentId(null)}
-            className="absolute top-5 right-5 p-2 rounded-full bg-black/10 hover:bg-black/20 text-white transition-colors"
+        {/* HEADER */}
+
+        <div
+          className="
+            relative
+            shrink-0
+            border-b
+            border-white/10
+            bg-gradient-to-r
+            from-[#111c30]
+            to-[#0e213b]
+            px-6 py-5
+          "
+        >
+          <button
+            onClick={() =>
+              setSelectedStudentId(null)
+            }
+            className="
+              absolute
+              right-5 top-5
+              flex h-9 w-9
+              cursor-pointer
+              items-center justify-center
+              rounded-xl
+              bg-white/5
+              text-slate-300
+              transition
+              hover:bg-white/10
+              hover:text-white
+            "
           >
-            <X className="w-5 h-5" />
+            <X className="h-4 w-4" />
           </button>
 
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
-            <img 
-              src={student.avatar} 
-              alt={student.fullName} 
-              className="w-20 h-20 rounded-full object-cover ring-4 ring-white/30 shadow-xl shrink-0" 
-            />
-            
-            <div className="flex-1 text-center sm:text-left">
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                <h2 className="text-2xl font-extrabold tracking-tight">{student.fullName}</h2>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-white/20 backdrop-blur-md">
-                  {student.id}
-                </span>
-                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                  student.status === 'Active' ? 'bg-emerald-400/20 text-emerald-200 border border-emerald-400/30' : 'bg-amber-400/20 text-amber-200'
-                }`}>
-                  {student.status}
-                </span>
-              </div>
+          <div
+            className="
+              flex
+              items-center
+              justify-between
+              gap-5
+              pr-12
+            "
+          >
+            <div
+              className="
+                flex
+                min-w-0
+                items-center
+                gap-4
+              "
+            >
+              <img
+                src={student.avatar}
+                alt={student.fullName}
+                className="
+                  h-16 w-16
+                  shrink-0
+                  rounded-2xl
+                  object-cover
+                  ring-2 ring-blue-500/40
+                "
+              />
 
-              <p className="text-sm text-blue-100 mt-1 flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1">
-                <span className="flex items-center gap-1"><BookOpen className="w-3.5 h-3.5" /> {student.groupName}</span>
-                <span className="flex items-center gap-1"><GraduationCap className="w-3.5 h-3.5" /> {student.teacherName}</span>
-              </p>
+              <div className="min-w-0">
+                <div
+                  className="
+                    flex
+                    flex-wrap
+                    items-center
+                    gap-2
+                  "
+                >
+                  <h2
+                    className="
+                      truncate
+                      text-xl
+                      font-black
+                      text-white
+                    "
+                  >
+                    {student.fullName}
+                  </h2>
 
-              <div className="mt-4 flex flex-wrap items-center justify-center sm:justify-start gap-3">
-                <button
-                  onClick={handleReceivePayment}
-                  className="px-4 py-2 rounded-xl bg-white text-[#007AFF] text-xs font-bold shadow-md hover:bg-blue-50 transition-colors flex items-center gap-1.5"
+                  <span
+                    className="
+                      rounded-md
+                      bg-slate-800
+                      px-2 py-1
+                      font-mono
+                      text-[9px]
+                      font-bold
+                      text-slate-400
+                    "
+                  >
+                    {student.id}
+                  </span>
+
+                  <span
+                    className="
+                      rounded-md
+                      bg-emerald-500/10
+                      px-2 py-1
+                      text-[9px]
+                      font-bold
+                      uppercase
+                      text-emerald-400
+                    "
+                  >
+                    {student.status}
+                  </span>
+                </div>
+
+                <div
+                  className="
+                    mt-2
+                    flex
+                    flex-wrap
+                    gap-4
+                    text-[11px]
+                    font-medium
+                    text-slate-400
+                  "
                 >
-                  <DollarSign className="w-4 h-4" /> Receive Payment
-                </button>
-                <button
-                  onClick={() => {
-                    if (confirm(`Are you sure you want to delete ${student.fullName}?`)) {
-                      deleteStudent(student.id);
-                    }
-                  }}
-                  className="px-3 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-white text-xs font-semibold backdrop-blur-md transition-colors flex items-center gap-1"
-                >
-                  <Trash2 className="w-3.5 h-3.5" /> Delete
-                </button>
+                  <span className="flex items-center gap-1.5">
+                    <BookOpen className="h-3.5 w-3.5" />
+                    {student.groupName}
+                  </span>
+
+                  <span className="flex items-center gap-1.5">
+                    <GraduationCap className="h-3.5 w-3.5" />
+                    {student.teacherName}
+                  </span>
+                </div>
               </div>
             </div>
+
+            {!isEditing && (
+              <div
+                className="
+                  hidden
+                  shrink-0
+                  items-center
+                  gap-2
+                  md:flex
+                "
+              >
+                <button
+                  onClick={handlePayment}
+                  className="
+                    cursor-pointer
+                    rounded-xl
+                    bg-blue-600
+                    px-4 py-2.5
+                    text-xs
+                    font-bold
+                    text-white
+                    transition
+                    hover:bg-blue-500
+                  "
+                >
+                  Receive Payment
+                </button>
+
+                <button
+                  onClick={() =>
+                    setIsEditing(true)
+                  }
+                  className="
+                    flex
+                    cursor-pointer
+                    items-center gap-2
+                    rounded-xl
+                    border border-slate-600
+                    bg-slate-800
+                    px-4 py-2.5
+                    text-xs
+                    font-bold
+                    text-slate-200
+                    transition
+                    hover:border-blue-500
+                    hover:text-blue-400
+                  "
+                >
+                  <Edit3 className="h-3.5 w-3.5" />
+                  Edit
+                </button>
+
+                <button
+                  onClick={() => {
+                    if (
+                      confirm(
+                        `Delete ${student.fullName}?`
+                      )
+                    ) {
+                      deleteStudent(
+                        student.id
+                      );
+                    }
+                  }}
+                  className="
+                    flex
+                    cursor-pointer
+                    items-center
+                    justify-center
+                    rounded-xl
+                    border border-rose-500/20
+                    bg-rose-500/10
+                    p-2.5
+                    text-rose-400
+                    transition
+                    hover:bg-rose-500
+                    hover:text-white
+                  "
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 px-6">
-          <button
-            onClick={() => setActiveTab('payments')}
-            className={`py-3.5 px-4 text-xs font-bold border-b-2 transition-all flex items-center gap-2 ${
-              activeTab === 'payments' 
-                ? 'border-[#007AFF] text-[#007AFF]' 
-                : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <DollarSign className="w-4 h-4" /> August - July Payment Matrix
-          </button>
-          <button
-            onClick={() => setActiveTab('info')}
-            className={`py-3.5 px-4 text-xs font-bold border-b-2 transition-all flex items-center gap-2 ${
-              activeTab === 'info' 
-                ? 'border-[#007AFF] text-[#007AFF]' 
-                : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <UserCheck className="w-4 h-4" /> Parent & Personal Details
-          </button>
-        </div>
+        {/* NAV */}
 
-        {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-6 scrollbar-thin">
-          {activeTab === 'payments' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-700/60">
-                <div>
-                  <span className="text-xs font-semibold text-slate-400 uppercase">Monthly Base Fee</span>
-                  <p className="text-xl font-extrabold text-slate-900 dark:text-white mt-0.5">
-                    {settings.currencySymbol}{student.monthlyFee}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <span className="text-xs font-semibold text-slate-400 uppercase">Academic Period</span>
-                  <p className="text-sm font-bold text-[#007AFF] mt-0.5">
-                    2025 - 2026 Season
-                  </p>
-                </div>
+        {!isEditing && (
+          <div
+            className="
+              shrink-0
+              border-b
+              border-white/10
+              bg-[#0c1627]
+              px-6
+            "
+          >
+            <div className="flex gap-6">
+              <button
+                onClick={() =>
+                  setActiveTab('profile')
+                }
+                className={`
+                  cursor-pointer
+                  border-b-2
+                  py-3
+                  text-xs
+                  font-bold
+                  ${
+                    activeTab ===
+                    'profile'
+                      ? 'border-blue-500 text-blue-400'
+                      : 'border-transparent text-slate-500 hover:text-slate-300'
+                  }
+                `}
+              >
+                Profile
+              </button>
+
+              <button
+                onClick={() =>
+                  setActiveTab('payments')
+                }
+                className={`
+                  cursor-pointer
+                  border-b-2
+                  py-3
+                  text-xs
+                  font-bold
+                  ${
+                    activeTab ===
+                    'payments'
+                      ? 'border-blue-500 text-blue-400'
+                      : 'border-transparent text-slate-500 hover:text-slate-300'
+                  }
+                `}
+              >
+                Payments
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* BODY */}
+
+        <div
+          className="
+            min-h-0
+            flex-1
+            overflow-y-auto
+            p-6
+          "
+        >
+          {isEditing ? (
+            <div className="mx-auto max-w-3xl">
+              <div className="mb-6">
+                <h3 className="text-lg font-black text-white">
+                  Edit Student
+                </h3>
+
+                <p className="mt-1 text-xs text-slate-500">
+                  Update profile and academic details
+                </p>
               </div>
 
-              {/* Monthly Matrix Table */}
-              <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 dark:bg-slate-800 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
-                    <tr>
-                      <th className="p-3">Month</th>
-                      <th className="p-3">Status</th>
-                      <th className="p-3">Amount Paid</th>
-                      <th className="p-3">Payment Date</th>
-                      <th className="p-3">Receipt / Method</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
-                    {MONTHS.map(month => {
-                      const p = student.payments[month] || { status: 'Unpaid', amountPaid: 0, discount: 0 };
-                      return (
-                        <tr key={month} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
-                          <td className="p-3 font-bold text-slate-900 dark:text-white">{month}</td>
-                          <td className="p-3">{getStatusBadge(p.status)}</td>
-                          <td className="p-3 font-semibold text-slate-900 dark:text-white">
-                            {p.amountPaid > 0 ? `${settings.currencySymbol}${p.amountPaid}` : '-'}
-                          </td>
-                          <td className="p-3 text-slate-500">{p.paymentDate || '-'}</td>
-                          <td className="p-3 text-slate-500">
-                            {p.receiptNo ? (
-                              <span className="font-mono text-[11px] text-[#007AFF] bg-blue-50 dark:bg-blue-950 px-1.5 py-0.5 rounded">
-                                {p.receiptNo} ({p.method})
-                              </span>
-                            ) : '-'}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+              <div className="space-y-7">
+                {/* BASIC */}
+
+                <section>
+                  <h4 className="mb-4 text-[10px] font-black uppercase tracking-[0.18em] text-blue-400">
+                    Student information
+                  </h4>
+
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="md:col-span-2">
+                      <label className={labelClass}>
+                        Full name
+                      </label>
+
+                      <input
+                        className={fieldClass}
+                        value={form.fullName}
+                        onChange={e =>
+                          setForm({
+                            ...form,
+                            fullName:
+                              e.target
+                                .value,
+                          })
+                        }
+                      />
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>
+                        Phone
+                      </label>
+
+                      <input
+                        className={fieldClass}
+                        value={form.phone}
+                        onChange={e =>
+                          setForm({
+                            ...form,
+                            phone:
+                              e.target
+                                .value,
+                          })
+                        }
+                      />
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>
+                        Email
+                      </label>
+
+                      <input
+                        className={fieldClass}
+                        value={form.email}
+                        onChange={e =>
+                          setForm({
+                            ...form,
+                            email:
+                              e.target
+                                .value,
+                          })
+                        }
+                      />
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>
+                        Birth date
+                      </label>
+
+                      <input
+                        type="date"
+                        className={fieldClass}
+                        value={
+                          form.birthDate
+                        }
+                        onChange={e =>
+                          setForm({
+                            ...form,
+                            birthDate:
+                              e.target
+                                .value,
+                          })
+                        }
+                      />
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>
+                        Gender
+                      </label>
+
+                      <select
+                        className={fieldClass}
+                        value={form.gender}
+                        onChange={e =>
+                          setForm({
+                            ...form,
+                            gender:
+                              e.target
+                                .value,
+                          })
+                        }
+                      >
+                        <option value="Male">
+                          Male
+                        </option>
+                        <option value="Female">
+                          Female
+                        </option>
+                      </select>
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className={labelClass}>
+                        Address
+                      </label>
+
+                      <input
+                        className={fieldClass}
+                        value={form.address}
+                        onChange={e =>
+                          setForm({
+                            ...form,
+                            address:
+                              e.target
+                                .value,
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                </section>
+
+                <div className="border-t border-white/5" />
+
+                {/* ACADEMIC */}
+
+                <section>
+                  <h4 className="mb-4 text-[10px] font-black uppercase tracking-[0.18em] text-violet-400">
+                    Academic
+                  </h4>
+
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                      <label className={labelClass}>
+                        Group
+                      </label>
+
+                      <select
+                        className={fieldClass}
+                        value={form.groupId}
+                        onChange={e =>
+                          setForm({
+                            ...form,
+                            groupId:
+                              e.target
+                                .value,
+                          })
+                        }
+                      >
+                        {groups.map(
+                          group => (
+                            <option
+                              key={
+                                group.id
+                              }
+                              value={
+                                group.id
+                              }
+                            >
+                              {
+                                group.name
+                              }
+                            </option>
+                          )
+                        )}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>
+                        Teacher
+                      </label>
+
+                      <div
+                        className="
+                          rounded-xl
+                          border border-slate-700
+                          bg-slate-800/50
+                          px-3.5 py-2.5
+                          text-sm
+                          font-semibold
+                          text-slate-300
+                        "
+                      >
+                        {selectedTeacher?.fullName ??
+                          selectedGroup?.teacherName ??
+                          student.teacherName}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>
+                        Monthly fee
+                      </label>
+
+                      <input
+                        type="number"
+                        className={fieldClass}
+                        value={
+                          form.monthlyFee
+                        }
+                        onChange={e =>
+                          setForm({
+                            ...form,
+                            monthlyFee:
+                              Number(
+                                e.target
+                                  .value
+                              ),
+                          })
+                        }
+                      />
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>
+                        Status
+                      </label>
+
+                      <select
+                        className={fieldClass}
+                        value={form.status}
+                        onChange={e =>
+                          setForm({
+                            ...form,
+                            status:
+                              e.target
+                                .value,
+                          })
+                        }
+                      >
+                        <option value="Active">
+                          Active
+                        </option>
+
+                        <option value="Trial">
+                          Trial
+                        </option>
+
+                        <option value="Frozen">
+                          Frozen
+                        </option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>
+                        Joined date
+                      </label>
+
+                      <input
+                        type="date"
+                        className={fieldClass}
+                        value={
+                          form.joinedDate
+                        }
+                        onChange={e =>
+                          setForm({
+                            ...form,
+                            joinedDate:
+                              e.target
+                                .value,
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                </section>
+
+                <div className="border-t border-white/5" />
+
+                {/* PARENT */}
+
+                <section>
+                  <h4 className="mb-4 text-[10px] font-black uppercase tracking-[0.18em] text-emerald-400">
+                    Parent / Guardian
+                  </h4>
+
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                      <label className={labelClass}>
+                        Parent name
+                      </label>
+
+                      <input
+                        className={fieldClass}
+                        value={
+                          form.parentName
+                        }
+                        onChange={e =>
+                          setForm({
+                            ...form,
+                            parentName:
+                              e.target
+                                .value,
+                          })
+                        }
+                      />
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>
+                        Parent phone
+                      </label>
+
+                      <input
+                        className={fieldClass}
+                        value={
+                          form.parentPhone
+                        }
+                        onChange={e =>
+                          setForm({
+                            ...form,
+                            parentPhone:
+                              e.target
+                                .value,
+                          })
+                        }
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className={labelClass}>
+                        Notes
+                      </label>
+
+                      <textarea
+                        rows={3}
+                        className={`${fieldClass} resize-none`}
+                        value={form.notes}
+                        onChange={e =>
+                          setForm({
+                            ...form,
+                            notes:
+                              e.target
+                                .value,
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                </section>
               </div>
             </div>
-          )}
+          ) : activeTab ===
+            'profile' ? (
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-5">
+                <div className="mb-5 flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
+                    <UserRound className="h-5 w-5" />
+                  </div>
 
-          {activeTab === 'info' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60 space-y-3">
-                <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                  <UserCheck className="w-4 h-4 text-[#007AFF]" /> Student Contact Info
-                </h4>
-                <div className="space-y-2 text-slate-600 dark:text-slate-300">
-                  <p className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-slate-400" /> {student.phone}</p>
-                  <p className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-slate-400" /> {student.email}</p>
-                  <p className="flex items-center gap-2"><Calendar className="w-3.5 h-3.5 text-slate-400" /> Birthday: {student.birthDate}</p>
-                  <p className="flex items-center gap-2"><MapPin className="w-3.5 h-3.5 text-slate-400" /> {student.address || 'Address on file'}</p>
+                  <div>
+                    <h3 className="text-sm font-black text-white">
+                      Student
+                    </h3>
+
+                    <p className="text-[10px] text-slate-500">
+                      Personal information
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-3 text-xs text-slate-300">
+                  <p className="flex items-center gap-3">
+                    <Phone className="h-4 w-4 text-slate-500" />
+                    {student.phone}
+                  </p>
+
+                  <p className="flex items-center gap-3">
+                    <Mail className="h-4 w-4 text-slate-500" />
+                    {student.email}
+                  </p>
+
+                  <p className="flex items-center gap-3">
+                    <Calendar className="h-4 w-4 text-slate-500" />
+                    {student.birthDate}
+                  </p>
+
+                  <p className="flex items-center gap-3">
+                    <MapPin className="h-4 w-4 text-slate-500" />
+                    {student.address ||
+                      'No address'}
+                  </p>
                 </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60 space-y-3">
-                <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                  <UserCheck className="w-4 h-4 text-emerald-500" /> Parent / Guardian Info
-                </h4>
-                <div className="space-y-2 text-slate-600 dark:text-slate-300">
-                  <p className="font-semibold text-slate-900 dark:text-white">{student.parentName}</p>
-                  <p className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-slate-400" /> {student.parentPhone}</p>
-                  <p className="text-slate-400 text-[11px] mt-2">Receives automatic SMS fee reminders & attendance updates.</p>
+              <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-5">
+                <div className="mb-5 flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
+                    <UserCheck className="h-5 w-5" />
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-black text-white">
+                      Parent
+                    </h3>
+
+                    <p className="text-[10px] text-slate-500">
+                      Guardian information
+                    </p>
+                  </div>
+                </div>
+
+                <p className="text-sm font-black text-white">
+                  {student.parentName}
+                </p>
+
+                <p className="mt-2 flex items-center gap-2 text-xs text-slate-400">
+                  <Phone className="h-4 w-4" />
+                  {student.parentPhone}
+                </p>
+              </div>
+
+              <div className="md:col-span-2 grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-4">
+                  <BookOpen className="mb-3 h-4 w-4 text-blue-400" />
+
+                  <p className="text-[9px] font-bold uppercase text-slate-500">
+                    Group
+                  </p>
+
+                  <p className="mt-1 text-xs font-black text-white">
+                    {student.groupName}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-4">
+                  <GraduationCap className="mb-3 h-4 w-4 text-violet-400" />
+
+                  <p className="text-[9px] font-bold uppercase text-slate-500">
+                    Teacher
+                  </p>
+
+                  <p className="mt-1 text-xs font-black text-white">
+                    {student.teacherName}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-4">
+                  <WalletCards className="mb-3 h-4 w-4 text-emerald-400" />
+
+                  <p className="text-[9px] font-bold uppercase text-slate-500">
+                    Monthly Fee
+                  </p>
+
+                  <p className="mt-1 text-xs font-black text-white">
+                    {settings.currencySymbol}
+                    {student.monthlyFee}
+                  </p>
                 </div>
               </div>
 
               {student.notes && (
-                <div className="md:col-span-2 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 text-amber-900 dark:text-amber-200">
-                  <span className="font-bold text-xs block mb-1">Academic Notes</span>
-                  <p className="text-xs leading-relaxed">{student.notes}</p>
+                <div className="md:col-span-2 rounded-2xl border border-amber-500/10 bg-amber-500/5 p-4">
+                  <div className="mb-2 flex items-center gap-2 text-amber-400">
+                    <FileText className="h-4 w-4" />
+
+                    <span className="text-[10px] font-bold uppercase">
+                      Notes
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-slate-300">
+                    {student.notes}
+                  </p>
                 </div>
               )}
             </div>
+          ) : (
+            <div className="overflow-hidden rounded-2xl border border-white/10">
+              <div className="flex items-center justify-between bg-slate-900 px-5 py-4">
+                <div>
+                  <h3 className="text-sm font-black text-white">
+                    Payment History
+                  </h3>
+
+                  <p className="mt-1 text-[10px] text-slate-500">
+                    {settings.academicYear}
+                  </p>
+                </div>
+
+                <div className="text-right">
+                  <p className="text-[9px] uppercase text-slate-500">
+                    Monthly fee
+                  </p>
+
+                  <p className="font-black text-white">
+                    {settings.currencySymbol}
+                    {student.monthlyFee}
+                  </p>
+                </div>
+              </div>
+
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#111b2d] text-[9px] uppercase tracking-wider text-slate-500">
+                  <tr>
+                    <th className="px-5 py-3">
+                      Month
+                    </th>
+
+                    <th className="px-5 py-3">
+                      Status
+                    </th>
+
+                    <th className="px-5 py-3">
+                      Paid
+                    </th>
+
+                    <th className="px-5 py-3">
+                      Date
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody className="divide-y divide-white/5">
+                  {months.map(month => {
+                    const p =
+                      student.payments[
+                        month
+                      ] || {
+                        status:
+                          'Unpaid',
+                        amountPaid: 0,
+                        discount: 0,
+                      };
+
+                    return (
+                      <tr
+                        key={month}
+                        className="bg-[#0d1728] transition hover:bg-[#122039]"
+                      >
+                        <td className="px-5 py-3 font-bold text-white">
+                          {month}
+                        </td>
+
+                        <td className="px-5 py-3">
+                          {paymentBadge(
+                            p.status
+                          )}
+                        </td>
+
+                        <td className="px-5 py-3 text-slate-300">
+                          {p.amountPaid
+                            ? `${settings.currencySymbol}${p.amountPaid}`
+                            : '—'}
+                        </td>
+
+                        <td className="px-5 py-3 text-slate-500">
+                          {p.paymentDate ||
+                            '—'}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
+
+        {/* EDIT FOOTER */}
+
+        {isEditing && (
+          <div
+            className="
+              shrink-0
+              border-t
+              border-white/10
+              bg-[#0c1627]
+              px-6 py-4
+            "
+          >
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() =>
+                  setIsEditing(false)
+                }
+                className="
+                  cursor-pointer
+                  rounded-xl
+                  border border-slate-700
+                  px-5 py-2.5
+                  text-xs font-bold
+                  text-slate-300
+                  transition
+                  hover:bg-slate-800
+                "
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleSave}
+                className="
+                  flex
+                  cursor-pointer
+                  items-center gap-2
+                  rounded-xl
+                  bg-blue-600
+                  px-5 py-2.5
+                  text-xs font-bold
+                  text-white
+                  shadow-lg
+                  shadow-blue-600/20
+                  transition
+                  hover:bg-blue-500
+                "
+              >
+                <Save className="h-4 w-4" />
+                Save Changes
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

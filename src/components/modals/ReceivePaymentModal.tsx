@@ -3,6 +3,7 @@ import { useCRM } from '../../context/CRMContext';
 import { X, DollarSign, Check, Percent, CreditCard } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { PaymentMethod } from '../../types/crm';
+import { ACADEMIC_MONTHS, getCurrentAcademicMonth } from '../../constants/academic';
 
 export const ReceivePaymentModal: React.FC = () => {
   const { 
@@ -15,12 +16,12 @@ export const ReceivePaymentModal: React.FC = () => {
   } = useCRM();
 
   const [studentId, setStudentId] = useState('');
-  const [selectedMonth, setSelectedMonth] = useState('August');
+  const [selectedMonth, setSelectedMonth] = useState(getCurrentAcademicMonth());
   const [discountPercent, setDiscountPercent] = useState(0);
   const [method, setMethod] = useState<PaymentMethod>('Payme / Click');
   const [notes, setNotes] = useState('');
 
-  const MONTHS = ["August", "September", "October", "November", "December", "January", "February", "March", "April", "May", "June", "July"];
+  const MONTHS = ACADEMIC_MONTHS;
 
   useEffect(() => {
     if (paymentModalDefaultStudentId) {
@@ -106,7 +107,7 @@ export const ReceivePaymentModal: React.FC = () => {
               <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Academic Month *</label>
               <select
                 value={selectedMonth}
-                onChange={e => setSelectedMonth(e.target.value)}
+                onChange={e => setSelectedMonth(e.target.value as typeof selectedMonth)}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none"
               >
                 {MONTHS.map(m => (

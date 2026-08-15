@@ -1,40 +1,76 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useCRM } from '../context/CRMContext';
-import { 
-  Users, DollarSign, ArrowUpRight, ArrowDownRight, UserPlus, 
-  TrendingUp, Calendar, Cake, CheckCircle2, AlertCircle, Plus, BookOpen, FileText 
+import {
+  Users, DollarSign, ArrowUpRight, ArrowDownRight, UserPlus,
+  TrendingUp, Calendar, Cake, CheckCircle2, AlertCircle, Plus, BookOpen, FileText
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { ACADEMIC_MONTHS } from '../constants/academic';
 
 export const DashboardPage: React.FC = () => {
-  const { 
-    financials, 
-    students, 
-    setIsAddStudentModalOpen, 
-    setIsReceivePaymentModalOpen, 
+  const {
+    financials,
+    students,
+    expenses,
+    setIsAddStudentModalOpen,
+    setIsReceivePaymentModalOpen,
     setSelectedStudentId,
     setIsAddGroupModalOpen,
     setActivePage,
     calendarEvents,
-    settings 
+    settings
   } = useCRM();
 
-  // Monthly Revenue & Expense Data
-  const monthlyData = [
-    { month: 'Jan', revenue: 21000, expenses: 14200, students: 110 },
-    { month: 'Feb', revenue: 22400, expenses: 14800, students: 118 },
-    { month: 'Mar', revenue: 23800, expenses: 15100, students: 125 },
-    { month: 'Apr', revenue: 24500, expenses: 15400, students: 132 },
-    { month: 'May', revenue: 25200, expenses: 15900, students: 138 },
-    { month: 'Jun', revenue: 26100, expenses: 16200, students: 144 },
-    { month: 'Jul', revenue: 26800, expenses: 16800, students: 148 },
-    { month: 'Aug', revenue: financials.paidIncome, expenses: financials.expensesTotal, students: financials.totalStudents },
-  ];
+  const currentMonth = financials.currentAcademicMonth;
+
+  const monthlyData = useMemo(() => {
+    const yearParts = settings.academicYear.split('-').map(s => parseInt(s.trim(), 10));
+    const academicYearStart = yearParts[0] || new Date().getFullYear();
+
+    return ACADEMIC_MONTHS.map((month, idx) => {
+      let revenue = 0;
+      students.forEach(s => {
+        const p = s.payments[month];
+        if (p && (p.status === 'Paid' || p.status === 'Discount')) {
+          revenue += p.amountPaid;
+        }
+      });
+
+      const calendarMonthIndex = (idx + 7) % 12;
+      const year = idx < 5 ? academicYearStart : academicYearStart + 1;
+
+      const monthExpenses = expenses
+        .filter(e => {
+          const d = new Date(e.date);
+          return d.getMonth() === calendarMonthIndex && d.getFullYear() === year;
+        })
+        .reduce((sum, e) => sum + e.amount, 0);
+
+      const studentCount = students.filter(s => {
+        const joined = new Date(s.joinedDate);
+        const cutoff = new Date(year, calendarMonthIndex + 1, 0);
+        return joined <= cutoff;
+      }).length;
+
+      return {
+        month: month.slice(0, 3),
+        revenue,
+        expenses: monthExpenses,
+        students: studentCount,
+      };
+    });
+  }, [students, expenses, settings.academicYear]);
 
   const recentStudents = students.slice(0, 5);
 
-  // Filter students with upcoming birthdays
-  const upcomingBirthdays = students.slice(0, 4);
+  const upcomingBirthdays = useMemo(() => {
+    const today = new Date();
+    const todayMMDD = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    return students
+      .filter(s => s.birthDate.slice(5) === todayMMDD)
+      .concat(students.filter(s => s.birthDate.slice(5) !== todayMMDD))
+      .slice(0, 4);
+  }, [students]);
 
   return (
     <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
@@ -102,7 +138,7 @@ export const DashboardPage: React.FC = () => {
         {/* Stat 2: Paid Income */}
         <div className="p-5 rounded-[20px] bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Paid Income (Aug)</span>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Paid Income ({currentMonth.slice(0, 3)})</span>
             <div className="p-2.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600">
               <DollarSign className="w-5 h-5" />
             </div>
@@ -133,7 +169,7 @@ export const DashboardPage: React.FC = () => {
               {settings.currencySymbol}{financials.unpaidIncome.toLocaleString()}
             </span>
             <span className="inline-flex items-center text-xs font-bold text-amber-600 bg-amber-50 dark:bg-amber-950 px-2 py-0.5 rounded-full">
-              18 Pending
+              {financials.unpaidCount} Pending
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-2 font-medium">
@@ -251,13 +287,13 @@ export const DashboardPage: React.FC = () => {
                   <th className="py-3 px-2">Student</th>
                   <th className="py-3 px-2">Group</th>
                   <th className="py-3 px-2">Teacher</th>
-                  <th className="py-3 px-2">August Status</th>
+                  <th className="py-3 px-2">{currentMonth} Status</th>
                   <th className="py-3 px-2 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {recentStudents.map(student => {
-                  const augPayment = student.payments['August'] || { status: 'Unpaid' };
+                  const monthPayment = student.payments[currentMonth] || { status: 'Unpaid' };
                   return (
                     <tr key={student.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
                       <td className="py-3 px-2">
@@ -272,7 +308,7 @@ export const DashboardPage: React.FC = () => {
                       <td className="py-3 px-2 font-medium text-slate-700 dark:text-slate-300">{student.groupName}</td>
                       <td className="py-3 px-2 text-slate-500">{student.teacherName}</td>
                       <td className="py-3 px-2">
-                        {augPayment.status === 'Paid' || augPayment.status === 'Discount' ? (
+                        {monthPayment.status === 'Paid' || monthPayment.status === 'Discount' ? (
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 inline-flex items-center gap-1">
                             <CheckCircle2 className="w-3 h-3" /> Paid
                           </span>
