@@ -1,39 +1,135 @@
-import React, { createContext, useContext, useState, useMemo } from 'react';
-import { 
-  Student, Teacher, Group, Expense, NotificationItem, 
-  CalendarEvent, CenterSettings, PageType, PaymentStatus, PaymentMethod, AttendanceStatus, AttendanceRecord 
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useMemo,
+  useEffect,
+  useCallback,
+} from 'react';
+
+import {
+  Student,
+  Teacher,
+  Group,
+  Expense,
+  NotificationItem,
+  CalendarEvent,
+  CenterSettings,
+  PageType,
+  PaymentStatus,
+  PaymentMethod,
+  AttendanceRecord,
 } from '../types/crm';
-import { 
-  initialSettings, INITIAL_TEACHERS, INITIAL_GROUPS, 
-  generateInitialStudents, INITIAL_EXPENSES, INITIAL_NOTIFICATIONS, INITIAL_CALENDAR_EVENTS 
-} from '../data/initialData';
+
+import { isSupabaseConfigured } from '../lib/supabase';
+import { migrateSeedDataIfNeeded } from '../services/migrationService';
+
+import {
+  fetchAllCrmData,
+
+  insertStudent,
+  updateStudentInDb,
+  deleteStudentFromDb,
+  updateGroupStudentCount,
+
+  upsertPayment,
+
+  insertTeacher,
+  updateTeacherInDb,
+  deleteTeacherFromDb,
+
+  insertGroup,
+  updateGroupInDb,
+  deleteGroupFromDb,
+
+  insertExpense,
+  updateExpenseInDb,
+  deleteExpenseFromDb,
+
+  insertAttendanceRecords,
+
+  insertNotification,
+  markNotificationReadInDb,
+  clearAllNotificationsInDb,
+
+  upsertSettings,
+
+  nextStudentId,
+  nextTeacherId,
+  nextGroupId,
+  nextExpenseId,
+
+  buildInitialPayments,
+  generateReceiptNo,
+} from '../services/crmService';
+
+import {
+  enrichGroupsWithCounts,
+  enrichTeachersWithCounts,
+} from '../lib/adapters';
+
+import {
+  getCurrentAcademicMonth,
+  isCurrentCalendarMonth,
+} from '../constants/academic';
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CONTEXT TYPE
+// ─────────────────────────────────────────────────────────────────────────────
 
 interface CRMContextType {
-  // Navigation & View State
   activePage: PageType;
   setActivePage: (page: PageType) => void;
+
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+
   isGlobalSearchOpen: boolean;
   setIsGlobalSearchOpen: (open: boolean) => void;
-  
-  // Center Settings
-  settings: CenterSettings;
-  updateSettings: (newSettings: Partial<CenterSettings>) => void;
 
-  // Primary Entities
+
+  isLoading: boolean;
+  isInitialized: boolean;
+  error: string | null;
+
+  refreshData: () => Promise<void>;
+
+
+  settings: CenterSettings;
+
+  updateSettings: (
+    newSettings: Partial<CenterSettings>
+  ) => void;
+
+
   students: Student[];
   teachers: Teacher[];
   groups: Group[];
+
   expenses: Expense[];
+
   notifications: NotificationItem[];
   calendarEvents: CalendarEvent[];
   attendanceRecords: AttendanceRecord[];
 
-  // Student Actions
-  addStudent: (student: Omit<Student, 'id' | 'payments'>) => void;
-  updateStudent: (id: string, updated: Partial<Student>) => void;
-  deleteStudent: (id: string) => void;
+
+  // STUDENTS
+  addStudent: (
+    student: Omit<Student, 'id' | 'payments'>
+  ) => void;
+
+  updateStudent: (
+    id: string,
+    updated: Partial<Student>
+  ) => void;
+
+  deleteStudent: (
+    id: string
+  ) => void;
+
+
+  // PAYMENTS
   recordPayment: (params: {
     studentId: string;
     month: string;
@@ -43,145 +139,761 @@ interface CRMContextType {
     notes?: string;
   }) => void;
 
-  // Teacher Actions
-  addTeacher: (teacher: Omit<Teacher, 'id' | 'groupsCount' | 'studentsCount' | 'rating'>) => void;
-  updateTeacher: (id: string, updated: Partial<Teacher>) => void;
-  deleteTeacher: (id: string) => void;
 
-  // Group Actions
-  addGroup: (group: Omit<Group, 'id' | 'currentStudentsCount'>) => void;
-  updateGroup: (id: string, updated: Partial<Group>) => void;
-  deleteGroup: (id: string) => void;
+  // TEACHERS
+  addTeacher: (
+    teacher: Omit<
+      Teacher,
+      'id' | 'groupsCount' | 'studentsCount' | 'rating'
+    >
+  ) => void;
 
-  // Expense Actions
-  addExpense: (expense: Omit<Expense, 'id'>) => void;
-  deleteExpense: (id: string) => void;
+  updateTeacher: (
+    id: string,
+    updated: Partial<Teacher>
+  ) => void;
 
-  // Attendance Actions
-  saveAttendance: (records: Omit<AttendanceRecord, 'id'>[]) => void;
+  deleteTeacher: (
+    id: string
+  ) => void;
 
-  // Notification Actions
-  markNotificationRead: (id: string) => void;
+
+  // GROUPS
+  addGroup: (
+    group: Omit<
+      Group,
+      'id' | 'currentStudentsCount'
+    >
+  ) => void;
+
+  updateGroup: (
+    id: string,
+    updated: Partial<Group>
+  ) => void;
+
+  deleteGroup: (
+    id: string
+  ) => void;
+
+
+  // EXPENSES
+  addExpense: (
+    expense: Omit<Expense, 'id'>
+  ) => void;
+
+  updateExpense: (
+    id: string,
+    updated: Partial<Expense>
+  ) => void;
+
+  deleteExpense: (
+    id: string
+  ) => void;
+
+
+  // ATTENDANCE
+  saveAttendance: (
+    records: Omit<AttendanceRecord, 'id'>[]
+  ) => void;
+
+
+  // NOTIFICATIONS
+  markNotificationRead: (
+    id: string
+  ) => void;
+
   clearAllNotifications: () => void;
 
-  // Active Modals & Selected Objects
+
+  // SELECTED ITEMS
   selectedStudentId: string | null;
-  setSelectedStudentId: (id: string | null) => void;
+
+  setSelectedStudentId: (
+    id: string | null
+  ) => void;
+
+
   selectedTeacherId: string | null;
-  setSelectedTeacherId: (id: string | null) => void;
+
+  setSelectedTeacherId: (
+    id: string | null
+  ) => void;
+
+
   selectedGroupId: string | null;
-  setSelectedGroupId: (id: string | null) => void;
 
+  setSelectedGroupId: (
+    id: string | null
+  ) => void;
+
+
+  // MODALS
   isAddStudentModalOpen: boolean;
-  setIsAddStudentModalOpen: (open: boolean) => void;
-  isReceivePaymentModalOpen: boolean;
-  setIsReceivePaymentModalOpen: (open: boolean) => void;
-  paymentModalDefaultStudentId: string | null;
-  setPaymentModalDefaultStudentId: (id: string | null) => void;
-  isAddTeacherModalOpen: boolean;
-  setIsAddTeacherModalOpen: (open: boolean) => void;
-  isAddGroupModalOpen: boolean;
-  setIsAddGroupModalOpen: (open: boolean) => void;
-  isAddExpenseModalOpen: boolean;
-  setIsAddExpenseModalOpen: (open: boolean) => void;
 
-  // Computed Financial Metrics
+  setIsAddStudentModalOpen: (
+    open: boolean
+  ) => void;
+
+
+  isReceivePaymentModalOpen: boolean;
+
+  setIsReceivePaymentModalOpen: (
+    open: boolean
+  ) => void;
+
+
+  paymentModalDefaultStudentId:
+    string | null;
+
+  setPaymentModalDefaultStudentId: (
+    id: string | null
+  ) => void;
+
+
+  isAddTeacherModalOpen: boolean;
+
+  setIsAddTeacherModalOpen: (
+    open: boolean
+  ) => void;
+
+
+  isAddGroupModalOpen: boolean;
+
+  setIsAddGroupModalOpen: (
+    open: boolean
+  ) => void;
+
+
+  isAddExpenseModalOpen: boolean;
+
+  setIsAddExpenseModalOpen: (
+    open: boolean
+  ) => void;
+
+
   financials: {
     totalStudents: number;
     activeStudents: number;
     newStudentsThisMonth: number;
+
     monthlyExpectedIncome: number;
+
     paidIncome: number;
     unpaidIncome: number;
+
     expensesTotal: number;
     netProfit: number;
+
     overallAttendancePercentage: number;
+
+    currentAcademicMonth: string;
+
+    unpaidCount: number;
   };
 }
 
-const CRMContext = createContext<CRMContextType | undefined>(undefined);
 
-export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [activePage, setActivePage] = useState<PageType>('dashboard');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState(false);
+// ─────────────────────────────────────────────────────────────────────────────
+// CONTEXT
+// ─────────────────────────────────────────────────────────────────────────────
 
-  const [settings, setSettings] = useState<CenterSettings>(initialSettings);
-  const [students, setStudents] = useState<Student[]>(() => generateInitialStudents());
-  const [teachers, setTeachers] = useState<Teacher[]>(INITIAL_TEACHERS);
-  const [groups, setGroups] = useState<Group[]>(INITIAL_GROUPS);
-  const [expenses, setExpenses] = useState<Expense[]>(INITIAL_EXPENSES);
-  const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
-  const [calendarEvents] = useState<CalendarEvent[]>(INITIAL_CALENDAR_EVENTS);
-  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
+const CRMContext =
+  createContext<CRMContextType | undefined>(
+    undefined
+  );
 
-  // Selected Profile Modals
-  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
-  const [selectedTeacherId, setSelectedTeacherId] = useState<string | null>(null);
-  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
 
-  // Form Modals
-  const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false);
-  const [isReceivePaymentModalOpen, setIsReceivePaymentModalOpen] = useState(false);
-  const [paymentModalDefaultStudentId, setPaymentModalDefaultStudentId] = useState<string | null>(null);
-  const [isAddTeacherModalOpen, setIsAddTeacherModalOpen] = useState(false);
-  const [isAddGroupModalOpen, setIsAddGroupModalOpen] = useState(false);
-  const [isAddExpenseModalOpen, setIsAddExpenseModalOpen] = useState(false);
+// ─────────────────────────────────────────────────────────────────────────────
+// PROVIDER
+// ─────────────────────────────────────────────────────────────────────────────
 
-  // Update Settings
-  const updateSettings = (newSettings: Partial<CenterSettings>) => {
-    setSettings(prev => ({ ...prev, ...newSettings }));
+export const CRMProvider: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => {
+
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // UI STATE
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const [
+    activePage,
+    setActivePage,
+  ] = useState<PageType>('dashboard');
+
+
+  const [
+    searchQuery,
+    setSearchQuery,
+  ] = useState('');
+
+
+  const [
+    isGlobalSearchOpen,
+    setIsGlobalSearchOpen,
+  ] = useState(false);
+
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // SYSTEM STATE
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const [
+    isLoading,
+    setIsLoading,
+  ] = useState(true);
+
+
+  const [
+    isInitialized,
+    setIsInitialized,
+  ] = useState(false);
+
+
+  const [
+    error,
+    setError,
+  ] = useState<string | null>(null);
+
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // SETTINGS
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const [
+    settings,
+    setSettings,
+  ] = useState<CenterSettings>({
+    centerName:
+      'LYUMOS International Education Center',
+
+    tagline:
+      'Empowering Next Generation Achievers',
+
+    phone: '',
+    email: '',
+    address: '',
+
+    currency: 'USD',
+    currencySymbol: '$',
+
+    academicYear:
+      '2025 - 2026',
+
+    language: 'en',
+    theme: 'light',
+
+    enableSmsNotifications: true,
+    autoRemindUnpaid: true,
+
+    discountPolicyMax: 25,
+  });
+
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // MAIN DATA
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const [
+    students,
+    setStudents,
+  ] = useState<Student[]>([]);
+
+
+  const [
+    teachers,
+    setTeachers,
+  ] = useState<Teacher[]>([]);
+
+
+  const [
+    groups,
+    setGroups,
+  ] = useState<Group[]>([]);
+
+
+  const [
+    expenses,
+    setExpenses,
+  ] = useState<Expense[]>([]);
+
+
+  const [
+    notifications,
+    setNotifications,
+  ] = useState<NotificationItem[]>([]);
+
+
+  const [
+    calendarEvents,
+    setCalendarEvents,
+  ] = useState<CalendarEvent[]>([]);
+
+
+  const [
+    attendanceRecords,
+    setAttendanceRecords,
+  ] = useState<AttendanceRecord[]>([]);
+
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // SELECTED ITEMS
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const [
+    selectedStudentId,
+    setSelectedStudentId,
+  ] = useState<string | null>(null);
+
+
+  const [
+    selectedTeacherId,
+    setSelectedTeacherId,
+  ] = useState<string | null>(null);
+
+
+  const [
+    selectedGroupId,
+    setSelectedGroupId,
+  ] = useState<string | null>(null);
+
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // MODALS
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const [
+    isAddStudentModalOpen,
+    setIsAddStudentModalOpen,
+  ] = useState(false);
+
+
+  const [
+    isReceivePaymentModalOpen,
+    setIsReceivePaymentModalOpen,
+  ] = useState(false);
+
+
+  const [
+    paymentModalDefaultStudentId,
+    setPaymentModalDefaultStudentId,
+  ] = useState<string | null>(null);
+
+
+  const [
+    isAddTeacherModalOpen,
+    setIsAddTeacherModalOpen,
+  ] = useState(false);
+
+
+  const [
+    isAddGroupModalOpen,
+    setIsAddGroupModalOpen,
+  ] = useState(false);
+
+
+  const [
+    isAddExpenseModalOpen,
+    setIsAddExpenseModalOpen,
+  ] = useState(false);
+
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // APPLY CRM DATA
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const applyCrmData = useCallback(
+    (
+      data: Awaited<
+        ReturnType<typeof fetchAllCrmData>
+      >
+    ) => {
+      setStudents(data.students);
+      setTeachers(data.teachers);
+      setGroups(data.groups);
+
+      setExpenses(data.expenses);
+
+      setNotifications(
+        data.notifications
+      );
+
+      setCalendarEvents(
+        data.calendarEvents
+      );
+
+      setAttendanceRecords(
+        data.attendanceRecords
+      );
+
+      setSettings(
+        data.settings
+      );
+    },
+    []
+  );
+
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // REFRESH DATA
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const refreshData =
+    useCallback(async () => {
+
+      if (!isSupabaseConfigured) {
+        setError(
+          'Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env.local'
+        );
+
+        setIsLoading(false);
+
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        await migrateSeedDataIfNeeded();
+
+        const data =
+          await fetchAllCrmData();
+
+        applyCrmData(data);
+
+        setIsInitialized(true);
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'Failed to load CRM data'
+        );
+      } finally {
+        setIsLoading(false);
+      }
+
+    }, [applyCrmData]);
+
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // INITIAL LOAD
+  // ───────────────────────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    refreshData();
+  }, [refreshData]);
+
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // ERROR HANDLER
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const handleAsyncError = (
+    err: unknown,
+    rollback?: () => void
+  ) => {
+    rollback?.();
+
+    setError(
+      err instanceof Error
+        ? err.message
+        : 'Operation failed'
+    );
   };
 
-  // Student Operations
-  const addStudent = (newStudentData: Omit<Student, 'id' | 'payments'>) => {
-    const newId = `STU-${1000 + students.length + 1}`;
-    const MONTHS = ["August", "September", "October", "November", "December", "January", "February", "March", "April", "May", "June", "July"];
-    
-    const initialPayments: Student['payments'] = {};
-    MONTHS.forEach((m) => {
-      initialPayments[m] = {
-        status: 'Unpaid',
-        amountPaid: 0,
-        discount: 0
-      };
-    });
 
-    const newStudent: Student = {
+  // ───────────────────────────────────────────────────────────────────────────
+  // SETTINGS
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const updateSettings = (
+    newSettings:
+      Partial<CenterSettings>
+  ) => {
+
+    const merged = {
+      ...settings,
+      ...newSettings,
+    };
+
+    setSettings(merged);
+
+    upsertSettings(merged)
+      .catch(err =>
+        handleAsyncError(
+          err,
+          () =>
+            setSettings(settings)
+        )
+      );
+  };
+
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // STUDENT CREATE
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const addStudent = (
+    newStudentData:
+      Omit<
+        Student,
+        'id' | 'payments'
+      >
+  ) => {
+
+    const newId =
+      nextStudentId(students);
+
+
+    const initialPayments =
+      buildInitialPayments();
+
+
+    const newStudent:
+      Student = {
+
       ...newStudentData,
+
       id: newId,
-      payments: initialPayments
+
+      payments:
+        initialPayments,
     };
 
-    setStudents(prev => [newStudent, ...prev]);
 
-    // Update group student count
-    setGroups(prev => prev.map(g => g.id === newStudent.groupId ? { ...g, currentStudentsCount: g.currentStudentsCount + 1 } : g));
+    setStudents(prev => [
+      newStudent,
+      ...prev,
+    ]);
 
-    // Notification
-    const newNotif: NotificationItem = {
-      id: `NOTIF-${Date.now()}`,
-      title: "New Student Enrolled",
-      message: `${newStudent.fullName} joined ${newStudent.groupName}.`,
-      time: "Just now",
-      type: "student",
-      read: false
+
+    setGroups(prev =>
+      enrichGroupsWithCounts(
+
+        prev.map(group =>
+          group.id ===
+          newStudent.groupId
+
+            ? {
+                ...group,
+
+                currentStudentsCount:
+                  group.currentStudentsCount + 1,
+              }
+
+            : group
+        ),
+
+        [
+          newStudent,
+          ...students,
+        ]
+      )
+    );
+
+
+    const newNotif:
+      NotificationItem = {
+
+      id:
+        `NOTIF-${Date.now()}`,
+
+      title:
+        'New Student Enrolled',
+
+      message:
+        `${newStudent.fullName} joined ${newStudent.groupName}.`,
+
+      time:
+        'Just now',
+
+      type:
+        'student',
+
+      read:
+        false,
     };
-    setNotifications(prev => [newNotif, ...prev]);
+
+
+    setNotifications(
+      prev => [
+        newNotif,
+        ...prev,
+      ]
+    );
+
+
+    insertStudent(
+      newStudent,
+      initialPayments
+    )
+
+      .then(() =>
+        updateGroupStudentCount(
+          newStudent.groupId,
+          1
+        )
+      )
+
+      .then(() =>
+        insertNotification(
+          newNotif
+        )
+      )
+
+      .catch(err =>
+        handleAsyncError(
+          err,
+          () => refreshData()
+        )
+      );
   };
 
-  const updateStudent = (id: string, updated: Partial<Student>) => {
-    setStudents(prev => prev.map(s => s.id === id ? { ...s, ...updated } : s));
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // STUDENT UPDATE
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const updateStudent = (
+    id: string,
+    updated:
+      Partial<Student>
+  ) => {
+
+    const prevStudents =
+      students;
+
+
+    setStudents(prev =>
+      prev.map(student =>
+        student.id === id
+
+          ? {
+              ...student,
+              ...updated,
+            }
+
+          : student
+      )
+    );
+
+
+    updateStudentInDb(
+      id,
+      updated
+    )
+      .catch(err =>
+        handleAsyncError(
+          err,
+          () =>
+            setStudents(
+              prevStudents
+            )
+        )
+      );
   };
 
-  const deleteStudent = (id: string) => {
-    const targetStudent = students.find(s => s.id === id);
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // STUDENT DELETE
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const deleteStudent = (
+    id: string
+  ) => {
+
+    const targetStudent =
+      students.find(
+        student =>
+          student.id === id
+      );
+
+
+    const prevStudents =
+      students;
+
+
+    const prevGroups =
+      groups;
+
+
     if (targetStudent) {
-      setGroups(prev => prev.map(g => g.id === targetStudent.groupId ? { ...g, currentStudentsCount: Math.max(0, g.currentStudentsCount - 1) } : g));
+
+      setGroups(prev =>
+        enrichGroupsWithCounts(
+
+          prev.map(group =>
+            group.id ===
+            targetStudent.groupId
+
+              ? {
+                  ...group,
+
+                  currentStudentsCount:
+                    Math.max(
+                      0,
+                      group.currentStudentsCount - 1
+                    ),
+                }
+
+              : group
+          ),
+
+          students.filter(
+            student =>
+              student.id !== id
+          )
+        )
+      );
     }
-    setStudents(prev => prev.filter(s => s.id !== id));
-    if (selectedStudentId === id) setSelectedStudentId(null);
+
+
+    setStudents(prev =>
+      prev.filter(
+        student =>
+          student.id !== id
+      )
+    );
+
+
+    if (
+      selectedStudentId === id
+    ) {
+      setSelectedStudentId(null);
+    }
+
+
+    deleteStudentFromDb(id)
+
+      .then(() =>
+        targetStudent &&
+        updateGroupStudentCount(
+          targetStudent.groupId,
+          -1
+        )
+      )
+
+      .catch(err =>
+        handleAsyncError(
+          err,
+          () => {
+            setStudents(
+              prevStudents
+            );
+
+            setGroups(
+              prevGroups
+            );
+          }
+        )
+      );
   };
+
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // PAYMENT
+  // ───────────────────────────────────────────────────────────────────────────
 
   const recordPayment = ({
     studentId,
@@ -189,7 +901,7 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     amount,
     discount = 0,
     method,
-    notes
+    notes,
   }: {
     studentId: string;
     month: string;
@@ -198,210 +910,970 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     method: PaymentMethod;
     notes?: string;
   }) => {
-    const receiptNo = `REC-2025-${Math.floor(1000 + Math.random() * 9000)}`;
-    const today = new Date().toISOString().split('T')[0];
 
-    setStudents(prev => prev.map(student => {
-      if (student.id !== studentId) return student;
+    const receiptNo =
+      generateReceiptNo();
 
-      const currentPayment = student.payments[month] || { status: 'Unpaid', amountPaid: 0, discount: 0 };
-      const status: PaymentStatus = discount > 0 ? 'Discount' : 'Paid';
 
-      return {
-        ...student,
-        payments: {
-          ...student.payments,
-          [month]: {
-            ...currentPayment,
-            status,
-            amountPaid: amount,
-            discount,
-            paymentDate: today,
-            method,
-            receiptNo
-          }
+    const today =
+      new Date()
+        .toISOString()
+        .split('T')[0];
+
+
+    const status:
+      PaymentStatus =
+        discount > 0
+          ? 'Discount'
+          : 'Paid';
+
+
+    const prevStudents =
+      students;
+
+
+    setStudents(prev =>
+      prev.map(student => {
+
+        if (
+          student.id !==
+          studentId
+        ) {
+          return student;
         }
-      };
-    }));
 
-    const targetStudent = students.find(s => s.id === studentId);
+
+        const currentPayment =
+          student.payments[
+            month
+          ] || {
+
+            status:
+              'Unpaid' as PaymentStatus,
+
+            amountPaid:
+              0,
+
+            discount:
+              0,
+          };
+
+
+        return {
+          ...student,
+
+          payments: {
+            ...student.payments,
+
+            [month]: {
+              ...currentPayment,
+
+              status,
+
+              amountPaid:
+                amount,
+
+              discount,
+
+              paymentDate:
+                today,
+
+              method,
+
+              receiptNo,
+            },
+          },
+        };
+      })
+    );
+
+
+    const targetStudent =
+      students.find(
+        student =>
+          student.id ===
+          studentId
+      );
+
+
+    const paymentData = {
+      status,
+      amountPaid: amount,
+      discount,
+      paymentDate: today,
+      method,
+      receiptNo,
+    };
+
+
     if (targetStudent) {
-      const newNotif: NotificationItem = {
-        id: `NOTIF-${Date.now()}`,
-        title: "Payment Recorded",
-        message: `${settings.currencySymbol}${amount} paid for ${month} by ${targetStudent.fullName} (${method}).`,
-        time: "Just now",
-        type: "payment",
-        read: false
+
+      const newNotif:
+        NotificationItem = {
+
+        id:
+          `NOTIF-${Date.now()}`,
+
+        title:
+          'Payment Recorded',
+
+        message:
+          `${settings.currencySymbol}${amount} paid for ${month} by ${targetStudent.fullName} (${method}).`,
+
+        time:
+          'Just now',
+
+        type:
+          'payment',
+
+        read:
+          false,
       };
-      setNotifications(prev => [newNotif, ...prev]);
+
+
+      setNotifications(
+        prev => [
+          newNotif,
+          ...prev,
+        ]
+      );
+
+
+      insertNotification(
+        newNotif
+      )
+        .catch(err =>
+          handleAsyncError(
+            err
+          )
+        );
     }
+
+
+    upsertPayment(
+      studentId,
+      month,
+      paymentData,
+      notes
+    )
+      .catch(err =>
+        handleAsyncError(
+          err,
+          () =>
+            setStudents(
+              prevStudents
+            )
+        )
+      );
   };
 
-  // Teacher Operations
-  const addTeacher = (teacherData: Omit<Teacher, 'id' | 'groupsCount' | 'studentsCount' | 'rating'>) => {
-    const newId = `TCH-${100 + teachers.length + 1}`;
-    const newTeacher: Teacher = {
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // TEACHER CREATE
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const addTeacher = (
+    teacherData:
+      Omit<
+        Teacher,
+        'id'
+        | 'groupsCount'
+        | 'studentsCount'
+        | 'rating'
+      >
+  ) => {
+
+    const newTeacher:
+      Teacher = {
+
       ...teacherData,
-      id: newId,
-      groupsCount: 0,
-      studentsCount: 0,
-      rating: 5.0
+
+      id:
+        nextTeacherId(
+          teachers
+        ),
+
+      groupsCount:
+        0,
+
+      studentsCount:
+        0,
+
+      rating:
+        5.0,
     };
-    setTeachers(prev => [newTeacher, ...prev]);
+
+
+    setTeachers(prev => [
+      newTeacher,
+      ...prev,
+    ]);
+
+
+    insertTeacher(
+      newTeacher
+    )
+      .catch(err =>
+        handleAsyncError(
+          err,
+          () => refreshData()
+        )
+      );
   };
 
-  const updateTeacher = (id: string, updated: Partial<Teacher>) => {
-    setTeachers(prev => prev.map(t => t.id === id ? { ...t, ...updated } : t));
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // TEACHER UPDATE
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const updateTeacher = (
+    id: string,
+    updated:
+      Partial<Teacher>
+  ) => {
+
+    const prevTeachers =
+      teachers;
+
+
+    setTeachers(prev =>
+      prev.map(teacher =>
+        teacher.id === id
+
+          ? {
+              ...teacher,
+              ...updated,
+            }
+
+          : teacher
+      )
+    );
+
+
+    updateTeacherInDb(
+      id,
+      updated
+    )
+      .catch(err =>
+        handleAsyncError(
+          err,
+          () =>
+            setTeachers(
+              prevTeachers
+            )
+        )
+      );
   };
 
-  const deleteTeacher = (id: string) => {
-    setTeachers(prev => prev.filter(t => t.id !== id));
-    if (selectedTeacherId === id) setSelectedTeacherId(null);
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // TEACHER DELETE
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const deleteTeacher = (
+    id: string
+  ) => {
+
+    const prevTeachers =
+      teachers;
+
+
+    setTeachers(prev =>
+      prev.filter(
+        teacher =>
+          teacher.id !== id
+      )
+    );
+
+
+    if (
+      selectedTeacherId === id
+    ) {
+      setSelectedTeacherId(null);
+    }
+
+
+    deleteTeacherFromDb(id)
+      .catch(err =>
+        handleAsyncError(
+          err,
+          () =>
+            setTeachers(
+              prevTeachers
+            )
+        )
+      );
   };
 
-  // Group Operations
-  const addGroup = (groupData: Omit<Group, 'id' | 'currentStudentsCount'>) => {
-    const newId = `GRP-${String(groups.length + 1).padStart(2, '0')}`;
-    const newGroup: Group = {
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // GROUP CREATE
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const addGroup = (
+    groupData:
+      Omit<
+        Group,
+        'id'
+        | 'currentStudentsCount'
+      >
+  ) => {
+
+    const newGroup:
+      Group = {
+
       ...groupData,
-      id: newId,
-      currentStudentsCount: 0
+
+      id:
+        nextGroupId(
+          groups
+        ),
+
+      currentStudentsCount:
+        0,
     };
-    setGroups(prev => [newGroup, ...prev]);
+
+
+    setGroups(prev => [
+      newGroup,
+      ...prev,
+    ]);
+
+
+    insertGroup(
+      newGroup
+    )
+      .catch(err =>
+        handleAsyncError(
+          err,
+          () => refreshData()
+        )
+      );
   };
 
-  const updateGroup = (id: string, updated: Partial<Group>) => {
-    setGroups(prev => prev.map(g => g.id === id ? { ...g, ...updated } : g));
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // GROUP UPDATE
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const updateGroup = (
+    id: string,
+    updated:
+      Partial<Group>
+  ) => {
+
+    const prevGroups =
+      groups;
+
+
+    setGroups(prev =>
+      prev.map(group =>
+        group.id === id
+
+          ? {
+              ...group,
+              ...updated,
+            }
+
+          : group
+      )
+    );
+
+
+    updateGroupInDb(
+      id,
+      updated
+    )
+      .catch(err =>
+        handleAsyncError(
+          err,
+          () =>
+            setGroups(
+              prevGroups
+            )
+        )
+      );
   };
 
-  const deleteGroup = (id: string) => {
-    setGroups(prev => prev.filter(g => g.id !== id));
-    if (selectedGroupId === id) setSelectedGroupId(null);
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // GROUP DELETE
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const deleteGroup = (
+    id: string
+  ) => {
+
+    const prevGroups =
+      groups;
+
+
+    setGroups(prev =>
+      prev.filter(
+        group =>
+          group.id !== id
+      )
+    );
+
+
+    if (
+      selectedGroupId === id
+    ) {
+      setSelectedGroupId(null);
+    }
+
+
+    deleteGroupFromDb(id)
+      .catch(err =>
+        handleAsyncError(
+          err,
+          () =>
+            setGroups(
+              prevGroups
+            )
+        )
+      );
   };
 
-  // Expense Operations
-  const addExpense = (expenseData: Omit<Expense, 'id'>) => {
-    const newId = `EXP-${800 + expenses.length + 1}`;
-    const newExpense: Expense = { ...expenseData, id: newId };
-    setExpenses(prev => [newExpense, ...prev]);
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // EXPENSE CREATE
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const addExpense = (
+    expenseData:
+      Omit<
+        Expense,
+        'id'
+      >
+  ) => {
+
+    const newExpense:
+      Expense = {
+
+      ...expenseData,
+
+      id:
+        nextExpenseId(
+          expenses
+        ),
+    };
+
+
+    setExpenses(prev => [
+      newExpense,
+      ...prev,
+    ]);
+
+
+    insertExpense(
+      newExpense
+    )
+      .catch(err =>
+        handleAsyncError(
+          err,
+          () => refreshData()
+        )
+      );
   };
 
-  const deleteExpense = (id: string) => {
-    setExpenses(prev => prev.filter(e => e.id !== id));
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // EXPENSE UPDATE
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const updateExpense = (
+    id: string,
+    updated:
+      Partial<Expense>
+  ) => {
+
+    const prevExpenses =
+      expenses;
+
+
+    setExpenses(prev =>
+      prev.map(expense =>
+        expense.id === id
+
+          ? {
+              ...expense,
+              ...updated,
+            }
+
+          : expense
+      )
+    );
+
+
+    updateExpenseInDb(
+      id,
+      updated
+    )
+      .catch(err =>
+        handleAsyncError(
+          err,
+          () =>
+            setExpenses(
+              prevExpenses
+            )
+        )
+      );
   };
 
-  // Save Attendance
-  const saveAttendance = (newRecords: Omit<AttendanceRecord, 'id'>[]) => {
-    const formattedRecords: AttendanceRecord[] = newRecords.map((rec, idx) => ({
-      ...rec,
-      id: `ATT-${Date.now()}-${idx}`
-    }));
-    setAttendanceRecords(prev => [...formattedRecords, ...prev]);
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // EXPENSE DELETE
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const deleteExpense = (
+    id: string
+  ) => {
+
+    const prevExpenses =
+      expenses;
+
+
+    setExpenses(prev =>
+      prev.filter(
+        expense =>
+          expense.id !== id
+      )
+    );
+
+
+    deleteExpenseFromDb(id)
+      .catch(err =>
+        handleAsyncError(
+          err,
+          () =>
+            setExpenses(
+              prevExpenses
+            )
+        )
+      );
   };
 
-  // Notification Handling
-  const markNotificationRead = (id: string) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-  };
 
-  const clearAllNotifications = () => {
-    setNotifications([]);
-  };
+  // ───────────────────────────────────────────────────────────────────────────
+  // ATTENDANCE
+  // ───────────────────────────────────────────────────────────────────────────
 
-  // Financial Metrics Computation
-  const financials = useMemo(() => {
-    const totalStudents = students.length;
-    const activeStudents = students.filter(s => s.status === 'Active').length;
-    const newStudentsThisMonth = 14;
+  const saveAttendance = (
+    newRecords: Omit<AttendanceRecord, 'id'>[]
+  ) => {
 
-    let monthlyExpectedIncome = 0;
-    let paidIncome = 0;
-    let unpaidIncome = 0;
+    const prevAttendanceRecords =
+      attendanceRecords;
 
-    const currentMonthKey = "August"; // Academic month August
 
-    students.forEach(student => {
-      monthlyExpectedIncome += student.monthlyFee;
-      const paymentInfo = student.payments[currentMonthKey];
-      if (paymentInfo) {
-        if (paymentInfo.status === 'Paid' || paymentInfo.status === 'Discount') {
-          paidIncome += paymentInfo.amountPaid;
-        } else if (paymentInfo.status === 'Unpaid' || paymentInfo.status === 'Overdue') {
-          unpaidIncome += student.monthlyFee;
-        }
-      }
+    const timestamp =
+      Date.now();
+
+
+    const existingByKey =
+      new Map(
+        attendanceRecords.map(record => [
+          `${record.studentId}__${record.date}`,
+          record,
+        ])
+      );
+
+
+    const formattedRecords:
+      AttendanceRecord[] =
+        newRecords.map(
+          (record, index) => {
+
+            const key =
+              `${record.studentId}__${record.date}`;
+
+
+            const existingRecord =
+              existingByKey.get(key);
+
+
+            return {
+              ...record,
+
+              id:
+                existingRecord?.id ??
+                `ATT-${timestamp}-${index}`,
+            };
+          }
+        );
+
+
+    setAttendanceRecords(prev => {
+
+      const updatedKeys =
+        new Set(
+          formattedRecords.map(
+            record =>
+              `${record.studentId}__${record.date}`
+          )
+        );
+
+
+      const untouchedRecords =
+        prev.filter(
+          record =>
+            !updatedKeys.has(
+              `${record.studentId}__${record.date}`
+            )
+        );
+
+
+      return [
+        ...formattedRecords,
+        ...untouchedRecords,
+      ];
     });
 
-    const expensesTotal = expenses.reduce((acc, exp) => acc + exp.amount, 0);
-    const netProfit = paidIncome - expensesTotal;
-    const overallAttendancePercentage = 94.2;
 
-    return {
-      totalStudents,
-      activeStudents,
-      newStudentsThisMonth,
-      monthlyExpectedIncome,
-      paidIncome,
-      unpaidIncome,
-      expensesTotal,
-      netProfit,
-      overallAttendancePercentage
-    };
-  }, [students, expenses]);
+    insertAttendanceRecords(
+      formattedRecords
+    )
+      .catch(err =>
+        handleAsyncError(
+          err,
+          () =>
+            setAttendanceRecords(
+              prevAttendanceRecords
+            )
+        )
+      );
+  };
+
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // NOTIFICATION READ
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const markNotificationRead = (
+    id: string
+  ) => {
+
+    setNotifications(prev =>
+      prev.map(
+        notification =>
+          notification.id === id
+
+            ? {
+                ...notification,
+                read: true,
+              }
+
+            : notification
+      )
+    );
+
+
+    markNotificationReadInDb(
+      id
+    )
+      .catch(err =>
+        handleAsyncError(
+          err
+        )
+      );
+  };
+
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // CLEAR NOTIFICATIONS
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const clearAllNotifications = () => {
+
+    const prev =
+      notifications;
+
+
+    setNotifications([]);
+
+
+    clearAllNotificationsInDb()
+      .catch(err =>
+        handleAsyncError(
+          err,
+          () =>
+            setNotifications(
+              prev
+            )
+        )
+      );
+  };
+
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // FINANCIAL CALCULATIONS
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const financials =
+    useMemo(() => {
+
+      const totalStudents =
+        students.length;
+
+
+      const activeStudents =
+        students.filter(
+          student =>
+            student.status ===
+            'Active'
+        ).length;
+
+
+      const newStudentsThisMonth =
+        students.filter(
+          student =>
+            isCurrentCalendarMonth(
+              student.joinedDate
+            )
+        ).length;
+
+
+      const currentAcademicMonth =
+        getCurrentAcademicMonth();
+
+
+      let monthlyExpectedIncome =
+        0;
+
+
+      let paidIncome =
+        0;
+
+
+      let unpaidIncome =
+        0;
+
+
+      let unpaidCount =
+        0;
+
+
+      students.forEach(
+        student => {
+
+          if (
+            student.status !==
+              'Active'
+            &&
+            student.status !==
+              'Trial'
+          ) {
+            return;
+          }
+
+
+          monthlyExpectedIncome +=
+            student.monthlyFee;
+
+
+          const paymentInfo =
+            student.payments[
+              currentAcademicMonth
+            ];
+
+
+          if (paymentInfo) {
+
+            if (
+              paymentInfo.status ===
+                'Paid'
+              ||
+              paymentInfo.status ===
+                'Discount'
+            ) {
+
+              paidIncome +=
+                paymentInfo.amountPaid;
+
+            } else if (
+              paymentInfo.status ===
+                'Unpaid'
+              ||
+              paymentInfo.status ===
+                'Overdue'
+            ) {
+
+              unpaidIncome +=
+                student.monthlyFee;
+
+
+              unpaidCount +=
+                1;
+            }
+          }
+        }
+      );
+
+
+      const expensesTotal =
+        expenses.reduce(
+          (
+            accumulator,
+            expense
+          ) =>
+            accumulator +
+            expense.amount,
+          0
+        );
+
+
+      const netProfit =
+        paidIncome -
+        expensesTotal;
+
+
+      let overallAttendancePercentage =
+        0;
+
+
+      if (
+        attendanceRecords.length >
+        0
+      ) {
+
+        const present =
+          attendanceRecords.filter(
+            record =>
+              record.status ===
+                'Present'
+              ||
+              record.status ===
+                'Late'
+          ).length;
+
+
+        overallAttendancePercentage =
+          Math.round(
+            (
+              present /
+              attendanceRecords.length
+            ) *
+            1000
+          ) / 10;
+      }
+
+
+      return {
+        totalStudents,
+
+        activeStudents,
+
+        newStudentsThisMonth,
+
+        monthlyExpectedIncome,
+
+        paidIncome,
+
+        unpaidIncome,
+
+        expensesTotal,
+
+        netProfit,
+
+        overallAttendancePercentage,
+
+        currentAcademicMonth,
+
+        unpaidCount,
+      };
+
+    }, [
+      students,
+      expenses,
+      attendanceRecords,
+    ]);
+
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // PROVIDER VALUE
+  // ───────────────────────────────────────────────────────────────────────────
 
   return (
     <CRMContext.Provider
       value={{
         activePage,
         setActivePage,
+
         searchQuery,
         setSearchQuery,
+
         isGlobalSearchOpen,
         setIsGlobalSearchOpen,
+
+        isLoading,
+        isInitialized,
+        error,
+        refreshData,
+
         settings,
         updateSettings,
+
         students,
         teachers,
         groups,
+
         expenses,
+
         notifications,
         calendarEvents,
         attendanceRecords,
+
         addStudent,
         updateStudent,
         deleteStudent,
         recordPayment,
+
         addTeacher,
         updateTeacher,
         deleteTeacher,
+
         addGroup,
         updateGroup,
         deleteGroup,
+
         addExpense,
+        updateExpense,
         deleteExpense,
+
         saveAttendance,
+
         markNotificationRead,
         clearAllNotifications,
+
         selectedStudentId,
         setSelectedStudentId,
+
         selectedTeacherId,
         setSelectedTeacherId,
+
         selectedGroupId,
         setSelectedGroupId,
+
         isAddStudentModalOpen,
         setIsAddStudentModalOpen,
+
         isReceivePaymentModalOpen,
         setIsReceivePaymentModalOpen,
+
         paymentModalDefaultStudentId,
         setPaymentModalDefaultStudentId,
+
         isAddTeacherModalOpen,
         setIsAddTeacherModalOpen,
+
         isAddGroupModalOpen,
         setIsAddGroupModalOpen,
+
         isAddExpenseModalOpen,
         setIsAddExpenseModalOpen,
-        financials
+
+        financials,
       }}
     >
       {children}
@@ -409,10 +1881,25 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   );
 };
 
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HOOK
+// ─────────────────────────────────────────────────────────────────────────────
+
 export const useCRM = () => {
-  const context = useContext(CRMContext);
+
+  const context =
+    useContext(
+      CRMContext
+    );
+
+
   if (!context) {
-    throw new Error('useCRM must be used within a CRMProvider');
+    throw new Error(
+      'useCRM must be used within a CRMProvider'
+    );
   }
+
+
   return context;
 };

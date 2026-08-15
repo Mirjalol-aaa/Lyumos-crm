@@ -1,23 +1,25 @@
 import React, { useState } from 'react';
 import { useCRM } from '../context/CRMContext';
-import { 
-  CreditCard, DollarSign, Search, CheckCircle2, AlertCircle, 
-  Clock, Plus, ArrowUpRight 
+import {
+  CreditCard, DollarSign, Search, CheckCircle2, AlertCircle,
+  Clock, Plus, ArrowUpRight
 } from 'lucide-react';
+import { ACADEMIC_MONTHS } from '../constants/academic';
 
 export const PaymentsPage: React.FC = () => {
-  const { 
-    students, 
-    setIsReceivePaymentModalOpen, 
+  const {
+    students,
+    financials,
+    setIsReceivePaymentModalOpen,
     setPaymentModalDefaultStudentId,
     setSelectedStudentId,
-    settings 
+    settings
   } = useCRM();
 
   const [term, setTerm] = useState('');
-  const [activeMonthFilter, setActiveMonthFilter] = useState('August');
+  const [activeMonthFilter, setActiveMonthFilter] = useState(financials.currentAcademicMonth);
 
-  const MONTHS = ["August", "September", "October", "November", "December", "January", "February", "March", "April", "May", "June", "July"];
+  const MONTHS = ACADEMIC_MONTHS;
 
   const filteredStudents = students.filter(s => 
     s.fullName.toLowerCase().includes(term.toLowerCase()) ||
