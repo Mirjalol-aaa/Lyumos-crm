@@ -3,10 +3,16 @@ import { Toast } from './components/common/Toast';
 
 import { CRMProvider, useCRM } from './context/CRMContext';
 import { LMSProvider, useLMS } from './context/LMSContext';
+import { I18nProvider } from './lib/i18n';
 import { DataLoader } from './components/common/DataLoader';
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
 import { Breadcrumb } from './components/layout/Breadcrumb';
+
+// Public & Payment Pages
+import { LandingPage } from './pages/public/LandingPage';
+import { PaymentSuccessPage } from './pages/payment/PaymentSuccessPage';
+import { PaymentFailedPage } from './pages/payment/PaymentFailedPage';
 
 // Dedicated Authentic Login Pages
 import { AdminTeacherLogin } from './pages/auth/AdminTeacherLogin';
@@ -277,47 +283,51 @@ function StudentPortalContent() {
 
 function AppContentRouter() {
   const { currentUser, currentRole } = useLMS();
-  const [authMode, setAuthMode] = useState<'admin' | 'student'>(() => {
-    if (typeof window !== 'undefined' && window.location.hash.toLowerCase().includes('student')) {
-      return 'student';
-    }
-    return 'admin';
+  const [currentHash, setCurrentHash] = useState(() => {
+    return typeof window !== 'undefined' ? window.location.hash.toLowerCase() : '';
   });
 
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash.toLowerCase();
-      if (hash.includes('student')) {
-        setAuthMode('student');
-      } else if (hash.includes('admin')) {
-        setAuthMode('admin');
-      }
+      setCurrentHash(window.location.hash.toLowerCase());
     };
 
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
+  // 1. Payment Callback Pages
+  if (currentHash.includes('payment/success')) {
+    return <PaymentSuccessPage />;
+  }
+  if (currentHash.includes('payment/failed')) {
+    return <PaymentFailedPage />;
+  }
+
+  // 2. Unauthenticated Visitor Flow
   if (!currentUser) {
-    if (authMode === 'student') {
+    if (currentHash.includes('student')) {
       return (
         <StudentLogin
           onSwitchToAdmin={() => {
-            setAuthMode('admin');
             window.location.hash = '#/admin';
           }}
         />
       );
     }
 
-    return (
-      <AdminTeacherLogin
-        onSwitchToStudent={() => {
-          setAuthMode('student');
-          window.location.hash = '#/student';
-        }}
-      />
-    );
+    if (currentHash.includes('admin') || currentHash.includes('login')) {
+      return (
+        <AdminTeacherLogin
+          onSwitchToStudent={() => {
+            window.location.hash = '#/student';
+          }}
+        />
+      );
+    }
+
+    // Default public landing page at root and #/landing
+    return <LandingPage />;
   }
 
   return (
@@ -341,9 +351,11 @@ export default function App() {
   return (
     <CRMProvider>
       <LMSProvider>
-        <DataLoader>
-          <AppContentRouter />
-        </DataLoader>
+        <I18nProvider>
+          <DataLoader>
+            <AppContentRouter />
+          </DataLoader>
+        </I18nProvider>
       </LMSProvider>
     </CRMProvider>
   );

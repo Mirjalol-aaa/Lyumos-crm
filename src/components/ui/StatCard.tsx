@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 
 interface StatCardProps {
@@ -20,6 +20,52 @@ export const StatCard: React.FC<StatCardProps> = ({
   icon,
   color = 'blue',
 }) => {
+  const [displayValue, setDisplayValue] = useState<string | number>(value);
+
+  useEffect(() => {
+    // Check if value contains numbers that can animate
+    const strVal = String(value);
+    const numMatch = strVal.match(/[\d,.]+/);
+
+    if (!numMatch) {
+      setDisplayValue(value);
+      return;
+    }
+
+    const rawNumStr = numMatch[0].replace(/,/g, '');
+    const targetNum = parseFloat(rawNumStr);
+
+    if (isNaN(targetNum) || targetNum <= 0) {
+      setDisplayValue(value);
+      return;
+    }
+
+    let start = 0;
+    const duration = 800; // ms
+    const startTime = performance.now();
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out cubic
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+      const currentVal = Math.round(start + (targetNum - start) * easeProgress);
+
+      const formattedCurrent = currentVal.toLocaleString();
+      const animatedStr = strVal.replace(numMatch[0], formattedCurrent);
+      setDisplayValue(animatedStr);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        setDisplayValue(value);
+      }
+    };
+
+    const frameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameId);
+  }, [value]);
+
   const colorMap = {
     blue: {
       bg: 'bg-blue-50/70 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400 border-blue-200/50 dark:border-blue-900/50',
@@ -50,21 +96,25 @@ export const StatCard: React.FC<StatCardProps> = ({
   const currentTheme = colorMap[color];
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md hover:border-slate-300 dark:border-slate-800/90 dark:bg-slate-900/90 dark:hover:border-slate-700 ${currentTheme.glow}`}>
+    <div
+      className={`relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md hover:border-slate-300 dark:border-slate-800/90 dark:bg-slate-900/90 dark:hover:border-slate-700 ${currentTheme.glow}`}
+    >
       <div className="flex items-center justify-between gap-3">
         <span className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">
           {title}
         </span>
         {icon && (
-          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border p-2 ${currentTheme.bg}`}>
+          <div
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border p-2 ${currentTheme.bg}`}
+          >
             {icon}
           </div>
         )}
       </div>
 
       <div className="mt-3 flex items-baseline justify-between gap-2">
-        <h3 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-          {value}
+        <h3 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white font-mono">
+          {displayValue}
         </h3>
 
         {delta && (
