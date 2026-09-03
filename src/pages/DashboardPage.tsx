@@ -1,389 +1,2399 @@
 import React, { useMemo } from 'react';
+
 import { useCRM } from '../context/CRMContext';
+
 import {
-  Users, DollarSign, ArrowUpRight, ArrowDownRight, UserPlus,
-  TrendingUp, Calendar, Cake, CheckCircle2, AlertCircle, Plus, BookOpen, FileText
+  Users,
+  DollarSign,
+  ArrowUpRight,
+  TrendingUp,
+  Calendar,
+  Cake,
+  CheckCircle2,
+  AlertCircle,
+  Plus,
+  BookOpen,
 } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+} from 'recharts';
+
 import { ACADEMIC_MONTHS } from '../constants/academic';
+
 
 export const DashboardPage: React.FC = () => {
   const {
     financials,
     students,
     expenses,
+
     setIsAddStudentModalOpen,
     setIsReceivePaymentModalOpen,
     setSelectedStudentId,
     setIsAddGroupModalOpen,
+
     setActivePage,
+
     calendarEvents,
-    settings
+    settings,
   } = useCRM();
 
-  const currentMonth = financials.currentAcademicMonth;
+
+  const currentMonth =
+    financials.currentAcademicMonth;
+
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // MONTHLY ANALYTICS
+  // ───────────────────────────────────────────────────────────────────────────
 
   const monthlyData = useMemo(() => {
-    const yearParts = settings.academicYear.split('-').map(s => parseInt(s.trim(), 10));
-    const academicYearStart = yearParts[0] || new Date().getFullYear();
+    const yearParts =
+      settings.academicYear
+        .split('-')
+        .map(part =>
+          parseInt(
+            part.trim(),
+            10
+          )
+        );
 
-    return ACADEMIC_MONTHS.map((month, idx) => {
-      let revenue = 0;
-      students.forEach(s => {
-        const p = s.payments[month];
-        if (p && (p.status === 'Paid' || p.status === 'Discount')) {
-          revenue += p.amountPaid;
-        }
-      });
+    const academicYearStart =
+      yearParts[0] ||
+      new Date().getFullYear();
 
-      const calendarMonthIndex = (idx + 7) % 12;
-      const year = idx < 5 ? academicYearStart : academicYearStart + 1;
+    return ACADEMIC_MONTHS.map(
+      (month, index) => {
+        let revenue = 0;
 
-      const monthExpenses = expenses
-        .filter(e => {
-          const d = new Date(e.date);
-          return d.getMonth() === calendarMonthIndex && d.getFullYear() === year;
-        })
-        .reduce((sum, e) => sum + e.amount, 0);
+        students.forEach(student => {
+          const payment =
+            student.payments[month];
 
-      const studentCount = students.filter(s => {
-        const joined = new Date(s.joinedDate);
-        const cutoff = new Date(year, calendarMonthIndex + 1, 0);
-        return joined <= cutoff;
-      }).length;
+          if (
+            payment &&
+            (
+              payment.status === 'Paid' ||
+              payment.status === 'Discount'
+            )
+          ) {
+            revenue +=
+              payment.amountPaid;
+          }
+        });
 
-      return {
-        month: month.slice(0, 3),
-        revenue,
-        expenses: monthExpenses,
-        students: studentCount,
-      };
-    });
-  }, [students, expenses, settings.academicYear]);
 
-  const recentStudents = students.slice(0, 5);
+        const calendarMonthIndex =
+          (index + 7) % 12;
 
-  const upcomingBirthdays = useMemo(() => {
-    const today = new Date();
-    const todayMMDD = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    return students
-      .filter(s => s.birthDate.slice(5) === todayMMDD)
-      .concat(students.filter(s => s.birthDate.slice(5) !== todayMMDD))
-      .slice(0, 4);
-  }, [students]);
+        const year =
+          index < 5
+            ? academicYearStart
+            : academicYearStart + 1;
+
+
+        const monthExpenses =
+          expenses
+            .filter(expense => {
+              const date =
+                new Date(
+                  expense.date
+                );
+
+              return (
+                date.getMonth() ===
+                  calendarMonthIndex &&
+                date.getFullYear() ===
+                  year
+              );
+            })
+            .reduce(
+              (
+                total,
+                expense
+              ) =>
+                total +
+                expense.amount,
+              0
+            );
+
+
+        const studentCount =
+          students.filter(
+            student => {
+              const joined =
+                new Date(
+                  student.joinedDate
+                );
+
+              const cutoff =
+                new Date(
+                  year,
+                  calendarMonthIndex +
+                    1,
+                  0
+                );
+
+              return joined <= cutoff;
+            }
+          ).length;
+
+
+        return {
+          month:
+            month.slice(
+              0,
+              3
+            ),
+
+          revenue,
+
+          expenses:
+            monthExpenses,
+
+          students:
+            studentCount,
+        };
+      }
+    );
+  }, [
+    students,
+    expenses,
+    settings.academicYear,
+  ]);
+
+
+  const recentStudents =
+    students.slice(
+      0,
+      5
+    );
+
+
+  const upcomingBirthdays =
+    useMemo(() => {
+      const today =
+        new Date();
+
+      const todayMMDD =
+        `${String(
+          today.getMonth() + 1
+        ).padStart(
+          2,
+          '0'
+        )}-${String(
+          today.getDate()
+        ).padStart(
+          2,
+          '0'
+        )}`;
+
+      return students
+        .filter(
+          student =>
+            student.birthDate.slice(
+              5
+            ) === todayMMDD
+        )
+        .concat(
+          students.filter(
+            student =>
+              student.birthDate.slice(
+                5
+              ) !== todayMMDD
+          )
+        )
+        .slice(
+          0,
+          4
+        );
+    }, [
+      students,
+    ]);
+
+
+  const formatCurrency = (
+    value: number
+  ) => {
+    return `${settings.currencySymbol}${value.toLocaleString()}`;
+  };
+
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // PAYMENT BADGE
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const renderPaymentStatus = (
+    status: string
+  ) => {
+    if (
+      status === 'Paid' ||
+      status === 'Discount'
+    ) {
+      return (
+        <span
+          className="
+            inline-flex
+            items-center
+            gap-1
+            rounded-full
+            bg-emerald-100
+            px-2 py-1
+            text-[10px]
+            font-bold
+            text-emerald-800
+
+            dark:bg-emerald-950
+            dark:text-emerald-300
+          "
+        >
+          <CheckCircle2
+            className="
+              h-3 w-3
+            "
+          />
+
+          Paid
+        </span>
+      );
+    }
+
+    return (
+      <span
+        className="
+          inline-flex
+          items-center
+          rounded-full
+          bg-amber-100
+          px-2 py-1
+          text-[10px]
+          font-bold
+          text-amber-800
+
+          dark:bg-amber-950
+          dark:text-amber-300
+        "
+      >
+        Unpaid
+      </span>
+    );
+  };
+
 
   return (
-    <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
-      {/* Top Banner / Welcome */}
-      <div className="relative overflow-hidden p-6 md:p-8 rounded-[28px] bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950 text-white shadow-2xl border border-slate-800">
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="space-y-1.5 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-semibold border border-blue-500/30">
-              <span>Academic Year {settings.academicYear}</span>
+    <div
+      className="
+        mx-auto
+        w-full
+        max-w-7xl
+        space-y-5
+        px-3
+        py-4
+
+        sm:space-y-6
+        sm:px-5
+        sm:py-5
+
+        lg:px-6
+        lg:py-6
+
+        xl:space-y-8
+        xl:px-8
+        xl:py-8
+      "
+    >
+      {/* ─────────────────────────────────────────────────────────────────────
+          WELCOME BANNER
+      ───────────────────────────────────────────────────────────────────── */}
+
+      <section
+        className="
+          relative
+          overflow-hidden
+          rounded-2xl
+          border
+          border-slate-800
+          bg-gradient-to-r
+          from-slate-900
+          via-slate-800
+          to-blue-950
+          p-5
+          text-white
+          shadow-xl
+
+          sm:rounded-[24px]
+          sm:p-6
+
+          lg:p-8
+        "
+      >
+        {/* Decorative glow */}
+        <div
+          className="
+            pointer-events-none
+            absolute
+            -right-20
+            -top-24
+            h-64 w-64
+            rounded-full
+            bg-blue-500/10
+            blur-3xl
+          "
+        />
+
+        <div
+          className="
+            relative z-10
+            flex flex-col
+            gap-5
+
+            lg:flex-row
+            lg:items-center
+            lg:justify-between
+            lg:gap-8
+          "
+        >
+          <div
+            className="
+              max-w-2xl
+              min-w-0
+            "
+          >
+            <div
+              className="
+                inline-flex
+                max-w-full
+                items-center
+                gap-2
+                rounded-full
+                border
+                border-blue-500/30
+                bg-blue-500/20
+                px-3 py-1
+                text-[10px]
+                font-semibold
+                text-blue-300
+
+                sm:text-xs
+              "
+            >
+              <span
+                className="
+                  truncate
+                "
+              >
+                Academic Year{' '}
+                {settings.academicYear}
+              </span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-              Welcome back to {settings.centerName}
+
+            <h1
+              className="
+                mt-3
+                text-xl
+                font-extrabold
+                leading-tight
+                tracking-tight
+
+                sm:text-2xl
+
+                lg:text-3xl
+              "
+            >
+              Welcome back to{' '}
+              {settings.centerName}
             </h1>
-            <p className="text-xs md:text-sm text-slate-300 font-normal leading-relaxed">
-              Manage 150+ students, track fee payments, generate financial reports, and align schedules effortlessly.
+
+            <p
+              className="
+                mt-2
+                max-w-xl
+                text-xs
+                leading-relaxed
+                text-slate-300
+
+                sm:text-sm
+              "
+            >
+              Manage{' '}
+              {financials.totalStudents}{' '}
+              students, track fee
+              payments, generate
+              financial reports and
+              manage your education
+              center from one place.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
+
+          {/* Actions */}
+
+          <div
+            className="
+              grid w-full
+              grid-cols-1
+              gap-2.5
+
+              sm:grid-cols-3
+
+              lg:w-auto
+              lg:min-w-max
+            "
+          >
             <button
-              onClick={() => setIsReceivePaymentModalOpen(true)}
-              className="px-4 py-2.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-lg shadow-emerald-500/25 active:scale-95 transition-all flex items-center gap-2"
+              type="button"
+              onClick={() =>
+                setIsReceivePaymentModalOpen(
+                  true
+                )
+              }
+              className="
+                flex
+                cursor-pointer
+                items-center
+                justify-center
+                gap-2
+                rounded-xl
+                bg-emerald-500
+                px-4
+                py-2.5
+                text-xs
+                font-bold
+                text-white
+                shadow-lg
+                shadow-emerald-500/20
+                transition-all
+
+                hover:bg-emerald-600
+
+                active:scale-[0.98]
+              "
             >
-              <DollarSign className="w-4 h-4" /> Receive Payment
+              <DollarSign
+                className="
+                  h-4 w-4
+                  shrink-0
+                "
+              />
+
+              Receive Payment
             </button>
+
+
             <button
-              onClick={() => setIsAddStudentModalOpen(true)}
-              className="px-4 py-2.5 rounded-2xl bg-[#007AFF] hover:bg-blue-600 text-white text-xs font-bold shadow-lg shadow-blue-500/25 active:scale-95 transition-all flex items-center gap-2"
+              type="button"
+              onClick={() =>
+                setIsAddStudentModalOpen(
+                  true
+                )
+              }
+              className="
+                flex
+                cursor-pointer
+                items-center
+                justify-center
+                gap-2
+                rounded-xl
+                bg-[#007AFF]
+                px-4
+                py-2.5
+                text-xs
+                font-bold
+                text-white
+                shadow-lg
+                shadow-blue-500/20
+                transition-all
+
+                hover:bg-blue-600
+
+                active:scale-[0.98]
+              "
             >
-              <Plus className="w-4 h-4" /> Add Student
+              <Plus
+                className="
+                  h-4 w-4
+                  shrink-0
+                "
+              />
+
+              Add Student
             </button>
+
+
             <button
-              onClick={() => setIsAddGroupModalOpen(true)}
-              className="px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold backdrop-blur-md border border-white/20 transition-all flex items-center gap-2"
+              type="button"
+              onClick={() =>
+                setIsAddGroupModalOpen(
+                  true
+                )
+              }
+              className="
+                flex
+                cursor-pointer
+                items-center
+                justify-center
+                gap-2
+                rounded-xl
+                border
+                border-white/20
+                bg-white/10
+                px-4
+                py-2.5
+                text-xs
+                font-bold
+                text-white
+                backdrop-blur-md
+                transition-all
+
+                hover:bg-white/20
+
+                active:scale-[0.98]
+              "
             >
-              <BookOpen className="w-4 h-4" /> New Group
+              <BookOpen
+                className="
+                  h-4 w-4
+                  shrink-0
+                "
+              />
+
+              New Group
             </button>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* KPI Stat Cards Grid (Apple styled 20px rounded glass cards) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {/* Stat 1: Total Students */}
-        <div className="p-5 rounded-[20px] bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Students</span>
-            <div className="p-2.5 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-[#007AFF]">
-              <Users className="w-5 h-5" />
+
+      {/* ─────────────────────────────────────────────────────────────────────
+          KPI CARDS
+      ───────────────────────────────────────────────────────────────────── */}
+
+      <section
+        className="
+          grid
+          grid-cols-1
+          gap-3
+
+          sm:grid-cols-2
+          sm:gap-4
+
+          xl:grid-cols-4
+          xl:gap-5
+        "
+      >
+        {/* Total Students */}
+
+        <div
+          className="
+            rounded-2xl
+            border
+            border-slate-200/60
+            bg-white
+            p-4
+            shadow-sm
+            transition-all
+
+            hover:-translate-y-0.5
+            hover:shadow-md
+
+            dark:border-slate-800
+            dark:bg-slate-900
+
+            sm:p-5
+          "
+        >
+          <div
+            className="
+              flex
+              items-center
+              justify-between
+              gap-3
+            "
+          >
+            <span
+              className="
+                text-[10px]
+                font-bold
+                uppercase
+                tracking-wider
+                text-slate-400
+
+                sm:text-xs
+              "
+            >
+              Total Students
+            </span>
+
+            <div
+              className="
+                rounded-xl
+                bg-blue-50
+                p-2.5
+                text-[#007AFF]
+
+                dark:bg-blue-950/60
+              "
+            >
+              <Users
+                className="
+                  h-5 w-5
+                "
+              />
             </div>
           </div>
-          <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+
+          <div
+            className="
+              mt-3
+              flex
+              items-end
+              justify-between
+              gap-3
+            "
+          >
+            <span
+              className="
+                text-2xl
+                font-black
+                tracking-tight
+                text-slate-900
+
+                dark:text-white
+              "
+            >
               {financials.totalStudents}
             </span>
-            <span className="inline-flex items-center text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded-full">
-              <ArrowUpRight className="w-3.5 h-3.5" /> +12%
+
+            <span
+              className="
+                inline-flex
+                items-center
+                gap-0.5
+                rounded-full
+                bg-emerald-50
+                px-2 py-1
+                text-[10px]
+                font-bold
+                text-emerald-600
+
+                dark:bg-emerald-950
+                dark:text-emerald-400
+              "
+            >
+              <ArrowUpRight
+                className="
+                  h-3.5 w-3.5
+                "
+              />
+
+              +12%
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-2 font-medium">
-            {financials.activeStudents} active • {financials.newStudentsThisMonth} new this month
+
+          <p
+            className="
+              mt-2
+              text-[11px]
+              font-medium
+              leading-relaxed
+              text-slate-400
+
+              sm:text-xs
+            "
+          >
+            {financials.activeStudents}{' '}
+            active •{' '}
+            {financials.newStudentsThisMonth}{' '}
+            new this month
           </p>
         </div>
 
-        {/* Stat 2: Paid Income */}
-        <div className="p-5 rounded-[20px] bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Paid Income ({currentMonth.slice(0, 3)})</span>
-            <div className="p-2.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600">
-              <DollarSign className="w-5 h-5" />
+
+        {/* Paid Income */}
+
+        <div
+          className="
+            rounded-2xl
+            border
+            border-slate-200/60
+            bg-white
+            p-4
+            shadow-sm
+            transition-all
+
+            hover:-translate-y-0.5
+            hover:shadow-md
+
+            dark:border-slate-800
+            dark:bg-slate-900
+
+            sm:p-5
+          "
+        >
+          <div
+            className="
+              flex
+              items-center
+              justify-between
+              gap-3
+            "
+          >
+            <span
+              className="
+                text-[10px]
+                font-bold
+                uppercase
+                tracking-wider
+                text-slate-400
+
+                sm:text-xs
+              "
+            >
+              Paid Income (
+              {currentMonth.slice(
+                0,
+                3
+              )}
+              )
+            </span>
+
+            <div
+              className="
+                rounded-xl
+                bg-emerald-50
+                p-2.5
+                text-emerald-600
+
+                dark:bg-emerald-950/60
+              "
+            >
+              <DollarSign
+                className="
+                  h-5 w-5
+                "
+              />
             </div>
           </div>
-          <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              {settings.currencySymbol}{financials.paidIncome.toLocaleString()}
+
+          <div
+            className="
+              mt-3
+              flex
+              items-end
+              justify-between
+              gap-3
+            "
+          >
+            <span
+              className="
+                min-w-0
+                truncate
+                text-2xl
+                font-black
+                tracking-tight
+                text-slate-900
+
+                dark:text-white
+              "
+            >
+              {formatCurrency(
+                financials.paidIncome
+              )}
             </span>
-            <span className="inline-flex items-center text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded-full">
-              <ArrowUpRight className="w-3.5 h-3.5" /> +18.4%
+
+            <span
+              className="
+                inline-flex
+                shrink-0
+                items-center
+                gap-0.5
+                rounded-full
+                bg-emerald-50
+                px-2 py-1
+                text-[10px]
+                font-bold
+                text-emerald-600
+
+                dark:bg-emerald-950
+                dark:text-emerald-400
+              "
+            >
+              <ArrowUpRight
+                className="
+                  h-3.5 w-3.5
+                "
+              />
+
+              +18.4%
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-2 font-medium">
-            Target expected: {settings.currencySymbol}{financials.monthlyExpectedIncome.toLocaleString()}
+
+          <p
+            className="
+              mt-2
+              text-[11px]
+              font-medium
+              leading-relaxed
+              text-slate-400
+
+              sm:text-xs
+            "
+          >
+            Target expected:{' '}
+            {formatCurrency(
+              financials.monthlyExpectedIncome
+            )}
           </p>
         </div>
 
-        {/* Stat 3: Unpaid Income */}
-        <div className="p-5 rounded-[20px] bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Unpaid Fee Due</span>
-            <div className="p-2.5 rounded-2xl bg-rose-50 dark:bg-rose-950/60 text-rose-600">
-              <AlertCircle className="w-5 h-5" />
+
+        {/* Unpaid */}
+
+        <div
+          className="
+            rounded-2xl
+            border
+            border-slate-200/60
+            bg-white
+            p-4
+            shadow-sm
+            transition-all
+
+            hover:-translate-y-0.5
+            hover:shadow-md
+
+            dark:border-slate-800
+            dark:bg-slate-900
+
+            sm:p-5
+          "
+        >
+          <div
+            className="
+              flex
+              items-center
+              justify-between
+              gap-3
+            "
+          >
+            <span
+              className="
+                text-[10px]
+                font-bold
+                uppercase
+                tracking-wider
+                text-slate-400
+
+                sm:text-xs
+              "
+            >
+              Unpaid Fee Due
+            </span>
+
+            <div
+              className="
+                rounded-xl
+                bg-rose-50
+                p-2.5
+                text-rose-600
+
+                dark:bg-rose-950/60
+              "
+            >
+              <AlertCircle
+                className="
+                  h-5 w-5
+                "
+              />
             </div>
           </div>
-          <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-2xl font-black text-rose-600 dark:text-rose-400 tracking-tight">
-              {settings.currencySymbol}{financials.unpaidIncome.toLocaleString()}
+
+          <div
+            className="
+              mt-3
+              flex
+              items-end
+              justify-between
+              gap-3
+            "
+          >
+            <span
+              className="
+                min-w-0
+                truncate
+                text-2xl
+                font-black
+                tracking-tight
+                text-rose-600
+
+                dark:text-rose-400
+              "
+            >
+              {formatCurrency(
+                financials.unpaidIncome
+              )}
             </span>
-            <span className="inline-flex items-center text-xs font-bold text-amber-600 bg-amber-50 dark:bg-amber-950 px-2 py-0.5 rounded-full">
-              {financials.unpaidCount} Pending
+
+            <span
+              className="
+                shrink-0
+                rounded-full
+                bg-amber-50
+                px-2 py-1
+                text-[10px]
+                font-bold
+                text-amber-600
+
+                dark:bg-amber-950
+              "
+            >
+              {financials.unpaidCount}{' '}
+              Pending
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-2 font-medium">
-            Automated SMS reminders active
+
+          <p
+            className="
+              mt-2
+              text-[11px]
+              font-medium
+              text-slate-400
+
+              sm:text-xs
+            "
+          >
+            Automated SMS reminders
+            active
           </p>
         </div>
 
-        {/* Stat 4: Net Profit */}
-        <div className="p-5 rounded-[20px] bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Net Profit</span>
-            <div className="p-2.5 rounded-2xl bg-purple-50 dark:bg-purple-950/60 text-purple-600">
-              <TrendingUp className="w-5 h-5" />
+
+        {/* Net Profit */}
+
+        <div
+          className="
+            rounded-2xl
+            border
+            border-slate-200/60
+            bg-white
+            p-4
+            shadow-sm
+            transition-all
+
+            hover:-translate-y-0.5
+            hover:shadow-md
+
+            dark:border-slate-800
+            dark:bg-slate-900
+
+            sm:p-5
+          "
+        >
+          <div
+            className="
+              flex
+              items-center
+              justify-between
+              gap-3
+            "
+          >
+            <span
+              className="
+                text-[10px]
+                font-bold
+                uppercase
+                tracking-wider
+                text-slate-400
+
+                sm:text-xs
+              "
+            >
+              Net Profit
+            </span>
+
+            <div
+              className="
+                rounded-xl
+                bg-purple-50
+                p-2.5
+                text-purple-600
+
+                dark:bg-purple-950/60
+              "
+            >
+              <TrendingUp
+                className="
+                  h-5 w-5
+                "
+              />
             </div>
           </div>
-          <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              {settings.currencySymbol}{financials.netProfit.toLocaleString()}
+
+          <div
+            className="
+              mt-3
+              flex
+              items-end
+              justify-between
+              gap-3
+            "
+          >
+            <span
+              className="
+                min-w-0
+                truncate
+                text-2xl
+                font-black
+                tracking-tight
+                text-slate-900
+
+                dark:text-white
+              "
+            >
+              {formatCurrency(
+                financials.netProfit
+              )}
             </span>
-            <span className="inline-flex items-center text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded-full">
-              <ArrowUpRight className="w-3.5 h-3.5" /> Healthy
+
+            <span
+              className="
+                inline-flex
+                shrink-0
+                items-center
+                gap-0.5
+                rounded-full
+                bg-emerald-50
+                px-2 py-1
+                text-[10px]
+                font-bold
+                text-emerald-600
+
+                dark:bg-emerald-950
+              "
+            >
+              <ArrowUpRight
+                className="
+                  h-3.5 w-3.5
+                "
+              />
+
+              Healthy
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-2 font-medium">
-            Expenses: {settings.currencySymbol}{financials.expensesTotal.toLocaleString()}
+
+          <p
+            className="
+              mt-2
+              text-[11px]
+              font-medium
+              text-slate-400
+
+              sm:text-xs
+            "
+          >
+            Expenses:{' '}
+            {formatCurrency(
+              financials.expensesTotal
+            )}
           </p>
         </div>
-      </div>
+      </section>
 
-      {/* Analytics Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Financial Growth Chart */}
-        <div className="lg:col-span-2 p-6 rounded-[24px] bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">Revenue vs Expenses Trend</h3>
-              <p className="text-xs text-slate-400">Monthly comparison for 2025 Academic Season</p>
+
+      {/* ─────────────────────────────────────────────────────────────────────
+          CHARTS
+      ───────────────────────────────────────────────────────────────────── */}
+
+      <section
+        className="
+          grid
+          grid-cols-1
+          gap-4
+
+          xl:grid-cols-3
+          xl:gap-6
+        "
+      >
+        {/* Revenue chart */}
+
+        <div
+          className="
+            min-w-0
+            rounded-2xl
+            border
+            border-slate-200/60
+            bg-white
+            p-4
+            shadow-sm
+
+            dark:border-slate-800
+            dark:bg-slate-900
+
+            sm:p-5
+
+            lg:p-6
+
+            xl:col-span-2
+          "
+        >
+          <div
+            className="
+              flex
+              flex-col
+              gap-2
+
+              sm:flex-row
+              sm:items-start
+              sm:justify-between
+            "
+          >
+            <div
+              className="
+                min-w-0
+              "
+            >
+              <h3
+                className="
+                  text-sm
+                  font-bold
+                  text-slate-900
+
+                  dark:text-white
+
+                  sm:text-base
+                "
+              >
+                Revenue vs Expenses
+                Trend
+              </h3>
+
+              <p
+                className="
+                  mt-0.5
+                  text-[11px]
+                  text-slate-400
+
+                  sm:text-xs
+                "
+              >
+                Monthly comparison for{' '}
+                {settings.academicYear}
+              </p>
             </div>
-            <button 
-              onClick={() => setActivePage('reports')}
-              className="text-xs font-bold text-[#007AFF] hover:underline"
+
+            <button
+              type="button"
+              onClick={() =>
+                setActivePage(
+                  'reports'
+                )
+              }
+              className="
+                w-fit
+                cursor-pointer
+                text-xs
+                font-bold
+                text-[#007AFF]
+
+                hover:underline
+              "
             >
               Full Report →
             </button>
           </div>
 
-          <div className="h-72 w-full pt-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={monthlyData}>
+
+          <div
+            className="
+              mt-4
+              h-64
+              w-full
+
+              sm:h-72
+            "
+          >
+            <ResponsiveContainer
+              width="100%"
+              height="100%"
+            >
+              <AreaChart
+                data={monthlyData}
+                margin={{
+                  top: 5,
+                  right: 5,
+                  left: -15,
+                  bottom: 0,
+                }}
+              >
                 <defs>
-                  <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#007AFF" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#007AFF" stopOpacity={0}/>
+                  <linearGradient
+                    id="colorRev"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset="5%"
+                      stopColor="#007AFF"
+                      stopOpacity={
+                        0.3
+                      }
+                    />
+
+                    <stop
+                      offset="95%"
+                      stopColor="#007AFF"
+                      stopOpacity={
+                        0
+                      }
+                    />
                   </linearGradient>
-                  <linearGradient id="colorExp" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#FF3B30" stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor="#FF3B30" stopOpacity={0}/>
+
+                  <linearGradient
+                    id="colorExp"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset="5%"
+                      stopColor="#FF3B30"
+                      stopOpacity={
+                        0.2
+                      }
+                    />
+
+                    <stop
+                      offset="95%"
+                      stopColor="#FF3B30"
+                      stopOpacity={
+                        0
+                      }
+                    />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} tickLine={false} />
-                <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} tickFormatter={val => `$${val/1000}k`} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#0f172a', borderRadius: '16px', color: '#fff', border: 'none' }}
-                  formatter={(val: any) => [`$${Number(val).toLocaleString()}`, '']}
+
+
+                <XAxis
+                  dataKey="month"
+                  stroke="#94a3b8"
+                  fontSize={10}
+                  tickLine={false}
+                  axisLine={false}
+                  interval={0}
                 />
-                <Area type="monotone" dataKey="revenue" name="Revenue" stroke="#007AFF" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
-                <Area type="monotone" dataKey="expenses" name="Expenses" stroke="#FF3B30" strokeWidth={2} fillOpacity={1} fill="url(#colorExp)" />
+
+                <YAxis
+                  stroke="#94a3b8"
+                  fontSize={10}
+                  tickLine={false}
+                  axisLine={false}
+                  width={55}
+                  tickFormatter={(
+                    value
+                  ) =>
+                    value >= 1000
+                      ? `${settings.currencySymbol}${Math.round(
+                          value /
+                            1000
+                        )}k`
+                      : `${settings.currencySymbol}${value}`
+                  }
+                />
+
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor:
+                      '#0f172a',
+
+                    borderRadius:
+                      '12px',
+
+                    color:
+                      '#fff',
+
+                    border:
+                      'none',
+
+                    fontSize:
+                      '12px',
+                  }}
+                  formatter={(
+                    value: any
+                  ) => [
+                    formatCurrency(
+                      Number(
+                        value
+                      )
+                    ),
+                    '',
+                  ]}
+                />
+
+                <Area
+                  type="monotone"
+                  dataKey="revenue"
+                  name="Revenue"
+                  stroke="#007AFF"
+                  strokeWidth={3}
+                  fillOpacity={1}
+                  fill="url(#colorRev)"
+                />
+
+                <Area
+                  type="monotone"
+                  dataKey="expenses"
+                  name="Expenses"
+                  stroke="#FF3B30"
+                  strokeWidth={2}
+                  fillOpacity={1}
+                  fill="url(#colorExp)"
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Student Enrollment Bar Chart */}
-        <div className="p-6 rounded-[24px] bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">Student Growth</h3>
-              <p className="text-xs text-slate-400">Total active enrollments</p>
-            </div>
+
+        {/* Students Chart */}
+
+        <div
+          className="
+            min-w-0
+            rounded-2xl
+            border
+            border-slate-200/60
+            bg-white
+            p-4
+            shadow-sm
+
+            dark:border-slate-800
+            dark:bg-slate-900
+
+            sm:p-5
+
+            lg:p-6
+          "
+        >
+          <div>
+            <h3
+              className="
+                text-sm
+                font-bold
+                text-slate-900
+
+                dark:text-white
+
+                sm:text-base
+              "
+            >
+              Student Growth
+            </h3>
+
+            <p
+              className="
+                mt-0.5
+                text-[11px]
+                text-slate-400
+
+                sm:text-xs
+              "
+            >
+              Total active enrollments
+            </p>
           </div>
 
-          <div className="h-72 w-full pt-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyData}>
-                <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} tickLine={false} />
-                <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#0f172a', borderRadius: '16px', color: '#fff', border: 'none' }}
+          <div
+            className="
+              mt-4
+              h-64
+              w-full
+
+              sm:h-72
+            "
+          >
+            <ResponsiveContainer
+              width="100%"
+              height="100%"
+            >
+              <BarChart
+                data={monthlyData}
+                margin={{
+                  top: 5,
+                  right: 5,
+                  left: -20,
+                  bottom: 0,
+                }}
+              >
+                <XAxis
+                  dataKey="month"
+                  stroke="#94a3b8"
+                  fontSize={10}
+                  tickLine={false}
+                  axisLine={false}
+                  interval={0}
                 />
-                <Bar dataKey="students" name="Students" fill="#34C759" radius={[8, 8, 0, 0]} />
+
+                <YAxis
+                  stroke="#94a3b8"
+                  fontSize={10}
+                  tickLine={false}
+                  axisLine={false}
+                  allowDecimals={
+                    false
+                  }
+                />
+
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor:
+                      '#0f172a',
+
+                    borderRadius:
+                      '12px',
+
+                    color:
+                      '#fff',
+
+                    border:
+                      'none',
+
+                    fontSize:
+                      '12px',
+                  }}
+                />
+
+                <Bar
+                  dataKey="students"
+                  name="Students"
+                  fill="#34C759"
+                  radius={[
+                    6,
+                    6,
+                    0,
+                    0,
+                  ]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Tables & Side Panels */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Student Registrations */}
-        <div className="lg:col-span-2 p-6 rounded-[24px] bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">Recently Enrolled Students</h3>
-              <p className="text-xs text-slate-400">Latest active registrations across groups</p>
+
+      {/* ─────────────────────────────────────────────────────────────────────
+          STUDENTS + SIDE PANELS
+      ───────────────────────────────────────────────────────────────────── */}
+
+      <section
+        className="
+          grid
+          grid-cols-1
+          gap-4
+
+          xl:grid-cols-3
+          xl:gap-6
+        "
+      >
+        {/* Recent Students */}
+
+        <div
+          className="
+            min-w-0
+            rounded-2xl
+            border
+            border-slate-200/60
+            bg-white
+            p-4
+            shadow-sm
+
+            dark:border-slate-800
+            dark:bg-slate-900
+
+            sm:p-5
+
+            lg:p-6
+
+            xl:col-span-2
+          "
+        >
+          <div
+            className="
+              flex
+              items-start
+              justify-between
+              gap-3
+            "
+          >
+            <div
+              className="
+                min-w-0
+              "
+            >
+              <h3
+                className="
+                  text-sm
+                  font-bold
+                  text-slate-900
+
+                  dark:text-white
+
+                  sm:text-base
+                "
+              >
+                Recently Enrolled
+                Students
+              </h3>
+
+              <p
+                className="
+                  mt-0.5
+                  text-[11px]
+                  text-slate-400
+
+                  sm:text-xs
+                "
+              >
+                Latest active
+                registrations across
+                groups
+              </p>
             </div>
-            <button onClick={() => setActivePage('students')} className="text-xs font-bold text-[#007AFF] hover:underline">
-              View All 150+ →
+
+            <button
+              type="button"
+              onClick={() =>
+                setActivePage(
+                  'students'
+                )
+              }
+              className="
+                shrink-0
+                cursor-pointer
+                text-xs
+                font-bold
+                text-[#007AFF]
+
+                hover:underline
+              "
+            >
+              View All →
             </button>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-100 dark:border-slate-800">
+
+          {/* MOBILE STUDENT CARDS */}
+
+          <div
+            className="
+              mt-4
+              space-y-3
+
+              md:hidden
+            "
+          >
+            {recentStudents.length ===
+            0 ? (
+              <div
+                className="
+                  rounded-xl
+                  border
+                  border-dashed
+                  border-slate-200
+                  px-4 py-8
+                  text-center
+                  text-xs
+                  text-slate-400
+
+                  dark:border-slate-800
+                "
+              >
+                No students found.
+              </div>
+            ) : (
+              recentStudents.map(
+                student => {
+                  const monthPayment =
+                    student.payments[
+                      currentMonth
+                    ] || {
+                      status:
+                        'Unpaid',
+                    };
+
+                  return (
+                    <div
+                      key={
+                        student.id
+                      }
+                      className="
+                        rounded-xl
+                        border
+                        border-slate-200/70
+                        bg-slate-50/70
+                        p-3
+
+                        dark:border-slate-800
+                        dark:bg-slate-800/30
+                      "
+                    >
+                      <div
+                        className="
+                          flex
+                          items-start
+                          gap-3
+                        "
+                      >
+                        <img
+                          src={
+                            student.avatar
+                          }
+                          alt={
+                            student.fullName
+                          }
+                          className="
+                            h-10 w-10
+                            shrink-0
+                            rounded-full
+                            object-cover
+                          "
+                        />
+
+                        <div
+                          className="
+                            min-w-0
+                            flex-1
+                          "
+                        >
+                          <div
+                            className="
+                              flex
+                              items-start
+                              justify-between
+                              gap-2
+                            "
+                          >
+                            <div
+                              className="
+                                min-w-0
+                              "
+                            >
+                              <p
+                                className="
+                                  truncate
+                                  text-xs
+                                  font-bold
+                                  text-slate-900
+
+                                  dark:text-white
+                                "
+                              >
+                                {
+                                  student.fullName
+                                }
+                              </p>
+
+                              <p
+                                className="
+                                  mt-0.5
+                                  text-[9px]
+                                  font-mono
+                                  text-slate-400
+                                "
+                              >
+                                {
+                                  student.id
+                                }
+                              </p>
+                            </div>
+
+                            {renderPaymentStatus(
+                              monthPayment.status
+                            )}
+                          </div>
+
+                          <div
+                            className="
+                              mt-3
+                              grid
+                              grid-cols-2
+                              gap-2
+                              text-[10px]
+                            "
+                          >
+                            <div>
+                              <p
+                                className="
+                                  text-slate-400
+                                "
+                              >
+                                Group
+                              </p>
+
+                              <p
+                                className="
+                                  mt-0.5
+                                  truncate
+                                  font-semibold
+                                  text-slate-700
+
+                                  dark:text-slate-300
+                                "
+                              >
+                                {
+                                  student.groupName
+                                }
+                              </p>
+                            </div>
+
+                            <div>
+                              <p
+                                className="
+                                  text-slate-400
+                                "
+                              >
+                                Teacher
+                              </p>
+
+                              <p
+                                className="
+                                  mt-0.5
+                                  truncate
+                                  font-semibold
+                                  text-slate-700
+
+                                  dark:text-slate-300
+                                "
+                              >
+                                {
+                                  student.teacherName
+                                }
+                              </p>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setSelectedStudentId(
+                                student.id
+                              )
+                            }
+                            className="
+                              mt-3
+                              w-full
+                              cursor-pointer
+                              rounded-lg
+                              bg-slate-200/70
+                              px-3 py-2
+                              text-[10px]
+                              font-bold
+                              text-[#007AFF]
+                              transition-colors
+
+                              hover:bg-slate-200
+
+                              dark:bg-slate-800
+                              dark:hover:bg-slate-700
+                            "
+                          >
+                            View Profile
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+              )
+            )}
+          </div>
+
+
+          {/* TABLET / DESKTOP TABLE */}
+
+          <div
+            className="
+              mt-4
+              hidden
+              overflow-x-auto
+
+              md:block
+            "
+          >
+            <table
+              className="
+                w-full
+                min-w-[700px]
+                text-left
+                text-xs
+              "
+            >
+              <thead
+                className="
+                  border-b
+                  border-slate-100
+                  text-[10px]
+                  font-bold
+                  uppercase
+                  tracking-wider
+                  text-slate-400
+
+                  dark:border-slate-800
+                "
+              >
                 <tr>
-                  <th className="py-3 px-2">Student</th>
-                  <th className="py-3 px-2">Group</th>
-                  <th className="py-3 px-2">Teacher</th>
-                  <th className="py-3 px-2">{currentMonth} Status</th>
-                  <th className="py-3 px-2 text-right">Action</th>
+                  <th
+                    className="
+                      px-2 py-3
+                    "
+                  >
+                    Student
+                  </th>
+
+                  <th
+                    className="
+                      px-2 py-3
+                    "
+                  >
+                    Group
+                  </th>
+
+                  <th
+                    className="
+                      px-2 py-3
+                    "
+                  >
+                    Teacher
+                  </th>
+
+                  <th
+                    className="
+                      px-2 py-3
+                    "
+                  >
+                    {currentMonth}{' '}
+                    Status
+                  </th>
+
+                  <th
+                    className="
+                      px-2 py-3
+                      text-right
+                    "
+                  >
+                    Action
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {recentStudents.map(student => {
-                  const monthPayment = student.payments[currentMonth] || { status: 'Unpaid' };
-                  return (
-                    <tr key={student.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                      <td className="py-3 px-2">
-                        <div className="flex items-center gap-3">
-                          <img src={student.avatar} alt={student.fullName} className="w-8 h-8 rounded-full object-cover shrink-0" />
-                          <div>
-                            <span className="font-bold text-slate-900 dark:text-white block">{student.fullName}</span>
-                            <span className="text-[10px] text-slate-400 font-mono">{student.id}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-2 font-medium text-slate-700 dark:text-slate-300">{student.groupName}</td>
-                      <td className="py-3 px-2 text-slate-500">{student.teacherName}</td>
-                      <td className="py-3 px-2">
-                        {monthPayment.status === 'Paid' || monthPayment.status === 'Discount' ? (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 inline-flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3" /> Paid
-                          </span>
-                        ) : (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
-                            Unpaid
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-3 px-2 text-right">
-                        <button
-                          onClick={() => setSelectedStudentId(student.id)}
-                          className="px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 font-bold text-[#007AFF]"
+
+              <tbody
+                className="
+                  divide-y
+                  divide-slate-100
+
+                  dark:divide-slate-800
+                "
+              >
+                {recentStudents.map(
+                  student => {
+                    const monthPayment =
+                      student.payments[
+                        currentMonth
+                      ] || {
+                        status:
+                          'Unpaid',
+                      };
+
+                    return (
+                      <tr
+                        key={
+                          student.id
+                        }
+                        className="
+                          transition-colors
+
+                          hover:bg-slate-50
+
+                          dark:hover:bg-slate-800/40
+                        "
+                      >
+                        <td
+                          className="
+                            px-2 py-3
+                          "
                         >
-                          Profile
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
+                          <div
+                            className="
+                              flex
+                              items-center
+                              gap-3
+                            "
+                          >
+                            <img
+                              src={
+                                student.avatar
+                              }
+                              alt={
+                                student.fullName
+                              }
+                              className="
+                                h-8 w-8
+                                shrink-0
+                                rounded-full
+                                object-cover
+                              "
+                            />
+
+                            <div
+                              className="
+                                min-w-0
+                              "
+                            >
+                              <span
+                                className="
+                                  block
+                                  max-w-[170px]
+                                  truncate
+                                  font-bold
+                                  text-slate-900
+
+                                  dark:text-white
+                                "
+                              >
+                                {
+                                  student.fullName
+                                }
+                              </span>
+
+                              <span
+                                className="
+                                  text-[10px]
+                                  font-mono
+                                  text-slate-400
+                                "
+                              >
+                                {
+                                  student.id
+                                }
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td
+                          className="
+                            px-2 py-3
+                            font-medium
+                            text-slate-700
+
+                            dark:text-slate-300
+                          "
+                        >
+                          {
+                            student.groupName
+                          }
+                        </td>
+
+                        <td
+                          className="
+                            px-2 py-3
+                            text-slate-500
+                          "
+                        >
+                          {
+                            student.teacherName
+                          }
+                        </td>
+
+                        <td
+                          className="
+                            px-2 py-3
+                          "
+                        >
+                          {renderPaymentStatus(
+                            monthPayment.status
+                          )}
+                        </td>
+
+                        <td
+                          className="
+                            px-2 py-3
+                            text-right
+                          "
+                        >
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setSelectedStudentId(
+                                student.id
+                              )
+                            }
+                            className="
+                              cursor-pointer
+                              rounded-lg
+                              bg-slate-100
+                              px-3 py-1.5
+                              font-bold
+                              text-[#007AFF]
+                              transition-colors
+
+                              hover:bg-slate-200
+
+                              dark:bg-slate-800
+                              dark:hover:bg-slate-700
+                            "
+                          >
+                            Profile
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  }
+                )}
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* Birthdays & Events Panel */}
-        <div className="space-y-6">
-          {/* Upcoming Birthdays */}
-          <div className="p-6 rounded-[24px] bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Cake className="w-4 h-4 text-amber-500" /> Birthdays Today & Soon
-              </h3>
-            </div>
 
-            <div className="space-y-3">
-              {upcomingBirthdays.map(st => (
-                <div key={st.id} className="flex items-center justify-between p-3 rounded-2xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/40">
-                  <div className="flex items-center gap-3">
-                    <img src={st.avatar} alt={st.fullName} className="w-9 h-9 rounded-full object-cover" />
-                    <div>
-                      <span className="text-xs font-bold text-slate-900 dark:text-white block">{st.fullName}</span>
-                      <span className="text-[10px] text-amber-700 dark:text-amber-300 font-medium">{st.groupName}</span>
-                    </div>
-                  </div>
-                  <span className="px-2 py-1 text-[10px] font-bold bg-amber-500 text-white rounded-lg">
-                    {st.birthDate}
-                  </span>
+        {/* SIDE PANELS */}
+
+        <div
+          className="
+            min-w-0
+            space-y-4
+
+            sm:space-y-6
+          "
+        >
+          {/* Birthdays */}
+
+          <div
+            className="
+              rounded-2xl
+              border
+              border-slate-200/60
+              bg-white
+              p-4
+              shadow-sm
+
+              dark:border-slate-800
+              dark:bg-slate-900
+
+              sm:p-5
+
+              lg:p-6
+            "
+          >
+            <h3
+              className="
+                flex
+                items-center
+                gap-2
+                text-sm
+                font-bold
+                text-slate-900
+
+                dark:text-white
+
+                sm:text-base
+              "
+            >
+              <Cake
+                className="
+                  h-4 w-4
+                  shrink-0
+                  text-amber-500
+                "
+              />
+
+              Birthdays Today & Soon
+            </h3>
+
+
+            <div
+              className="
+                mt-4
+                space-y-2.5
+              "
+            >
+              {upcomingBirthdays.length ===
+              0 ? (
+                <div
+                  className="
+                    rounded-xl
+                    border
+                    border-dashed
+                    border-slate-200
+                    px-3 py-6
+                    text-center
+                    text-xs
+                    text-slate-400
+
+                    dark:border-slate-800
+                  "
+                >
+                  No students found.
                 </div>
-              ))}
+              ) : (
+                upcomingBirthdays.map(
+                  student => (
+                    <div
+                      key={
+                        student.id
+                      }
+                      className="
+                        flex
+                        items-center
+                        gap-3
+                        rounded-xl
+                        border
+                        border-amber-200/50
+                        bg-amber-50/50
+                        p-3
+
+                        dark:border-amber-900/40
+                        dark:bg-amber-950/20
+                      "
+                    >
+                      <img
+                        src={
+                          student.avatar
+                        }
+                        alt={
+                          student.fullName
+                        }
+                        className="
+                          h-9 w-9
+                          shrink-0
+                          rounded-full
+                          object-cover
+                        "
+                      />
+
+                      <div
+                        className="
+                          min-w-0
+                          flex-1
+                        "
+                      >
+                        <span
+                          className="
+                            block
+                            truncate
+                            text-xs
+                            font-bold
+                            text-slate-900
+
+                            dark:text-white
+                          "
+                        >
+                          {
+                            student.fullName
+                          }
+                        </span>
+
+                        <span
+                          className="
+                            mt-0.5
+                            block
+                            truncate
+                            text-[10px]
+                            font-medium
+                            text-amber-700
+
+                            dark:text-amber-300
+                          "
+                        >
+                          {
+                            student.groupName
+                          }
+                        </span>
+                      </div>
+
+                      <span
+                        className="
+                          shrink-0
+                          rounded-lg
+                          bg-amber-500
+                          px-2 py-1
+                          text-[9px]
+                          font-bold
+                          text-white
+                        "
+                      >
+                        {
+                          student.birthDate
+                        }
+                      </span>
+                    </div>
+                  )
+                )
+              )}
             </div>
           </div>
 
-          {/* Calendar Events */}
-          <div className="p-6 rounded-[24px] bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-[#007AFF]" /> Center Calendar
-              </h3>
-            </div>
 
-            <div className="space-y-3">
-              {calendarEvents.map(evt => (
-                <div key={evt.id} className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-900 dark:text-white">{evt.title}</span>
-                    <span className="text-[10px] font-semibold text-[#007AFF]">{evt.date}</span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 mt-1">{evt.description}</p>
+          {/* Calendar */}
+
+          <div
+            className="
+              rounded-2xl
+              border
+              border-slate-200/60
+              bg-white
+              p-4
+              shadow-sm
+
+              dark:border-slate-800
+              dark:bg-slate-900
+
+              sm:p-5
+
+              lg:p-6
+            "
+          >
+            <h3
+              className="
+                flex
+                items-center
+                gap-2
+                text-sm
+                font-bold
+                text-slate-900
+
+                dark:text-white
+
+                sm:text-base
+              "
+            >
+              <Calendar
+                className="
+                  h-4 w-4
+                  shrink-0
+                  text-[#007AFF]
+                "
+              />
+
+              Center Calendar
+            </h3>
+
+
+            <div
+              className="
+                mt-4
+                space-y-2.5
+              "
+            >
+              {calendarEvents.length ===
+              0 ? (
+                <div
+                  className="
+                    rounded-xl
+                    border
+                    border-dashed
+                    border-slate-200
+                    px-3 py-6
+                    text-center
+                    text-xs
+                    text-slate-400
+
+                    dark:border-slate-800
+                  "
+                >
+                  No calendar events.
                 </div>
-              ))}
+              ) : (
+                calendarEvents.map(
+                  event => (
+                    <div
+                      key={
+                        event.id
+                      }
+                      className="
+                        rounded-xl
+                        border
+                        border-slate-200/60
+                        bg-slate-50
+                        p-3
+
+                        dark:border-slate-700/60
+                        dark:bg-slate-800/50
+                      "
+                    >
+                      <div
+                        className="
+                          flex
+                          items-start
+                          justify-between
+                          gap-3
+                        "
+                      >
+                        <span
+                          className="
+                            min-w-0
+                            flex-1
+                            text-xs
+                            font-bold
+                            leading-relaxed
+                            text-slate-900
+
+                            dark:text-white
+                          "
+                        >
+                          {
+                            event.title
+                          }
+                        </span>
+
+                        <span
+                          className="
+                            shrink-0
+                            text-[9px]
+                            font-semibold
+                            text-[#007AFF]
+                          "
+                        >
+                          {
+                            event.date
+                          }
+                        </span>
+                      </div>
+
+                      {event.description && (
+                        <p
+                          className="
+                            mt-1.5
+                            text-[10px]
+                            leading-relaxed
+                            text-slate-500
+
+                            sm:text-[11px]
+                          "
+                        >
+                          {
+                            event.description
+                          }
+                        </p>
+                      )}
+                    </div>
+                  )
+                )
+              )}
             </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 };

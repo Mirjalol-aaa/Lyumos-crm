@@ -200,7 +200,7 @@ export const GlobalSearchModal: React.FC = () => {
         {/* Footer */}
         <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-400 flex items-center justify-between px-5">
           <span>Search across 150+ student records and center groups</span>
-          <span className="font-semibold text-[#007AFF]">LYUMOS AI Search</span>
+          <span className="font-semibold text-amber-500">LUMOS AI Search</span>
         </div>
       </div>
     </div>

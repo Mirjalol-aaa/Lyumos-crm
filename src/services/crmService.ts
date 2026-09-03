@@ -51,7 +51,6 @@ import { resolveEntityUuid } from '../lib/entityResolver';
 import { ACADEMIC_MONTHS } from '../constants/academic';
 import { initialSettings } from '../data/initialData';
 
-
 const SETTINGS_CODE = 'default';
 
 
@@ -112,22 +111,38 @@ export async function fetchAllCrmData(): Promise<CrmData> {
     client
       .from('notifications')
       .select('*')
-      .order('time', { ascending: false }),
+      .order(
+        'created_at',
+        { ascending: false }
+      )
+      .order(
+        'id',
+        { ascending: false }
+      ),
 
     client
       .from('calendar_events')
       .select('*')
-      .order('date', { ascending: true }),
+      .order(
+        'date',
+        { ascending: true }
+      ),
 
     client
       .from('attendance')
       .select('*')
-      .order('date', { ascending: false }),
+      .order(
+        'date',
+        { ascending: false }
+      ),
 
     client
       .from('center_settings')
       .select('*')
-      .eq('code', SETTINGS_CODE)
+      .eq(
+        'code',
+        SETTINGS_CODE
+      )
       .maybeSingle(),
   ]);
 
@@ -146,7 +161,10 @@ export async function fetchAllCrmData(): Promise<CrmData> {
   if (errors.length > 0) {
     throw new Error(
       errors
-        .map(error => error!.message)
+        .map(
+          error =>
+            error!.message
+        )
         .join('; ')
     );
   }
@@ -160,19 +178,16 @@ export async function fetchAllCrmData(): Promise<CrmData> {
   const dbStudents =
     studentsRes.data as DbStudent[];
 
-
   let teachers =
     dbTeachers.map(
       dbTeacherToFrontend
     );
-
 
   let groups =
     mapGroupsToFrontend(
       dbGroups,
       dbTeachers
     );
-
 
   const students =
     buildStudents(
@@ -182,13 +197,11 @@ export async function fetchAllCrmData(): Promise<CrmData> {
       dbTeachers
     );
 
-
   groups =
     enrichGroupsWithCounts(
       groups,
       students
     );
-
 
   teachers =
     enrichTeachersWithCounts(
@@ -197,14 +210,12 @@ export async function fetchAllCrmData(): Promise<CrmData> {
       students
     );
 
-
   const settings =
     settingsRes.data
       ? dbSettingsToFrontend(
           settingsRes.data as DbCenterSettings
         )
       : initialSettings;
-
 
   return {
     students,
@@ -258,20 +269,17 @@ export async function insertStudent(
   const client =
     requireSupabase();
 
-
   const groupUuid =
     await resolveEntityUuid(
       'groups',
       student.groupId
     );
 
-
   const teacherUuid =
     await resolveEntityUuid(
       'teachers',
       student.teacherId
     );
-
 
   const {
     data: inserted,
@@ -289,17 +297,14 @@ export async function insertStudent(
       .select('id')
       .single();
 
-
   if (studentError) {
     throw new Error(
       studentError.message
     );
   }
 
-
   const studentUuid =
     inserted.id;
-
 
   const paymentRows =
     ACADEMIC_MONTHS.map(
@@ -311,7 +316,6 @@ export async function insertStudent(
           initialPayments[month]
         )
     );
-
 
   const {
     error: payError,
@@ -325,13 +329,11 @@ export async function insertStudent(
         }
       );
 
-
   if (payError) {
     throw new Error(
       payError.message
     );
   }
-
 
   return student;
 }
@@ -345,17 +347,14 @@ export async function updateStudentInDb(
   const client =
     requireSupabase();
 
-
   const studentUuid =
     await resolveEntityUuid(
       'students',
       id
     );
 
-
   const patch:
     Record<string, unknown> = {};
-
 
   if (
     updated.fullName !== undefined
@@ -364,14 +363,12 @@ export async function updateStudentInDb(
       updated.fullName;
   }
 
-
   if (
     updated.avatar !== undefined
   ) {
     patch.avatar =
       updated.avatar;
   }
-
 
   if (
     updated.birthDate !== undefined
@@ -380,14 +377,12 @@ export async function updateStudentInDb(
       updated.birthDate;
   }
 
-
   if (
     updated.gender !== undefined
   ) {
     patch.gender =
       updated.gender;
   }
-
 
   if (
     updated.phone !== undefined
@@ -396,14 +391,12 @@ export async function updateStudentInDb(
       updated.phone;
   }
 
-
   if (
     updated.email !== undefined
   ) {
     patch.email =
       updated.email;
   }
-
 
   if (
     updated.parentName !== undefined
@@ -412,14 +405,12 @@ export async function updateStudentInDb(
       updated.parentName;
   }
 
-
   if (
     updated.parentPhone !== undefined
   ) {
     patch.parent_phone =
       updated.parentPhone;
   }
-
 
   if (
     updated.groupId !== undefined
@@ -431,7 +422,6 @@ export async function updateStudentInDb(
       );
   }
 
-
   if (
     updated.teacherId !== undefined
   ) {
@@ -442,14 +432,12 @@ export async function updateStudentInDb(
       );
   }
 
-
   if (
     updated.monthlyFee !== undefined
   ) {
     patch.monthly_fee =
       updated.monthlyFee;
   }
-
 
   if (
     updated.status !== undefined
@@ -458,14 +446,12 @@ export async function updateStudentInDb(
       updated.status;
   }
 
-
   if (
     updated.joinedDate !== undefined
   ) {
     patch.joined_date =
       updated.joinedDate;
   }
-
 
   if (
     updated.address !== undefined
@@ -474,7 +460,6 @@ export async function updateStudentInDb(
       updated.address ?? null;
   }
 
-
   if (
     updated.notes !== undefined
   ) {
@@ -482,13 +467,11 @@ export async function updateStudentInDb(
       updated.notes ?? null;
   }
 
-
   if (
     Object.keys(patch).length === 0
   ) {
     return;
   }
-
 
   const { error } =
     await client
@@ -498,7 +481,6 @@ export async function updateStudentInDb(
         'id',
         studentUuid
       );
-
 
   if (error) {
     throw new Error(
@@ -515,13 +497,11 @@ export async function deleteStudentFromDb(
   const client =
     requireSupabase();
 
-
   const studentUuid =
     await resolveEntityUuid(
       'students',
       id
     );
-
 
   await client
     .from('payments')
@@ -531,7 +511,6 @@ export async function deleteStudentFromDb(
       studentUuid
     );
 
-
   const { error } =
     await client
       .from('students')
@@ -540,7 +519,6 @@ export async function deleteStudentFromDb(
         'id',
         studentUuid
       );
-
 
   if (error) {
     throw new Error(
@@ -558,13 +536,11 @@ export async function updateGroupStudentCount(
   const client =
     requireSupabase();
 
-
   const groupUuid =
     await resolveEntityUuid(
       'groups',
       groupId
     );
-
 
   const {
     data,
@@ -581,19 +557,16 @@ export async function updateGroupStudentCount(
       )
       .single();
 
-
   if (fetchError) {
     throw new Error(
       fetchError.message
     );
   }
 
-
   const current =
     Number(
       data.current_students_count
     );
-
 
   const { error } =
     await client
@@ -609,7 +582,6 @@ export async function updateGroupStudentCount(
         'id',
         groupUuid
       );
-
 
   if (error) {
     throw new Error(
@@ -633,13 +605,11 @@ export async function upsertPayment(
   const client =
     requireSupabase();
 
-
   const studentUuid =
     await resolveEntityUuid(
       'students',
       studentId
     );
-
 
   const row =
     paymentToDbInsert(
@@ -650,7 +620,6 @@ export async function upsertPayment(
       notes
     );
 
-
   const { error } =
     await client
       .from('payments')
@@ -660,7 +629,6 @@ export async function upsertPayment(
           onConflict: 'code',
         }
       );
-
 
   if (error) {
     throw new Error(
@@ -681,7 +649,6 @@ export async function insertTeacher(
   const client =
     requireSupabase();
 
-
   const { error } =
     await client
       .from('teachers')
@@ -690,7 +657,6 @@ export async function insertTeacher(
           teacher
         )
       );
-
 
   if (error) {
     throw new Error(
@@ -708,17 +674,14 @@ export async function updateTeacherInDb(
   const client =
     requireSupabase();
 
-
   const teacherUuid =
     await resolveEntityUuid(
       'teachers',
       id
     );
 
-
   const patch:
     Record<string, unknown> = {};
-
 
   if (
     updated.fullName !== undefined
@@ -727,14 +690,12 @@ export async function updateTeacherInDb(
       updated.fullName;
   }
 
-
   if (
     updated.avatar !== undefined
   ) {
     patch.avatar =
       updated.avatar;
   }
-
 
   if (
     updated.phone !== undefined
@@ -743,14 +704,12 @@ export async function updateTeacherInDb(
       updated.phone;
   }
 
-
   if (
     updated.email !== undefined
   ) {
     patch.email =
       updated.email;
   }
-
 
   if (
     updated.subjects !== undefined
@@ -759,14 +718,12 @@ export async function updateTeacherInDb(
       updated.subjects;
   }
 
-
   if (
     updated.baseSalary !== undefined
   ) {
     patch.base_salary =
       updated.baseSalary;
   }
-
 
   if (
     updated.bonusPerStudent !== undefined
@@ -775,14 +732,12 @@ export async function updateTeacherInDb(
       updated.bonusPerStudent;
   }
 
-
   if (
     updated.groupsCount !== undefined
   ) {
     patch.groups_count =
       updated.groupsCount;
   }
-
 
   if (
     updated.studentsCount !== undefined
@@ -791,14 +746,12 @@ export async function updateTeacherInDb(
       updated.studentsCount;
   }
 
-
   if (
     updated.joinedDate !== undefined
   ) {
     patch.joined_date =
       updated.joinedDate;
   }
-
 
   if (
     updated.rating !== undefined
@@ -807,14 +760,12 @@ export async function updateTeacherInDb(
       updated.rating;
   }
 
-
   if (
     updated.schedule !== undefined
   ) {
     patch.schedule =
       updated.schedule;
   }
-
 
   if (
     updated.status !== undefined
@@ -823,13 +774,11 @@ export async function updateTeacherInDb(
       updated.status;
   }
 
-
   if (
     Object.keys(patch).length === 0
   ) {
     return;
   }
-
 
   const { error } =
     await client
@@ -839,7 +788,6 @@ export async function updateTeacherInDb(
         'id',
         teacherUuid
       );
-
 
   if (error) {
     throw new Error(
@@ -856,13 +804,11 @@ export async function deleteTeacherFromDb(
   const client =
     requireSupabase();
 
-
   const teacherUuid =
     await resolveEntityUuid(
       'teachers',
       id
     );
-
 
   const { error } =
     await client
@@ -872,7 +818,6 @@ export async function deleteTeacherFromDb(
         'id',
         teacherUuid
       );
-
 
   if (error) {
     throw new Error(
@@ -893,13 +838,11 @@ export async function insertGroup(
   const client =
     requireSupabase();
 
-
   const teacherUuid =
     await resolveEntityUuid(
       'teachers',
       group.teacherId
     );
-
 
   const { error } =
     await client
@@ -910,7 +853,6 @@ export async function insertGroup(
           teacherUuid
         )
       );
-
 
   if (error) {
     throw new Error(
@@ -928,17 +870,14 @@ export async function updateGroupInDb(
   const client =
     requireSupabase();
 
-
   const groupUuid =
     await resolveEntityUuid(
       'groups',
       id
     );
 
-
   const patch:
     Record<string, unknown> = {};
-
 
   if (
     updated.name !== undefined
@@ -947,7 +886,6 @@ export async function updateGroupInDb(
       updated.name;
   }
 
-
   if (
     updated.subject !== undefined
   ) {
@@ -955,14 +893,12 @@ export async function updateGroupInDb(
       updated.subject;
   }
 
-
   if (
     updated.level !== undefined
   ) {
     patch.level =
       updated.level;
   }
-
 
   if (
     updated.teacherId !== undefined
@@ -974,14 +910,12 @@ export async function updateGroupInDb(
       );
   }
 
-
   if (
     updated.teacherName !== undefined
   ) {
     patch.teacher_name =
       updated.teacherName;
   }
-
 
   if (
     updated.scheduleDays !== undefined
@@ -990,14 +924,12 @@ export async function updateGroupInDb(
       updated.scheduleDays;
   }
 
-
   if (
     updated.scheduleTime !== undefined
   ) {
     patch.schedule_time =
       updated.scheduleTime;
   }
-
 
   if (
     updated.room !== undefined
@@ -1006,14 +938,12 @@ export async function updateGroupInDb(
       updated.room;
   }
 
-
   if (
     updated.monthlyFee !== undefined
   ) {
     patch.monthly_fee =
       updated.monthlyFee;
   }
-
 
   if (
     updated.maxCapacity !== undefined
@@ -1022,14 +952,12 @@ export async function updateGroupInDb(
       updated.maxCapacity;
   }
 
-
   if (
     updated.currentStudentsCount !== undefined
   ) {
     patch.current_students_count =
       updated.currentStudentsCount;
   }
-
 
   if (
     updated.status !== undefined
@@ -1038,13 +966,11 @@ export async function updateGroupInDb(
       updated.status;
   }
 
-
   if (
     Object.keys(patch).length === 0
   ) {
     return;
   }
-
 
   const { error } =
     await client
@@ -1054,7 +980,6 @@ export async function updateGroupInDb(
         'id',
         groupUuid
       );
-
 
   if (error) {
     throw new Error(
@@ -1071,13 +996,11 @@ export async function deleteGroupFromDb(
   const client =
     requireSupabase();
 
-
   const groupUuid =
     await resolveEntityUuid(
       'groups',
       id
     );
-
 
   const { error } =
     await client
@@ -1087,7 +1010,6 @@ export async function deleteGroupFromDb(
         'id',
         groupUuid
       );
-
 
   if (error) {
     throw new Error(
@@ -1108,7 +1030,6 @@ export async function insertExpense(
   const client =
     requireSupabase();
 
-
   const { error } =
     await client
       .from('expenses')
@@ -1117,7 +1038,6 @@ export async function insertExpense(
           expense
         )
       );
-
 
   if (error) {
     throw new Error(
@@ -1135,10 +1055,8 @@ export async function updateExpenseInDb(
   const client =
     requireSupabase();
 
-
   const patch:
     Record<string, unknown> = {};
-
 
   if (
     updated.title !== undefined
@@ -1147,14 +1065,12 @@ export async function updateExpenseInDb(
       updated.title;
   }
 
-
   if (
     updated.category !== undefined
   ) {
     patch.category =
       updated.category;
   }
-
 
   if (
     updated.amount !== undefined
@@ -1163,14 +1079,12 @@ export async function updateExpenseInDb(
       updated.amount;
   }
 
-
   if (
     updated.date !== undefined
   ) {
     patch.date =
       updated.date;
   }
-
 
   if (
     updated.paymentMethod !== undefined
@@ -1179,14 +1093,12 @@ export async function updateExpenseInDb(
       updated.paymentMethod;
   }
 
-
   if (
     updated.requestedBy !== undefined
   ) {
     patch.requested_by =
       updated.requestedBy;
   }
-
 
   if (
     updated.notes !== undefined
@@ -1195,7 +1107,6 @@ export async function updateExpenseInDb(
       updated.notes ?? null;
   }
 
-
   if (
     updated.receiptUrl !== undefined
   ) {
@@ -1203,13 +1114,11 @@ export async function updateExpenseInDb(
       updated.receiptUrl ?? null;
   }
 
-
   if (
     Object.keys(patch).length === 0
   ) {
     return;
   }
-
 
   const query =
     isUuid(id)
@@ -1230,10 +1139,8 @@ export async function updateExpenseInDb(
             id
           );
 
-
   const { error } =
     await query;
-
 
   if (error) {
     throw new Error(
@@ -1250,7 +1157,6 @@ export async function deleteExpenseFromDb(
   const client =
     requireSupabase();
 
-
   if (isUuid(id)) {
 
     const { error } =
@@ -1262,17 +1168,14 @@ export async function deleteExpenseFromDb(
           id
         );
 
-
     if (error) {
       throw new Error(
         error.message
       );
     }
 
-
     return;
   }
-
 
   const { error } =
     await client
@@ -1282,7 +1185,6 @@ export async function deleteExpenseFromDb(
         'code',
         id
       );
-
 
   if (error) {
     throw new Error(
@@ -1303,7 +1205,6 @@ export async function insertAttendanceRecords(
   const client =
     requireSupabase();
 
-
   const rows =
     await Promise.all(
 
@@ -1316,13 +1217,11 @@ export async function insertAttendanceRecords(
               record.groupId
             );
 
-
           const studentUuid =
             await resolveEntityUuid(
               'students',
               record.studentId
             );
-
 
           return attendanceToDbInsert(
             record,
@@ -1332,7 +1231,6 @@ export async function insertAttendanceRecords(
         }
       )
     );
-
 
   const { error } =
     await client
@@ -1344,7 +1242,6 @@ export async function insertAttendanceRecords(
             'student_id,date',
         }
       );
-
 
   if (error) {
     throw new Error(
@@ -1365,7 +1262,6 @@ export async function insertNotification(
   const client =
     requireSupabase();
 
-
   const { error } =
     await client
       .from('notifications')
@@ -1374,7 +1270,6 @@ export async function insertNotification(
           notification
         )
       );
-
 
   if (error) {
     throw new Error(
@@ -1390,7 +1285,6 @@ export async function markNotificationReadInDb(
 
   const client =
     requireSupabase();
-
 
   const query =
     isUuid(id)
@@ -1415,10 +1309,8 @@ export async function markNotificationReadInDb(
             id
           );
 
-
   const { error } =
     await query;
-
 
   if (error) {
     throw new Error(
@@ -1434,7 +1326,6 @@ Promise<void> {
   const client =
     requireSupabase();
 
-
   const { error } =
     await client
       .from('notifications')
@@ -1443,7 +1334,6 @@ Promise<void> {
         'id',
         '00000000-0000-0000-0000-000000000000'
       );
-
 
   if (error) {
     throw new Error(
@@ -1460,30 +1350,28 @@ Promise<void> {
 export async function upsertSettings(
   settings: CenterSettings
 ): Promise<void> {
+  try {
+    const client = requireSupabase();
 
-  const client =
-    requireSupabase();
+    const { error } =
+      await client
+        .from('center_settings')
+        .upsert(
+          settingsToDb(
+            settings,
+            SETTINGS_CODE
+          ),
+          {
+            onConflict:
+              'code',
+          }
+        );
 
-
-  const { error } =
-    await client
-      .from('center_settings')
-      .upsert(
-        settingsToDb(
-          settings,
-          SETTINGS_CODE
-        ),
-        {
-          onConflict:
-            'code',
-        }
-      );
-
-
-  if (error) {
-    throw new Error(
-      error.message
-    );
+    if (error) {
+      console.warn('[Supabase Warning] Settings upsert:', error.message);
+    }
+  } catch (err) {
+    console.warn('[Supabase Warning] Settings error:', err);
   }
 }
 
@@ -1515,12 +1403,10 @@ export function nextStudentId(
           )
       );
 
-
   const max =
     nums.length > 0
       ? Math.max(...nums)
       : 1000;
-
 
   return `STU-${max + 1}`;
 }
@@ -1549,12 +1435,10 @@ export function nextTeacherId(
           )
       );
 
-
   const max =
     nums.length > 0
       ? Math.max(...nums)
       : 100;
-
 
   return `TCH-${max + 1}`;
 }
@@ -1583,12 +1467,10 @@ export function nextGroupId(
           )
       );
 
-
   const max =
     nums.length > 0
       ? Math.max(...nums)
       : 0;
-
 
   return `GRP-${String(
     max + 1
@@ -1622,12 +1504,10 @@ export function nextExpenseId(
           )
       );
 
-
   const max =
     nums.length > 0
       ? Math.max(...nums)
       : 800;
-
 
   return `EXP-${max + 1}`;
 }
@@ -1642,7 +1522,6 @@ Student['payments'] {
 
   const payments:
     Student['payments'] = {};
-
 
   for (
     const month
@@ -1660,7 +1539,6 @@ Student['payments'] {
         0,
     };
   }
-
 
   return payments;
 }

@@ -1,1 +1,427 @@
 @import "tailwindcss";
+
+
+/* ==========================================================================
+   LYUMOS CRM — GLOBAL DESIGN FOUNDATION
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   DESIGN TOKENS
+   -------------------------------------------------------------------------- */
+
+:root {
+  /* Brand */
+  --ly-primary: #007aff;
+  --ly-primary-hover: #006ee6;
+  --ly-primary-soft: rgba(0, 122, 255, 0.1);
+
+  /* Success */
+  --ly-success: #10b981;
+  --ly-success-soft: rgba(16, 185, 129, 0.1);
+
+  /* Warning */
+  --ly-warning: #f59e0b;
+  --ly-warning-soft: rgba(245, 158, 11, 0.1);
+
+  /* Danger */
+  --ly-danger: #e11d48;
+  --ly-danger-hover: #be123c;
+  --ly-danger-soft: rgba(225, 29, 72, 0.1);
+
+  /* Light surfaces */
+  --ly-bg: #f6f7f9;
+  --ly-surface: #ffffff;
+  --ly-surface-soft: #f8fafc;
+  --ly-surface-muted: #f1f5f9;
+
+  /* Light borders */
+  --ly-border: #e2e8f0;
+  --ly-border-strong: #cbd5e1;
+
+  /* Light text */
+  --ly-text: #0f172a;
+  --ly-text-secondary: #475569;
+  --ly-text-muted: #94a3b8;
+
+  /* Shadows */
+  --ly-shadow-sm:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 1px 3px rgba(15, 23, 42, 0.03);
+
+  --ly-shadow-md:
+    0 8px 24px rgba(15, 23, 42, 0.08);
+
+  --ly-shadow-lg:
+    0 24px 60px rgba(15, 23, 42, 0.16);
+
+  /* Radius */
+  --ly-radius-sm: 10px;
+  --ly-radius-md: 14px;
+  --ly-radius-lg: 18px;
+  --ly-radius-xl: 24px;
+
+  /* Motion */
+  --ly-duration-fast: 150ms;
+  --ly-duration-normal: 220ms;
+
+  --ly-ease:
+    cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+
+/* --------------------------------------------------------------------------
+   DARK MODE TOKENS
+   -------------------------------------------------------------------------- */
+
+.dark {
+  --ly-bg: #070d1c;
+  --ly-surface: #0f172a;
+  --ly-surface-soft: #111c31;
+  --ly-surface-muted: #1e293b;
+
+  --ly-border: #263449;
+  --ly-border-strong: #334155;
+
+  --ly-text: #f8fafc;
+  --ly-text-secondary: #cbd5e1;
+  --ly-text-muted: #8190a5;
+
+  --ly-shadow-sm:
+    0 1px 2px rgba(0, 0, 0, 0.22);
+
+  --ly-shadow-md:
+    0 10px 30px rgba(0, 0, 0, 0.28);
+
+  --ly-shadow-lg:
+    0 30px 80px rgba(0, 0, 0, 0.42);
+
+  color-scheme: dark;
+}
+
+
+/* --------------------------------------------------------------------------
+   DOCUMENT
+   -------------------------------------------------------------------------- */
+
+html {
+  min-width: 320px;
+
+  background:
+    var(--ly-bg);
+
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  font-synthesis: none;
+
+  text-rendering:
+    optimizeLegibility;
+
+  -webkit-font-smoothing:
+    antialiased;
+
+  -moz-osx-font-smoothing:
+    grayscale;
+}
+
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+
+  margin: 0;
+
+  background:
+    var(--ly-bg);
+
+  color:
+    var(--ly-text);
+}
+
+
+#root {
+  min-height: 100vh;
+}
+
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+
+button,
+select {
+  -webkit-tap-highlight-color:
+    transparent;
+}
+
+
+button {
+  touch-action:
+    manipulation;
+}
+
+
+/* --------------------------------------------------------------------------
+   TEXT SELECTION
+   -------------------------------------------------------------------------- */
+
+::selection {
+  background:
+    rgba(0, 122, 255, 0.22);
+
+  color:
+    inherit;
+}
+
+
+/* --------------------------------------------------------------------------
+   PROFESSIONAL FOCUS SYSTEM
+   -------------------------------------------------------------------------- */
+
+:focus {
+  outline: none;
+}
+
+
+:focus-visible {
+  outline:
+    2px solid
+    rgba(0, 122, 255, 0.75);
+
+  outline-offset:
+    2px;
+}
+
+
+/* --------------------------------------------------------------------------
+   FORM CONTROLS
+   -------------------------------------------------------------------------- */
+
+input,
+select,
+textarea {
+  transition:
+    border-color var(--ly-duration-fast) var(--ly-ease),
+    background-color var(--ly-duration-fast) var(--ly-ease),
+    box-shadow var(--ly-duration-fast) var(--ly-ease),
+    color var(--ly-duration-fast) var(--ly-ease);
+}
+
+
+input::placeholder,
+textarea::placeholder {
+  color:
+    #94a3b8;
+
+  opacity:
+    1;
+}
+
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color:
+    #64748b;
+}
+
+
+/*
+  This rule prevents focused controls from turning white
+  inside the dark LYUMOS interface.
+*/
+
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+  background-color:
+    #1e293b !important;
+
+  color:
+    #f8fafc !important;
+}
+
+
+.dark input,
+.dark select,
+.dark textarea {
+  color-scheme:
+    dark;
+}
+
+
+/* Chrome autofill — Light */
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color:
+    #0f172a;
+
+  transition:
+    background-color 9999s ease-out;
+}
+
+
+/* Chrome autofill — Dark */
+
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus {
+  -webkit-text-fill-color:
+    #f8fafc;
+
+  caret-color:
+    #f8fafc;
+
+  -webkit-box-shadow:
+    0 0 0 1000px #1e293b inset;
+
+  box-shadow:
+    0 0 0 1000px #1e293b inset;
+}
+
+
+/* --------------------------------------------------------------------------
+   DISABLED CONTROLS
+   -------------------------------------------------------------------------- */
+
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  cursor:
+    not-allowed;
+
+  opacity:
+    0.55;
+}
+
+
+/* --------------------------------------------------------------------------
+   PROFESSIONAL SCROLLBAR — FIREFOX
+   -------------------------------------------------------------------------- */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212, 175, 55, 0.4) transparent;
+}
+
+.dark,
+.dark * {
+  scrollbar-color: rgba(212, 175, 55, 0.3) transparent;
+}
+
+/* --------------------------------------------------------------------------
+   PROFESSIONAL SCROLLBAR — CHROME / EDGE / SAFARI
+   -------------------------------------------------------------------------- */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(202, 138, 4, 0.35);
+  border-radius: 9999px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(202, 138, 4, 0.7);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.25);
+  border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 55, 0.6);
+}
+
+
+/* --------------------------------------------------------------------------
+   LINKS
+   -------------------------------------------------------------------------- */
+
+a {
+  color:
+    inherit;
+
+  text-decoration:
+    none;
+}
+
+
+/* --------------------------------------------------------------------------
+   MEDIA
+   -------------------------------------------------------------------------- */
+
+img,
+svg {
+  display:
+    block;
+}
+
+
+/* --------------------------------------------------------------------------
+   SMOOTH UI
+   -------------------------------------------------------------------------- */
+
+button {
+  transition:
+    background-color var(--ly-duration-fast) var(--ly-ease),
+    border-color var(--ly-duration-fast) var(--ly-ease),
+    color var(--ly-duration-fast) var(--ly-ease),
+    box-shadow var(--ly-duration-fast) var(--ly-ease),
+    opacity var(--ly-duration-fast) var(--ly-ease),
+    transform var(--ly-duration-fast) var(--ly-ease);
+}
+
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION ACCESSIBILITY
+   -------------------------------------------------------------------------- */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior:
+      auto !important;
+
+    animation-duration:
+      0.01ms !important;
+
+    animation-iteration-count:
+      1 !important;
+
+    transition-duration:
+      0.01ms !important;
+  }
+}

@@ -1,5 +1,12 @@
 export type PageType = 
   | 'dashboard'
+  | 'teachers_workload'
+  | 'courses_groups'
+  | 'students_hub'
+  | 'finance_payroll'
+  | 'branches'
+  | 'credentials'
+  | 'audit_settings'
   | 'students'
   | 'payments'
   | 'attendance'

@@ -23,6 +23,15 @@ import {
 
 import { isSupabaseConfigured } from '../lib/supabase';
 import { migrateSeedDataIfNeeded } from '../services/migrationService';
+import {
+  INITIAL_TEACHERS,
+  INITIAL_GROUPS,
+  generateInitialStudents,
+  INITIAL_EXPENSES,
+  initialSettings,
+  INITIAL_NOTIFICATIONS,
+  INITIAL_CALENDAR_EVENTS,
+} from '../data/initialData';
 
 import {
   fetchAllCrmData,
@@ -88,20 +97,17 @@ interface CRMContextType {
   isGlobalSearchOpen: boolean;
   setIsGlobalSearchOpen: (open: boolean) => void;
 
-
   isLoading: boolean;
   isInitialized: boolean;
   error: string | null;
 
   refreshData: () => Promise<void>;
 
-
   settings: CenterSettings;
 
   updateSettings: (
     newSettings: Partial<CenterSettings>
   ) => void;
-
 
   students: Student[];
   teachers: Teacher[];
@@ -115,6 +121,7 @@ interface CRMContextType {
 
 
   // STUDENTS
+
   addStudent: (
     student: Omit<Student, 'id' | 'payments'>
   ) => void;
@@ -130,6 +137,7 @@ interface CRMContextType {
 
 
   // PAYMENTS
+
   recordPayment: (params: {
     studentId: string;
     month: string;
@@ -141,6 +149,7 @@ interface CRMContextType {
 
 
   // TEACHERS
+
   addTeacher: (
     teacher: Omit<
       Teacher,
@@ -159,6 +168,7 @@ interface CRMContextType {
 
 
   // GROUPS
+
   addGroup: (
     group: Omit<
       Group,
@@ -177,6 +187,7 @@ interface CRMContextType {
 
 
   // EXPENSES
+
   addExpense: (
     expense: Omit<Expense, 'id'>
   ) => void;
@@ -192,12 +203,14 @@ interface CRMContextType {
 
 
   // ATTENDANCE
+
   saveAttendance: (
     records: Omit<AttendanceRecord, 'id'>[]
   ) => void;
 
 
   // NOTIFICATIONS
+
   markNotificationRead: (
     id: string
   ) => void;
@@ -206,6 +219,7 @@ interface CRMContextType {
 
 
   // SELECTED ITEMS
+
   selectedStudentId: string | null;
 
   setSelectedStudentId: (
@@ -228,6 +242,7 @@ interface CRMContextType {
 
 
   // MODALS
+
   isAddStudentModalOpen: boolean;
 
   setIsAddStudentModalOpen: (
@@ -247,6 +262,14 @@ interface CRMContextType {
 
   setPaymentModalDefaultStudentId: (
     id: string | null
+  ) => void;
+
+
+  paymentModalDefaultMonth:
+    string | null;
+
+  setPaymentModalDefaultMonth: (
+    month: string | null
   ) => void;
 
 
@@ -316,10 +339,102 @@ export const CRMProvider: React.FC<{
   // UI STATE
   // ───────────────────────────────────────────────────────────────────────────
 
+  const validPages: PageType[] = [
+    'dashboard',
+    'students',
+    'payments',
+    'attendance',
+    'teachers',
+    'groups',
+    'reports',
+    'expenses',
+    'settings',
+  ];
+
+
+  const getPageFromHash = (): PageType => {
+    if (typeof window === 'undefined') {
+      return 'dashboard';
+    }
+
+    const page = window.location.hash
+      .replace(/^#\/?/, '')
+      .trim() as PageType;
+
+    return validPages.includes(page)
+      ? page
+      : 'dashboard';
+  };
+
+
   const [
     activePage,
-    setActivePage,
-  ] = useState<PageType>('dashboard');
+    setActivePageState,
+  ] = useState<PageType>(() => {
+    return getPageFromHash();
+  });
+
+
+  const setActivePage = useCallback(
+    (page: PageType) => {
+      setActivePageState(page);
+
+      const nextHash = `#/${page}`;
+
+      if (window.location.hash !== nextHash) {
+        window.history.pushState(
+          null,
+          '',
+          nextHash
+        );
+      }
+    },
+    []
+  );
+
+
+  useEffect(() => {
+    const syncPageFromUrl = () => {
+      setActivePageState(
+        getPageFromHash()
+      );
+    };
+
+
+    if (!window.location.hash) {
+      window.history.replaceState(
+        null,
+        '',
+        '#/dashboard'
+      );
+    } else {
+      syncPageFromUrl();
+    }
+
+
+    window.addEventListener(
+      'popstate',
+      syncPageFromUrl
+    );
+
+    window.addEventListener(
+      'hashchange',
+      syncPageFromUrl
+    );
+
+
+    return () => {
+      window.removeEventListener(
+        'popstate',
+        syncPageFromUrl
+      );
+
+      window.removeEventListener(
+        'hashchange',
+        syncPageFromUrl
+      );
+    };
+  }, []);
 
 
   const [
@@ -365,14 +480,14 @@ export const CRMProvider: React.FC<{
     setSettings,
   ] = useState<CenterSettings>({
     centerName:
-      'LYUMOS International Education Center',
+      'LUMOS O‘quv Markazi',
 
     tagline:
-      'Empowering Next Generation Achievers',
+      'Bilim bilan yorqin kelajakka!',
 
-    phone: '',
-    email: '',
-    address: '',
+    phone: '+998 (71) 200-00-25',
+    email: 'admin@lumos.uz',
+    address: 'Toshkent sh., Chilonzor tumani',
 
     currency: 'USD',
     currencySymbol: '$',
@@ -388,6 +503,14 @@ export const CRMProvider: React.FC<{
 
     discountPolicyMax: 25,
   });
+
+  useEffect(() => {
+    if (settings.theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [settings.theme]);
 
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -481,6 +604,12 @@ export const CRMProvider: React.FC<{
 
 
   const [
+    paymentModalDefaultMonth,
+    setPaymentModalDefaultMonth,
+  ] = useState<string | null>(null);
+
+
+  const [
     isAddTeacherModalOpen,
     setIsAddTeacherModalOpen,
   ] = useState(false);
@@ -540,19 +669,26 @@ export const CRMProvider: React.FC<{
 
   const refreshData =
     useCallback(async () => {
-
-      if (!isSupabaseConfigured) {
-        setError(
-          'Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env.local'
-        );
-
-        setIsLoading(false);
-
-        return;
-      }
-
       setIsLoading(true);
       setError(null);
+
+      const loadLocalFallback = () => {
+        setStudents(generateInitialStudents());
+        setTeachers(INITIAL_TEACHERS);
+        setGroups(INITIAL_GROUPS);
+        setExpenses(INITIAL_EXPENSES);
+        setSettings(initialSettings);
+        setNotifications(INITIAL_NOTIFICATIONS);
+        setCalendarEvents(INITIAL_CALENDAR_EVENTS);
+        setAttendanceRecords([]);
+        setIsInitialized(true);
+      };
+
+      if (!isSupabaseConfigured) {
+        loadLocalFallback();
+        setIsLoading(false);
+        return;
+      }
 
       try {
         await migrateSeedDataIfNeeded();
@@ -560,15 +696,16 @@ export const CRMProvider: React.FC<{
         const data =
           await fetchAllCrmData();
 
-        applyCrmData(data);
+        if (data && data.teachers && data.teachers.length > 0) {
+          applyCrmData(data);
+        } else {
+          loadLocalFallback();
+        }
 
         setIsInitialized(true);
       } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : 'Failed to load CRM data'
-        );
+        console.warn('[CRM Sync] Supabase sync warning, falling back to local dataset:', err);
+        loadLocalFallback();
       } finally {
         setIsLoading(false);
       }
@@ -617,7 +754,9 @@ export const CRMProvider: React.FC<{
       ...newSettings,
     };
 
+
     setSettings(merged);
+
 
     upsertSettings(merged)
       .catch(err =>
@@ -1863,6 +2002,9 @@ export const CRMProvider: React.FC<{
 
         paymentModalDefaultStudentId,
         setPaymentModalDefaultStudentId,
+
+        paymentModalDefaultMonth,
+        setPaymentModalDefaultMonth,
 
         isAddTeacherModalOpen,
         setIsAddTeacherModalOpen,

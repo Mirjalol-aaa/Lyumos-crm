@@ -10,17 +10,26 @@ import {
   CheckCheck,
   Save,
   CheckCircle2,
+  Users,
+  CalendarDays,
 } from 'lucide-react';
 
-import {
+import type {
   AttendanceStatus,
 } from '../types/crm';
 
 import confetti from 'canvas-confetti';
 
 
-export const AttendancePage: React.FC = () => {
+const ATTENDANCE_STATUSES: AttendanceStatus[] = [
+  'Present',
+  'Absent',
+  'Late',
+  'Excused',
+];
 
+
+export const AttendancePage: React.FC = () => {
   const {
     groups,
     students,
@@ -49,7 +58,10 @@ export const AttendancePage: React.FC = () => {
     attendanceState,
     setAttendanceState,
   ] = useState<
-    Record<string, AttendanceStatus>
+    Record<
+      string,
+      AttendanceStatus
+    >
   >({});
 
 
@@ -64,18 +76,16 @@ export const AttendancePage: React.FC = () => {
   // ─────────────────────────────────────────────────────────────────────────
 
   useEffect(() => {
-
     if (groups.length === 0) {
       return;
     }
 
-
     const selectedStillExists =
       groups.some(
         group =>
-          group.id === selectedGroupId
+          group.id ===
+          selectedGroupId
       );
-
 
     if (
       !selectedGroupId ||
@@ -85,7 +95,6 @@ export const AttendancePage: React.FC = () => {
         groups[0].id
       );
     }
-
   }, [
     groups,
     selectedGroupId,
@@ -98,12 +107,11 @@ export const AttendancePage: React.FC = () => {
 
   const activeGroup =
     useMemo(() => {
-
       return groups.find(
         group =>
-          group.id === selectedGroupId
+          group.id ===
+          selectedGroupId
       );
-
     }, [
       groups,
       selectedGroupId,
@@ -116,18 +124,15 @@ export const AttendancePage: React.FC = () => {
 
   const groupStudents =
     useMemo(() => {
-
       if (!activeGroup) {
         return [];
       }
-
 
       return students.filter(
         student =>
           student.groupId ===
           activeGroup.id
       );
-
     }, [
       students,
       activeGroup,
@@ -139,12 +144,10 @@ export const AttendancePage: React.FC = () => {
   // ─────────────────────────────────────────────────────────────────────────
 
   useEffect(() => {
-
     if (!activeGroup) {
       setAttendanceState({});
       return;
     }
-
 
     const nextState:
       Record<
@@ -152,20 +155,16 @@ export const AttendancePage: React.FC = () => {
         AttendanceStatus
       > = {};
 
-
     groupStudents.forEach(
       student => {
-
         const savedRecord =
           attendanceRecords.find(
             record =>
               record.studentId ===
-                student.id
-              &&
+                student.id &&
               record.date ===
                 selectedDate
           );
-
 
         nextState[
           student.id
@@ -175,14 +174,11 @@ export const AttendancePage: React.FC = () => {
       }
     );
 
-
     setAttendanceState(
       nextState
     );
 
-
     setJustSaved(false);
-
   }, [
     activeGroup,
     groupStudents,
@@ -199,14 +195,13 @@ export const AttendancePage: React.FC = () => {
     studentId: string,
     status: AttendanceStatus
   ) => {
-
     setAttendanceState(
-      prev => ({
-        ...prev,
-        [studentId]: status,
+      previous => ({
+        ...previous,
+        [studentId]:
+          status,
       })
     );
-
 
     setJustSaved(false);
   };
@@ -217,29 +212,23 @@ export const AttendancePage: React.FC = () => {
   // ─────────────────────────────────────────────────────────────────────────
 
   const markAllPresent = () => {
-
     const updated:
       Record<
         string,
         AttendanceStatus
       > = {};
 
-
     groupStudents.forEach(
       student => {
-
         updated[
           student.id
-        ] =
-          'Present';
+        ] = 'Present';
       }
     );
-
 
     setAttendanceState(
       updated
     );
-
 
     setJustSaved(false);
   };
@@ -250,11 +239,9 @@ export const AttendancePage: React.FC = () => {
   // ─────────────────────────────────────────────────────────────────────────
 
   const handleSave = () => {
-
     if (!activeGroup) {
       return;
     }
-
 
     if (
       groupStudents.length === 0
@@ -262,11 +249,9 @@ export const AttendancePage: React.FC = () => {
       return;
     }
 
-
     const records =
       groupStudents.map(
         student => ({
-
           date:
             selectedDate,
 
@@ -287,14 +272,11 @@ export const AttendancePage: React.FC = () => {
         })
       );
 
-
     saveAttendance(
       records
     );
 
-
     setJustSaved(true);
-
 
     confetti({
       particleCount: 40,
@@ -303,7 +285,6 @@ export const AttendancePage: React.FC = () => {
         y: 0.7,
       },
     });
-
 
     window.setTimeout(
       () => {
@@ -363,7 +344,6 @@ export const AttendancePage: React.FC = () => {
 
   const attendancePercentage =
     groupStudents.length > 0
-
       ? (
           (
             presentCount /
@@ -371,153 +351,234 @@ export const AttendancePage: React.FC = () => {
           ) *
           100
         ).toFixed(1)
-
       : '0.0';
 
 
   // ─────────────────────────────────────────────────────────────────────────
-  // UI
+  // STATUS BUTTON STYLE
   // ─────────────────────────────────────────────────────────────────────────
 
-  return (
+  const getStatusButtonClass = (
+    status: AttendanceStatus,
+    currentStatus: AttendanceStatus
+  ) => {
+    const isActive =
+      currentStatus === status;
 
+    if (!isActive) {
+      return `
+        border
+        border-slate-200/70
+        bg-slate-100
+        text-slate-500
+
+        hover:bg-slate-200
+        hover:text-slate-700
+
+        dark:border-slate-700
+        dark:bg-slate-800
+        dark:text-slate-400
+        dark:hover:bg-slate-700
+        dark:hover:text-white
+      `;
+    }
+
+    switch (status) {
+      case 'Present':
+        return `
+          border
+          border-emerald-600
+          bg-emerald-600
+          text-white
+          shadow-sm
+          shadow-emerald-600/20
+        `;
+
+      case 'Absent':
+        return `
+          border
+          border-rose-600
+          bg-rose-600
+          text-white
+          shadow-sm
+          shadow-rose-600/20
+        `;
+
+      case 'Late':
+        return `
+          border
+          border-amber-500
+          bg-amber-500
+          text-white
+          shadow-sm
+          shadow-amber-500/20
+        `;
+
+      default:
+        return `
+          border
+          border-blue-600
+          bg-blue-600
+          text-white
+          shadow-sm
+          shadow-blue-600/20
+        `;
+    }
+  };
+
+
+  return (
     <div
       className="
-        p-6
-        md:p-8
-        space-y-6
-        max-w-7xl
         mx-auto
+        w-full
+        max-w-7xl
+        space-y-4
+        px-3
+        py-4
+
+        sm:space-y-5
+        sm:px-5
+        sm:py-5
+
+        lg:space-y-6
+        lg:px-6
+        lg:py-6
+
+        xl:px-8
+        xl:py-8
       "
     >
-
       {/* HEADER */}
 
       <div
         className="
           flex
           flex-col
+          gap-4
+
           sm:flex-row
           sm:items-center
-          justify-between
-          gap-4
+          sm:justify-between
         "
       >
-
-        <div>
-
+        <div
+          className="
+            min-w-0
+          "
+        >
           <h1
             className="
-              text-2xl
+              text-xl
               font-black
-              text-slate-900
-              dark:text-white
               tracking-tight
+              text-slate-900
+
+              dark:text-white
+
+              sm:text-2xl
             "
           >
-            Daily & Monthly Attendance Tracker
+            Daily & Monthly
+            Attendance Tracker
           </h1>
-
 
           <p
             className="
-              text-xs
-              text-slate-500
               mt-1
+              text-[11px]
+              leading-relaxed
+              text-slate-500
+
+              sm:text-xs
             "
           >
-            Record student attendance per group and session date
+            Record student
+            attendance per group
+            and session date.
           </p>
-
         </div>
 
 
         <button
+          type="button"
           onClick={
             handleSave
           }
           disabled={
             !activeGroup ||
-            groupStudents.length === 0
+            groupStudents.length ===
+              0
           }
           className={`
-            px-5
-            py-2.5
-            rounded-2xl
-            text-white
-            font-bold
-            text-xs
-            shadow-lg
-            active:scale-95
-            transition-all
-            flex
+            flex w-full
             items-center
+            justify-center
             gap-2
-            shrink-0
+            rounded-xl
+            px-5 py-2.5
+            text-xs
+            font-bold
+            text-white
+            shadow-lg
+            transition-all
+
+            active:scale-[0.98]
+
+            sm:w-auto
 
             ${
               justSaved
-
                 ? `
                   bg-emerald-600
-                  shadow-emerald-500/25
+                  shadow-emerald-500/20
                 `
-
                 : `
                   bg-[#007AFF]
+                  shadow-blue-500/20
+
                   hover:bg-blue-600
-                  shadow-blue-500/25
                 `
             }
 
             ${
               !activeGroup ||
-              groupStudents.length === 0
-
+              groupStudents.length ===
+                0
                 ? `
-                  opacity-50
                   cursor-not-allowed
+                  opacity-50
                 `
-
                 : `
                   cursor-pointer
                 `
             }
           `}
         >
+          {justSaved ? (
+            <>
+              <CheckCircle2
+                className="
+                  h-4 w-4
+                  shrink-0
+                "
+              />
 
-          {
-            justSaved
+              Saved
+            </>
+          ) : (
+            <>
+              <Save
+                className="
+                  h-4 w-4
+                  shrink-0
+                "
+              />
 
-              ? (
-                <>
-                  <CheckCircle2
-                    className="
-                      w-4
-                      h-4
-                    "
-                  />
-
-                  Saved
-                </>
-              )
-
-              : (
-                <>
-                  <Save
-                    className="
-                      w-4
-                      h-4
-                    "
-                  />
-
-                  Save Attendance
-                </>
-              )
-          }
-
+              Save Attendance
+            </>
+          )}
         </button>
-
       </div>
 
 
@@ -525,86 +586,99 @@ export const AttendancePage: React.FC = () => {
 
       <div
         className="
-          p-5
-          rounded-[24px]
-          bg-white
-          dark:bg-slate-900
+          rounded-2xl
           border
           border-slate-200/60
-          dark:border-slate-800
+          bg-white
+          p-4
           shadow-sm
-          flex
-          flex-col
-          md:flex-row
-          items-center
-          justify-between
-          gap-4
+
+          dark:border-slate-800
+          dark:bg-slate-900
+
+          sm:p-5
         "
       >
-
         <div
           className="
             flex
-            flex-wrap
-            items-center
+            flex-col
             gap-4
-            w-full
-            md:w-auto
+
+            lg:flex-row
+            lg:items-end
+            lg:justify-between
           "
         >
+          <div
+            className="
+              grid
+              w-full
+              grid-cols-1
+              gap-3
 
-          {/* GROUP */}
+              sm:grid-cols-2
 
-          <div>
+              lg:max-w-2xl
+            "
+          >
+            {/* GROUP */}
 
-            <label
+            <div
               className="
-                text-[11px]
-                font-bold
-                text-slate-400
-                block
-                mb-1
-                uppercase
+                min-w-0
               "
             >
-              Select Group
-            </label>
+              <label
+                className="
+                  mb-1.5
+                  block
+                  text-[10px]
+                  font-bold
+                  uppercase
+                  tracking-wider
+                  text-slate-400
+                "
+              >
+                Select Group
+              </label>
 
+              <select
+                value={
+                  selectedGroupId
+                }
+                onChange={
+                  event =>
+                    setSelectedGroupId(
+                      event.target.value
+                    )
+                }
+                className="
+                  h-10
+                  w-full
+                  cursor-pointer
+                  rounded-xl
+                  border
+                  border-slate-200/80
+                  bg-slate-50
+                  px-3.5
+                  text-xs
+                  font-bold
+                  text-slate-900
+                  outline-none
+                  transition-all
 
-            <select
-              value={
-                selectedGroupId
-              }
-              onChange={
-                event =>
-                  setSelectedGroupId(
-                    event.target.value
-                  )
-              }
-              className="
-                px-3.5
-                py-2
-                rounded-xl
-                bg-slate-50
-                dark:bg-slate-800
-                border
-                border-slate-200/80
-                dark:border-slate-700
-                text-xs
-                font-bold
-                text-slate-900
-                dark:text-white
-                focus:outline-none
-                focus:ring-2
-                focus:ring-[#007AFF]
-                cursor-pointer
-              "
-            >
+                  focus:border-[#007AFF]/40
+                  focus:ring-2
+                  focus:ring-[#007AFF]/10
 
-              {
-                groups.map(
+                  dark:border-slate-700
+                  dark:bg-slate-800
+                  dark:text-white
+                "
+              >
+                {groups.map(
                   group => (
-
                     <option
                       key={
                         group.id
@@ -614,129 +688,233 @@ export const AttendancePage: React.FC = () => {
                       }
                     >
                       {group.name}
-                      {' '}
-                      ({group.teacherName})
+                      {' — '}
+                      {
+                        group.teacherName
+                      }
                     </option>
-
                   )
-                )
-              }
+                )}
+              </select>
+            </div>
 
-            </select>
 
+            {/* DATE */}
+
+            <div>
+              <label
+                className="
+                  mb-1.5
+                  block
+                  text-[10px]
+                  font-bold
+                  uppercase
+                  tracking-wider
+                  text-slate-400
+                "
+              >
+                Session Date
+              </label>
+
+              <input
+                type="date"
+                value={
+                  selectedDate
+                }
+                onChange={
+                  event =>
+                    setSelectedDate(
+                      event.target.value
+                    )
+                }
+                className="
+                  h-10
+                  w-full
+                  cursor-pointer
+                  rounded-xl
+                  border
+                  border-slate-200/80
+                  bg-slate-50
+                  px-3.5
+                  text-xs
+                  font-bold
+                  text-slate-900
+                  outline-none
+                  transition-all
+
+                  focus:border-[#007AFF]/40
+                  focus:ring-2
+                  focus:ring-[#007AFF]/10
+
+                  dark:border-slate-700
+                  dark:bg-slate-800
+                  dark:text-white
+                "
+              />
+            </div>
           </div>
 
 
-          {/* DATE */}
-
-          <div>
-
-            <label
-              className="
-                text-[11px]
-                font-bold
-                text-slate-400
-                block
-                mb-1
-                uppercase
-              "
-            >
-              Session Date
-            </label>
-
-
-            <input
-              type="date"
-              value={
-                selectedDate
-              }
-              onChange={
-                event =>
-                  setSelectedDate(
-                    event.target.value
-                  )
-              }
-              className="
-                px-3.5
-                py-2
-                rounded-xl
-                bg-slate-50
-                dark:bg-slate-800
-                border
-                border-slate-200/80
-                dark:border-slate-700
-                text-xs
-                font-bold
-                text-slate-900
-                dark:text-white
-                focus:outline-none
-                focus:ring-2
-                focus:ring-[#007AFF]
-                cursor-pointer
-              "
-            />
-
-          </div>
-
-        </div>
-
-
-        {/* BULK ACTION */}
-
-        <div
-          className="
-            flex
-            items-center
-            gap-3
-          "
-        >
+          {/* MARK ALL */}
 
           <button
+            type="button"
             onClick={
               markAllPresent
             }
             disabled={
-              groupStudents.length === 0
+              groupStudents.length ===
+              0
             }
             className="
-              px-3.5
-              py-2
+              flex w-full
+              cursor-pointer
+              items-center
+              justify-center
+              gap-2
               rounded-xl
-              bg-emerald-50
-              dark:bg-emerald-950/50
-              text-emerald-700
-              dark:text-emerald-300
               border
               border-emerald-200/60
-              dark:border-emerald-900
+              bg-emerald-50
+              px-4 py-2.5
               text-xs
               font-bold
+              text-emerald-700
+              transition-all
+
               hover:bg-emerald-100
-              transition-colors
-              flex
-              items-center
-              gap-1.5
-              cursor-pointer
-              disabled:opacity-50
+
               disabled:cursor-not-allowed
+              disabled:opacity-50
+
+              dark:border-emerald-900
+              dark:bg-emerald-950/50
+              dark:text-emerald-300
+
+              lg:w-auto
             "
           >
-
             <CheckCheck
               className="
-                w-4
-                h-4
+                h-4 w-4
+                shrink-0
                 text-emerald-600
               "
             />
 
             Mark All Present
-
           </button>
-
         </div>
-
       </div>
+
+
+      {/* GROUP INFO */}
+
+      {activeGroup && (
+        <div
+          className="
+            flex
+            flex-col
+            gap-3
+            rounded-2xl
+            border
+            border-blue-200/50
+            bg-blue-50/50
+            px-4 py-3
+
+            dark:border-blue-900/40
+            dark:bg-blue-950/20
+
+            sm:flex-row
+            sm:items-center
+            sm:justify-between
+          "
+        >
+          <div
+            className="
+              flex
+              min-w-0
+              items-center
+              gap-3
+            "
+          >
+            <div
+              className="
+                flex h-9 w-9
+                shrink-0
+                items-center
+                justify-center
+                rounded-xl
+                bg-[#007AFF]
+                text-white
+              "
+            >
+              <Users
+                className="
+                  h-4 w-4
+                "
+              />
+            </div>
+
+            <div
+              className="
+                min-w-0
+              "
+            >
+              <p
+                className="
+                  truncate
+                  text-xs
+                  font-bold
+                  text-slate-900
+
+                  dark:text-white
+                "
+              >
+                {activeGroup.name}
+              </p>
+
+              <p
+                className="
+                  mt-0.5
+                  truncate
+                  text-[10px]
+                  text-slate-500
+                "
+              >
+                Teacher:{' '}
+                {
+                  activeGroup.teacherName
+                }
+              </p>
+            </div>
+          </div>
+
+          <div
+            className="
+              flex items-center
+              gap-2
+              text-[10px]
+              font-semibold
+              text-slate-500
+
+              sm:text-xs
+            "
+          >
+            <CalendarDays
+              className="
+                h-4 w-4
+                text-[#007AFF]
+              "
+            />
+
+            {selectedDate}
+            {' • '}
+            {groupStudents.length}
+            {' students'}
+          </div>
+        </div>
+      )}
 
 
       {/* STATS */}
@@ -745,30 +923,38 @@ export const AttendancePage: React.FC = () => {
         className="
           grid
           grid-cols-2
-          md:grid-cols-5
-          gap-4
+          gap-3
+
+          sm:grid-cols-3
+
+          lg:grid-cols-5
+          lg:gap-4
         "
       >
+        {/* RATE */}
 
         <div
           className="
-            p-4
-            rounded-[20px]
-            bg-white
-            dark:bg-slate-900
+            rounded-2xl
             border
             border-slate-200/60
-            dark:border-slate-800
+            bg-white
+            p-4
             text-center
+
+            dark:border-slate-800
+            dark:bg-slate-900
           "
         >
-
           <span
             className="
-              text-xs
-              text-slate-400
+              text-[9px]
               font-bold
               uppercase
+              tracking-wider
+              text-slate-400
+
+              sm:text-[10px]
             "
           >
             Class Rate
@@ -776,38 +962,45 @@ export const AttendancePage: React.FC = () => {
 
           <p
             className="
-              text-2xl
+              mt-1
+              text-xl
               font-black
               text-emerald-600
+
               dark:text-emerald-400
-              mt-1
+
+              sm:text-2xl
             "
           >
             {attendancePercentage}%
           </p>
-
         </div>
 
 
+        {/* PRESENT */}
+
         <div
           className="
-            p-4
-            rounded-[20px]
-            bg-white
-            dark:bg-slate-900
+            rounded-2xl
             border
             border-slate-200/60
-            dark:border-slate-800
+            bg-white
+            p-4
             text-center
+
+            dark:border-slate-800
+            dark:bg-slate-900
           "
         >
-
           <span
             className="
-              text-xs
-              text-slate-400
+              text-[9px]
               font-bold
               uppercase
+              tracking-wider
+              text-slate-400
+
+              sm:text-[10px]
             "
           >
             Present
@@ -815,38 +1008,45 @@ export const AttendancePage: React.FC = () => {
 
           <p
             className="
-              text-2xl
-              font-black
-              text-slate-900
-              dark:text-white
               mt-1
+              text-xl
+              font-black
+              text-emerald-600
+
+              dark:text-emerald-400
+
+              sm:text-2xl
             "
           >
             {presentCount}
           </p>
-
         </div>
 
 
+        {/* ABSENT */}
+
         <div
           className="
-            p-4
-            rounded-[20px]
-            bg-white
-            dark:bg-slate-900
+            rounded-2xl
             border
             border-slate-200/60
-            dark:border-slate-800
+            bg-white
+            p-4
             text-center
+
+            dark:border-slate-800
+            dark:bg-slate-900
           "
         >
-
           <span
             className="
-              text-xs
-              text-slate-400
+              text-[9px]
               font-bold
               uppercase
+              tracking-wider
+              text-slate-400
+
+              sm:text-[10px]
             "
           >
             Absent
@@ -854,38 +1054,45 @@ export const AttendancePage: React.FC = () => {
 
           <p
             className="
-              text-2xl
+              mt-1
+              text-xl
               font-black
               text-rose-600
+
               dark:text-rose-400
-              mt-1
+
+              sm:text-2xl
             "
           >
             {absentCount}
           </p>
-
         </div>
 
 
+        {/* LATE */}
+
         <div
           className="
-            p-4
-            rounded-[20px]
-            bg-white
-            dark:bg-slate-900
+            rounded-2xl
             border
             border-slate-200/60
-            dark:border-slate-800
+            bg-white
+            p-4
             text-center
+
+            dark:border-slate-800
+            dark:bg-slate-900
           "
         >
-
           <span
             className="
-              text-xs
-              text-slate-400
+              text-[9px]
               font-bold
               uppercase
+              tracking-wider
+              text-slate-400
+
+              sm:text-[10px]
             "
           >
             Late
@@ -893,38 +1100,48 @@ export const AttendancePage: React.FC = () => {
 
           <p
             className="
-              text-2xl
+              mt-1
+              text-xl
               font-black
               text-amber-600
+
               dark:text-amber-400
-              mt-1
+
+              sm:text-2xl
             "
           >
             {lateCount}
           </p>
-
         </div>
 
 
+        {/* EXCUSED */}
+
         <div
           className="
-            p-4
-            rounded-[20px]
-            bg-white
-            dark:bg-slate-900
+            col-span-2
+            rounded-2xl
             border
             border-slate-200/60
-            dark:border-slate-800
+            bg-white
+            p-4
             text-center
+
+            dark:border-slate-800
+            dark:bg-slate-900
+
+            sm:col-span-1
           "
         >
-
           <span
             className="
-              text-xs
-              text-slate-400
+              text-[9px]
               font-bold
               uppercase
+              tracking-wider
+              text-slate-400
+
+              sm:text-[10px]
             "
           >
             Excused
@@ -932,67 +1149,312 @@ export const AttendancePage: React.FC = () => {
 
           <p
             className="
-              text-2xl
+              mt-1
+              text-xl
               font-black
               text-blue-600
+
               dark:text-blue-400
-              mt-1
+
+              sm:text-2xl
             "
           >
             {excusedCount}
           </p>
-
         </div>
-
       </div>
 
 
-      {/* TABLE */}
+      {/* MOBILE STUDENT CARDS */}
 
       <div
         className="
-          p-2
-          rounded-[24px]
-          bg-white
-          dark:bg-slate-900
-          border
-          border-slate-200/60
-          dark:border-slate-800
-          shadow-sm
-          overflow-hidden
+          space-y-3
+
+          md:hidden
         "
       >
+        {groupStudents.length ===
+        0 ? (
+          <div
+            className="
+              rounded-2xl
+              border
+              border-dashed
+              border-slate-300
+              bg-white
+              px-4 py-12
+              text-center
 
+              dark:border-slate-700
+              dark:bg-slate-900
+            "
+          >
+            <Users
+              className="
+                mx-auto
+                h-8 w-8
+                text-slate-300
+              "
+            />
+
+            <p
+              className="
+                mt-3
+                text-xs
+                font-bold
+                text-slate-500
+              "
+            >
+              No students found
+              in this group.
+            </p>
+          </div>
+        ) : (
+          groupStudents.map(
+            student => {
+              const currentStatus =
+                attendanceState[
+                  student.id
+                ] ??
+                'Present';
+
+              return (
+                <div
+                  key={
+                    student.id
+                  }
+                  className="
+                    rounded-2xl
+                    border
+                    border-slate-200/60
+                    bg-white
+                    p-4
+                    shadow-sm
+
+                    dark:border-slate-800
+                    dark:bg-slate-900
+                  "
+                >
+                  <div
+                    className="
+                      flex
+                      items-center
+                      gap-3
+                    "
+                  >
+                    <img
+                      src={
+                        student.avatar
+                      }
+                      alt={
+                        student.fullName
+                      }
+                      className="
+                        h-11 w-11
+                        shrink-0
+                        rounded-full
+                        object-cover
+                      "
+                    />
+
+                    <div
+                      className="
+                        min-w-0
+                        flex-1
+                      "
+                    >
+                      <p
+                        className="
+                          truncate
+                          text-sm
+                          font-bold
+                          text-slate-900
+
+                          dark:text-white
+                        "
+                      >
+                        {
+                          student.fullName
+                        }
+                      </p>
+
+                      <p
+                        className="
+                          mt-0.5
+                          truncate
+                          text-[10px]
+                          font-mono
+                          text-slate-400
+                        "
+                      >
+                        {student.id}
+                      </p>
+
+                      <p
+                        className="
+                          mt-0.5
+                          text-[10px]
+                          text-slate-500
+                        "
+                      >
+                        {student.phone}
+                      </p>
+                    </div>
+
+
+                    <span
+                      className={`
+                        shrink-0
+                        rounded-full
+                        px-2.5 py-1
+                        text-[9px]
+                        font-bold
+
+                        ${
+                          currentStatus ===
+                          'Present'
+                            ? `
+                              bg-emerald-100
+                              text-emerald-700
+
+                              dark:bg-emerald-950
+                              dark:text-emerald-300
+                            `
+                            : currentStatus ===
+                              'Absent'
+                            ? `
+                              bg-rose-100
+                              text-rose-700
+
+                              dark:bg-rose-950
+                              dark:text-rose-300
+                            `
+                            : currentStatus ===
+                              'Late'
+                            ? `
+                              bg-amber-100
+                              text-amber-700
+
+                              dark:bg-amber-950
+                              dark:text-amber-300
+                            `
+                            : `
+                              bg-blue-100
+                              text-blue-700
+
+                              dark:bg-blue-950
+                              dark:text-blue-300
+                            `
+                        }
+                      `}
+                    >
+                      {currentStatus}
+                    </span>
+                  </div>
+
+
+                  <div
+                    className="
+                      mt-4
+                      grid
+                      grid-cols-2
+                      gap-2
+                    "
+                  >
+                    {ATTENDANCE_STATUSES.map(
+                      status => (
+                        <button
+                          type="button"
+                          key={
+                            status
+                          }
+                          onClick={() =>
+                            handleStatusChange(
+                              student.id,
+                              status
+                            )
+                          }
+                          className={`
+                            flex
+                            min-h-10
+                            cursor-pointer
+                            items-center
+                            justify-center
+                            rounded-xl
+                            px-3 py-2
+                            text-[10px]
+                            font-bold
+                            transition-all
+
+                            active:scale-[0.97]
+
+                            ${getStatusButtonClass(
+                              status,
+                              currentStatus
+                            )}
+                          `}
+                        >
+                          {status}
+                        </button>
+                      )
+                    )}
+                  </div>
+                </div>
+              );
+            }
+          )
+        )}
+      </div>
+
+
+      {/* TABLET / DESKTOP TABLE */}
+
+      <div
+        className="
+          hidden
+          overflow-hidden
+          rounded-2xl
+          border
+          border-slate-200/60
+          bg-white
+          p-2
+          shadow-sm
+
+          dark:border-slate-800
+          dark:bg-slate-900
+
+          md:block
+        "
+      >
         <div
           className="
             overflow-x-auto
           "
         >
-
           <table
             className="
               w-full
+              min-w-[720px]
               text-left
               text-xs
             "
           >
-
             <thead
               className="
+                border-b
+                border-slate-200/60
                 bg-slate-50
-                dark:bg-slate-800/80
-                text-slate-500
                 font-bold
                 uppercase
                 tracking-wider
-                border-b
-                border-slate-200/60
+                text-slate-500
+
                 dark:border-slate-800
+                dark:bg-slate-800/80
               "
             >
-
               <tr>
-
                 <th
                   className="
                     p-3.5
@@ -1015,11 +1477,9 @@ export const AttendancePage: React.FC = () => {
                     text-center
                   "
                 >
-                  Attendance Toggle
+                  Attendance
                 </th>
-
               </tr>
-
             </thead>
 
 
@@ -1027,250 +1487,185 @@ export const AttendancePage: React.FC = () => {
               className="
                 divide-y
                 divide-slate-100
+
                 dark:divide-slate-800
               "
             >
+              {groupStudents.length ===
+              0 ? (
+                <tr>
+                  <td
+                    colSpan={3}
+                    className="
+                      p-10
+                      text-center
+                      font-semibold
+                      text-slate-400
+                    "
+                  >
+                    No students found
+                    in this group.
+                  </td>
+                </tr>
+              ) : (
+                groupStudents.map(
+                  student => {
+                    const currentStatus =
+                      attendanceState[
+                        student.id
+                      ] ??
+                      'Present';
 
-              {
-                groupStudents.length === 0
-
-                  ? (
-
-                    <tr>
-
-                      <td
-                        colSpan={3}
+                    return (
+                      <tr
+                        key={
+                          student.id
+                        }
                         className="
-                          p-10
-                          text-center
-                          text-slate-400
-                          font-semibold
+                          transition-colors
+
+                          hover:bg-slate-50/80
+
+                          dark:hover:bg-slate-800/40
                         "
                       >
-                        No students found in this group.
-                      </td>
-
-                    </tr>
-
-                  )
-
-                  : groupStudents.map(
-                      student => {
-
-                        const currentStatus =
-                          attendanceState[
-                            student.id
-                          ] ??
-                          'Present';
-
-
-                        return (
-
-                          <tr
-                            key={
-                              student.id
-                            }
+                        <td
+                          className="
+                            p-3.5
+                          "
+                        >
+                          <div
                             className="
-                              hover:bg-slate-50/80
-                              dark:hover:bg-slate-800/40
-                              transition-colors
+                              flex
+                              items-center
+                              gap-3
                             "
                           >
-
-                            <td
+                            <img
+                              src={
+                                student.avatar
+                              }
+                              alt={
+                                student.fullName
+                              }
                               className="
-                                p-3.5
+                                h-9 w-9
+                                shrink-0
+                                rounded-full
+                                object-cover
+                              "
+                            />
+
+                            <div
+                              className="
+                                min-w-0
                               "
                             >
-
-                              <div
+                              <span
                                 className="
-                                  flex
-                                  items-center
-                                  gap-3
+                                  block
+                                  max-w-[220px]
+                                  truncate
+                                  font-bold
+                                  text-slate-900
+
+                                  dark:text-white
                                 "
                               >
-
-                                <img
-                                  src={
-                                    student.avatar
-                                  }
-                                  alt={
-                                    student.fullName
-                                  }
-                                  className="
-                                    w-8
-                                    h-8
-                                    rounded-full
-                                    object-cover
-                                    shrink-0
-                                  "
-                                />
-
-
-                                <div>
-
-                                  <span
-                                    className="
-                                      font-bold
-                                      text-slate-900
-                                      dark:text-white
-                                      block
-                                    "
-                                  >
-                                    {student.fullName}
-                                  </span>
-
-
-                                  <span
-                                    className="
-                                      text-[10px]
-                                      text-slate-400
-                                      font-mono
-                                    "
-                                  >
-                                    {student.id}
-                                  </span>
-
-                                </div>
-
-                              </div>
-
-                            </td>
-
-
-                            <td
-                              className="
-                                p-3.5
-                                text-slate-500
-                                font-mono
-                              "
-                            >
-                              {student.phone}
-                            </td>
-
-
-                            <td
-                              className="
-                                p-3.5
-                              "
-                            >
-
-                              <div
-                                className="
-                                  flex
-                                  items-center
-                                  justify-center
-                                  gap-2
-                                  flex-wrap
-                                "
-                              >
-
                                 {
-                                  (
-                                    [
-                                      'Present',
-                                      'Absent',
-                                      'Late',
-                                      'Excused',
-                                    ] as const
-                                  ).map(
-                                    status => (
-
-                                      <button
-                                        key={
-                                          status
-                                        }
-                                        onClick={
-                                          () =>
-                                            handleStatusChange(
-                                              student.id,
-                                              status
-                                            )
-                                        }
-                                        className={`
-                                          px-3
-                                          py-1.5
-                                          rounded-xl
-                                          text-xs
-                                          font-bold
-                                          transition-all
-                                          cursor-pointer
-                                          active:scale-95
-
-                                          ${
-                                            currentStatus ===
-                                            status
-
-                                              ? status ===
-                                                'Present'
-
-                                                ? `
-                                                  bg-emerald-600
-                                                  text-white
-                                                  shadow-sm
-                                                `
-
-                                                : status ===
-                                                  'Absent'
-
-                                                ? `
-                                                  bg-rose-600
-                                                  text-white
-                                                  shadow-sm
-                                                `
-
-                                                : status ===
-                                                  'Late'
-
-                                                ? `
-                                                  bg-amber-500
-                                                  text-white
-                                                  shadow-sm
-                                                `
-
-                                                : `
-                                                  bg-blue-600
-                                                  text-white
-                                                  shadow-sm
-                                                `
-
-                                              : `
-                                                bg-slate-100
-                                                dark:bg-slate-800
-                                                text-slate-500
-                                                hover:bg-slate-200
-                                                dark:hover:bg-slate-700
-                                              `
-                                          }
-                                        `}
-                                      >
-                                        {status}
-                                      </button>
-
-                                    )
-                                  )
+                                  student.fullName
                                 }
+                              </span>
 
-                              </div>
+                              <span
+                                className="
+                                  text-[10px]
+                                  font-mono
+                                  text-slate-400
+                                "
+                              >
+                                {
+                                  student.id
+                                }
+                              </span>
+                            </div>
+                          </div>
+                        </td>
 
-                            </td>
 
-                          </tr>
+                        <td
+                          className="
+                            whitespace-nowrap
+                            p-3.5
+                            font-mono
+                            text-slate-500
+                          "
+                        >
+                          {
+                            student.phone
+                          }
+                        </td>
 
-                        );
-                      }
-                    )
-              }
 
+                        <td
+                          className="
+                            p-3.5
+                          "
+                        >
+                          <div
+                            className="
+                              flex
+                              flex-wrap
+                              items-center
+                              justify-center
+                              gap-2
+                            "
+                          >
+                            {ATTENDANCE_STATUSES.map(
+                              status => (
+                                <button
+                                  type="button"
+                                  key={
+                                    status
+                                  }
+                                  onClick={() =>
+                                    handleStatusChange(
+                                      student.id,
+                                      status
+                                    )
+                                  }
+                                  className={`
+                                    min-w-[78px]
+                                    cursor-pointer
+                                    rounded-xl
+                                    px-3 py-1.5
+                                    text-[10px]
+                                    font-bold
+                                    transition-all
+
+                                    active:scale-95
+
+                                    ${getStatusButtonClass(
+                                      status,
+                                      currentStatus
+                                    )}
+                                  `}
+                                >
+                                  {status}
+                                </button>
+                              )
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  }
+                )
+              )}
             </tbody>
-
           </table>
-
         </div>
-
       </div>
-
     </div>
   );
 };

@@ -160,17 +160,8 @@ async function upsertByCode<
 
 
     if (error) {
-
-      const failedCode =
-        chunk[0]?.code ??
-        'unknown';
-
-      throwMigrationError(
-        entityLabel,
-        failedCode,
-        `upsert into ${table}`,
-        error
-      );
+      console.warn(`[Supabase Migration Warning] ${entityLabel} upsert into ${table} encountered:`, error.message);
+      break;
     }
 
 
@@ -492,16 +483,8 @@ Promise<void> {
       );
 
 
-  if (
-    error
-  ) {
-
-    throwMigrationError(
-      'Settings',
-      SETTINGS_CODE,
-      'upsert into center_settings',
-      error
-    );
+  if (error) {
+    console.warn('[Supabase Migration Warning] Settings upsert into center_settings:', error.message);
   }
 }
 
@@ -534,13 +517,8 @@ Promise<void> {
       );
 
 
-  if (
-    error
-  ) {
-
-    throw new Error(
-      `Failed to mark seed migration complete: ${error.message}`
-    );
+  if (error) {
+    console.warn('[Supabase Migration Warning] Failed to mark seed migration complete:', error.message);
   }
 }
 

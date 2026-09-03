@@ -1,14 +1,34 @@
-import React, { useEffect, useState } from 'react';
-import type { Session } from '@supabase/supabase-js';
+import React, { useState, useEffect } from 'react';
+import { Toast } from './components/common/Toast';
 
 import { CRMProvider, useCRM } from './context/CRMContext';
+import { LMSProvider, useLMS } from './context/LMSContext';
 import { DataLoader } from './components/common/DataLoader';
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
 import { Breadcrumb } from './components/layout/Breadcrumb';
-import { supabase } from './lib/supabase';
 
-// Modals
+// Dedicated Authentic Login Pages
+import { AdminTeacherLogin } from './pages/auth/AdminTeacherLogin';
+import { StudentLogin } from './pages/auth/StudentLogin';
+
+// Teacher Components & Pages
+import { TeacherSidebar, TeacherPageType } from './components/teacher/TeacherSidebar';
+import { TeacherDashboardPage } from './pages/teacher/TeacherDashboardPage';
+import { TeacherLessonsPage } from './pages/teacher/TeacherLessonsPage';
+import { TeacherHomeworkPage } from './pages/teacher/TeacherHomeworkPage';
+import { TeacherAttendancePage } from './pages/teacher/TeacherAttendancePage';
+
+// Student Components & Pages
+import { StudentSidebar, StudentPageType } from './components/student/StudentSidebar';
+import { StudentDashboardPage } from './pages/student/StudentDashboardPage';
+import { StudentLessonsPage } from './pages/student/StudentLessonsPage';
+import { StudentHomeworkPage } from './pages/student/StudentHomeworkPage';
+import { StudentLeaderboardPage } from './pages/student/StudentLeaderboardPage';
+import { StudentRewardsPage } from './pages/student/StudentRewardsPage';
+import { StudentPaymentsPage } from './pages/student/StudentPaymentsPage';
+
+// Admin Modals
 import { GlobalSearchModal } from './components/common/GlobalSearchModal';
 import { NotificationDrawer } from './components/common/NotificationDrawer';
 import { StudentProfileModal } from './components/common/StudentProfileModal';
@@ -18,8 +38,17 @@ import { AddTeacherModal } from './components/modals/AddTeacherModal';
 import { AddGroupModal } from './components/modals/AddGroupModal';
 import { AddExpenseModal } from './components/modals/AddExpenseModal';
 
-// Pages
-import { DashboardPage } from './pages/DashboardPage';
+// Super Admin Pages (SaaS Redesign)
+import { AdminOverviewPage } from './pages/admin/AdminOverviewPage';
+import { AdminTeachersWorkloadPage } from './pages/admin/AdminTeachersWorkloadPage';
+import { AdminCoursesGroupsPage } from './pages/admin/AdminCoursesGroupsPage';
+import { AdminStudentsHubPage } from './pages/admin/AdminStudentsHubPage';
+import { AdminFinancePayrollPage } from './pages/admin/AdminFinancePayrollPage';
+import { AdminBranchesPage } from './pages/admin/AdminBranchesPage';
+import { AdminCredentialsPage } from './pages/admin/AdminCredentialsPage';
+import { AdminAuditSettingsPage } from './pages/admin/AdminAuditSettingsPage';
+
+// Other Admin Pages
 import { StudentsPage } from './pages/StudentsPage';
 import { PaymentsPage } from './pages/PaymentsPage';
 import { AttendancePage } from './pages/AttendancePage';
@@ -29,96 +58,40 @@ import { ReportsPage } from './pages/ReportsPage';
 import { ExpensesPage } from './pages/ExpensesPage';
 import { SettingsPage } from './pages/SettingsPage';
 
-function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+// ─────────────────────────────────────────────────────────────────────────────
+// 1. SUPER ADMIN CONTENT (SaaS Redesign)
+// ─────────────────────────────────────────────────────────────────────────────
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!supabase) {
-      setError('Supabase konfiguratsiyasi topilmadi.');
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-
-    const { error: loginError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (loginError) {
-      setError(loginError.message);
-    }
-
-    setLoading(false);
-  };
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4">
-      <form
-        onSubmit={handleLogin}
-        className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl"
-      >
-        <h1 className="text-2xl font-bold text-slate-900">
-          LYUMOS CRM
-        </h1>
-
-        <p className="mt-2 text-sm text-slate-500">
-          Tizimga kirish
-        </p>
-
-        <div className="mt-6 space-y-4">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
-            required
-            className="w-full rounded-lg border border-slate-300 px-4 py-3 text-slate-900"
-          />
-
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Parol"
-            required
-            className="w-full rounded-lg border border-slate-300 px-4 py-3 text-slate-900"
-          />
-
-          {error && (
-            <p className="text-sm text-red-600">
-              {error}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white disabled:opacity-50"
-          >
-            {loading ? 'Kirilmoqda...' : 'Kirish'}
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-}
-
-function CRMContent() {
-  const { activePage, settings } = useCRM();
-  const [collapsed, setCollapsed] = useState(false);
+function AdminPortalContent() {
+  const { activePage, setActivePage, settings } = useCRM();
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return window.innerWidth < 1024;
+  });
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+
+  useEffect(() => {
+    document.title = "LUMOS ERP - Boshqaruv Markazi";
+  }, []);
 
   const renderPage = () => {
     switch (activePage) {
       case 'dashboard':
-        return <DashboardPage />;
+        return <AdminOverviewPage onNavigateTab={(tabId) => setActivePage(tabId as any)} />;
+      case 'teachers_workload':
+        return <AdminTeachersWorkloadPage />;
+      case 'courses_groups':
+        return <AdminCoursesGroupsPage />;
+      case 'students_hub':
+        return <AdminStudentsHubPage />;
+      case 'finance_payroll':
+        return <AdminFinancePayrollPage />;
+      case 'branches':
+        return <AdminBranchesPage />;
+      case 'credentials':
+        return <AdminCredentialsPage />;
+      case 'audit_settings':
+        return <AdminAuditSettingsPage />;
       case 'students':
         return <StudentsPage />;
       case 'payments':
@@ -136,22 +109,19 @@ function CRMContent() {
       case 'settings':
         return <SettingsPage />;
       default:
-        return <DashboardPage />;
+        return <AdminOverviewPage onNavigateTab={(tabId) => setActivePage(tabId as any)} />;
     }
   };
 
   return (
     <div
-      className={`min-h-screen flex font-sans antialiased selection:bg-[#007AFF] selection:text-white ${
+      className={`min-h-screen flex font-sans antialiased selection:bg-blue-600 selection:text-white ${
         settings.theme === 'dark'
           ? 'dark bg-slate-950 text-slate-100'
-          : 'bg-[#F5F5F7] text-slate-900'
+          : 'bg-[#F8F9FA] text-slate-900'
       }`}
     >
-      <Sidebar
-        collapsed={collapsed}
-        setCollapsed={setCollapsed}
-      />
+      <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         <Header
@@ -168,7 +138,6 @@ function CRMContent() {
       </div>
 
       <GlobalSearchModal />
-
       <NotificationDrawer
         isOpen={isNotificationsOpen}
         onClose={() => setIsNotificationsOpen(false)}
@@ -184,50 +153,198 @@ function CRMContent() {
   );
 }
 
-export default function App() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
+// ─────────────────────────────────────────────────────────────────────────────
+// 2. TEACHER CONTENT (Strict LMS for Teachers)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function TeacherPortalContent() {
+  const { settings } = useCRM();
+  const [teacherPage, setTeacherPage] = useState<TeacherPageType>('dashboard');
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return window.innerWidth < 1024;
+  });
 
   useEffect(() => {
-    if (!supabase) {
-      setAuthLoading(false);
-      return;
-    }
-
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setAuthLoading(false);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      setSession(newSession);
-      setAuthLoading(false);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    document.title = "LUMOS LMS - Ustoz Paneli";
   }, []);
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
-        Yuklanmoqda...
+  const renderTeacherPage = () => {
+    switch (teacherPage) {
+      case 'dashboard':
+        return <TeacherDashboardPage onNavigate={setTeacherPage} />;
+      case 'lessons':
+        return <TeacherLessonsPage />;
+      case 'homework':
+        return <TeacherHomeworkPage />;
+      case 'attendance':
+        return <TeacherAttendancePage />;
+      case 'students':
+        return <StudentsPage />;
+      default:
+        return <TeacherDashboardPage onNavigate={setTeacherPage} />;
+    }
+  };
+
+  return (
+    <div
+      className={`min-h-screen flex font-sans antialiased selection:bg-indigo-600 selection:text-white ${
+        settings.theme === 'dark'
+          ? 'dark bg-slate-950 text-slate-100'
+          : 'bg-[#F8F9FC] text-slate-900'
+      }`}
+    >
+      <TeacherSidebar
+        activePage={teacherPage}
+        setActivePage={setTeacherPage}
+        collapsed={collapsed}
+        setCollapsed={setCollapsed}
+      />
+
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        <main className="flex-1 overflow-y-auto scrollbar-thin">
+          {renderTeacherPage()}
+        </main>
       </div>
+
+      <StudentProfileModal />
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 3. STUDENT CONTENT (Strict Portal for Students)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function StudentPortalContent() {
+  const { settings } = useCRM();
+  const [studentPage, setStudentPage] = useState<StudentPageType>('dashboard');
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return window.innerWidth < 1024;
+  });
+
+  useEffect(() => {
+    document.title = "Offline Student Panel";
+  }, []);
+
+  const renderStudentPage = () => {
+    switch (studentPage) {
+      case 'dashboard':
+        return <StudentDashboardPage onNavigate={setStudentPage} />;
+      case 'lessons':
+        return <StudentLessonsPage />;
+      case 'homework':
+        return <StudentHomeworkPage />;
+      case 'leaderboard':
+        return <StudentLeaderboardPage />;
+      case 'rewards':
+        return <StudentRewardsPage />;
+      case 'payments':
+        return <StudentPaymentsPage />;
+      default:
+        return <StudentDashboardPage onNavigate={setStudentPage} />;
+    }
+  };
+
+  return (
+    <div
+      className={`min-h-screen flex font-sans antialiased selection:bg-emerald-600 selection:text-white ${
+        settings.theme === 'dark'
+          ? 'dark bg-slate-950 text-slate-100'
+          : 'bg-[#F8FAF9] text-slate-900'
+      }`}
+    >
+      <StudentSidebar
+        activePage={studentPage}
+        setActivePage={setStudentPage}
+        collapsed={collapsed}
+        setCollapsed={setCollapsed}
+      />
+
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        <main className="flex-1 overflow-y-auto scrollbar-thin">
+          {renderStudentPage()}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// APP CONTENT ROUTER: AUTHENTIC SPLIT LOGIN WITH STRICT PORTAL ROUTING
+// ─────────────────────────────────────────────────────────────────────────────
+
+function AppContentRouter() {
+  const { currentUser, currentRole } = useLMS();
+  const [authMode, setAuthMode] = useState<'admin' | 'student'>(() => {
+    if (typeof window !== 'undefined' && window.location.hash.toLowerCase().includes('student')) {
+      return 'student';
+    }
+    return 'admin';
+  });
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.toLowerCase();
+      if (hash.includes('student')) {
+        setAuthMode('student');
+      } else if (hash.includes('admin')) {
+        setAuthMode('admin');
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  if (!currentUser) {
+    if (authMode === 'student') {
+      return (
+        <StudentLogin
+          onSwitchToAdmin={() => {
+            setAuthMode('admin');
+            window.location.hash = '#/admin';
+          }}
+        />
+      );
+    }
+
+    return (
+      <AdminTeacherLogin
+        onSwitchToStudent={() => {
+          setAuthMode('student');
+          window.location.hash = '#/student';
+        }}
+      />
     );
   }
 
-  if (!session) {
-    return <LoginScreen />;
-  }
+  return (
+    <div className="flex flex-col min-h-screen">
+      <div className="flex-1 min-h-0">
+        {currentRole === 'admin' && <AdminPortalContent />}
+        {currentRole === 'teacher' && <TeacherPortalContent />}
+        {currentRole === 'student' && <StudentPortalContent />}
+      </div>
 
+      <Toast />
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MAIN APP ROOT
+// ─────────────────────────────────────────────────────────────────────────────
+
+export default function App() {
   return (
     <CRMProvider>
-      <DataLoader>
-        <CRMContent />
-      </DataLoader>
+      <LMSProvider>
+        <DataLoader>
+          <AppContentRouter />
+        </DataLoader>
+      </LMSProvider>
     </CRMProvider>
   );
 }

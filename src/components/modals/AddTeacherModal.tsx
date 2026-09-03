@@ -26,7 +26,7 @@ export const AddTeacherModal: React.FC = () => {
       fullName,
       avatar: `https://randomuser.me/api/portraits/men/${avatarId}.jpg`,
       phone,
-      email: email || `${fullName.toLowerCase().replace(/\s+/g, '.')}@lyumos.com`,
+      email: email || `${fullName.toLowerCase().replace(/\s+/g, '.')}@lumos.uz`,
       subjects,
       baseSalary: Number(baseSalary),
       bonusPerStudent: Number(bonusPerStudent),
@@ -93,7 +93,7 @@ export const AddTeacherModal: React.FC = () => {
                 type="email" 
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="teacher@lyumos.com"
+                placeholder="teacher@lumos.uz"
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
               />
             </div>
