@@ -137,7 +137,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({ onSwitchToAdmin }) =
                 value={studentIdInput}
                 onChange={(e) => setStudentIdInput(e.target.value)}
                 placeholder="masalan: 25073 yoki ethan@lumos.uz"
-                className="w-full rounded-xl border border-slate-200 bg-blue-50/40 dark:bg-slate-900 px-4 py-3.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500/10 dark:border-slate-800 dark:text-white font-medium"
+                className="w-full rounded-xl border border-slate-200/90 bg-slate-50/60 px-4 py-3.5 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-amber-500 focus:outline-none focus:ring-4 focus:ring-amber-500/15 dark:border-slate-800 dark:bg-slate-900 dark:focus:bg-slate-950 dark:text-white font-medium transition-all"
               />
             </div>
 
@@ -153,7 +153,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({ onSwitchToAdmin }) =
                   value={passwordInput}
                   onChange={(e) => setPasswordInput(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full rounded-xl border border-slate-200 bg-blue-50/40 dark:bg-slate-900 px-4 py-3.5 pr-11 text-xs text-slate-900 placeholder:text-slate-400 focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500/10 dark:border-slate-800 dark:text-white font-medium"
+                  className="w-full rounded-xl border border-slate-200/90 bg-slate-50/60 px-4 py-3.5 pr-11 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-amber-500 focus:outline-none focus:ring-4 focus:ring-amber-500/15 dark:border-slate-800 dark:bg-slate-900 dark:focus:bg-slate-950 dark:text-white font-medium transition-all"
                 />
                 <button
                   type="button"
@@ -165,20 +165,20 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({ onSwitchToAdmin }) =
               </div>
             </div>
 
-            {/* Cloudflare Verification Badge */}
+            {/* Verification Badge */}
             <div className="flex items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/70 p-3 text-xs dark:border-slate-800 dark:bg-slate-900/60">
               <div className="flex items-center gap-2">
-                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white">
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white shadow-xs">
                   <CheckCircle2 className="h-3.5 w-3.5" />
                 </div>
                 <span className="font-bold text-slate-700 dark:text-slate-300">
-                  Success!
+                  Xavfsizlik Tasdiqlandi
                 </span>
               </div>
               <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold">
-                <ShieldCheck className="h-3.5 w-3.5 text-orange-500" />
-                <span>CLOUDFLARE</span>
-                <span>• Privacy • Help</span>
+                <ShieldCheck className="h-3.5 w-3.5 text-amber-500" />
+                <span>LUMOS LMS</span>
+                <span>• Talaba Himoyasi</span>
               </div>
             </div>
 
@@ -188,11 +188,11 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({ onSwitchToAdmin }) =
               </div>
             )}
 
-            {/* Warm Bronze/Gold Button matching Najot Ta'lim Student Login */}
+            {/* Golden Amber Button */}
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full rounded-xl bg-[#BA8B52] hover:bg-[#A67840] text-white py-3.5 text-sm font-bold transition-all shadow-md shadow-[#BA8B52]/20 active:scale-[0.99] disabled:opacity-60"
+              className="w-full rounded-xl bg-gradient-to-r from-amber-500 via-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white py-3.5 text-xs font-black tracking-tight transition-all duration-150 shadow-lg shadow-amber-500/25 active:scale-[0.98] disabled:opacity-60 cursor-pointer"
             >
               {isLoading ? 'Kirilmoqda...' : 'Kirish'}
             </button>

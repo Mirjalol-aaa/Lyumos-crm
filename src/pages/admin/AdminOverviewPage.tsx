@@ -121,7 +121,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
           value={financials.totalStudents}
           subtitle={`${financials.activeStudents} faol • ${financials.newStudentsThisMonth} yangi o‘quvchi`}
           delta="+14%"
-          color="blue"
+          color="amber"
           icon={<Users className="h-5 w-5" />}
         />
 

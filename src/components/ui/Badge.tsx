@@ -10,7 +10,7 @@ export type BadgeVariant =
   | 'amber'
   | 'neutral';
 
-interface BadgeProps {
+export interface BadgeProps {
   children: React.ReactNode;
   variant?: BadgeVariant;
   size?: 'sm' | 'md';
@@ -26,55 +26,58 @@ export const Badge: React.FC<BadgeProps> = ({
   className = '',
 }) => {
   const sizeStyles = {
-    sm: 'px-2 py-0.5 text-[10px]',
-    md: 'px-2.5 py-1 text-xs',
+    sm: 'px-2 py-0.5 text-[10px] font-bold rounded-md gap-1',
+    md: 'px-2.5 py-1 text-[11px] font-extrabold rounded-lg gap-1.5',
   };
 
   const variantStyles: Record<BadgeVariant, { bg: string; dot: string }> = {
     default: {
-      bg: 'bg-blue-50 text-blue-700 border border-blue-200/60 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-900',
-      dot: 'bg-blue-500',
+      bg: 'bg-amber-500/10 text-amber-700 border border-amber-500/20 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-400/25',
+      dot: 'bg-amber-500',
+    },
+    amber: {
+      bg: 'bg-amber-500/10 text-amber-700 border border-amber-500/20 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-400/25',
+      dot: 'bg-amber-500',
     },
     success: {
-      bg: 'bg-emerald-50 text-emerald-700 border border-emerald-200/60 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-900',
+      bg: 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-400/25',
       dot: 'bg-emerald-500',
     },
     warning: {
-      bg: 'bg-amber-50 text-amber-700 border border-amber-200/60 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-900',
+      bg: 'bg-amber-500/10 text-amber-800 border border-amber-500/25 dark:bg-amber-500/20 dark:text-amber-200 dark:border-amber-400/30',
       dot: 'bg-amber-500',
     },
     danger: {
-      bg: 'bg-rose-50 text-rose-700 border border-rose-200/60 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-900',
+      bg: 'bg-rose-500/10 text-rose-700 border border-rose-500/20 dark:bg-rose-500/15 dark:text-rose-300 dark:border-rose-400/25',
       dot: 'bg-rose-500',
     },
     info: {
-      bg: 'bg-cyan-50 text-cyan-700 border border-cyan-200/60 dark:bg-cyan-950/60 dark:text-cyan-300 dark:border-cyan-900',
-      dot: 'bg-cyan-500',
+      bg: 'bg-sky-500/10 text-sky-700 border border-sky-500/20 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-400/25',
+      dot: 'bg-sky-500',
     },
     purple: {
-      bg: 'bg-purple-50 text-purple-700 border border-purple-200/60 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-900',
+      bg: 'bg-purple-500/10 text-purple-700 border border-purple-500/20 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-400/25',
       dot: 'bg-purple-500',
     },
-    amber: {
-      bg: 'bg-amber-100 text-amber-900 border border-amber-300/60 dark:bg-amber-950 dark:text-amber-200 dark:border-amber-800',
-      dot: 'bg-amber-500',
-    },
     neutral: {
-      bg: 'bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
+      bg: 'bg-slate-500/10 text-slate-700 border border-slate-500/20 dark:bg-slate-500/15 dark:text-slate-300 dark:border-slate-400/25',
       dot: 'bg-slate-400',
     },
   };
 
+  const current = variantStyles[variant] || variantStyles.default;
+
   return (
     <span
-      className={`inline-flex items-center gap-1.5 font-bold rounded-full select-none ${sizeStyles[size]} ${variantStyles[variant].bg} ${className}`}
+      className={`inline-flex items-center tracking-tight transition-colors ${sizeStyles[size]} ${current.bg} ${className}`}
     >
       {hasDot && (
-        <span
-          className={`h-1.5 w-1.5 rounded-full ${variantStyles[variant].dot} shrink-0 animate-pulse`}
-        />
+        <span className="relative flex h-1.5 w-1.5 shrink-0">
+          <span className={`absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping ${current.dot}`} />
+          <span className={`relative inline-flex h-1.5 w-1.5 rounded-full ${current.dot}`} />
+        </span>
       )}
-      {children}
+      <span>{children}</span>
     </span>
   );
 };

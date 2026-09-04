@@ -126,7 +126,7 @@ export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchTo
                 value={loginInput}
                 onChange={(e) => setLoginInput(e.target.value)}
                 placeholder="Loginni kiriting"
-                className="w-full rounded-xl border border-slate-200/90 bg-white px-3.5 py-3 text-xs text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/10 dark:border-slate-800 dark:bg-slate-900 dark:text-white font-medium"
+                className="w-full rounded-xl border border-slate-200/90 bg-slate-50/60 px-3.5 py-3 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-amber-500 focus:outline-none focus:ring-4 focus:ring-amber-500/15 dark:border-slate-800 dark:bg-slate-900 dark:focus:bg-slate-950 dark:text-white font-medium transition-all"
               />
             </div>
 
@@ -142,7 +142,7 @@ export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchTo
                   value={passwordInput}
                   onChange={(e) => setPasswordInput(e.target.value)}
                   placeholder="Parolni kiriting"
-                  className="w-full rounded-xl border border-slate-200/90 bg-white px-3.5 py-3 pr-10 text-xs text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/10 dark:border-slate-800 dark:bg-slate-900 dark:text-white font-medium"
+                  className="w-full rounded-xl border border-slate-200/90 bg-slate-50/60 px-3.5 py-3 pr-10 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-amber-500 focus:outline-none focus:ring-4 focus:ring-amber-500/15 dark:border-slate-800 dark:bg-slate-900 dark:focus:bg-slate-950 dark:text-white font-medium transition-all"
                 />
                 <button
                   type="button"
@@ -157,17 +157,17 @@ export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchTo
             {/* Cloudflare Style Verification Chip */}
             <div className="flex items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/70 p-3 text-xs dark:border-slate-800 dark:bg-slate-900/60">
               <div className="flex items-center gap-2">
-                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white">
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white shadow-xs">
                   <CheckCircle2 className="h-3.5 w-3.5" />
                 </div>
                 <span className="font-bold text-slate-700 dark:text-slate-300">
-                  Success!
+                  Xavfsizlik Tasdiqlandi
                 </span>
               </div>
               <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold">
-                <ShieldCheck className="h-3.5 w-3.5 text-orange-500" />
-                <span>CLOUDFLARE</span>
-                <span>• Privacy • Help</span>
+                <ShieldCheck className="h-3.5 w-3.5 text-amber-500" />
+                <span>LUMOS SHIELD</span>
+                <span>• 256-bit SSL</span>
               </div>
             </div>
 
@@ -181,9 +181,9 @@ export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchTo
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full rounded-xl bg-slate-900 hover:bg-slate-800 text-white py-3.5 text-xs font-bold transition-all shadow-md active:scale-[0.99] disabled:opacity-60 dark:bg-blue-600 dark:hover:bg-blue-700"
+              className="w-full rounded-xl bg-gradient-to-r from-amber-500 via-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white py-3.5 text-xs font-black tracking-tight transition-all duration-150 shadow-lg shadow-amber-500/25 active:scale-[0.98] disabled:opacity-60 cursor-pointer"
             >
-              {isLoading ? 'Tekshirilmoqda...' : 'Kirish'}
+              {isLoading ? 'Tekshirilmoqda...' : 'Tizimga Kirish'}
             </button>
           </form>
         </div>

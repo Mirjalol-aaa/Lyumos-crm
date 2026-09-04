@@ -58,7 +58,7 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
@@ -66,7 +66,7 @@ export const Modal: React.FC<ModalProps> = ({
         role="dialog"
         aria-modal="true"
         onClick={(e) => e.stopPropagation()}
-        className={`w-full ${maxWidthClasses[maxWidth]} rounded-3xl border border-slate-200/80 bg-white p-0 shadow-2xl transition-all duration-200 animate-in zoom-in-95 dark:border-slate-800 dark:bg-slate-900 flex flex-col max-h-[90vh] overflow-hidden ${className}`}
+        className={`w-full ${maxWidthClasses[maxWidth]} rounded-3xl border border-slate-200/90 bg-white p-0 shadow-2xl ring-1 ring-slate-900/[0.04] transition-all duration-200 animate-in zoom-in-95 dark:border-slate-800/90 dark:bg-slate-900 dark:ring-white/[0.06] flex flex-col max-h-[90vh] overflow-hidden ${className}`}
       >
         {/* Header */}
         {(title || subtitle || icon) && (

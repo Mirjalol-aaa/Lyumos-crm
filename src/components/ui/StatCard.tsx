@@ -97,7 +97,7 @@ export const StatCard: React.FC<StatCardProps> = ({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md hover:border-slate-300 dark:border-slate-800/90 dark:bg-slate-900/90 dark:hover:border-slate-700 ${currentTheme.glow}`}
+      className={`relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs ring-1 ring-slate-900/[0.03] transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-slate-300 dark:border-slate-800/90 dark:bg-slate-900/90 dark:ring-white/[0.04] dark:hover:border-slate-700 ${currentTheme.glow}`}
     >
       <div className="flex items-center justify-between gap-3">
         <span className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">
