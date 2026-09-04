@@ -31,35 +31,50 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const t = translations[language] || translations.uz;
 
-  const formatMoney = (amount: number, currency: string = 'USD'): string => {
-    const num = Math.round(amount);
-    const formatted = new Intl.NumberFormat(
-      language === 'uz' ? 'uz-UZ' : language === 'ru' ? 'ru-RU' : 'en-US'
-    ).format(num);
-
-    if (currency === 'UZS' || currency === 'so‘m' || currency === 'som') {
-      return `${formatted} so‘m`;
-    }
-    return `$${formatted}`;
-  };
-
-  const formatDate = (dateInput: string | Date | number): string => {
-    const date = new Date(dateInput);
-    if (isNaN(date.getTime())) return String(dateInput);
-
-    const locale = language === 'uz' ? 'uz-UZ' : language === 'ru' ? 'ru-RU' : 'en-US';
-    return new Intl.DateTimeFormat(locale, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    }).format(date);
-  };
-
   return (
-    <I18nContext.Provider value={{ language, setLanguage, t, formatMoney, formatDate }}>
+    <I18nContext.Provider
+      value={{
+        language,
+        setLanguage,
+        t,
+        formatMoney: (amt, curr) => formatMoney(amt, curr, language),
+        formatDate: (dt) => formatDate(dt, language),
+      }}
+    >
       {children}
     </I18nContext.Provider>
   );
+};
+
+export const formatMoney = (
+  amount: number,
+  currency: string = 'USD',
+  lang: Language = 'uz'
+): string => {
+  const num = Math.round(amount);
+  const formatted = new Intl.NumberFormat(
+    lang === 'uz' ? 'uz-UZ' : lang === 'ru' ? 'ru-RU' : 'en-US'
+  ).format(num);
+
+  if (currency === 'UZS' || currency === 'so‘m' || currency === 'som') {
+    return `${formatted} so‘m`;
+  }
+  return `$${formatted}`;
+};
+
+export const formatDate = (
+  dateInput: string | Date | number,
+  lang: Language = 'uz'
+): string => {
+  const date = new Date(dateInput);
+  if (isNaN(date.getTime())) return String(dateInput);
+
+  const locale = lang === 'uz' ? 'uz-UZ' : lang === 'ru' ? 'ru-RU' : 'en-US';
+  return new Intl.DateTimeFormat(locale, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }).format(date);
 };
 
 export const useI18n = (): I18nContextType => {

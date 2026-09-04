@@ -28,14 +28,11 @@ import { Group, Student } from '../types/crm';
 
 const BATCH_SIZE = 100;
 
-const SETTINGS_CODE =
-  'default';
+const SETTINGS_CODE = 'default';
 
-const SEED_STUDENT_COUNT =
-  152;
+const SEED_STUDENT_COUNT = 11;
 
-const SEED_MARKER_CODE =
-  'TCH-101';
+const SEED_MARKER_CODE = 'TCH-01';
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -508,31 +505,24 @@ Promise<void> {
         'center_settings'
       )
       .update({
-        seed_migration_version:
-          1,
+        seed_migration_version: 2,
       })
       .eq(
         'code',
         SETTINGS_CODE
       );
 
-
   if (error) {
     console.warn('[Supabase Migration Warning] Failed to mark seed migration complete:', error.message);
   }
 }
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // CHECK SEED MIGRATION STATUS
 // ─────────────────────────────────────────────────────────────────────────────
 
-async function isSeedMigrationComplete():
-Promise<boolean> {
-
-  const client =
-    requireSupabase();
-
+async function isSeedMigrationComplete(): Promise<boolean> {
+  const client = requireSupabase();
 
   const {
     data,
@@ -551,22 +541,13 @@ Promise<boolean> {
       )
       .maybeSingle();
 
-
-  if (
-    error
-  ) {
-
+  if (error) {
     throw new Error(
       `Failed to check seed migration version: ${error.message}`
     );
   }
 
-
-  return Number(
-    data
-      ?.seed_migration_version
-      ?? 0
-  ) >= 1;
+  return Number(data?.seed_migration_version ?? 0) >= 2;
 }
 
 

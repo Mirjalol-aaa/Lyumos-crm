@@ -318,11 +318,11 @@ export const LandingPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 max-w-4xl mx-auto">
             {INITIAL_COURSES.map((course) => (
               <div
                 key={course.id}
-                className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900"
+                className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900"
               >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -336,31 +336,29 @@ export const LandingPage: React.FC = () => {
                   </div>
 
                   <div>
-                    <h3 className="text-lg font-black text-slate-900 group-hover:text-amber-600 dark:text-white dark:group-hover:text-amber-400 transition-colors">
+                    <h3 className="text-xl font-black text-slate-900 group-hover:text-amber-600 dark:text-white dark:group-hover:text-amber-400 transition-colors">
                       {course.title}
                     </h3>
-                    <p className="mt-1.5 text-xs text-slate-500 leading-relaxed line-clamp-2">
+                    <p className="mt-2 text-xs text-slate-500 leading-relaxed">
                       {course.description}
                     </p>
                   </div>
 
                   <div className="space-y-2 border-t border-slate-100 pt-3 dark:border-slate-800 text-xs">
-                    <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-                      <span>Haftasiga 3 kun amaliy mashg‘ulot</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-                      <span>Xalqaro darajadagi portfolio loyihalari</span>
-                    </div>
+                    {course.syllabus.map((item, i) => (
+                      <div key={i} className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <div className="mt-8 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                   <div>
                     <span className="text-[10px] text-slate-400 uppercase font-bold">Oylik to‘lov:</span>
-                    <p className="text-lg font-black text-amber-600 dark:text-amber-400 font-mono">
-                      {formatMoney(course.pricePerMonth, 'USD')}
+                    <p className="text-xl font-black text-amber-600 dark:text-amber-400 font-mono">
+                      {formatMoney(course.pricePerMonth, 'UZS')}
                     </p>
                   </div>
 
@@ -382,7 +380,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ─────────────────────────────────────────────────────────────
-          5. EXPERT INSTRUCTORS
+          5. EXPERT INSTRUCTORS (NO PHOTOS AS REQUESTED)
       ───────────────────────────────────────────────────────────── */}
       <section id="teachers" className="border-t border-slate-200/80 bg-white py-20 dark:border-slate-800/80 dark:bg-slate-900/40">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
@@ -394,32 +392,30 @@ export const LandingPage: React.FC = () => {
               {t.landing.teachersTitle}
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto">
-              {t.landing.teachersSubtitle}
+              Matematika va ingliz tili bo‘yicha tajribali mutaxassis ustozlar
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {INITIAL_TEACHERS.slice(0, 4).map((teacher) => (
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 max-w-3xl mx-auto">
+            {INITIAL_TEACHERS.map((teacher) => (
               <div
                 key={teacher.id}
-                className="rounded-3xl border border-slate-200/90 bg-white p-5 text-center shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4"
+                className="rounded-3xl border border-slate-200/90 bg-white p-7 text-center shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4"
               >
-                <img
-                  src={teacher.avatar}
-                  alt={teacher.fullName}
-                  className="mx-auto h-24 w-24 rounded-2xl object-cover ring-4 ring-amber-500/10"
-                />
+                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500/20 via-amber-400/10 to-yellow-500/20 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-3xl font-black shadow-inner">
+                  {teacher.fullName.charAt(0)}
+                </div>
                 <div>
-                  <h4 className="text-sm font-black text-slate-900 dark:text-white">
+                  <h4 className="text-base font-black text-slate-900 dark:text-white">
                     {teacher.fullName}
                   </h4>
-                  <p className="text-xs text-amber-600 dark:text-amber-400 font-semibold mt-0.5">
+                  <p className="text-xs text-amber-600 dark:text-amber-400 font-semibold mt-1">
                     {teacher.subjects?.join(', ')}
                   </p>
                 </div>
                 <div className="flex items-center justify-center gap-1 text-xs text-amber-500 font-bold">
                   <Star className="h-3.5 w-3.5 fill-current" />
-                  <span>{teacher.rating || '4.9'} Baho</span>
+                  <span>{teacher.rating || '5.0'} Baho</span>
                 </div>
               </div>
             ))}

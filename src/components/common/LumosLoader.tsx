@@ -38,11 +38,11 @@ export const LumosLoader: React.FC<LumosLoaderProps> = ({
         <div className="absolute w-36 h-36 rounded-full border border-dashed border-amber-400/40 border-b-amber-300 animate-[spin_4s_linear_infinite_reverse]" />
         
         {/* Soft Golden Pulsing Halo Backdrop */}
-        <div className="w-28 h-28 rounded-3xl bg-gradient-to-tr from-amber-600/30 via-yellow-500/20 to-amber-300/30 backdrop-blur-xl border border-amber-400/40 shadow-[0_0_50px_rgba(212,175,55,0.35)] flex items-center justify-center p-3 animate-pulse">
+        <div className="w-32 h-32 rounded-3xl bg-gradient-to-tr from-amber-600/30 via-yellow-500/20 to-amber-300/30 backdrop-blur-xl border border-amber-400/50 shadow-[0_0_60px_rgba(212,175,55,0.45)] flex items-center justify-center p-1.5 animate-pulse overflow-hidden">
           <img
             src="/lumos-logo.png"
             alt="LUMOS O'QUV MARKAZI"
-            className="w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(212,175,55,0.6)]"
+            className="w-full h-full object-cover rounded-2xl filter drop-shadow-[0_6px_16px_rgba(212,175,55,0.7)]"
           />
         </div>
       </div>

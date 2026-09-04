@@ -31,7 +31,7 @@ export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchTo
     setIsLoading(true);
 
     setTimeout(() => {
-      const res = loginWithCredentials(loginInput, passwordInput);
+      const res = loginWithCredentials(loginInput, passwordInput, 'admin_teacher');
       if (!res.success) {
         setError(res.message || 'Login yoki parol noto‘g‘ri kiritildi.');
         setIsLoading(false);

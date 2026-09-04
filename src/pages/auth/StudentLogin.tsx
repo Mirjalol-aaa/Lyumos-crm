@@ -31,7 +31,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({ onSwitchToAdmin }) =
     setIsLoading(true);
 
     setTimeout(() => {
-      const res = loginWithCredentials(studentIdInput, passwordInput);
+      const res = loginWithCredentials(studentIdInput, passwordInput, 'student');
       if (!res.success) {
         setError(res.message || 'Login yoki parol noto‘g‘ri kiritildi.');
         setIsLoading(false);

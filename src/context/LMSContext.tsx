@@ -36,7 +36,11 @@ interface LMSContextType {
   generatePassword: () => string;
 
   loginWithRole: (role: UserRole, email: string, name?: string, teacherId?: string, studentId?: string) => void;
-  loginWithCredentials: (loginInput: string, passwordInput: string) => { success: boolean; message?: string };
+  loginWithCredentials: (
+    loginInput: string,
+    passwordInput: string,
+    allowedScope?: 'admin_teacher' | 'student'
+  ) => { success: boolean; message?: string };
   logout: () => void;
 
   activeTeacherId: string;
@@ -153,8 +157,8 @@ export const LMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ) => {
     const defaultNames: Record<UserRole, string> = {
       admin: 'Mirjalol Ahmadov',
-      teacher: 'Dr. Alexander Wright',
-      student: 'Ethan Smith',
+      teacher: 'Hadicha ustoz',
+      student: 'Azizbek',
     };
 
     const userObj: AuthUser = {
@@ -162,8 +166,8 @@ export const LMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       name: name || defaultNames[role],
       email,
       role,
-      teacherId: teacherId || (role === 'teacher' ? 'TCH-101' : undefined),
-      studentId: studentId || (role === 'student' ? 'STU-1001' : undefined),
+      teacherId: teacherId || (role === 'teacher' ? 'TCH-01' : undefined),
+      studentId: studentId || (role === 'student' ? 'STU-04' : undefined),
     };
 
     setCurrentUser(userObj);
@@ -174,12 +178,19 @@ export const LMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('lumos_auth_user', JSON.stringify(userObj));
   };
 
-  const loginWithCredentials = (loginInput: string, passwordInput: string): { success: boolean; message?: string } => {
+  const loginWithCredentials = (
+    loginInput: string,
+    passwordInput: string,
+    allowedScope?: 'admin_teacher' | 'student'
+  ): { success: boolean; message?: string } => {
     const cleanLogin = loginInput.toLowerCase().trim();
     const cleanPass = passwordInput.trim();
 
     // Direct check for Mirjalol Super Admin
     if ((cleanLogin === 'mirjalol' || cleanLogin === 'mirjalol ahmadov' || cleanLogin === 'admin@lumos.uz' || cleanLogin === 'admin@lyumos.uz' || cleanLogin === 'admin') && (cleanPass === '25073' || cleanPass === 'admin123')) {
+      if (allowedScope === 'student') {
+        return { success: false, message: 'Bu portal faqat o‘quvchilar uchun. O‘qituvchi va ma’muriyat uchun alohida portal mavjud.' };
+      }
       loginWithRole('admin', 'Mirjalol', 'Mirjalol Ahmadov');
       return { success: true };
     }
@@ -190,18 +201,35 @@ export const LMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (!matched) {
       if (cleanLogin.includes('admin') || cleanLogin.includes('mirjalol')) {
+        if (allowedScope === 'student') {
+          return { success: false, message: 'Bu portal faqat o‘quvchilar uchun.' };
+        }
         loginWithRole('admin', cleanLogin, 'Mirjalol Ahmadov');
         return { success: true };
       }
-      if (cleanLogin.includes('teacher') || cleanLogin.includes('ustoz')) {
-        loginWithRole('teacher', cleanLogin, 'Dr. Alexander Wright', 'TCH-101');
+      if (cleanLogin.includes('hadicha') || cleanLogin.includes('teacher') || cleanLogin.includes('ustoz')) {
+        if (allowedScope === 'student') {
+          return { success: false, message: 'Bu portal faqat o‘quvchilar uchun. O‘qituvchilar o‘z portaliga kirishi kerak.' };
+        }
+        loginWithRole('teacher', cleanLogin, 'Hadicha ustoz', 'TCH-01');
         return { success: true };
       }
-      if (cleanLogin.includes('student') || cleanLogin.includes('talaba')) {
-        loginWithRole('student', cleanLogin, 'Ethan Smith', undefined, 'STU-1001');
+      if (cleanLogin.includes('student') || cleanLogin.includes('talaba') || cleanLogin.includes('azizbek')) {
+        if (allowedScope === 'admin_teacher') {
+          return { success: false, message: 'Bu portal faqat o‘qituvchilar va ma’muriyat uchun. Iltimos, O‘quvchi portalidan kiring.' };
+        }
+        loginWithRole('student', cleanLogin, 'Azizbek', undefined, 'STU-04');
         return { success: true };
       }
       return { success: false, message: 'Bunday login topilmadi. Super Admin tomonidan login yaratilganligini tekshiring.' };
+    }
+
+    // Role Gatekeeping Check
+    if (allowedScope === 'admin_teacher' && matched.role === 'student') {
+      return { success: false, message: 'Bu portal faqat o‘qituvchilar va ma’muriyat uchun. O‘quvchilar o‘z portalidan kirishi kerak.' };
+    }
+    if (allowedScope === 'student' && (matched.role === 'admin' || matched.role === 'teacher')) {
+      return { success: false, message: 'Bu portal faqat o‘quvchilar uchun. O‘qituvchi va ma’muriyat uchun alohida portal mavjud.' };
     }
 
     if (matched.password !== cleanPass && cleanPass !== '25073' && cleanPass !== 'admin123' && cleanPass !== 'teacher123' && cleanPass !== 'student123') {
