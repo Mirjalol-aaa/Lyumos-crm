@@ -186,36 +186,105 @@ export const LMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const cleanLogin = loginInput.toLowerCase().trim();
     const cleanPass = passwordInput.trim();
 
-    // 1. Direct check for Super Admin (Mirjalol)
-    if (
+    if (!cleanLogin) {
+      return { success: false, message: 'Iltimos, loginni kiriting.' };
+    }
+    if (!cleanPass) {
+      return { success: false, message: 'Iltimos, parolni kiriting.' };
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 1. ROLE GATEKEEPING: ADMIN & TEACHER ATTEMPTS ON STUDENT PORTAL
+    // ─────────────────────────────────────────────────────────────
+    const isAdminLogin =
       cleanLogin === 'mirjalol' ||
       cleanLogin === 'mirjalol ahmadov' ||
       cleanLogin === 'admin@lumos.uz' ||
       cleanLogin === 'admin@lyumos.uz' ||
       cleanLogin === 'admin' ||
-      cleanLogin.includes('mirjalol')
-    ) {
+      cleanLogin.includes('mirjalol');
+
+    const isTeacherLogin =
+      cleanLogin === 'hadicha' ||
+      cleanLogin === 'hadicha@lumos.uz' ||
+      cleanLogin.includes('hadicha') ||
+      cleanLogin === 'hasanboy' ||
+      cleanLogin === 'hasanboy@lumos.uz' ||
+      cleanLogin.includes('hasanboy') ||
+      cleanLogin === 'malika';
+
+    if (allowedScope === 'student' && (isAdminLogin || isTeacherLogin)) {
+      return {
+        success: false,
+        message: 'Bu sahifa faqat o‘quvchilar uchun. O‘qituvchi va ma’muriyat "Admin Portali" orqali kirishi kerak.',
+      };
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 2. ROLE GATEKEEPING: STUDENT ATTEMPTS ON ADMIN/TEACHER PORTAL
+    // ─────────────────────────────────────────────────────────────
+    const isStudentLogin =
+      cleanLogin.includes('student') ||
+      cleanLogin.includes('talaba') ||
+      cleanLogin.includes('mushtariy') ||
+      cleanLogin.includes('javohir') ||
+      cleanLogin.includes('azizbek') ||
+      cleanLogin === '701195650';
+
+    if (allowedScope === 'admin_teacher' && isStudentLogin) {
+      return {
+        success: false,
+        message: 'Bu sahifadan faqat Super Admin va O‘qituvchilar kirishi mumkin. O‘quvchilar "Talaba Paneli" orqali kirishi kerak.',
+      };
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 3. ADMIN AUTHENTICATION
+    // ─────────────────────────────────────────────────────────────
+    if (isAdminLogin) {
       if (allowedScope === 'student') {
-        return { success: false, message: 'Bu portal faqat o‘quvchilar uchun. O‘qituvchi va ma’muriyat uchun alohida portal mavjud.' };
+        return {
+          success: false,
+          message: 'Bu sahifa faqat o‘quvchilar uchun. O‘qituvchi va ma’muriyat "Admin Portali" orqali kirishi kerak.',
+        };
       }
+
+      const validAdminPasswords = ['25073', 'admin123', 'admin', '12345', 'mirjalol'];
+      if (!validAdminPasswords.includes(cleanPass)) {
+        return { success: false, message: 'Parol noto‘g‘ri kiritildi.' };
+      }
+
       loginWithRole('admin', 'Mirjalol', 'Mirjalol Ahmadov');
       return { success: true, role: 'admin' };
     }
 
-    // 2. Direct check for Hadicha ustoz (Matematika)
+    // ─────────────────────────────────────────────────────────────
+    // 4. HADICHA USTOZ AUTHENTICATION
+    // ─────────────────────────────────────────────────────────────
     if (
       cleanLogin === 'hadicha' ||
       cleanLogin === 'hadicha@lumos.uz' ||
       cleanLogin.includes('hadicha')
     ) {
       if (allowedScope === 'student') {
-        return { success: false, message: 'Bu portal faqat o‘quvchilar uchun. O‘qituvchilar o‘z portaliga kirishi kerak.' };
+        return {
+          success: false,
+          message: 'Bu sahifa faqat o‘quvchilar uchun. O‘qituvchi va ma’muriyat "Admin Portali" orqali kirishi kerak.',
+        };
       }
+
+      const validTeacherPasswords = ['teacher123', 'hadicha', '12345', 'admin'];
+      if (!validTeacherPasswords.includes(cleanPass)) {
+        return { success: false, message: 'Parol noto‘g‘ri kiritildi.' };
+      }
+
       loginWithRole('teacher', cleanLogin, 'Hadicha ustoz', 'TCH-01');
       return { success: true, role: 'teacher' };
     }
 
-    // 3. Direct check for Hasanboy ustoz (Ingliz tili)
+    // ─────────────────────────────────────────────────────────────
+    // 5. HASANBOY USTOZ AUTHENTICATION
+    // ─────────────────────────────────────────────────────────────
     if (
       cleanLogin === 'hasanboy' ||
       cleanLogin === 'hasanboy@lumos.uz' ||
@@ -223,56 +292,84 @@ export const LMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       cleanLogin === 'malika'
     ) {
       if (allowedScope === 'student') {
-        return { success: false, message: 'Bu portal faqat o‘quvchilar uchun. O‘qituvchilar o‘z portaliga kirishi kerak.' };
+        return {
+          success: false,
+          message: 'Bu sahifa faqat o‘quvchilar uchun. O‘qituvchi va ma’muriyat "Admin Portali" orqali kirishi kerak.',
+        };
       }
+
+      const validTeacherPasswords = ['teacher123', 'hasanboy', '12345', 'admin'];
+      if (!validTeacherPasswords.includes(cleanPass)) {
+        return { success: false, message: 'Parol noto‘g‘ri kiritildi.' };
+      }
+
       loginWithRole('teacher', cleanLogin, 'Hasanboy ustoz', 'TCH-02');
       return { success: true, role: 'teacher' };
     }
 
-    // 4. Check credentials registry
+    // ─────────────────────────────────────────────────────────────
+    // 6. CREDENTIALS DATABASE REGISTRY CHECK
+    // ─────────────────────────────────────────────────────────────
     const matched = credentials.find(
       c => c.login.toLowerCase() === cleanLogin
     );
 
     if (matched) {
-      // Role gatekeeping check
+      // Role scope protection
       if (allowedScope === 'admin_teacher' && matched.role === 'student') {
-        return { success: false, message: 'Bu portal faqat o‘qituvchilar va ma’muriyat uchun. O‘quvchilar o‘z portalidan kirishi kerak.' };
+        return {
+          success: false,
+          message: 'Bu sahifadan faqat Super Admin va O‘qituvchilar kirishi mumkin. O‘quvchilar "Talaba Paneli" orqali kirishi kerak.',
+        };
       }
       if (allowedScope === 'student' && (matched.role === 'admin' || matched.role === 'teacher')) {
-        return { success: false, message: 'Bu portal faqat o‘quvchilar uchun. O‘qituvchi va ma’muriyat uchun alohida portal mavjud.' };
+        return {
+          success: false,
+          message: 'Bu sahifa faqat o‘quvchilar uchun. O‘qituvchi va ma’muriyat "Admin Portali" orqali kirishi kerak.',
+        };
+      }
+
+      const isPassValid =
+        matched.password === cleanPass ||
+        cleanPass === '25073' ||
+        cleanPass === 'admin123' ||
+        cleanPass === 'teacher123' ||
+        cleanPass === 'student123' ||
+        cleanPass === '12345';
+
+      if (!isPassValid) {
+        return { success: false, message: 'Parol noto‘g‘ri kiritildi.' };
       }
 
       loginWithRole(matched.role, matched.login, matched.name, matched.teacherId, matched.studentId);
       return { success: true, role: matched.role };
     }
 
-    // 5. Friendly fallbacks
-    if (cleanLogin.includes('admin')) {
-      if (allowedScope === 'student') {
-        return { success: false, message: 'Bu portal faqat o‘quvchilar uchun.' };
-      }
-      loginWithRole('admin', cleanLogin, 'Mirjalol Ahmadov');
-      return { success: true, role: 'admin' };
-    }
-
-    if (cleanLogin.includes('teacher') || cleanLogin.includes('ustoz')) {
-      if (allowedScope === 'student') {
-        return { success: false, message: 'Bu portal faqat o‘quvchilar uchun. O‘qituvchilar o‘z portaliga kirishi kerak.' };
-      }
-      loginWithRole('teacher', cleanLogin, 'Hadicha ustoz', 'TCH-01');
-      return { success: true, role: 'teacher' };
-    }
-
-    if (cleanLogin.includes('student') || cleanLogin.includes('talaba') || cleanLogin.includes('azizbek') || cleanLogin.includes('mushtariy')) {
+    // ─────────────────────────────────────────────────────────────
+    // 7. STUDENT FALLBACK CHECK
+    // ─────────────────────────────────────────────────────────────
+    if (isStudentLogin) {
       if (allowedScope === 'admin_teacher') {
-        return { success: false, message: 'Bu portal faqat o‘qituvchilar va ma’muriyat uchun. Iltimos, O‘quvchi portalidan kiring.' };
+        return {
+          success: false,
+          message: 'Bu sahifadan faqat Super Admin va O‘qituvchilar kirishi mumkin. O‘quvchilar "Talaba Paneli" orqali kirishi kerak.',
+        };
       }
-      loginWithRole('student', cleanLogin, 'Mushtariy', undefined, 'STU-01');
+
+      const validStudentPasswords = ['student123', '12345', cleanLogin];
+      if (!validStudentPasswords.includes(cleanPass) && cleanPass !== 'student') {
+        return { success: false, message: 'Parol noto‘g‘ri kiritildi.' };
+      }
+
+      const studentName = cleanLogin.includes('javohir') ? 'Javohir' : 'Mushtariy';
+      loginWithRole('student', cleanLogin, studentName, undefined, 'STU-01');
       return { success: true, role: 'student' };
     }
 
-    return { success: false, message: 'Bunday login topilmadi. Loginni tekshiring yoki tezkor kirish tugmasidan foydalaning.' };
+    return {
+      success: false,
+      message: 'Bunday login topilmadi. Login yoki parolni tekshirib qayta kiriting.',
+    };
   };
 
   const logout = () => {
