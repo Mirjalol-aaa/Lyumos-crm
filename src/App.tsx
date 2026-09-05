@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Toast } from './components/common/Toast';
+import { Menu, Sun, Moon, Globe } from 'lucide-react';
 
 import { CRMProvider, useCRM } from './context/CRMContext';
 import { LMSProvider, useLMS } from './context/LMSContext';
@@ -172,7 +173,7 @@ function AdminPortalContent() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function TeacherPortalContent() {
-  const { settings } = useCRM();
+  const { settings, updateSettings } = useCRM();
   const [teacherPage, setTeacherPage] = useState<TeacherPageType>('dashboard');
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window === 'undefined') return true;
@@ -212,6 +213,52 @@ function TeacherPortalContent() {
       />
 
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        {/* Mobile / Tablet Header for Teacher */}
+        <header className="lg:hidden flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-900/95 z-30">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setCollapsed(false)}
+              className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 cursor-pointer"
+              title="Menyu"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm font-black text-slate-900 dark:text-white font-serif">LUMOS</span>
+                <span className="rounded-md bg-indigo-500/10 px-1.5 py-0.5 text-[9px] font-black uppercase text-indigo-600 dark:text-indigo-400">
+                  Ustoz
+                </span>
+              </div>
+              <p className="text-[10px] text-slate-400 font-medium capitalize truncate max-w-[130px] sm:max-w-none">
+                {teacherPage === 'dashboard' ? 'Bosh sahifa' : teacherPage === 'lessons' ? 'Darslar & Videolar' : teacherPage === 'homework' ? 'Uyga vazifalar' : teacherPage === 'attendance' ? 'Davomat olish' : 'O‘quvchilarim'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => updateSettings({ theme: settings.theme === 'dark' ? 'light' : 'dark' })}
+              className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 cursor-pointer"
+              title="Mavzuni o‘zgartirish"
+            >
+              {settings.theme === 'dark' ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4" />}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                window.location.hash = '#/landing';
+              }}
+              className="flex h-9 items-center gap-1 px-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+            >
+              <Globe className="h-3.5 w-3.5 text-amber-500" />
+              <span className="hidden xs:inline">Sayt</span>
+            </button>
+          </div>
+        </header>
+
         <main className="flex-1 overflow-y-auto scrollbar-thin">
           {renderTeacherPage()}
         </main>
@@ -227,7 +274,7 @@ function TeacherPortalContent() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function StudentPortalContent() {
-  const { settings } = useCRM();
+  const { settings, updateSettings } = useCRM();
   const [studentPage, setStudentPage] = useState<StudentPageType>('dashboard');
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window === 'undefined') return true;
@@ -269,6 +316,52 @@ function StudentPortalContent() {
       />
 
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        {/* Mobile / Tablet Header for Student */}
+        <header className="lg:hidden flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-900/95 z-30">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setCollapsed(false)}
+              className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 cursor-pointer"
+              title="Menyu"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm font-black text-slate-900 dark:text-white font-serif">LUMOS</span>
+                <span className="rounded-md bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-black uppercase text-emerald-600 dark:text-emerald-400">
+                  Talaba
+                </span>
+              </div>
+              <p className="text-[10px] text-slate-400 font-medium capitalize truncate max-w-[130px] sm:max-w-none">
+                {studentPage === 'dashboard' ? 'Bosh sahifa' : studentPage === 'lessons' ? 'Darslar & Videolar' : studentPage === 'homework' ? 'Uyga vazifalar' : studentPage === 'leaderboard' ? 'Reyting' : studentPage === 'rewards' ? 'Sovg‘alar' : 'To‘lovlarim'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => updateSettings({ theme: settings.theme === 'dark' ? 'light' : 'dark' })}
+              className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 cursor-pointer"
+              title="Mavzuni o‘zgartirish"
+            >
+              {settings.theme === 'dark' ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4" />}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                window.location.hash = '#/landing';
+              }}
+              className="flex h-9 items-center gap-1 px-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+            >
+              <Globe className="h-3.5 w-3.5 text-amber-500" />
+              <span className="hidden xs:inline">Sayt</span>
+            </button>
+          </div>
+        </header>
+
         <main className="flex-1 overflow-y-auto scrollbar-thin">
           {renderStudentPage()}
         </main>
@@ -276,6 +369,7 @@ function StudentPortalContent() {
     </div>
   );
 }
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // APP CONTENT ROUTER: AUTHENTIC SPLIT LOGIN WITH STRICT PORTAL ROUTING

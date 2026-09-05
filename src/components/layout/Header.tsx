@@ -376,29 +376,31 @@ export const Header:
 
           <div
             className="
-              hidden
+              flex
               min-w-0
               flex-col
-
-              sm:flex
             "
           >
             <h1
               className="
-                max-w-[150px]
+                max-w-[115px]
                 truncate
 
-                text-sm
-                font-semibold
-                tracking-[-0.015em]
+                text-xs
+                font-bold
+                tracking-tight
                 text-slate-900
 
                 dark:text-slate-100
 
-                md:max-w-[190px]
+                sm:max-w-[160px]
+                sm:text-sm
+                sm:font-semibold
+
+                md:max-w-[200px]
                 md:text-[15px]
 
-                xl:max-w-[260px]
+                xl:max-w-[280px]
               "
             >
               {PAGE_TITLES_BY_LANG[
@@ -867,7 +869,8 @@ export const Header:
               window.location.hash = '#/landing';
             }}
             className="
-              flex
+              hidden
+              sm:flex
               h-10
               cursor-pointer
               items-center
@@ -905,7 +908,7 @@ export const Header:
           </button>
 
 
-          {/* LANGUAGE */}
+          {/* LANGUAGE (RESPONSIVE ON ALL SCREENS) */}
 
           <div
             ref={
@@ -913,9 +916,7 @@ export const Header:
             }
             className="
               relative
-              hidden
-
-              md:block
+              flex
             "
           >
             <button
@@ -936,7 +937,8 @@ export const Header:
 
                 rounded-xl
 
-                px-2.5
+                px-2
+                sm:px-2.5
 
                 text-slate-500
 
@@ -998,7 +1000,8 @@ export const Header:
                   z-50
 
                   mt-2
-                  w-44
+                  w-40
+                  sm:w-44
 
                   overflow-hidden
 
@@ -1020,11 +1023,6 @@ export const Header:
               >
                 {[
                   {
-                    code: 'en',
-                    label:
-                      'English',
-                  },
-                  {
                     code: 'uz',
                     label:
                       "O'zbekcha",
@@ -1033,6 +1031,11 @@ export const Header:
                     code: 'ru',
                     label:
                       'Русский',
+                  },
+                  {
+                    code: 'en',
+                    label:
+                      'English',
                   },
                 ].map(
                   langItem => {
@@ -1127,12 +1130,12 @@ export const Header:
           </div>
 
 
-          {/* THEME */}
+          {/* THEME (RESPONSIVE ON ALL SCREENS) */}
 
           <button
             type="button"
             onClick={toggleTheme}
-            className="hidden h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xl text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900 active:scale-[0.96] dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white sm:flex overflow-hidden relative"
+            className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xl text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900 active:scale-[0.96] dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white overflow-hidden relative"
             title={
               settings.theme === 'dark'
                 ? "Yorug' rejimga o'tish"
@@ -1163,6 +1166,7 @@ export const Header:
               <Moon className="h-[18px] w-[18px]" />
             </span>
           </button>
+
         </div>
       </header>
     );

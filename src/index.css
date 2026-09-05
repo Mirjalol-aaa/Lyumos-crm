@@ -420,6 +420,27 @@ button {
   scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
 }
 
+/* --------------------------------------------------------------------------
+   TOUCH-FRIENDLY & MOBILE RESPONSIVE UTILITIES
+   -------------------------------------------------------------------------- */
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+.scrollbar-thin,
+main,
+[role="dialog"] {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent horizontal overflow on small devices */
+body {
+  overflow-x: hidden;
+  touch-action: manipulation;
+}
+
 
 
 /* --------------------------------------------------------------------------
