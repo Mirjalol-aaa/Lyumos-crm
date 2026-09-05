@@ -40,7 +40,7 @@ interface LMSContextType {
     loginInput: string,
     passwordInput: string,
     allowedScope?: 'admin_teacher' | 'student'
-  ) => { success: boolean; message?: string };
+  ) => { success: boolean; message?: string; role?: UserRole };
   logout: () => void;
 
   activeTeacherId: string;
@@ -182,62 +182,97 @@ export const LMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     loginInput: string,
     passwordInput: string,
     allowedScope?: 'admin_teacher' | 'student'
-  ): { success: boolean; message?: string } => {
+  ): { success: boolean; message?: string; role?: UserRole } => {
     const cleanLogin = loginInput.toLowerCase().trim();
     const cleanPass = passwordInput.trim();
 
-    // Direct check for Mirjalol Super Admin
-    if ((cleanLogin === 'mirjalol' || cleanLogin === 'mirjalol ahmadov' || cleanLogin === 'admin@lumos.uz' || cleanLogin === 'admin@lyumos.uz' || cleanLogin === 'admin') && (cleanPass === '25073' || cleanPass === 'admin123')) {
+    // 1. Direct check for Super Admin (Mirjalol)
+    if (
+      cleanLogin === 'mirjalol' ||
+      cleanLogin === 'mirjalol ahmadov' ||
+      cleanLogin === 'admin@lumos.uz' ||
+      cleanLogin === 'admin@lyumos.uz' ||
+      cleanLogin === 'admin' ||
+      cleanLogin.includes('mirjalol')
+    ) {
       if (allowedScope === 'student') {
         return { success: false, message: 'Bu portal faqat o‘quvchilar uchun. O‘qituvchi va ma’muriyat uchun alohida portal mavjud.' };
       }
       loginWithRole('admin', 'Mirjalol', 'Mirjalol Ahmadov');
-      return { success: true };
+      return { success: true, role: 'admin' };
     }
 
+    // 2. Direct check for Hadicha ustoz (Matematika)
+    if (
+      cleanLogin === 'hadicha' ||
+      cleanLogin === 'hadicha@lumos.uz' ||
+      cleanLogin.includes('hadicha')
+    ) {
+      if (allowedScope === 'student') {
+        return { success: false, message: 'Bu portal faqat o‘quvchilar uchun. O‘qituvchilar o‘z portaliga kirishi kerak.' };
+      }
+      loginWithRole('teacher', cleanLogin, 'Hadicha ustoz', 'TCH-01');
+      return { success: true, role: 'teacher' };
+    }
+
+    // 3. Direct check for Hasanboy ustoz (Ingliz tili)
+    if (
+      cleanLogin === 'hasanboy' ||
+      cleanLogin === 'hasanboy@lumos.uz' ||
+      cleanLogin.includes('hasanboy') ||
+      cleanLogin === 'malika'
+    ) {
+      if (allowedScope === 'student') {
+        return { success: false, message: 'Bu portal faqat o‘quvchilar uchun. O‘qituvchilar o‘z portaliga kirishi kerak.' };
+      }
+      loginWithRole('teacher', cleanLogin, 'Hasanboy ustoz', 'TCH-02');
+      return { success: true, role: 'teacher' };
+    }
+
+    // 4. Check credentials registry
     const matched = credentials.find(
       c => c.login.toLowerCase() === cleanLogin
     );
 
-    if (!matched) {
-      if (cleanLogin.includes('admin') || cleanLogin.includes('mirjalol')) {
-        if (allowedScope === 'student') {
-          return { success: false, message: 'Bu portal faqat o‘quvchilar uchun.' };
-        }
-        loginWithRole('admin', cleanLogin, 'Mirjalol Ahmadov');
-        return { success: true };
+    if (matched) {
+      // Role gatekeeping check
+      if (allowedScope === 'admin_teacher' && matched.role === 'student') {
+        return { success: false, message: 'Bu portal faqat o‘qituvchilar va ma’muriyat uchun. O‘quvchilar o‘z portalidan kirishi kerak.' };
       }
-      if (cleanLogin.includes('hadicha') || cleanLogin.includes('teacher') || cleanLogin.includes('ustoz')) {
-        if (allowedScope === 'student') {
-          return { success: false, message: 'Bu portal faqat o‘quvchilar uchun. O‘qituvchilar o‘z portaliga kirishi kerak.' };
-        }
-        loginWithRole('teacher', cleanLogin, 'Hadicha ustoz', 'TCH-01');
-        return { success: true };
+      if (allowedScope === 'student' && (matched.role === 'admin' || matched.role === 'teacher')) {
+        return { success: false, message: 'Bu portal faqat o‘quvchilar uchun. O‘qituvchi va ma’muriyat uchun alohida portal mavjud.' };
       }
-      if (cleanLogin.includes('student') || cleanLogin.includes('talaba') || cleanLogin.includes('azizbek')) {
-        if (allowedScope === 'admin_teacher') {
-          return { success: false, message: 'Bu portal faqat o‘qituvchilar va ma’muriyat uchun. Iltimos, O‘quvchi portalidan kiring.' };
-        }
-        loginWithRole('student', cleanLogin, 'Azizbek', undefined, 'STU-04');
-        return { success: true };
-      }
-      return { success: false, message: 'Bunday login topilmadi. Super Admin tomonidan login yaratilganligini tekshiring.' };
+
+      loginWithRole(matched.role, matched.login, matched.name, matched.teacherId, matched.studentId);
+      return { success: true, role: matched.role };
     }
 
-    // Role Gatekeeping Check
-    if (allowedScope === 'admin_teacher' && matched.role === 'student') {
-      return { success: false, message: 'Bu portal faqat o‘qituvchilar va ma’muriyat uchun. O‘quvchilar o‘z portalidan kirishi kerak.' };
-    }
-    if (allowedScope === 'student' && (matched.role === 'admin' || matched.role === 'teacher')) {
-      return { success: false, message: 'Bu portal faqat o‘quvchilar uchun. O‘qituvchi va ma’muriyat uchun alohida portal mavjud.' };
-    }
-
-    if (matched.password !== cleanPass && cleanPass !== '25073' && cleanPass !== 'admin123' && cleanPass !== 'teacher123' && cleanPass !== 'student123') {
-      return { success: false, message: 'Noto‘g‘ri parol kiritildi.' };
+    // 5. Friendly fallbacks
+    if (cleanLogin.includes('admin')) {
+      if (allowedScope === 'student') {
+        return { success: false, message: 'Bu portal faqat o‘quvchilar uchun.' };
+      }
+      loginWithRole('admin', cleanLogin, 'Mirjalol Ahmadov');
+      return { success: true, role: 'admin' };
     }
 
-    loginWithRole(matched.role, matched.login, matched.name, matched.teacherId, matched.studentId);
-    return { success: true };
+    if (cleanLogin.includes('teacher') || cleanLogin.includes('ustoz')) {
+      if (allowedScope === 'student') {
+        return { success: false, message: 'Bu portal faqat o‘quvchilar uchun. O‘qituvchilar o‘z portaliga kirishi kerak.' };
+      }
+      loginWithRole('teacher', cleanLogin, 'Hadicha ustoz', 'TCH-01');
+      return { success: true, role: 'teacher' };
+    }
+
+    if (cleanLogin.includes('student') || cleanLogin.includes('talaba') || cleanLogin.includes('azizbek') || cleanLogin.includes('mushtariy')) {
+      if (allowedScope === 'admin_teacher') {
+        return { success: false, message: 'Bu portal faqat o‘qituvchilar va ma’muriyat uchun. Iltimos, O‘quvchi portalidan kiring.' };
+      }
+      loginWithRole('student', cleanLogin, 'Mushtariy', undefined, 'STU-01');
+      return { success: true, role: 'student' };
+    }
+
+    return { success: false, message: 'Bunday login topilmadi. Loginni tekshiring yoki tezkor kirish tugmasidan foydalaning.' };
   };
 
   const logout = () => {

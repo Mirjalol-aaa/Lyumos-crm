@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLMS } from '../../context/LMSContext';
 import { InteractiveParticles } from '../../components/common/InteractiveParticles';
-import { Sparkles, Eye, EyeOff, CheckCircle2, ShieldCheck, ArrowRight, ArrowLeft, Home, Sun, Moon } from 'lucide-react';
-import { useCRM } from '../../context/CRMContext';
+import { Eye, EyeOff, CheckCircle2, ShieldCheck, ArrowRight, ArrowLeft } from 'lucide-react';
 import lumosLogo from '../../assets/lumos-logo.png';
 
 interface AdminTeacherLoginProps {
@@ -12,7 +11,6 @@ interface AdminTeacherLoginProps {
 
 export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchToStudent, onBackToHome }) => {
   const { loginWithCredentials } = useLMS();
-  const { settings, updateSettings } = useCRM();
   const [loginInput, setLoginInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -23,37 +21,72 @@ export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchTo
     document.title = "LUMOS ERP - O‘quv Markazi Boshqaruvi";
   }, []);
 
+  const handleBackToHome = () => {
+    if (onBackToHome) {
+      onBackToHome();
+    } else {
+      window.location.hash = '#/home';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleFastLogin = (loginVal: string, passVal: string) => {
+    setLoginInput(loginVal);
+    setPasswordInput(passVal);
+    setError('');
+    setIsLoading(true);
+
+    setTimeout(() => {
+      const res = loginWithCredentials(loginVal, passVal, 'admin_teacher');
+      if (!res.success) {
+        setError(res.message || 'Login yoki parol noto‘g‘ri kiritildi.');
+        setIsLoading(false);
+      } else {
+        setIsLoading(false);
+        if (res.role === 'teacher') {
+          window.location.hash = '#/teacher';
+        } else {
+          window.location.hash = '#/dashboard';
+        }
+      }
+    }, 200);
+  };
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    if (!loginInput.trim() || !passwordInput.trim()) {
-      setError('Iltimos, login va parolni kiriting.');
+    if (!loginInput.trim()) {
+      setError('Iltimos, loginni kiriting.');
       return;
     }
 
     setIsLoading(true);
 
     setTimeout(() => {
-      const res = loginWithCredentials(loginInput, passwordInput, 'admin_teacher');
+      const res = loginWithCredentials(loginInput, passwordInput || '25073', 'admin_teacher');
       if (!res.success) {
         setError(res.message || 'Login yoki parol noto‘g‘ri kiritildi.');
         setIsLoading(false);
+      } else {
+        setIsLoading(false);
+        if (res.role === 'teacher') {
+          window.location.hash = '#/teacher';
+        } else {
+          window.location.hash = '#/dashboard';
+        }
       }
-    }, 250);
+    }, 200);
   };
 
   return (
     <div className="min-h-screen w-full flex flex-col lg:flex-row bg-white dark:bg-slate-950 font-sans">
       {/* LEFT COLUMN: Modern Education Center Reception Visual */}
       <div className="relative hidden lg:flex lg:w-1/2 min-h-screen bg-slate-900 overflow-hidden items-end p-12">
-        {/* Top left return button */}
+        {/* Top left return button (Desktop) */}
         <button
           type="button"
-          onClick={() => {
-            if (onBackToHome) onBackToHome();
-            else window.location.hash = '#/';
-          }}
+          onClick={handleBackToHome}
           className="absolute top-8 left-8 z-30 inline-flex items-center gap-2 rounded-xl bg-slate-950/70 backdrop-blur-md px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-slate-900 hover:border-amber-400/50 transition-all cursor-pointer border border-white/20"
           title="LUMOS Asosiy saytiga qaytish"
         >
@@ -95,10 +128,7 @@ export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchTo
         <div className="flex items-center justify-between gap-3">
           <button
             type="button"
-            onClick={() => {
-              if (onBackToHome) onBackToHome();
-              else window.location.hash = '#/';
-            }}
+            onClick={handleBackToHome}
             className="flex items-center gap-3 cursor-pointer text-left group"
             title="LUMOS Asosiy saytiga qaytish"
           >
@@ -119,40 +149,12 @@ export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchTo
             </div>
           </button>
 
+          {/* Clean right header: NO theme toggle, NO duplicate "Bosh sahifa" button */}
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => {
-                const nextTheme = settings.theme === 'dark' ? 'light' : 'dark';
-                updateSettings({ theme: nextTheme });
-              }}
-              className="flex h-8.5 w-8.5 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 hover:border-amber-400 dark:border-slate-800 dark:bg-slate-900 dark:text-amber-400 dark:hover:bg-slate-800 transition-all shadow-xs cursor-pointer"
-              title={settings.theme === 'dark' ? "Yorug' rejim (Light Mode)" : "Qorong'i rejim (Dark Mode)"}
-            >
-              {settings.theme === 'dark' ? (
-                <Sun className="h-4 w-4 text-amber-400" />
-              ) : (
-                <Moon className="h-4 w-4 text-slate-700" />
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                if (onBackToHome) onBackToHome();
-                else window.location.hash = '#/';
-              }}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-xs hover:bg-amber-50 hover:text-amber-700 hover:border-amber-300 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 transition-all cursor-pointer"
-              title="LUMOS Asosiy saytiga qaytish"
-            >
-              <ArrowLeft className="h-3.5 w-3.5 text-amber-500" />
-              <span className="hidden sm:inline">Bosh sahifa</span>
-            </button>
-
-            <button
-              type="button"
               onClick={onSwitchToStudent}
-              className="text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer ml-1"
+              className="text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:underline flex items-center gap-1.5 cursor-pointer bg-blue-50 dark:bg-blue-950/40 px-3.5 py-2 rounded-xl border border-blue-200/60 dark:border-blue-800/60 transition-all shadow-xs"
             >
               <span>Talaba Paneli</span>
               <ArrowRight className="h-3.5 w-3.5" />
@@ -169,6 +171,52 @@ export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchTo
             <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
               Boshqaruv markaziga kirish uchun login va parolingizni kiriting
             </p>
+          </div>
+
+          {/* Quick 1-Click Fast Login for Instant Entry */}
+          <div className="space-y-1.5 pt-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                Tezkor kirish (1-klik):
+              </span>
+              <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">
+                To‘g‘ridan-to‘g‘ri kirish
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => handleFastLogin('Mirjalol', '25073')}
+                disabled={isLoading}
+                className="flex flex-col items-center justify-center p-2.5 rounded-xl border border-amber-200/90 bg-amber-50/70 hover:bg-amber-100 hover:border-amber-400 text-amber-950 dark:bg-amber-950/30 dark:border-amber-800/60 dark:text-amber-300 transition-all cursor-pointer shadow-xs active:scale-95 group text-center"
+              >
+                <span className="text-base group-hover:scale-110 transition-transform">👑</span>
+                <span className="text-[11px] font-extrabold mt-0.5">Super Admin</span>
+                <span className="text-[9px] text-amber-700/80 dark:text-amber-400/80 font-medium">Mirjalol</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleFastLogin('hadicha', 'teacher123')}
+                disabled={isLoading}
+                className="flex flex-col items-center justify-center p-2.5 rounded-xl border border-emerald-200/90 bg-emerald-50/70 hover:bg-emerald-100 hover:border-emerald-400 text-emerald-950 dark:bg-emerald-950/30 dark:border-emerald-800/60 dark:text-emerald-300 transition-all cursor-pointer shadow-xs active:scale-95 group text-center"
+              >
+                <span className="text-base group-hover:scale-110 transition-transform">📐</span>
+                <span className="text-[11px] font-extrabold mt-0.5">Hadicha ustoz</span>
+                <span className="text-[9px] text-emerald-700/80 dark:text-emerald-400/80 font-medium">Matematika</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleFastLogin('hasanboy', 'teacher123')}
+                disabled={isLoading}
+                className="flex flex-col items-center justify-center p-2.5 rounded-xl border border-blue-200/90 bg-blue-50/70 hover:bg-blue-100 hover:border-blue-400 text-blue-950 dark:bg-blue-950/30 dark:border-blue-800/60 dark:text-blue-300 transition-all cursor-pointer shadow-xs active:scale-95 group text-center"
+              >
+                <span className="text-base group-hover:scale-110 transition-transform">🇬🇧</span>
+                <span className="text-[11px] font-extrabold mt-0.5">Hasanboy ustoz</span>
+                <span className="text-[9px] text-blue-700/80 dark:text-blue-400/80 font-medium">Ingliz tili</span>
+              </button>
+            </div>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
@@ -195,10 +243,9 @@ export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchTo
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  required
                   value={passwordInput}
                   onChange={(e) => setPasswordInput(e.target.value)}
-                  placeholder="Parolni kiriting"
+                  placeholder="Parolni kiriting (Super Admin uchun ixtiyoriy)"
                   className="w-full rounded-xl border border-slate-200/90 bg-slate-50/60 px-3.5 py-3 pr-10 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-amber-500 focus:outline-none focus:ring-4 focus:ring-amber-500/15 dark:border-slate-800 dark:bg-slate-900 dark:focus:bg-slate-950 dark:text-white font-medium transition-all"
                 />
                 <button

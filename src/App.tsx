@@ -340,7 +340,8 @@ function AppContentRouter() {
             window.location.hash = '#/admin';
           }}
           onBackToHome={() => {
-            window.location.hash = '#/landing';
+            window.location.hash = '#/home';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         />
       );
@@ -353,7 +354,8 @@ function AppContentRouter() {
             window.location.hash = '#/student';
           }}
           onBackToHome={() => {
-            window.location.hash = '#/landing';
+            window.location.hash = '#/home';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         />
       );
