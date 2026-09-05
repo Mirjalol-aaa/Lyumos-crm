@@ -17,6 +17,20 @@ import {
   ACADEMIC_MONTHS,
 } from '../constants/academic';
 
+const MONTH_NAMES_UZ: Record<string, string> = {
+  August: 'Avgust',
+  September: 'Sentabr',
+  October: 'Oktyabr',
+  November: 'Noyabr',
+  December: 'Dekabr',
+  January: 'Yanvar',
+  February: 'Fevral',
+  March: 'Mart',
+  April: 'Aprel',
+  May: 'May',
+  June: 'Iyun',
+  July: 'Iyul',
+};
 
 export const PaymentsPage: React.FC = () => {
   const {
@@ -341,7 +355,7 @@ export const PaymentsPage: React.FC = () => {
               "
             />
 
-            Pay
+            To‘lash
           </button>
         );
     }
@@ -457,7 +471,7 @@ export const PaymentsPage: React.FC = () => {
               sm:text-2xl
             "
           >
-            Academic Year Payment Matrix
+            To‘lovlar Tarixi & Matritsa
           </h1>
 
           <p
@@ -470,10 +484,7 @@ export const PaymentsPage: React.FC = () => {
               sm:text-xs
             "
           >
-            August — July • Real-time
-            monthly fee collection,
-            discounts and payment
-            status.
+            Oylar kesimida oylik to‘lovlar, tushumlar, chegirmalar va kassa holati monitoringi.
           </p>
         </div>
 
@@ -516,7 +527,7 @@ export const PaymentsPage: React.FC = () => {
             "
           />
 
-          Receive Payment
+          To‘lov Qabul Qilish
         </button>
       </div>
 
@@ -580,7 +591,7 @@ export const PaymentsPage: React.FC = () => {
                   event.target.value
                 )
               }
-              placeholder="Search name, ID or group..."
+              placeholder="O‘quvchi FISH, ID yoki guruh bo‘yicha qidiruv..."
               className="
                 h-10
                 w-full
@@ -628,7 +639,7 @@ export const PaymentsPage: React.FC = () => {
                 sm:text-xs
               "
             >
-              Active Month
+              Faol Oy:
             </span>
 
             <select
@@ -665,7 +676,7 @@ export const PaymentsPage: React.FC = () => {
                     key={month}
                     value={month}
                   >
-                    {month}
+                    {MONTH_NAMES_UZ[month] || month}
                   </option>
                 )
               )}
@@ -712,7 +723,7 @@ export const PaymentsPage: React.FC = () => {
               sm:text-[10px]
             "
           >
-            Paid
+            To‘langan
           </p>
 
           <p
@@ -735,7 +746,7 @@ export const PaymentsPage: React.FC = () => {
               text-slate-400
             "
           >
-            {activeMonthFilter}
+            {MONTH_NAMES_UZ[activeMonthFilter] || activeMonthFilter}
           </p>
         </div>
 
@@ -764,7 +775,7 @@ export const PaymentsPage: React.FC = () => {
               sm:text-[10px]
             "
           >
-            Unpaid
+            Kutilmoqda
           </p>
 
           <p
@@ -787,7 +798,7 @@ export const PaymentsPage: React.FC = () => {
               text-slate-400
             "
           >
-            Pending
+            To‘lanmagan
           </p>
         </div>
 
@@ -816,7 +827,7 @@ export const PaymentsPage: React.FC = () => {
               sm:text-[10px]
             "
           >
-            Overdue
+            Muddati O‘tgan
           </p>
 
           <p
@@ -839,7 +850,7 @@ export const PaymentsPage: React.FC = () => {
               text-slate-400
             "
           >
-            Requires attention
+            E’tibor talab
           </p>
         </div>
 
@@ -868,7 +879,7 @@ export const PaymentsPage: React.FC = () => {
               sm:text-[10px]
             "
           >
-            Collected
+            Yig‘ilgan Tushum
           </p>
 
           <p
@@ -896,7 +907,7 @@ export const PaymentsPage: React.FC = () => {
               text-slate-400
             "
           >
-            Total received
+            Jami qabul qilingan
           </p>
         </div>
       </div>
@@ -1042,7 +1053,7 @@ export const PaymentsPage: React.FC = () => {
                             text-slate-400
                           "
                         >
-                          Group
+                          Guruh
                         </p>
 
                         <p
@@ -1071,7 +1082,7 @@ export const PaymentsPage: React.FC = () => {
                             text-slate-400
                           "
                         >
-                          Monthly Fee
+                          Oylik To‘lov
                         </p>
 
                         <p
@@ -1101,7 +1112,7 @@ export const PaymentsPage: React.FC = () => {
                             text-slate-400
                           "
                         >
-                          Month
+                          Oy
                         </p>
 
                         <p
@@ -1112,7 +1123,7 @@ export const PaymentsPage: React.FC = () => {
                             text-[#007AFF]
                           "
                         >
-                          {activeMonthFilter}
+                          {MONTH_NAMES_UZ[activeMonthFilter] || activeMonthFilter}
                         </p>
                       </div>
 
@@ -1127,7 +1138,7 @@ export const PaymentsPage: React.FC = () => {
                             text-slate-400
                           "
                         >
-                          Paid Amount
+                          To‘langan Summa
                         </p>
 
                         <p
@@ -1180,7 +1191,7 @@ export const PaymentsPage: React.FC = () => {
                           dark:hover:bg-slate-700
                         "
                       >
-                        View Profile
+                        Profil
                       </button>
 
 
@@ -1207,7 +1218,7 @@ export const PaymentsPage: React.FC = () => {
                           active:scale-[0.98]
                         "
                       >
-                        Receive Payment
+                        To‘lov Qabul Qilish
                       </button>
                     </div>
                   </div>
@@ -1237,7 +1248,7 @@ export const PaymentsPage: React.FC = () => {
               dark:bg-slate-900
             "
           >
-            No students found.
+            O‘quvchilar topilmadi.
           </div>
         )}
       </div>
@@ -1306,7 +1317,7 @@ export const PaymentsPage: React.FC = () => {
                     dark:bg-slate-800
                   "
                 >
-                  Student
+                  O‘quvchi FISH
                 </th>
 
                 <th
@@ -1314,7 +1325,7 @@ export const PaymentsPage: React.FC = () => {
                     p-3.5
                   "
                 >
-                  Group
+                  Guruh
                 </th>
 
                 <th
@@ -1322,7 +1333,7 @@ export const PaymentsPage: React.FC = () => {
                     p-3.5
                   "
                 >
-                  Fee
+                  Oylik Narx
                 </th>
 
 
@@ -1348,10 +1359,10 @@ export const PaymentsPage: React.FC = () => {
                         }
                       `}
                     >
-                      {month.slice(
+                      {MONTH_NAMES_UZ[month]?.slice(
                         0,
                         3
-                      )}
+                      ) || month.slice(0, 3)}
                     </th>
                   )
                 )}

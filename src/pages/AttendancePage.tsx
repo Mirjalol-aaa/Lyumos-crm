@@ -28,6 +28,13 @@ const ATTENDANCE_STATUSES: AttendanceStatus[] = [
   'Excused',
 ];
 
+const STATUS_UZ: Record<AttendanceStatus, { label: string; icon: string }> = {
+  Present: { label: 'Keldi', icon: '🟢' },
+  Absent: { label: 'Kelmagan', icon: '🔴' },
+  Late: { label: 'Kechikdi', icon: '🟡' },
+  Excused: { label: 'Sababli', icon: '🔵' },
+};
+
 
 export const AttendancePage: React.FC = () => {
   const {
@@ -479,8 +486,7 @@ export const AttendancePage: React.FC = () => {
               sm:text-2xl
             "
           >
-            Daily & Monthly
-            Attendance Tracker
+            Davomat Nazorati & Jurnali
           </h1>
 
           <p
@@ -493,9 +499,7 @@ export const AttendancePage: React.FC = () => {
               sm:text-xs
             "
           >
-            Record student
-            attendance per group
-            and session date.
+            Guruhlar va dars sanalari bo‘yicha o‘quvchilar davomatini yuritish hamda tasdiqlash.
           </p>
         </div>
 
@@ -534,10 +538,10 @@ export const AttendancePage: React.FC = () => {
                   shadow-emerald-500/20
                 `
                 : `
-                  bg-[#007AFF]
-                  shadow-blue-500/20
+                  bg-gradient-to-r from-amber-500 to-amber-600
+                  shadow-amber-500/20
 
-                  hover:bg-blue-600
+                  hover:from-amber-600 hover:to-amber-700
                 `
             }
 
@@ -564,7 +568,7 @@ export const AttendancePage: React.FC = () => {
                 "
               />
 
-              Saved
+              Saqlandi ✓
             </>
           ) : (
             <>
@@ -575,7 +579,7 @@ export const AttendancePage: React.FC = () => {
                 "
               />
 
-              Save Attendance
+              Davomatni Saqlash
             </>
           )}
         </button>
@@ -640,7 +644,7 @@ export const AttendancePage: React.FC = () => {
                   text-slate-400
                 "
               >
-                Select Group
+                Guruhni Tanlang
               </label>
 
               <select
@@ -713,7 +717,7 @@ export const AttendancePage: React.FC = () => {
                   text-slate-400
                 "
               >
-                Session Date
+                Dars Sanasi
               </label>
 
               <input
@@ -802,7 +806,7 @@ export const AttendancePage: React.FC = () => {
               "
             />
 
-            Mark All Present
+            ✓ Barchasini Kelgan Deb Belgilash
           </button>
         </div>
       </div>
@@ -882,7 +886,7 @@ export const AttendancePage: React.FC = () => {
                   text-slate-500
                 "
               >
-                Teacher:{' '}
+                O‘qituvchi:{' '}
                 {
                   activeGroup.teacherName
                 }
@@ -911,7 +915,7 @@ export const AttendancePage: React.FC = () => {
             {selectedDate}
             {' • '}
             {groupStudents.length}
-            {' students'}
+            {' nafar o‘quvchi'}
           </div>
         </div>
       )}
@@ -957,7 +961,7 @@ export const AttendancePage: React.FC = () => {
               sm:text-[10px]
             "
           >
-            Class Rate
+            Davomat Ko‘rsatkichi
           </span>
 
           <p
@@ -1003,7 +1007,7 @@ export const AttendancePage: React.FC = () => {
               sm:text-[10px]
             "
           >
-            Present
+            Kelgan
           </span>
 
           <p
@@ -1049,7 +1053,7 @@ export const AttendancePage: React.FC = () => {
               sm:text-[10px]
             "
           >
-            Absent
+            Kelmagan
           </span>
 
           <p
@@ -1095,7 +1099,7 @@ export const AttendancePage: React.FC = () => {
               sm:text-[10px]
             "
           >
-            Late
+            Kechikkan
           </span>
 
           <p
@@ -1144,7 +1148,7 @@ export const AttendancePage: React.FC = () => {
               sm:text-[10px]
             "
           >
-            Excused
+            Sababli
           </span>
 
           <p
@@ -1206,8 +1210,7 @@ export const AttendancePage: React.FC = () => {
                 text-slate-500
               "
             >
-              No students found
-              in this group.
+              Ushbu guruhda o‘quvchilar mavjud emas.
             </p>
           </div>
         ) : (
@@ -1349,7 +1352,7 @@ export const AttendancePage: React.FC = () => {
                         }
                       `}
                     >
-                      {currentStatus}
+                      {STATUS_UZ[currentStatus]?.icon} {STATUS_UZ[currentStatus]?.label}
                     </span>
                   </div>
 
@@ -1395,7 +1398,7 @@ export const AttendancePage: React.FC = () => {
                             )}
                           `}
                         >
-                          {status}
+                          {STATUS_UZ[status]?.icon} {STATUS_UZ[status]?.label}
                         </button>
                       )
                     )}
@@ -1460,7 +1463,7 @@ export const AttendancePage: React.FC = () => {
                     p-3.5
                   "
                 >
-                  Student
+                  O‘quvchi FISH
                 </th>
 
                 <th
@@ -1468,7 +1471,7 @@ export const AttendancePage: React.FC = () => {
                     p-3.5
                   "
                 >
-                  Phone
+                  Telefon Raqami
                 </th>
 
                 <th
@@ -1477,7 +1480,7 @@ export const AttendancePage: React.FC = () => {
                     text-center
                   "
                 >
-                  Attendance
+                  Davomat Holati
                 </th>
               </tr>
             </thead>
@@ -1503,8 +1506,7 @@ export const AttendancePage: React.FC = () => {
                       text-slate-400
                     "
                   >
-                    No students found
-                    in this group.
+                    Ushbu guruhda o‘quvchilar mavjud emas.
                   </td>
                 </tr>
               ) : (
@@ -1651,7 +1653,7 @@ export const AttendancePage: React.FC = () => {
                                     )}
                                   `}
                                 >
-                                  {status}
+                                  {STATUS_UZ[status]?.icon} {STATUS_UZ[status]?.label}
                                 </button>
                               )
                             )}

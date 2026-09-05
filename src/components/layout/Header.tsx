@@ -37,6 +37,10 @@ interface HeaderProps {
 
 const pageTitles: Record<string, string> = {
   dashboard: 'Boshqaruv Markazi',
+  schedule: 'Dars Jadvali',
+  homework: 'Uy Vazifalari',
+  grades: 'Baholar & Reyting',
+  applications: 'Arizalar & Qabul',
   students_hub: 'O‘quvchilar Bazasi',
   teachers_workload: 'O‘qituvchilar & Yuklama',
   courses_groups: 'Guruhlar & Kurslar',

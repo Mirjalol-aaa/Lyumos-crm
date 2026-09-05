@@ -53,6 +53,10 @@ import { AdminFinancePayrollPage } from './pages/admin/AdminFinancePayrollPage';
 import { AdminBranchesPage } from './pages/admin/AdminBranchesPage';
 import { AdminCredentialsPage } from './pages/admin/AdminCredentialsPage';
 import { AdminAuditSettingsPage } from './pages/admin/AdminAuditSettingsPage';
+import { AdminSchedulePage } from './pages/admin/AdminSchedulePage';
+import { AdminHomeworkPage } from './pages/admin/AdminHomeworkPage';
+import { AdminGradesPage } from './pages/admin/AdminGradesPage';
+import { AdminApplicationsPage } from './pages/admin/AdminApplicationsPage';
 
 // Other Admin Pages
 import { StudentsPage } from './pages/StudentsPage';
@@ -84,6 +88,14 @@ function AdminPortalContent() {
     switch (activePage) {
       case 'dashboard':
         return <AdminOverviewPage onNavigateTab={(tabId) => setActivePage(tabId as any)} />;
+      case 'schedule':
+        return <AdminSchedulePage />;
+      case 'homework':
+        return <AdminHomeworkPage />;
+      case 'grades':
+        return <AdminGradesPage />;
+      case 'applications':
+        return <AdminApplicationsPage />;
       case 'teachers_workload':
         return <AdminTeachersWorkloadPage />;
       case 'courses_groups':

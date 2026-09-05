@@ -12,6 +12,10 @@ import {
   DollarSign,
   Building2,
   CalendarCheck2,
+  Calendar,
+  Award,
+  FileText,
+  BookCheck,
   ShieldCheck,
   KeyRound,
   BarChart3,
@@ -55,86 +59,118 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
 
   const navGroups: NavGroup[] = [
     {
-      groupTitle: 'ASOSIY BOSHQARUV',
+      groupTitle: 'ASOSIY',
       items: [
         {
           id: 'dashboard',
-          label: 'Boshqaruv Markazi',
+          label: 'Bosh sahifa',
           icon: LayoutDashboard,
         },
       ],
     },
     {
-      groupTitle: 'AKADEMIK & TA’LIM',
+      groupTitle: 'TA’LIM',
       items: [
         {
           id: 'students_hub',
-          label: 'O‘quvchilar Bazasi',
+          label: 'O‘quvchilar',
           icon: Users,
           badge: students.length,
           badgeColor: 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300',
         },
         {
-          id: 'teachers_workload',
-          label: 'O‘qituvchilar & Yuklama',
-          icon: GraduationCap,
-        },
-        {
           id: 'courses_groups',
-          label: 'Guruhlar & Kurslar',
+          label: 'Guruhlar',
           icon: BookOpen,
         },
         {
+          id: 'teachers_workload',
+          label: 'O‘qituvchilar',
+          icon: GraduationCap,
+        },
+        {
+          id: 'schedule',
+          label: 'Dars jadvali',
+          icon: Calendar,
+        },
+        {
           id: 'attendance',
-          label: 'Davomat Nazorati',
+          label: 'Davomat',
           icon: CalendarCheck2,
+        },
+        {
+          id: 'homework',
+          label: 'Uy vazifalari',
+          icon: BookCheck,
+        },
+        {
+          id: 'grades',
+          label: 'Baholar & Reyting',
+          icon: Award,
         },
       ],
     },
     {
-      groupTitle: 'MOLIYA & TARMOQ',
+      groupTitle: 'MOLIYA',
       items: [
         {
-          id: 'finance_payroll',
-          label: 'Moliya & Payroll',
-          icon: DollarSign,
+          id: 'payments',
+          label: 'To‘lovlar',
+          icon: Receipt,
           badge: overdueCount > 0 ? `${overdueCount} qarz` : undefined,
           badgeColor: 'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300',
         },
         {
-          id: 'payments',
-          label: 'To‘lovlar Tarixi',
-          icon: Receipt,
+          id: 'expenses',
+          label: 'Xarajatlar',
+          icon: DollarSign,
         },
         {
-          id: 'branches',
-          label: 'Filiallar Boshqaruvi',
-          icon: Building2,
+          id: 'finance_payroll',
+          label: 'Oyliklar & Payroll',
+          icon: DollarSign,
         },
       ],
     },
     {
-      groupTitle: 'TIZIM & SOZLAMALAR',
+      groupTitle: 'CRM',
       items: [
+        {
+          id: 'applications',
+          label: 'Arizalar & Qabul',
+          icon: FileText,
+          badge: 'Yangi',
+          badgeColor: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300',
+        },
+      ],
+    },
+    {
+      groupTitle: 'TAHLIL',
+      items: [
+        {
+          id: 'reports',
+          label: 'Hisobotlar',
+          icon: BarChart3,
+        },
+      ],
+    },
+    {
+      groupTitle: 'TIZIM',
+      items: [
+        {
+          id: 'settings',
+          label: 'Sozlamalar',
+          icon: Settings,
+        },
         {
           id: 'credentials',
           label: 'Login & Parollar',
           icon: KeyRound,
         },
         {
-          id: 'reports',
-          label: 'Tahliliy Hisobotlar',
-          icon: BarChart3,
-        },
-        {
           id: 'audit_settings',
-          label: 'Rollar & Audit Log',
+          label: 'Xavfsizlik & Rollar',
           icon: ShieldCheck,
-        },
-        {
-          id: 'settings',
-          label: 'Tizim Sozlamalari',
-          icon: Settings,
         },
       ],
     },

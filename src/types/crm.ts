@@ -14,7 +14,11 @@ export type PageType =
   | 'groups'
   | 'reports'
   | 'expenses'
-  | 'settings';
+  | 'settings'
+  | 'schedule'
+  | 'homework'
+  | 'grades'
+  | 'applications';
 
 export type StudentStatus = 'Active' | 'Graduated' | 'Frozen' | 'Trial' | 'Inactive';
 

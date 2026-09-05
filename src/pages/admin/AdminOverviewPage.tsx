@@ -97,6 +97,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
     settings,
     setIsReceivePaymentModalOpen,
     setIsAddStudentModalOpen,
+    setIsAddGroupModalOpen,
     setSelectedStudentId,
     setPaymentModalDefaultStudentId,
     setPaymentModalDefaultMonth,
@@ -106,6 +107,15 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
   const [studentSearchQuery, setStudentSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'paid' | 'unpaid' | 'full_attendance'>('all');
   const [reminderSent, setReminderSent] = useState(false);
+
+  const currentHour = new Date().getHours();
+  const greeting = currentHour < 11 ? 'Xayrli tong' : currentHour < 18 ? 'Xayrli kun' : 'Xayrli kech';
+  const todayFormatted = new Intl.DateTimeFormat('uz-UZ', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    weekday: 'long',
+  }).format(new Date());
 
   const activeStats = MONTHLY_STATS[selectedMonth];
   const unpaidDebt = activeStats.expectedIncome - activeStats.paidIncome;
@@ -213,6 +223,68 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8 font-sans">
+      {/* ─────────────────────────────────────────────────────────────
+          0. WELCOME GREETING BANNER & QUICK ACTION LAUNCHPAD
+      ───────────────────────────────────────────────────────────── */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 rounded-3xl border border-slate-200/80 bg-gradient-to-r from-amber-500/10 via-amber-50/40 to-white p-5 dark:border-slate-800 dark:from-amber-950/20 dark:via-slate-900 dark:to-slate-900 shadow-xs">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+              {greeting} 👋, Hurmatli Administrator!
+            </h2>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+            Bugun: <span className="font-bold text-slate-700 dark:text-slate-300 capitalize">{todayFormatted}</span> • Tizim barcha o‘quv kurslari va guruhlar bo‘yicha barqaror ishlamoqda.
+          </p>
+        </div>
+
+        {/* Quick Action Buttons */}
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setIsAddStudentModalOpen(true)}
+            className="gap-1.5 shadow-xs cursor-pointer text-xs"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            <span>+ O‘quvchi</span>
+          </Button>
+
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              setPaymentModalDefaultMonth(selectedMonth);
+              setIsReceivePaymentModalOpen(true);
+            }}
+            className="gap-1.5 cursor-pointer text-xs"
+          >
+            <CreditCard className="h-3.5 w-3.5 text-emerald-600" />
+            <span>+ To‘lov</span>
+          </Button>
+
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setIsAddGroupModalOpen(true)}
+            className="gap-1.5 cursor-pointer text-xs"
+          >
+            <BookOpen className="h-3.5 w-3.5 text-blue-600" />
+            <span>+ Guruh</span>
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onNavigateTab('schedule')}
+            className="gap-1.5 cursor-pointer text-xs border border-slate-200 dark:border-slate-800"
+          >
+            <Calendar className="h-3.5 w-3.5 text-purple-600" />
+            <span>Dars Jadvali</span>
+          </Button>
+        </div>
+      </div>
+
       {/* ─────────────────────────────────────────────────────────────
           1. EXECUTIVE HEADER & CONTROLS
       ───────────────────────────────────────────────────────────── */}
@@ -973,7 +1045,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
               </p>
               <div className="flex items-center gap-2 text-[10px] text-amber-700 dark:text-amber-400 font-bold">
                 <Clock className="h-3 w-3" />
-                <span>Dush, Chor, Juma 14:00 (3-xona)</span>
+                <span>Dush, Chor, Juma 14:00 (101-xona)</span>
               </div>
             </div>
 
@@ -988,11 +1060,11 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
                 </span>
               </div>
               <p className="text-[11px] text-slate-600 dark:text-slate-300">
-                Ustoz: <strong>Dr. Alexander Wright</strong> (IELTS 8.5)
+                Ustoz: <strong>Hasanboy ustoz</strong> (IELTS 8.5)
               </p>
               <div className="flex items-center gap-2 text-[10px] text-indigo-700 dark:text-indigo-400 font-bold">
                 <Clock className="h-3 w-3" />
-                <span>Sesh, Pay, Shanba 16:00 (1-xona)</span>
+                <span>Sesh, Pay, Shanba 15:30 (102-xona)</span>
               </div>
             </div>
 
