@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLMS } from '../../context/LMSContext';
 import { InteractiveParticles } from '../../components/common/InteractiveParticles';
-import { Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight } from 'lucide-react';
+import lumosLogo from '../../assets/lumos-logo.png';
 
 interface StudentLoginProps {
   onSwitchToAdmin: () => void;
@@ -56,17 +57,6 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({ onSwitchToAdmin, onB
     <div className="min-h-screen w-full flex flex-col lg:flex-row bg-[#F8FAFC] dark:bg-[#070C18] font-sans antialiased text-slate-900 dark:text-slate-100 transition-colors">
       {/* LEFT COLUMN: Student 3D / Isometric Graphic Illustration */}
       <div className="relative hidden lg:flex lg:w-1/2 min-h-screen bg-[#F1F5F9] dark:bg-slate-950 items-center justify-center p-12 border-r border-slate-200 dark:border-slate-800/80 overflow-hidden">
-        {/* Top left return button (Desktop) */}
-        <button
-          type="button"
-          onClick={handleBackToHome}
-          className="absolute top-8 left-8 z-30 inline-flex items-center gap-2 rounded-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-4 py-2.5 text-xs font-bold text-slate-800 dark:text-slate-100 shadow-md hover:border-amber-400 transition-all cursor-pointer border border-slate-300 dark:border-slate-700 active:scale-95 group"
-          title="LUMOS Asosiy saytiga qaytish"
-        >
-          <ArrowLeft className="h-4 w-4 text-amber-500 group-hover:-translate-x-0.5 transition-transform" />
-          <span>Bosh sahifaga qaytish</span>
-        </button>
-
         {/* Interactive Antigravity Particles Effect */}
         <InteractiveParticles className="opacity-60" particleCount={110} />
 
@@ -127,23 +117,36 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({ onSwitchToAdmin, onB
 
       {/* RIGHT COLUMN: Clean Student Form */}
       <div className="flex-1 flex flex-col justify-between p-6 sm:p-12 lg:p-16 max-w-lg mx-auto w-full">
-        {/* Top Navigation Bar */}
+        {/* Top Navigation Bar: Brand Logo acts as Home link */}
         <div className="flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={handleBackToHome}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3.5 py-2 text-xs font-bold text-slate-800 dark:text-slate-200 shadow-xs hover:bg-amber-50 hover:text-amber-700 hover:border-amber-400 dark:hover:bg-slate-800 transition-all cursor-pointer"
+            className="flex items-center gap-3 cursor-pointer text-left group"
             title="LUMOS Asosiy saytiga qaytish"
           >
-            <ArrowLeft className="h-3.5 w-3.5 text-amber-500" />
-            <span>Asosiy saytga qaytish</span>
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500/20 via-yellow-500/10 to-amber-300/20 p-2 border border-amber-400/40 shadow-md shadow-amber-500/10 group-hover:scale-105 transition-transform">
+              <img
+                src={lumosLogo}
+                alt="LUMOS"
+                className="h-full w-full object-contain filter drop-shadow-sm"
+              />
+            </div>
+            <div>
+              <span className="text-xl font-black tracking-tight text-slate-900 dark:text-white group-hover:text-amber-500 transition-colors">
+                LUMOS
+              </span>
+              <span className="block text-[11px] uppercase tracking-wider text-amber-600 dark:text-amber-400 font-extrabold">
+                Talabalar Portali
+              </span>
+            </div>
           </button>
 
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={onSwitchToAdmin}
-              className="text-xs font-bold text-amber-700 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300 hover:underline flex items-center gap-1.5 cursor-pointer bg-amber-50 dark:bg-amber-950/50 px-3.5 py-2 rounded-xl border border-amber-200 dark:border-amber-800/80"
+              className="text-xs font-bold text-amber-700 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300 hover:underline flex items-center gap-1.5 cursor-pointer bg-amber-50 dark:bg-amber-950/50 px-3.5 py-2 rounded-xl border border-amber-200 dark:border-amber-800/80 transition-all shadow-xs"
             >
               <span>Admin Portali</span>
               <ArrowRight className="h-3.5 w-3.5" />
@@ -170,7 +173,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({ onSwitchToAdmin, onB
             {/* Student ID / Login Input */}
             <div>
               <label className="text-xs font-bold text-slate-900 dark:text-white block mb-1.5">
-                <span className="text-rose-500 font-black">*</span> Login yoki Student ID:
+                <span className="text-rose-500 font-black">*</span> Login yoki Student ID
               </label>
               <input
                 type="text"
@@ -185,7 +188,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({ onSwitchToAdmin, onB
             {/* Password Input */}
             <div>
               <label className="text-xs font-bold text-slate-900 dark:text-white block mb-1.5">
-                <span className="text-rose-500 font-black">*</span> Parol:
+                <span className="text-rose-500 font-black">*</span> Parol
               </label>
               <div className="relative">
                 <input

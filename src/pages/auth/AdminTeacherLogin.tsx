@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLMS } from '../../context/LMSContext';
 import { InteractiveParticles } from '../../components/common/InteractiveParticles';
-import { Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import lumosLogo from '../../assets/lumos-logo.png';
 
 interface AdminTeacherLoginProps {
@@ -61,17 +61,6 @@ export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchTo
     <div className="min-h-screen w-full flex flex-col lg:flex-row bg-[#F8FAFC] dark:bg-[#070C18] font-sans antialiased text-slate-900 dark:text-slate-100 transition-colors">
       {/* LEFT COLUMN: Modern Education Center Reception Visual */}
       <div className="relative hidden lg:flex lg:w-1/2 min-h-screen bg-slate-950 overflow-hidden items-end p-12">
-        {/* Top left return button (Desktop) */}
-        <button
-          type="button"
-          onClick={handleBackToHome}
-          className="absolute top-8 left-8 z-30 inline-flex items-center gap-2 rounded-xl bg-slate-900/80 hover:bg-slate-900 backdrop-blur-md px-4 py-2.5 text-xs font-bold text-white shadow-lg hover:border-amber-400/60 transition-all cursor-pointer border border-white/20 active:scale-95 group"
-          title="LUMOS Asosiy saytiga qaytish"
-        >
-          <ArrowLeft className="h-4 w-4 text-amber-400 group-hover:-translate-x-0.5 transition-transform" />
-          <span>Bosh sahifaga qaytish</span>
-        </button>
-
         <img
           src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1600"
           alt="LUMOS Education Center"
