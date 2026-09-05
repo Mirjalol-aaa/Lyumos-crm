@@ -184,13 +184,13 @@ export const LandingPage: React.FC = () => {
           2. NAVIGATION HEADER (CRISP & BALANCED)
       ───────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 bg-white/90 backdrop-blur-md dark:border-slate-800/80 dark:bg-[#080D1A]/90 transition-colors">
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-3.5 sm:px-6 lg:px-8">
           {/* Brand Logo */}
           <div
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="flex items-center gap-3.5 cursor-pointer group select-none"
+            className="flex items-center gap-2.5 sm:gap-3.5 cursor-pointer group select-none shrink-0"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500/20 via-yellow-500/10 to-amber-300/20 p-2 border border-amber-400/40 shadow-sm shadow-amber-500/15 group-hover:scale-105 transition-transform duration-200">
+            <div className="flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500/20 via-yellow-500/10 to-amber-300/20 p-2 border border-amber-400/40 shadow-sm shadow-amber-500/15 group-hover:scale-105 transition-transform duration-200">
               <img
                 src={lumosLogo}
                 alt="LUMOS O‘QUV MARKAZI"
@@ -199,18 +199,18 @@ export const LandingPage: React.FC = () => {
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-black tracking-tight text-slate-900 dark:text-white font-serif">
+                <span className="text-lg sm:text-xl font-black tracking-tight text-slate-900 dark:text-white font-serif">
                   LUMOS
                 </span>
                 <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
               </div>
-              <span className="block text-[10px] uppercase tracking-widest text-amber-600 dark:text-amber-400 font-extrabold">
+              <span className="block text-[9px] sm:text-[10px] uppercase tracking-widest text-amber-600 dark:text-amber-400 font-extrabold -mt-0.5">
                 O‘quv Markazi
               </span>
             </div>
           </div>
 
-          {/* Nav Links */}
+          {/* Nav Links (Desktop) */}
           <nav className="hidden lg:flex items-center gap-7 text-xs font-bold text-slate-600 dark:text-slate-300">
             <a
               href="#courses"
@@ -244,9 +244,9 @@ export const LandingPage: React.FC = () => {
             </a>
           </nav>
 
-          {/* Right Controls: Theme + Language + Portal CTA */}
-          <div className="flex items-center gap-2.5 sm:gap-3">
-            {/* Theme Toggle Button */}
+          {/* Right Controls: Theme + Language (md+) + Portal CTA (lg+) + Mobile Hamburger (lg hidden) */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Theme Toggle Button (Always visible) */}
             <button
               type="button"
               onClick={toggleTheme}
@@ -261,8 +261,8 @@ export const LandingPage: React.FC = () => {
               </span>
             </button>
 
-            {/* Language Switcher */}
-            <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 p-0.5 text-[11px] font-black dark:border-slate-800 dark:bg-slate-900/90">
+            {/* Language Switcher (Hidden on mobile < md, visible on tablet/desktop) */}
+            <div className="hidden md:flex items-center rounded-xl border border-slate-200 bg-slate-50 p-0.5 text-[11px] font-black dark:border-slate-800 dark:bg-slate-900/90">
               {(['uz', 'ru', 'en'] as const).map((lang) => (
                 <button
                   key={lang}
@@ -279,38 +279,45 @@ export const LandingPage: React.FC = () => {
               ))}
             </div>
 
-            {/* Portal Entry Button (Desktop / Tablet) */}
-            <Button
-              variant="primary"
-              size="sm"
-              className="hidden sm:inline-flex items-center gap-2 shadow-md shadow-amber-500/20 cursor-pointer font-bold px-4 py-2 text-xs"
-              onClick={() => {
-                if (currentUser) {
-                  window.location.hash = currentRole === 'student' ? '#/student' : '#/dashboard';
-                } else {
-                  window.location.hash = '#/admin';
-                }
-              }}
-            >
-              <span>
-                {currentUser
-                  ? currentRole === 'student'
-                    ? 'Talaba Kabineti'
-                    : 'Boshqaruv Markazi'
-                  : t.landing.loginCta}
-              </span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Button>
+            {/* Portal Entry Button (Hidden on mobile/tablet < lg, visible on desktop) */}
+            <div className="hidden lg:flex items-center">
+              <Button
+                variant="primary"
+                size="sm"
+                className="items-center gap-2 shadow-md shadow-amber-500/20 cursor-pointer font-bold px-4 py-2 text-xs"
+                onClick={() => {
+                  if (currentUser) {
+                    window.location.hash = currentRole === 'student' ? '#/student' : '#/dashboard';
+                  } else {
+                    window.location.hash = '#/admin';
+                  }
+                }}
+              >
+                <span>
+                  {currentUser
+                    ? currentRole === 'student'
+                      ? 'Talaba Kabineti'
+                      : 'Boshqaruv Markazi'
+                    : t.landing.loginCta}
+                </span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </div>
 
-            {/* Mobile Menu Hamburger Toggle */}
+            {/* Mobile Menu Hamburger Toggle (Visible on mobile/tablet < lg) */}
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="flex lg:hidden h-10 w-10 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900/90 dark:text-slate-200 dark:hover:bg-slate-800 cursor-pointer transition-all"
+              className={`flex lg:hidden h-10 w-10 items-center justify-center rounded-xl border transition-all cursor-pointer ${
+                isMobileMenuOpen
+                  ? 'border-amber-500 bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                  : 'border-slate-200/80 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900/90 dark:text-slate-200 dark:hover:bg-slate-800'
+              }`}
               aria-label="Menyu"
+              title="Menyuni ochish"
             >
               {isMobileMenuOpen ? (
-                <X className="h-5 w-5 text-amber-500" />
+                <X className="h-5 w-5" />
               ) : (
                 <Menu className="h-5 w-5" />
               )}
@@ -320,8 +327,37 @@ export const LandingPage: React.FC = () => {
 
         {/* Mobile Navigation Drawer */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-slate-200/80 bg-white/98 backdrop-blur-2xl dark:border-slate-800/80 dark:bg-[#080D1A]/98 px-5 py-5 space-y-4 shadow-2xl animate-in slide-in-from-top-2 duration-200">
-            <nav className="flex flex-col space-y-1">
+          <div className="lg:hidden border-t border-slate-200/80 bg-white/98 backdrop-blur-2xl dark:border-slate-800/80 dark:bg-[#080D1A]/98 px-4 sm:px-6 py-5 space-y-4 shadow-2xl animate-in slide-in-from-top-2 duration-200">
+            {/* 1. Mobile Language Selector */}
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block px-1">
+                Tilni tanlang / Select Language:
+              </span>
+              <div className="grid grid-cols-3 gap-2 p-1 rounded-2xl bg-slate-100/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800">
+                {[
+                  { code: 'uz', label: "O'zbek", flag: '🇺🇿' },
+                  { code: 'ru', label: 'Русский', flag: '🇷🇺' },
+                  { code: 'en', label: 'English', flag: '🇬🇧' },
+                ].map((l) => (
+                  <button
+                    key={l.code}
+                    type="button"
+                    onClick={() => setLanguage(l.code as 'uz' | 'ru' | 'en')}
+                    className={`py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                      language === l.code
+                        ? 'bg-amber-500 text-slate-950 shadow-md font-black'
+                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    <span>{l.flag}</span>
+                    <span>{l.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 2. Navigation Links */}
+            <nav className="flex flex-col space-y-1 pt-1">
               {[
                 { name: 'Kurslar', href: '#courses' },
                 { name: 'Ustozlar', href: '#teachers' },
@@ -341,6 +377,7 @@ export const LandingPage: React.FC = () => {
               ))}
             </nav>
 
+            {/* 3. Portal Logins */}
             <div className="pt-3 border-t border-slate-200/70 dark:border-slate-800/70 space-y-2">
               {currentUser ? (
                 <button
@@ -355,17 +392,17 @@ export const LandingPage: React.FC = () => {
                   <span>{currentRole === 'student' ? 'Talaba Kabineti' : 'Boshqaruv Markazi'}</span>
                 </button>
               ) : (
-                <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => {
                       setIsMobileMenuOpen(false);
                       window.location.hash = '#/admin';
                     }}
-                    className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 py-2.5 text-xs font-black text-slate-950 shadow-md active:scale-98 transition-all cursor-pointer"
+                    className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 py-3 text-xs font-black text-slate-950 shadow-md active:scale-98 transition-all cursor-pointer"
                   >
-                    <LogIn className="h-3.5 w-3.5" />
-                    <span>Admin & Ustoz</span>
+                    <LogIn className="h-4 w-4" />
+                    <span>Admin & Ustoz Portali</span>
                   </button>
                   <button
                     type="button"
@@ -373,13 +410,25 @@ export const LandingPage: React.FC = () => {
                       setIsMobileMenuOpen(false);
                       window.location.hash = '#/login';
                     }}
-                    className="w-full flex items-center justify-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 py-2.5 text-xs font-black text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 active:scale-98 transition-all cursor-pointer"
+                    className="w-full flex items-center justify-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 py-3 text-xs font-black text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 active:scale-98 transition-all cursor-pointer"
                   >
-                    <GraduationCap className="h-3.5 w-3.5" />
-                    <span>Talaba Kirish</span>
+                    <GraduationCap className="h-4 w-4" />
+                    <span>Talaba Shaxsiy Kabineti</span>
                   </button>
                 </div>
               )}
+
+              {/* 4. Contact Shortcut */}
+              <div className="pt-2 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 px-1">
+                <span>Savollar bormi?</span>
+                <a
+                  href="tel:+998712000025"
+                  className="font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1.5"
+                >
+                  <Phone className="h-3.5 w-3.5" />
+                  <span>+998 (71) 200-00-25</span>
+                </a>
+              </div>
             </div>
           </div>
         )}
