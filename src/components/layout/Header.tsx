@@ -5,6 +5,7 @@ import React, {
 } from 'react';
 
 import { useCRM } from '../../context/CRMContext';
+import { useI18n, Language } from '../../lib/i18n';
 
 import {
   Search,
@@ -35,29 +36,28 @@ interface HeaderProps {
 }
 
 
-const pageTitles: Record<string, string> = {
-  dashboard: 'Boshqaruv Markazi',
-  schedule: 'Dars Jadvali',
-  homework: 'Uy Vazifalari',
-  grades: 'Baholar & Reyting',
-  applications: 'Arizalar & Qabul',
-  students_hub: 'O‘quvchilar Bazasi',
-  teachers_workload: 'O‘qituvchilar & Yuklama',
-  courses_groups: 'Guruhlar & Kurslar',
-  attendance: 'Davomat Nazorati',
-  finance_payroll: 'Moliya & Payroll',
-  branches: 'Filiallar Boshqaruvi',
-  credentials: 'Login & Parollar Boshqaruvi',
-  reports: 'Tahliliy Hisobotlar',
-  audit_settings: 'Rollar & Xavfsizlik Auditi',
-  students: 'O‘quvchilar',
-  payments: 'To‘lovlar Tarixi',
-  teachers: 'O‘qituvchilar',
-  groups: 'Guruhlar',
-  expenses: 'Xarajatlar',
-  settings: 'Tizim Sozlamalari',
+const PAGE_TITLES_BY_LANG: Record<string, Record<Language, string>> = {
+  dashboard: { uz: 'Boshqaruv Markazi', ru: 'Панель управления', en: 'Executive Dashboard' },
+  schedule: { uz: 'Dars Jadvali', ru: 'Расписание занятий', en: 'Class Schedule' },
+  homework: { uz: 'Uy Vazifalari', ru: 'Домашние задания', en: 'Homework & Tasks' },
+  grades: { uz: 'Baholar & Reyting', ru: 'Оценки и Рейтинг', en: 'Grades & Ranking' },
+  applications: { uz: 'Arizalar & Qabul', ru: 'Заявки и Прием', en: 'Applications & Leads' },
+  students_hub: { uz: 'O‘quvchilar Bazasi', ru: 'База студентов', en: 'Students Directory' },
+  teachers_workload: { uz: 'O‘qituvchilar & Yuklama', ru: 'Преподаватели и Нагрузка', en: 'Teachers & Workload' },
+  courses_groups: { uz: 'Guruhlar & Kurslar', ru: 'Группы и Курсы', en: 'Groups & Courses' },
+  attendance: { uz: 'Davomat Nazorati', ru: 'Контроль посещаемости', en: 'Attendance Tracking' },
+  finance_payroll: { uz: 'Moliya & Payroll', ru: 'Финансы и Зарплаты', en: 'Finance & Payroll' },
+  branches: { uz: 'Filiallar Boshqaruvi', ru: 'Управление филиалами', en: 'Branch Network' },
+  credentials: { uz: 'Login & Parollar Boshqaruvi', ru: 'Логины и Пароли', en: 'Credentials Management' },
+  audit_settings: { uz: 'Rollar & Audit Log', ru: 'Роли и Журнал действий', en: 'Roles & Audit Logs' },
+  reports: { uz: 'Tahliliy Hisobotlar', ru: 'Аналитические отчеты', en: 'Analytics & Reports' },
+  expenses: { uz: 'Xarajatlar Nazorati', ru: 'Контроль расходов', en: 'Expenses Registry' },
+  payments: { uz: 'To‘lovlar Tarixi', ru: 'История платежей', en: 'Payments Ledger' },
+  settings: { uz: 'Tizim Sozlamalari', ru: 'Настройки системы', en: 'System Settings' },
+  students: { uz: 'O‘quvchilar', ru: 'Студенты', en: 'Students' },
+  teachers: { uz: 'O‘qituvchilar', ru: 'Учителя', en: 'Teachers' },
+  groups: { uz: 'Guruhlar', ru: 'Группы', en: 'Groups' },
 };
-
 
 export const Header:
   React.FC<HeaderProps> = ({
@@ -65,6 +65,8 @@ export const Header:
     setCollapsed,
     onOpenNotifications,
   }) => {
+    const { t, language, setLanguage } = useI18n();
+
     const {
       setIsGlobalSearchOpen,
 
@@ -399,9 +401,13 @@ export const Header:
                 xl:max-w-[260px]
               "
             >
-              {pageTitles[
+              {PAGE_TITLES_BY_LANG[
                 activePage
-              ] || 'LUMOS ERP'}
+              ]?.[language] ||
+                PAGE_TITLES_BY_LANG[
+                  activePage
+                ]?.uz ||
+                'LUMOS ERP'}
             </h1>
 
 
@@ -419,7 +425,7 @@ export const Header:
                 xl:block
               "
             >
-              Academic Year{' '}
+              {t.common.academicYear}{' '}
               {
                 settings.academicYear
               }
@@ -512,8 +518,11 @@ export const Header:
                 font-medium
               "
             >
-              Search students,
-              teachers, groups...
+              {language === 'en'
+                ? 'Search students, teachers, groups...'
+                : language === 'ru'
+                ? 'Поиск учеников, учителей, групп...'
+                : 'O‘quvchilar, ustozlar, guruhlarni qidirish...'}
             </span>
 
 
@@ -692,7 +701,7 @@ export const Header:
               "
             />
 
-            Receive Payment
+            {t.common.receivePayment}
           </button>
 
 
@@ -738,7 +747,7 @@ export const Header:
 
               md:px-4
             "
-            title="Add Student"
+            title={t.common.addStudent}
           >
             <Plus
               className="
@@ -754,7 +763,7 @@ export const Header:
                 md:inline
               "
             >
-              Add Student
+              {t.common.addStudent}
             </span>
           </button>
 
@@ -891,7 +900,7 @@ export const Header:
               "
             />
             <span className="hidden sm:inline">
-              Asosiy sayt
+              {t.common.publicSite}
             </span>
           </button>
 
@@ -953,7 +962,7 @@ export const Header:
                     : ''
                 }
               `}
-              title="Language"
+              title={language === 'en' ? 'Language' : language === 'ru' ? 'Язык' : 'Til'}
               aria-expanded={
                 langMenuOpen
               }
@@ -974,7 +983,7 @@ export const Header:
                 "
               >
                 {
-                  settings.language
+                  language
                 }
               </span>
             </button>
@@ -1026,22 +1035,25 @@ export const Header:
                       'Русский',
                   },
                 ].map(
-                  language => {
+                  langItem => {
                     const isSelected =
-                      settings.language ===
-                      language.code;
+                      language ===
+                      langItem.code;
 
 
                     return (
                       <button
                         type="button"
                         key={
-                          language.code
+                          langItem.code
                         }
                         onClick={() => {
+                          setLanguage(
+                            langItem.code as any
+                          );
                           updateSettings({
                             language:
-                              language.code as any,
+                              langItem.code as any,
                           });
 
 
@@ -1093,7 +1105,7 @@ export const Header:
                       >
                         <span>
                           {
-                            language.label
+                            langItem.label
                           }
                         </span>
 

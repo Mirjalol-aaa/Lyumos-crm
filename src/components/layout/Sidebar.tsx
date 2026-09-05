@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useCRM } from '../../context/CRMContext';
 import { useLMS } from '../../context/LMSContext';
+import { useI18n } from '../../lib/i18n';
 import type { PageType } from '../../types/crm';
 import { LogoutConfirmModal } from '../modals/LogoutConfirmModal';
 import lumosLogo from '../../assets/lumos-logo.png';
@@ -47,6 +48,7 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
   collapsed,
   setCollapsed,
 }) => {
+  const { t, language } = useI18n();
   const { activePage, setActivePage, students } = useCRM();
   const { currentUser } = useLMS();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
@@ -59,75 +61,75 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
 
   const navGroups: NavGroup[] = [
     {
-      groupTitle: 'ASOSIY',
+      groupTitle: language === 'en' ? 'MAIN' : language === 'ru' ? 'ОСНОВНОЕ' : 'ASOSIY',
       items: [
         {
           id: 'dashboard',
-          label: 'Bosh sahifa',
+          label: t.common.dashboard,
           icon: LayoutDashboard,
         },
       ],
     },
     {
-      groupTitle: 'TA’LIM',
+      groupTitle: language === 'en' ? 'EDUCATION' : language === 'ru' ? 'ОБУЧЕНИЕ' : 'TA’LIM',
       items: [
         {
           id: 'students_hub',
-          label: 'O‘quvchilar',
+          label: t.common.students,
           icon: Users,
           badge: students.length,
           badgeColor: 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300',
         },
         {
           id: 'courses_groups',
-          label: 'Guruhlar',
+          label: t.common.groups,
           icon: BookOpen,
         },
         {
           id: 'teachers_workload',
-          label: 'O‘qituvchilar',
+          label: t.common.teachers,
           icon: GraduationCap,
         },
         {
           id: 'schedule',
-          label: 'Dars jadvali',
+          label: t.common.schedule,
           icon: Calendar,
         },
         {
           id: 'attendance',
-          label: 'Davomat',
+          label: t.common.attendance,
           icon: CalendarCheck2,
         },
         {
           id: 'homework',
-          label: 'Uy vazifalari',
+          label: t.common.homework,
           icon: BookCheck,
         },
         {
           id: 'grades',
-          label: 'Baholar & Reyting',
+          label: t.common.grades,
           icon: Award,
         },
       ],
     },
     {
-      groupTitle: 'MOLIYA',
+      groupTitle: language === 'en' ? 'FINANCE' : language === 'ru' ? 'ФИНАНСЫ' : 'MOLIYA',
       items: [
         {
           id: 'payments',
-          label: 'To‘lovlar',
+          label: t.common.payments,
           icon: Receipt,
-          badge: overdueCount > 0 ? `${overdueCount} qarz` : undefined,
+          badge: overdueCount > 0 ? (language === 'en' ? `${overdueCount} due` : language === 'ru' ? `${overdueCount} долг` : `${overdueCount} qarz`) : undefined,
           badgeColor: 'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300',
         },
         {
           id: 'expenses',
-          label: 'Xarajatlar',
+          label: t.common.expenses,
           icon: DollarSign,
         },
         {
           id: 'finance_payroll',
-          label: 'Oyliklar & Payroll',
+          label: t.common.payroll,
           icon: DollarSign,
         },
       ],
@@ -137,39 +139,39 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
       items: [
         {
           id: 'applications',
-          label: 'Arizalar & Qabul',
+          label: t.common.applications,
           icon: FileText,
-          badge: 'Yangi',
+          badge: language === 'en' ? 'New' : language === 'ru' ? 'Новые' : 'Yangi',
           badgeColor: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300',
         },
       ],
     },
     {
-      groupTitle: 'TAHLIL',
+      groupTitle: language === 'en' ? 'ANALYTICS' : language === 'ru' ? 'АНАЛИТИКА' : 'TAHLIL',
       items: [
         {
           id: 'reports',
-          label: 'Hisobotlar',
+          label: t.common.reports,
           icon: BarChart3,
         },
       ],
     },
     {
-      groupTitle: 'TIZIM',
+      groupTitle: language === 'en' ? 'SYSTEM' : language === 'ru' ? 'СИСТЕМА' : 'TIZIM',
       items: [
         {
           id: 'settings',
-          label: 'Sozlamalar',
+          label: t.common.settings,
           icon: Settings,
         },
         {
           id: 'credentials',
-          label: 'Login & Parollar',
+          label: t.common.credentials,
           icon: KeyRound,
         },
         {
           id: 'audit_settings',
-          label: 'Xavfsizlik & Rollar',
+          label: t.common.audit,
           icon: ShieldCheck,
         },
       ],
@@ -308,10 +310,10 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
               window.location.hash = '#/landing';
             }}
             className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-amber-200/80 bg-amber-50/70 py-2 text-xs font-bold text-amber-800 hover:bg-amber-100 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-300 dark:hover:bg-amber-900/60 transition-all shadow-xs"
-            title="LUMOS Asosiy saytiga o‘tish"
+            title={t.common.publicSite}
           >
             <Globe className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
-            <span className={collapsed ? 'lg:hidden' : ''}>🌐 Asosiy Sayt & Kurslar</span>
+            <span className={collapsed ? 'lg:hidden' : ''}>🌐 {t.common.publicSite}</span>
           </button>
 
           <div className={`flex items-center gap-3 rounded-2xl border border-slate-200/60 bg-slate-50/80 p-2.5 dark:border-slate-700/50 dark:bg-slate-800/50 ${collapsed ? 'lg:justify-center' : ''}`}>
@@ -325,15 +327,15 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
                 {currentUser?.name || 'Mirjalol Ahmadov'}
               </p>
               <p className="truncate text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                Super Admin ({currentUser?.email || 'Mirjalol'})
+                {t.roles.superAdmin} ({currentUser?.email || 'Mirjalol'})
               </p>
             </div>
 
             <button
               type="button"
               onClick={() => setIsLogoutModalOpen(true)}
-              title="Tizimdan chiqish"
-              className={`rounded-xl p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/50 transition-colors ${collapsed ? 'lg:hidden' : ''}`}
+              title={t.common.logout}
+              className={`rounded-xl p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/50 transition-colors cursor-pointer ${collapsed ? 'lg:hidden' : ''}`}
             >
               <LogOut className="h-4 w-4" />
             </button>

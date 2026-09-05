@@ -36,6 +36,16 @@ export interface Translations {
     back: string;
     select: string;
     viewAll: string;
+    schedule: string;
+    homework: string;
+    grades: string;
+    applications: string;
+    payroll: string;
+    receivePayment: string;
+    addStudent: string;
+    addGroup: string;
+    publicSite: string;
+    academicYear: string;
   };
   // Roles
   roles: {
@@ -141,6 +151,16 @@ export const translations: Record<Language, Translations> = {
       back: 'Orqaga',
       select: 'Tanlang',
       viewAll: 'Barchasini ko‘rish',
+      schedule: 'Dars jadvali',
+      homework: 'Uy vazifalari',
+      grades: 'Baholar & Reyting',
+      applications: 'Arizalar & Qabul',
+      payroll: 'Oyliklar & Payroll',
+      receivePayment: 'To‘lov Qabul Qilish',
+      addStudent: 'O‘quvchi Qo‘shish',
+      addGroup: 'Guruh Qo‘shish',
+      publicSite: 'Asosiy sayt',
+      academicYear: 'Akademik Yil',
     },
     roles: {
       superAdmin: 'Super Admin',
@@ -240,6 +260,16 @@ export const translations: Record<Language, Translations> = {
       back: 'Назад',
       select: 'Выбрать',
       viewAll: 'Посмотреть все',
+      schedule: 'Расписание занятий',
+      homework: 'Домашние задания',
+      grades: 'Оценки и Рейтинг',
+      applications: 'Заявки и Прием',
+      payroll: 'Зарплаты и Payroll',
+      receivePayment: 'Принять оплату',
+      addStudent: 'Добавить ученика',
+      addGroup: 'Добавить группу',
+      publicSite: 'Основной сайт',
+      academicYear: 'Учебный год',
     },
     roles: {
       superAdmin: 'Супер Администратор',
@@ -339,6 +369,16 @@ export const translations: Record<Language, Translations> = {
       back: 'Back',
       select: 'Select',
       viewAll: 'View all',
+      schedule: 'Class Schedule',
+      homework: 'Homework Tasks',
+      grades: 'Grades & Ranking',
+      applications: 'Applications & Leads',
+      payroll: 'Salaries & Payroll',
+      receivePayment: 'Receive Payment',
+      addStudent: 'Add Student',
+      addGroup: 'Add Group',
+      publicSite: 'Main Website',
+      academicYear: 'Academic Year',
     },
     roles: {
       superAdmin: 'Super Admin',
