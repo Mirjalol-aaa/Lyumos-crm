@@ -760,18 +760,26 @@ export const CRMProvider: React.FC<{
     };
 
     if (newSettings.theme) {
+      const nextTheme = newSettings.theme;
       try {
-        localStorage.setItem('lumos_theme', newSettings.theme);
+        localStorage.setItem('lumos_theme', nextTheme);
       } catch {
         // LocalStorage fallback
       }
-      if (newSettings.theme === 'dark') {
+
+      document.documentElement.classList.add('theme-transitioning');
+
+      if (nextTheme === 'dark') {
         document.documentElement.classList.add('dark');
         document.body.classList.add('dark');
       } else {
         document.documentElement.classList.remove('dark');
         document.body.classList.remove('dark');
       }
+
+      setTimeout(() => {
+        document.documentElement.classList.remove('theme-transitioning');
+      }, 500);
     }
 
     setSettings(merged);

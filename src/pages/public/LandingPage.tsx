@@ -138,9 +138,7 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div
-      className={`min-h-screen font-sans transition-colors duration-200 antialiased selection:bg-amber-500 selection:text-white ${
-        isDark ? 'dark bg-[#080D1A] text-slate-100' : 'bg-[#F8F9FA] text-slate-900'
-      }`}
+      className="min-h-screen font-sans bg-[#F8FAFC] dark:bg-[#080D1A] text-slate-900 dark:text-slate-100 antialiased selection:bg-amber-500 selection:text-white"
     >
       {/* ─────────────────────────────────────────────────────────────
           1. ACTIVE SESSION TOP BAR (DISCREET & MODERN GLASS BANNER)
@@ -248,14 +246,15 @@ export const LandingPage: React.FC = () => {
             <button
               type="button"
               onClick={toggleTheme}
-              className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:border-amber-400/50 dark:border-slate-800 dark:bg-slate-900/90 dark:text-amber-400 dark:hover:bg-slate-800 transition-all shadow-xs cursor-pointer group"
+              className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50/90 text-slate-700 hover:bg-slate-100 hover:border-amber-400/50 dark:border-slate-800 dark:bg-slate-900/90 dark:text-amber-400 dark:hover:bg-slate-800 shadow-xs cursor-pointer overflow-hidden group transition-all"
               title={isDark ? "Yorug' rejimga o'tish (Light Mode)" : "Qorong'i rejimga o'tish (Dark Mode)"}
             >
-              {isDark ? (
-                <Sun className="h-4 w-4 text-amber-400 group-hover:rotate-45 transition-transform duration-300" />
-              ) : (
-                <Moon className="h-4 w-4 text-slate-700 group-hover:-rotate-12 transition-transform duration-300" />
-              )}
+              <span className={`inline-flex items-center justify-center transition-all duration-500 ease-out transform ${isDark ? 'rotate-0 scale-100 opacity-100' : 'rotate-90 scale-0 opacity-0 absolute'}`}>
+                <Sun className="h-4 w-4 text-amber-400" />
+              </span>
+              <span className={`inline-flex items-center justify-center transition-all duration-500 ease-out transform ${isDark ? '-rotate-90 scale-0 opacity-0 absolute' : 'rotate-0 scale-100 opacity-100'}`}>
+                <Moon className="h-4 w-4 text-slate-700 dark:text-slate-200" />
+              </span>
             </button>
 
             {/* Language Switcher */}

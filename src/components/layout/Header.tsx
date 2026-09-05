@@ -1119,67 +1119,37 @@ export const Header:
 
           <button
             type="button"
-            onClick={
-              toggleTheme
-            }
-            className="
-              hidden
-              h-10
-              w-10
-              shrink-0
-
-              cursor-pointer
-              items-center
-              justify-center
-
-              rounded-xl
-
-              text-slate-500
-
-              transition-all
-
-              hover:bg-slate-100
-              hover:text-slate-900
-
-              active:scale-[0.96]
-
-              dark:text-slate-400
-
-              dark:hover:bg-slate-800
-              dark:hover:text-white
-
-              sm:flex
-            "
+            onClick={toggleTheme}
+            className="hidden h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xl text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900 active:scale-[0.96] dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white sm:flex overflow-hidden relative"
             title={
-              settings.theme ===
-              'dark'
-                ? 'Use light mode'
-                : 'Use dark mode'
+              settings.theme === 'dark'
+                ? "Yorug' rejimga o'tish"
+                : "Qorong'i rejimga o'tish"
             }
             aria-label={
-              settings.theme ===
-              'dark'
-                ? 'Use light mode'
-                : 'Use dark mode'
+              settings.theme === 'dark'
+                ? "Yorug' rejimga o'tish"
+                : "Qorong'i rejimga o'tish"
             }
           >
-            {settings.theme ===
-            'dark' ? (
-              <Sun
-                className="
-                  h-[18px]
-                  w-[18px]
-                  text-amber-400
-                "
-              />
-            ) : (
-              <Moon
-                className="
-                  h-[18px]
-                  w-[18px]
-                "
-              />
-            )}
+            <span
+              className={`inline-flex items-center justify-center transition-all duration-500 ease-out transform ${
+                settings.theme === 'dark'
+                  ? 'rotate-0 scale-100 opacity-100'
+                  : 'rotate-90 scale-0 opacity-0 absolute'
+              }`}
+            >
+              <Sun className="h-[18px] w-[18px] text-amber-400" />
+            </span>
+            <span
+              className={`inline-flex items-center justify-center transition-all duration-500 ease-out transform ${
+                settings.theme === 'dark'
+                  ? '-rotate-90 scale-0 opacity-0 absolute'
+                  : 'rotate-0 scale-100 opacity-100'
+              }`}
+            >
+              <Moon className="h-[18px] w-[18px]" />
+            </span>
           </button>
         </div>
       </header>

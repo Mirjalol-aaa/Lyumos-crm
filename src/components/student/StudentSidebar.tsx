@@ -14,6 +14,8 @@ import {
   LogOut,
   X,
   Globe,
+  Sun,
+  Moon,
 } from 'lucide-react';
 
 export type StudentPageType =
@@ -37,7 +39,7 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
   collapsed,
   setCollapsed,
 }) => {
-  const { students } = useCRM();
+  const { students, settings, updateSettings } = useCRM();
   const { activeStudentId, homeworkTasks, submissions } = useLMS();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
@@ -239,6 +241,23 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
                 {currentStudent?.groupName || 'Guruh'}
               </p>
             </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                updateSettings({
+                  theme: settings.theme === 'dark' ? 'light' : 'dark',
+                });
+              }}
+              title={settings.theme === 'dark' ? "Yorug' rejimga o'tish" : "Qorong'i rejimga o'tish"}
+              className={`rounded-xl p-2 text-slate-400 hover:bg-slate-200/60 hover:text-amber-500 dark:hover:bg-slate-700/60 dark:hover:text-amber-400 transition-colors ${collapsed ? 'lg:hidden' : ''}`}
+            >
+              {settings.theme === 'dark' ? (
+                <Sun className="h-4 w-4 text-amber-400" />
+              ) : (
+                <Moon className="h-4 w-4 text-slate-600" />
+              )}
+            </button>
 
             <button
               type="button"

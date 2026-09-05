@@ -133,11 +133,7 @@ function AdminPortalContent() {
 
   return (
     <div
-      className={`min-h-screen flex font-sans antialiased selection:bg-blue-600 selection:text-white ${
-        settings.theme === 'dark'
-          ? 'dark bg-slate-950 text-slate-100'
-          : 'bg-[#F8F9FA] text-slate-900'
-      }`}
+      className="min-h-screen flex font-sans antialiased selection:bg-blue-600 selection:text-white bg-[#F8F9FA] dark:bg-slate-950 text-slate-900 dark:text-slate-100"
     >
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
@@ -206,11 +202,7 @@ function TeacherPortalContent() {
 
   return (
     <div
-      className={`min-h-screen flex font-sans antialiased selection:bg-indigo-600 selection:text-white ${
-        settings.theme === 'dark'
-          ? 'dark bg-slate-950 text-slate-100'
-          : 'bg-[#F8F9FC] text-slate-900'
-      }`}
+      className="min-h-screen flex font-sans antialiased selection:bg-indigo-600 selection:text-white bg-[#F8F9FC] dark:bg-slate-950 text-slate-900 dark:text-slate-100"
     >
       <TeacherSidebar
         activePage={teacherPage}
@@ -267,11 +259,7 @@ function StudentPortalContent() {
 
   return (
     <div
-      className={`min-h-screen flex font-sans antialiased selection:bg-emerald-600 selection:text-white ${
-        settings.theme === 'dark'
-          ? 'dark bg-slate-950 text-slate-100'
-          : 'bg-[#F8FAF9] text-slate-900'
-      }`}
+      className="min-h-screen flex font-sans antialiased selection:bg-emerald-600 selection:text-white bg-[#F8FAF9] dark:bg-slate-950 text-slate-900 dark:text-slate-100"
     >
       <StudentSidebar
         activePage={studentPage}
