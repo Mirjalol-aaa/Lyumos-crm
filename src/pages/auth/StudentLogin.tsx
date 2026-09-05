@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLMS } from '../../context/LMSContext';
 import { InteractiveParticles } from '../../components/common/InteractiveParticles';
-import { Eye, EyeOff, CheckCircle2, ShieldCheck, ArrowRight, ArrowLeft, Home } from 'lucide-react';
+import { Eye, EyeOff, CheckCircle2, ShieldCheck, ArrowRight, ArrowLeft, Home, Sun, Moon } from 'lucide-react';
+import { useCRM } from '../../context/CRMContext';
 
 interface StudentLoginProps {
   onSwitchToAdmin: () => void;
@@ -10,6 +11,7 @@ interface StudentLoginProps {
 
 export const StudentLogin: React.FC<StudentLoginProps> = ({ onSwitchToAdmin, onBackToHome }) => {
   const { loginWithCredentials } = useLMS();
+  const { settings, updateSettings } = useCRM();
   const [studentIdInput, setStudentIdInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -133,14 +135,32 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({ onSwitchToAdmin, onB
             <span>Asosiy saytga qaytish</span>
           </button>
 
-          <button
-            type="button"
-            onClick={onSwitchToAdmin}
-            className="text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:underline flex items-center gap-1 cursor-pointer"
-          >
-            <span>Ustoz / Admin Portali</span>
-            <ArrowRight className="h-3.5 w-3.5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                const nextTheme = settings.theme === 'dark' ? 'light' : 'dark';
+                updateSettings({ theme: nextTheme });
+              }}
+              className="flex h-8.5 w-8.5 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 hover:border-amber-400 dark:border-slate-800 dark:bg-slate-900 dark:text-amber-400 dark:hover:bg-slate-800 transition-all shadow-xs cursor-pointer"
+              title={settings.theme === 'dark' ? "Yorug' rejim (Light Mode)" : "Qorong'i rejim (Dark Mode)"}
+            >
+              {settings.theme === 'dark' ? (
+                <Sun className="h-4 w-4 text-amber-400" />
+              ) : (
+                <Moon className="h-4 w-4 text-slate-700" />
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={onSwitchToAdmin}
+              className="text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:underline flex items-center gap-1 cursor-pointer"
+            >
+              <span>Admin Portali</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
 
         {/* Center Form */}

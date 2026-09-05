@@ -35,17 +35,17 @@ export const INITIAL_TEACHERS: Teacher[] = [
   },
   {
     id: "TCH-02",
-    fullName: "Malika ustoz",
+    fullName: "Hasanboy ustoz",
     avatar: "", // No photo as requested
     phone: "+998 (90) 987-65-43",
-    email: "ingliz@lumos.uz",
+    email: "hasanboy@lumos.uz",
     subjects: ["Ingliz tili"],
     baseSalary: 1200000,
     bonusPerStudent: 15000,
     groupsCount: 1,
     studentsCount: 8,
     joinedDate: "2024-07-01",
-    rating: 4.9,
+    rating: 5.0,
     schedule: "Seshanba, Payshanba, Shanba (15:30 - 17:30)",
     status: "Active"
   }
@@ -69,11 +69,11 @@ export const INITIAL_GROUPS: Group[] = [
   },
   {
     id: "GRP-02",
-    name: "Ingliz tili (Malika ustoz)",
+    name: "Ingliz tili (Hasanboy ustoz)",
     subject: "Ingliz tili",
-    level: "General English",
+    level: "General English & IELTS",
     teacherId: "TCH-02",
-    teacherName: "Malika ustoz",
+    teacherName: "Hasanboy ustoz",
     room: "102-xona",
     scheduleDays: "Sesh, Pay, Shan",
     scheduleTime: "15:30 - 17:30",
@@ -399,7 +399,7 @@ export const INITIAL_EVENTS: CalendarEvent[] = [
   },
   {
     id: "EVT-02",
-    title: "Ingliz tili (Malika ustoz)",
+    title: "Ingliz tili (Hasanboy ustoz)",
     date: new Date().toISOString().split('T')[0],
     time: "15:30 - 17:30",
     type: "event",

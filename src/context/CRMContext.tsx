@@ -478,37 +478,42 @@ export const CRMProvider: React.FC<{
   const [
     settings,
     setSettings,
-  ] = useState<CenterSettings>({
-    centerName:
-      'LUMOS O‘quv Markazi',
+  ] = useState<CenterSettings>(() => {
+    const savedTheme = typeof window !== 'undefined'
+      ? (localStorage.getItem('lumos_theme') as 'light' | 'dark' | null)
+      : null;
 
-    tagline:
-      'Bilim bilan yorqin kelajakka!',
-
-    phone: '+998 (71) 200-00-25',
-    email: 'admin@lumos.uz',
-    address: 'Toshkent sh., Chilonzor tumani',
-
-    currency: 'USD',
-    currencySymbol: '$',
-
-    academicYear:
-      '2025 - 2026',
-
-    language: 'en',
-    theme: 'light',
-
-    enableSmsNotifications: true,
-    autoRemindUnpaid: true,
-
-    discountPolicyMax: 25,
+    return {
+      centerName: 'LUMOS O‘quv Markazi',
+      tagline: 'Bilim bilan yorqin kelajakka!',
+      phone: '+998 (71) 200-00-25',
+      email: 'admin@lumos.uz',
+      address: 'Toshkent sh., Chilonzor tumani, Bunyodkor shoh ko‘chasi 42',
+      currency: 'UZS',
+      currencySymbol: 'so‘m',
+      academicYear: '2025 - 2026',
+      language: 'uz',
+      theme: savedTheme || 'light',
+      enableSmsNotifications: true,
+      autoRemindUnpaid: true,
+      discountPolicyMax: 20,
+    };
   });
 
   useEffect(() => {
-    if (settings.theme === 'dark') {
+    const activeTheme = settings.theme || 'light';
+    try {
+      localStorage.setItem('lumos_theme', activeTheme);
+    } catch {
+      // LocalStorage might be restricted
+    }
+
+    if (activeTheme === 'dark') {
       document.documentElement.classList.add('dark');
+      document.body.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark');
     }
   }, [settings.theme]);
 
@@ -754,18 +759,27 @@ export const CRMProvider: React.FC<{
       ...newSettings,
     };
 
+    if (newSettings.theme) {
+      try {
+        localStorage.setItem('lumos_theme', newSettings.theme);
+      } catch {
+        // LocalStorage fallback
+      }
+      if (newSettings.theme === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.body.classList.remove('dark');
+      }
+    }
 
     setSettings(merged);
 
-
     upsertSettings(merged)
-      .catch(err =>
-        handleAsyncError(
-          err,
-          () =>
-            setSettings(settings)
-        )
-      );
+      .catch(err => {
+        console.warn('[Supabase Settings Sync Warning]:', err);
+      });
   };
 
 

@@ -54,8 +54,8 @@ export const OFFICIAL_CREDENTIALS: UserCredential[] = [
   {
     id: 'TCH-02',
     role: 'teacher',
-    name: 'Malika ustoz',
-    login: 'ingliz@lumos.uz',
+    name: 'Hasanboy ustoz',
+    login: 'hasanboy@lumos.uz',
     password: 'teacher123',
     details: 'Ingliz tili ustozi',
     teacherId: 'TCH-02',
@@ -63,10 +63,19 @@ export const OFFICIAL_CREDENTIALS: UserCredential[] = [
   {
     id: 'TCH-02-USER',
     role: 'teacher',
-    name: 'Malika ustoz',
-    login: 'malika',
+    name: 'Hasanboy ustoz',
+    login: 'hasanboy',
     password: 'teacher123',
     details: 'Ingliz tili ustozi (login nomi orqali)',
+    teacherId: 'TCH-02',
+  },
+  {
+    id: 'TCH-02-ALIAS',
+    role: 'teacher',
+    name: 'Hasanboy ustoz',
+    login: 'malika',
+    password: 'teacher123',
+    details: 'Ingliz tili ustozi (zaxira login)',
     teacherId: 'TCH-02',
   },
 

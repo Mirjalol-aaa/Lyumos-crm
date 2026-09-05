@@ -6,6 +6,19 @@
     <link rel="icon" type="image/png" href="/lumos-logo.png" />
     <title>LUMOS O‘quv Markazi — ERP & LMS Boshqaruv Tizimi</title>
     <meta name="description" content="LUMOS O‘quv Markazi — Bilim bilan yorqin kelajakka!" />
+    <!-- Immediate Dark/Light Mode Bootstrapper -->
+    <script>
+      (function() {
+        try {
+          var t = localStorage.getItem('lumos_theme');
+          if (t === 'dark') {
+            document.documentElement.classList.add('dark');
+          } else if (t === 'light') {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
     <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono for PRO SaaS UI -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

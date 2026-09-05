@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLMS } from '../../context/LMSContext';
 import { InteractiveParticles } from '../../components/common/InteractiveParticles';
-import { Sparkles, Eye, EyeOff, CheckCircle2, ShieldCheck, ArrowRight, ArrowLeft, Home } from 'lucide-react';
+import { Sparkles, Eye, EyeOff, CheckCircle2, ShieldCheck, ArrowRight, ArrowLeft, Home, Sun, Moon } from 'lucide-react';
+import { useCRM } from '../../context/CRMContext';
 import lumosLogo from '../../assets/lumos-logo.png';
 
 interface AdminTeacherLoginProps {
@@ -11,6 +12,7 @@ interface AdminTeacherLoginProps {
 
 export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchToStudent, onBackToHome }) => {
   const { loginWithCredentials } = useLMS();
+  const { settings, updateSettings } = useCRM();
   const [loginInput, setLoginInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -74,7 +76,7 @@ export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchTo
           <div className="inline-flex items-center gap-2 rounded-2xl bg-amber-500/20 px-3.5 py-1.5 backdrop-blur-md border border-amber-500/30">
             <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
             <span className="text-xs font-black uppercase tracking-widest text-amber-300">
-              Zamonaviy Kasblar Markazi
+              Matematika va Ingliz Tili Markazi
             </span>
           </div>
 
@@ -121,6 +123,22 @@ export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchTo
             <button
               type="button"
               onClick={() => {
+                const nextTheme = settings.theme === 'dark' ? 'light' : 'dark';
+                updateSettings({ theme: nextTheme });
+              }}
+              className="flex h-8.5 w-8.5 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 hover:border-amber-400 dark:border-slate-800 dark:bg-slate-900 dark:text-amber-400 dark:hover:bg-slate-800 transition-all shadow-xs cursor-pointer"
+              title={settings.theme === 'dark' ? "Yorug' rejim (Light Mode)" : "Qorong'i rejim (Dark Mode)"}
+            >
+              {settings.theme === 'dark' ? (
+                <Sun className="h-4 w-4 text-amber-400" />
+              ) : (
+                <Moon className="h-4 w-4 text-slate-700" />
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
                 if (onBackToHome) onBackToHome();
                 else window.location.hash = '#/';
               }}
@@ -134,7 +152,7 @@ export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchTo
             <button
               type="button"
               onClick={onSwitchToStudent}
-              className="text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
+              className="text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer ml-1"
             >
               <span>Talaba Paneli</span>
               <ArrowRight className="h-3.5 w-3.5" />
