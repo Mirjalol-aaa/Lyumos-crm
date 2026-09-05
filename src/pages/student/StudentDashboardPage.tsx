@@ -69,27 +69,27 @@ export const StudentDashboardPage: React.FC<StudentDashboardPageProps> = ({ onNa
         </div>
 
         {/* Student selector & Site link */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
           <button
             type="button"
             onClick={() => {
               window.location.hash = '#/landing';
             }}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300/80 bg-white px-3.5 py-1.5 text-xs font-bold text-emerald-800 shadow-xs hover:bg-emerald-50 hover:border-emerald-400 dark:border-emerald-800 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/60 transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300/80 bg-white px-3 py-1.5 text-xs font-bold text-emerald-800 shadow-xs hover:bg-emerald-50 hover:border-emerald-400 dark:border-emerald-800 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/60 transition-all cursor-pointer"
             title="LUMOS Asosiy sayti va kurslar ro‘yxatiga o‘tish"
           >
             <Globe className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span>🌐 Asosiy Sayt & Kurslar</span>
+            <span>🌐 Asosiy Sayt</span>
           </button>
 
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-              Talabani o‘zgartirish:
+          <div className="flex items-center gap-2 flex-1 sm:flex-initial">
+            <span className="text-[11px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 shrink-0">
+              Talaba:
             </span>
             <select
               value={activeStudentId}
               onChange={(e) => setActiveStudentId(e.target.value)}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 shadow-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              className="w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-800 shadow-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
             >
               {students.slice(0, 15).map(s => (
                 <option key={s.id} value={s.id}>
@@ -102,8 +102,8 @@ export const StudentDashboardPage: React.FC<StudentDashboardPageProps> = ({ onNa
       </div>
 
       {/* Hero Welcome Banner */}
-      <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-r from-slate-900 via-emerald-950 to-teal-950 p-6 text-white shadow-xl sm:p-8">
-        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+      <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-r from-slate-900 via-emerald-950 to-teal-950 p-5 sm:p-8 text-white shadow-xl">
+        <div className="relative z-10 flex flex-col gap-5 sm:gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-300">
               <Sparkles className="h-3.5 w-3.5" />
@@ -113,29 +113,29 @@ export const StudentDashboardPage: React.FC<StudentDashboardPageProps> = ({ onNa
             <h1 className="mt-3 text-2xl font-black tracking-tight sm:text-3xl lg:text-4xl">
               Salom, {currentStudent?.fullName}!
             </h1>
-            <p className="mt-2 text-sm leading-relaxed text-slate-300">
+            <p className="mt-2 text-xs sm:text-sm leading-relaxed text-slate-300">
               Guruh: <strong className="text-emerald-300">{myGroup?.name}</strong> • Ustoz:{' '}
               <strong className="text-emerald-300">{currentStudent?.teacherName}</strong>. Dars videolarini tomosha qiling, uyga vazifalarni topshiring va guruh reytingida yuqori o‘rinni egallang!
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:flex sm:flex-wrap gap-2.5 sm:gap-3 w-full lg:w-auto">
             <button
               type="button"
               onClick={() => onNavigate('lessons')}
-              className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-xs font-bold text-white shadow-lg shadow-emerald-600/30 transition-all hover:bg-emerald-700 active:scale-95"
+              className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 sm:py-3 text-xs font-bold text-white shadow-lg shadow-emerald-600/30 transition-all hover:bg-emerald-700 active:scale-95"
             >
               <PlayCircle className="h-4 w-4" />
-              Dars Videolari
+              <span>Dars Videolari</span>
             </button>
 
             <button
               type="button"
               onClick={() => onNavigate('homework')}
-              className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-xs font-bold text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-95"
+              className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 sm:py-3 text-xs font-bold text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-95"
             >
               <FileCheck2 className="h-4 w-4" />
-              Vazifani Topshirish ({pendingTasks.length})
+              <span>Topshirish ({pendingTasks.length})</span>
             </button>
 
             <button
@@ -143,11 +143,11 @@ export const StudentDashboardPage: React.FC<StudentDashboardPageProps> = ({ onNa
               onClick={() => {
                 window.location.hash = '#/landing';
               }}
-              className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-emerald-400/40 bg-emerald-950/50 px-4 py-3 text-xs font-bold text-emerald-300 backdrop-blur-md transition-all hover:bg-emerald-900/60 active:scale-95"
+              className="col-span-1 xs:col-span-2 sm:col-auto flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-emerald-400/40 bg-emerald-950/50 px-4 py-2.5 sm:py-3 text-xs font-bold text-emerald-300 backdrop-blur-md transition-all hover:bg-emerald-900/60 active:scale-95"
               title="LUMOS Asosiy saytini ko‘rish"
             >
               <Globe className="h-4 w-4" />
-              Asosiy Sayt
+              <span>Asosiy Sayt</span>
             </button>
           </div>
         </div>

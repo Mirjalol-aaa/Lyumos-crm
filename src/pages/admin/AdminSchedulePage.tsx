@@ -139,16 +139,18 @@ export const AdminSchedulePage: React.FC = () => {
 
       {/* Filter by Teacher */}
       <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl border border-slate-200/80 bg-white dark:border-slate-800 dark:bg-slate-900/70 shadow-xs">
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-slate-400" />
-          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-            O‘qituvchi bo‘yicha:
-          </span>
-          <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1.5">
+            <Filter className="h-4 w-4 text-slate-400" />
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+              O‘qituvchi bo‘yicha:
+            </span>
+          </div>
+          <div className="flex flex-wrap items-center gap-1.5">
             <button
               type="button"
               onClick={() => setTeacherFilter('all')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+              className={`px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition-colors cursor-pointer ${
                 teacherFilter === 'all'
                   ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'
@@ -159,7 +161,7 @@ export const AdminSchedulePage: React.FC = () => {
             <button
               type="button"
               onClick={() => setTeacherFilter('Hadicha')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+              className={`px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition-colors cursor-pointer ${
                 teacherFilter === 'Hadicha'
                   ? 'bg-amber-500 text-white'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'
@@ -170,7 +172,7 @@ export const AdminSchedulePage: React.FC = () => {
             <button
               type="button"
               onClick={() => setTeacherFilter('Hasanboy')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+              className={`px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition-colors cursor-pointer ${
                 teacherFilter === 'Hasanboy'
                   ? 'bg-blue-600 text-white'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'

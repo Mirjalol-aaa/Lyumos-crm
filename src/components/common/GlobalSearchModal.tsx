@@ -51,20 +51,20 @@ export const GlobalSearchModal: React.FC = () => {
   ).slice(0, 3) : groups.slice(0, 2);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-6 sm:pt-20 px-2 sm:px-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
-        className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[24px] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[80vh] animate-in zoom-in-95 duration-200"
+        className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[24px] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
         {/* Search Header */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-100 dark:border-slate-800">
-          <Search className="w-5 h-5 text-amber-500 shrink-0" />
+        <div className="flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-5 py-3 sm:py-4 border-b border-slate-100 dark:border-slate-800">
+          <Search className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500 shrink-0" />
           <input
             type="text"
             value={term}
             onChange={e => setTerm(e.target.value)}
-            placeholder="O‘quvchi ismi, guruh, ustoz yoki telefon raqamini qidiring..."
-            className="flex-1 bg-transparent text-base text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none"
+            placeholder="O‘quvchi, guruh yoki ustoz qidirish..."
+            className="flex-1 bg-transparent text-sm sm:text-base text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none"
             autoFocus
           />
           {term && (
@@ -74,7 +74,7 @@ export const GlobalSearchModal: React.FC = () => {
           )}
           <button 
             onClick={() => setIsGlobalSearchOpen(false)}
-            className="px-2.5 py-1 text-xs font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700"
+            className="px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer"
           >
             ESC
           </button>

@@ -256,7 +256,7 @@ export const StudentProfileModal: React.FC = () => {
         fixed inset-0 z-50
         flex items-center justify-center
         bg-black/70
-        p-5
+        p-2 sm:p-5
         backdrop-blur-md
       "
     >
@@ -266,12 +266,12 @@ export const StudentProfileModal: React.FC = () => {
         }
         className="
           flex
-          h-[82vh]
+          h-[92vh] sm:h-[84vh]
           w-full
           max-w-4xl
           flex-col
           overflow-hidden
-          rounded-[26px]
+          rounded-2xl sm:rounded-[26px]
           border border-slate-700/60
           bg-[#0b1322]
           shadow-[0_30px_100px_rgba(0,0,0,.55)]
@@ -288,7 +288,7 @@ export const StudentProfileModal: React.FC = () => {
             bg-gradient-to-r
             from-[#111c30]
             to-[#0e213b]
-            px-6 py-5
+            px-4 sm:px-6 py-4 sm:py-5
           "
         >
           <button
@@ -297,8 +297,8 @@ export const StudentProfileModal: React.FC = () => {
             }
             className="
               absolute
-              right-5 top-5
-              flex h-9 w-9
+              right-3.5 top-3.5 sm:right-5 sm:top-5
+              flex h-8 w-8 sm:h-9 sm:w-9
               cursor-pointer
               items-center justify-center
               rounded-xl
@@ -315,10 +315,13 @@ export const StudentProfileModal: React.FC = () => {
           <div
             className="
               flex
-              items-center
+              flex-col
+              md:flex-row
+              items-start
+              md:items-center
               justify-between
-              gap-5
-              pr-12
+              gap-3 md:gap-5
+              pr-10 md:pr-12
             "
           >
             <div
@@ -326,16 +329,16 @@ export const StudentProfileModal: React.FC = () => {
                 flex
                 min-w-0
                 items-center
-                gap-4
+                gap-3 sm:gap-4
               "
             >
               <img
                 src={student.avatar}
                 alt={student.fullName}
                 className="
-                  h-16 w-16
+                  h-12 w-12 sm:h-16 sm:w-16
                   shrink-0
-                  rounded-2xl
+                  rounded-xl sm:rounded-2xl
                   object-cover
                   ring-2 ring-blue-500/40
                 "
@@ -347,13 +350,13 @@ export const StudentProfileModal: React.FC = () => {
                     flex
                     flex-wrap
                     items-center
-                    gap-2
+                    gap-1.5 sm:gap-2
                   "
                 >
                   <h2
                     className="
                       truncate
-                      text-xl
+                      text-base sm:text-xl
                       font-black
                       text-white
                     "
@@ -365,7 +368,7 @@ export const StudentProfileModal: React.FC = () => {
                     className="
                       rounded-md
                       bg-slate-800
-                      px-2 py-1
+                      px-1.5 py-0.5 sm:px-2 sm:py-1
                       font-mono
                       text-[9px]
                       font-bold
@@ -379,7 +382,7 @@ export const StudentProfileModal: React.FC = () => {
                     className="
                       rounded-md
                       bg-emerald-500/10
-                      px-2 py-1
+                      px-1.5 py-0.5 sm:px-2 sm:py-1
                       text-[9px]
                       font-bold
                       uppercase
@@ -392,11 +395,11 @@ export const StudentProfileModal: React.FC = () => {
 
                 <div
                   className="
-                    mt-2
+                    mt-1.5 sm:mt-2
                     flex
                     flex-wrap
-                    gap-4
-                    text-[11px]
+                    gap-2 sm:gap-4
+                    text-[10px] sm:text-[11px]
                     font-medium
                     text-slate-400
                   "
@@ -417,11 +420,12 @@ export const StudentProfileModal: React.FC = () => {
             {!isEditing && (
               <div
                 className="
-                  hidden
+                  flex
+                  flex-wrap
                   shrink-0
                   items-center
-                  gap-2
-                  md:flex
+                  gap-1.5 sm:gap-2
+                  mt-1 md:mt-0
                 "
               >
                 <button
@@ -430,7 +434,7 @@ export const StudentProfileModal: React.FC = () => {
                     cursor-pointer
                     rounded-xl
                     bg-blue-600
-                    px-4 py-2.5
+                    px-3 sm:px-4 py-2 sm:py-2.5
                     text-xs
                     font-bold
                     text-white
@@ -438,7 +442,7 @@ export const StudentProfileModal: React.FC = () => {
                     hover:bg-blue-500
                   "
                 >
-                  Receive Payment
+                  To‘lov Qabul Qilish
                 </button>
 
                 <button
@@ -448,11 +452,11 @@ export const StudentProfileModal: React.FC = () => {
                   className="
                     flex
                     cursor-pointer
-                    items-center gap-2
+                    items-center gap-1.5 sm:gap-2
                     rounded-xl
                     border border-slate-600
                     bg-slate-800
-                    px-4 py-2.5
+                    px-3 sm:px-4 py-2 sm:py-2.5
                     text-xs
                     font-bold
                     text-slate-200
@@ -462,14 +466,14 @@ export const StudentProfileModal: React.FC = () => {
                   "
                 >
                   <Edit3 className="h-3.5 w-3.5" />
-                  Edit
+                  <span>Tahrirlash</span>
                 </button>
 
                 <button
                   onClick={() => {
                     if (
                       confirm(
-                        `Delete ${student.fullName}?`
+                        `Haqiqatan ham ${student.fullName} o‘quvchisini o‘chirmoqchimisiz?`
                       )
                     ) {
                       deleteStudent(
@@ -485,12 +489,13 @@ export const StudentProfileModal: React.FC = () => {
                     rounded-xl
                     border border-rose-500/20
                     bg-rose-500/10
-                    p-2.5
+                    p-2 sm:p-2.5
                     text-rose-400
                     transition
                     hover:bg-rose-500
                     hover:text-white
                   "
+                  title="O‘chirish"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>

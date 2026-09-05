@@ -123,46 +123,46 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({ onSwitchToAdmin, onB
       </div>
 
       {/* RIGHT COLUMN: Clean Student Form */}
-      <div className="flex-1 flex flex-col justify-between p-6 sm:p-12 lg:p-16 max-w-lg mx-auto w-full bg-[#070C18]">
+      <div className="flex-1 flex flex-col justify-between p-4 sm:p-10 lg:p-16 max-w-lg mx-auto w-full bg-[#070C18]">
         {/* Top Navigation Bar: Brand Logo acts as Home link */}
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-2 sm:gap-3">
           <button
             type="button"
             onClick={handleBackToHome}
-            className="flex items-center gap-3 cursor-pointer text-left group select-none"
+            className="flex items-center gap-2.5 sm:gap-3 cursor-pointer text-left group select-none min-w-0"
             title="LUMOS Asosiy saytiga qaytish"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500/20 via-yellow-500/10 to-amber-300/20 p-2 border border-amber-400/40 shadow-md shadow-amber-500/10 group-hover:scale-105 transition-transform">
+            <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-tr from-amber-500/20 via-yellow-500/10 to-amber-300/20 p-1.5 sm:p-2 border border-amber-400/40 shadow-md shadow-amber-500/10 group-hover:scale-105 transition-transform">
               <img
                 src={lumosLogo}
                 alt="LUMOS"
                 className="h-full w-full object-contain filter drop-shadow-sm"
               />
             </div>
-            <div>
-              <span className="text-xl font-black tracking-tight text-white group-hover:text-amber-400 transition-colors font-serif">
+            <div className="min-w-0">
+              <span className="text-lg sm:text-xl font-black tracking-tight text-white group-hover:text-amber-400 transition-colors font-serif block">
                 LUMOS
               </span>
-              <span className="block text-[11px] uppercase tracking-wider text-amber-400 font-extrabold">
+              <span className="block text-[9px] sm:text-[11px] uppercase tracking-wider text-amber-400 font-extrabold truncate max-w-[130px] xs:max-w-none">
                 Talabalar Portali
               </span>
             </div>
           </button>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
               onClick={onSwitchToAdmin}
-              className="text-xs font-bold text-amber-300 hover:text-amber-200 flex items-center gap-1.5 cursor-pointer bg-amber-950/60 px-3.5 py-2 rounded-xl border border-amber-800/80 hover:border-amber-700 transition-all shadow-xs"
+              className="text-[11px] sm:text-xs font-bold text-amber-300 hover:text-amber-200 flex items-center gap-1 sm:gap-1.5 cursor-pointer bg-amber-950/60 px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border border-amber-800/80 hover:border-amber-700 transition-all shadow-xs"
             >
               <span>Admin Portali</span>
-              <ArrowRight className="h-3.5 w-3.5" />
+              <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
             </button>
           </div>
         </div>
 
         {/* Center Form */}
-        <div className="my-auto py-8 space-y-6">
+        <div className="my-auto py-6 sm:py-8 space-y-5 sm:space-y-6">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/80 text-[11px] font-bold text-slate-300 mb-3">
               <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />

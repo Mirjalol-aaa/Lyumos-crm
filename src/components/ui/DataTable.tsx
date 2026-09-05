@@ -92,7 +92,7 @@ export function DataTable<T extends Record<string, any>>({
     <div className="w-full space-y-4">
       {/* Control Bar: Search & Custom Filter */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative flex-1 max-w-sm">
+        <div className="relative flex-1 w-full sm:max-w-sm">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <input
             type="text"
@@ -115,7 +115,7 @@ export function DataTable<T extends Record<string, any>>({
 
       {/* Table Surface */}
       <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs dark:border-slate-800/90 dark:bg-slate-900/90">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto scrollbar-thin">
           <table className="w-full text-left text-xs">
             <thead className="border-b border-slate-100 bg-slate-50/80 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400 dark:border-slate-800 dark:bg-slate-800/40 dark:text-slate-400">
               <tr>
@@ -123,7 +123,7 @@ export function DataTable<T extends Record<string, any>>({
                   <th
                     key={String(col.key) + idx}
                     style={{ width: col.width }}
-                    className={`px-5 py-3.5 ${
+                    className={`px-3 sm:px-5 py-2.5 sm:py-3.5 ${
                       col.align === 'center'
                         ? 'text-center'
                         : col.align === 'right'
@@ -148,7 +148,7 @@ export function DataTable<T extends Record<string, any>>({
                 <tr>
                   <td
                     colSpan={columns.length}
-                    className="px-5 py-12 text-center text-xs text-slate-400 dark:text-slate-500"
+                    className="px-4 sm:px-5 py-10 sm:py-12 text-center text-xs text-slate-400 dark:text-slate-500"
                   >
                     <div className="flex flex-col items-center justify-center gap-2">
                       <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800">
@@ -170,7 +170,7 @@ export function DataTable<T extends Record<string, any>>({
                     {columns.map((col, colIdx) => (
                       <td
                         key={String(col.key) + colIdx}
-                        className={`px-5 py-3.5 text-slate-700 dark:text-slate-300 font-medium ${
+                        className={`px-3 sm:px-5 py-2.5 sm:py-3.5 text-slate-700 dark:text-slate-300 font-medium ${
                           col.align === 'center'
                             ? 'text-center'
                             : col.align === 'right'
@@ -192,8 +192,8 @@ export function DataTable<T extends Record<string, any>>({
 
         {/* Pagination Bar */}
         {totalPages > 1 && (
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-t border-slate-100 px-5 py-3 gap-2 dark:border-slate-800/60 bg-slate-50/40 dark:bg-slate-900/40 text-xs">
-            <span className="text-slate-500 text-[11px]">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-t border-slate-100 px-3.5 sm:px-5 py-2.5 sm:py-3 gap-2 dark:border-slate-800/60 bg-slate-50/40 dark:bg-slate-900/40 text-xs">
+            <span className="text-slate-500 text-[10px] sm:text-[11px]">
               Jami <strong>{sortedData.length}</strong> ta qator (Sahifa <strong>{currentPage}</strong> / {totalPages})
             </span>
 

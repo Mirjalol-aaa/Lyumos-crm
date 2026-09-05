@@ -479,9 +479,9 @@ export const LandingPage: React.FC = () => {
       {/* ─────────────────────────────────────────────────────────────
           4. STATS BAR (CREDIBLE & FOCUSED)
       ───────────────────────────────────────────────────────────── */}
-      <section id="stats" className="border-y border-slate-200/80 bg-white py-12 dark:border-slate-800/80 dark:bg-slate-900/60 transition-colors">
+      <section id="stats" className="border-y border-slate-200/80 bg-white py-10 sm:py-12 dark:border-slate-800/80 dark:bg-slate-900/60 transition-colors">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
             <div className="text-center space-y-1">
               <span className="text-3xl sm:text-4xl font-black text-amber-500 font-mono">
                 {counterStudents}+
@@ -537,12 +537,12 @@ export const LandingPage: React.FC = () => {
               return (
                 <div
                   key={course.id}
-                  className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900/90"
+                  className="group relative flex flex-col justify-between rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-8 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900/90"
                 >
-                  <div className="space-y-5">
+                  <div className="space-y-4 sm:space-y-5">
                     {/* Header tags */}
                     <div className="flex items-center justify-between">
-                      <span className="rounded-xl bg-amber-500/10 px-3 py-1 text-[11px] font-black uppercase text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                      <span className="rounded-xl bg-amber-500/10 px-2.5 sm:px-3 py-1 text-[10px] sm:text-[11px] font-black uppercase text-amber-600 dark:text-amber-400 border border-amber-500/20">
                         {isMath ? 'Aniq Fanlar & Mantiq' : 'Xalqaro Tillar'}
                       </span>
                       <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
@@ -553,7 +553,7 @@ export const LandingPage: React.FC = () => {
 
                     {/* Title & Description */}
                     <div>
-                      <h3 className="text-2xl font-black text-slate-900 group-hover:text-amber-600 dark:text-white dark:group-hover:text-amber-400 transition-colors">
+                      <h3 className="text-xl sm:text-2xl font-black text-slate-900 group-hover:text-amber-600 dark:text-white dark:group-hover:text-amber-400 transition-colors">
                         {course.title}
                       </h3>
                       <p className="mt-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
@@ -562,7 +562,7 @@ export const LandingPage: React.FC = () => {
                     </div>
 
                     {/* Schedule & Teacher Info */}
-                    <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-4 border border-slate-100 dark:border-slate-800 space-y-2 text-xs">
+                    <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-3.5 sm:p-4 border border-slate-100 dark:border-slate-800 space-y-2 text-xs">
                       <div className="flex items-center justify-between text-slate-700 dark:text-slate-300">
                         <span className="text-slate-500 dark:text-slate-400 font-medium">Ustoz:</span>
                         <span className="font-bold text-amber-600 dark:text-amber-400">
@@ -571,7 +571,7 @@ export const LandingPage: React.FC = () => {
                       </div>
                       <div className="flex items-center justify-between text-slate-700 dark:text-slate-300">
                         <span className="text-slate-500 dark:text-slate-400 font-medium">Dars vaqti:</span>
-                        <span className="font-semibold">
+                        <span className="font-semibold text-[11px] sm:text-xs">
                           {isMath ? 'Dush, Chor, Juma (14:00 - 16:00)' : 'Sesh, Pay, Shan (15:30 - 17:30)'}
                         </span>
                       </div>
@@ -585,17 +585,17 @@ export const LandingPage: React.FC = () => {
                       {course.syllabus.map((item, i) => (
                         <div key={i} className="flex items-start gap-2.5 text-slate-600 dark:text-slate-300">
                           <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                          <span className="leading-snug">{item}</span>
+                          <span className="leading-snug text-xs">{item}</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
                   {/* Price & Action */}
-                  <div className="mt-8 pt-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-4">
+                  <div className="mt-6 sm:mt-8 pt-4 sm:pt-5 border-t border-slate-100 dark:border-slate-800 flex flex-col xs:flex-row xs:items-center xs:justify-between gap-3 sm:gap-4">
                     <div>
                       <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Oylik to‘lov:</span>
-                      <p className="text-xl font-black text-amber-600 dark:text-amber-400 font-mono">
+                      <p className="text-lg sm:text-xl font-black text-amber-600 dark:text-amber-400 font-mono">
                         {formatMoney(course.pricePerMonth, 'UZS')}
                       </p>
                     </div>
@@ -603,7 +603,7 @@ export const LandingPage: React.FC = () => {
                     <Button
                       variant="primary"
                       size="md"
-                      className="px-6 py-2.5 font-bold shadow-md shadow-amber-500/20 cursor-pointer rounded-xl"
+                      className="w-full xs:w-auto px-5 sm:px-6 py-2.5 font-bold shadow-md shadow-amber-500/20 cursor-pointer rounded-xl text-center justify-center"
                       onClick={() => {
                         setSelectedCourseName(course.title);
                         setIsApplyModalOpen(true);
@@ -638,22 +638,22 @@ export const LandingPage: React.FC = () => {
 
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 max-w-4xl mx-auto">
             {/* 1. Hadicha ustoz */}
-            <div className="rounded-3xl border border-slate-200/90 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-6 flex flex-col justify-between">
-              <div className="space-y-5">
-                <div className="flex items-center gap-4">
+            <div className="rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-6 flex flex-col justify-between">
+              <div className="space-y-4 sm:space-y-5">
+                <div className="flex items-center gap-3.5 sm:gap-4">
                   {/* Golden Monogram Avatar */}
-                  <div className="relative flex h-18 w-18 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-600/30 via-yellow-500/20 to-amber-300/30 border border-amber-400/50 text-amber-500 dark:text-amber-400 font-serif font-black text-3xl shadow-md">
+                  <div className="relative flex h-14 w-14 sm:h-18 sm:w-18 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-600/30 via-yellow-500/20 to-amber-300/30 border border-amber-400/50 text-amber-500 dark:text-amber-400 font-serif font-black text-2xl sm:text-3xl shadow-md">
                     H
-                    <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-lg bg-amber-500 text-slate-950 text-[10px] font-black">
+                    <span className="absolute -bottom-1 -right-1 flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-lg bg-amber-500 text-slate-950 text-[9px] sm:text-[10px] font-black">
                       ∑
                     </span>
                   </div>
 
-                  <div>
-                    <h4 className="text-xl font-black text-slate-900 dark:text-white">
+                  <div className="min-w-0 flex-1">
+                    <h4 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white truncate">
                       Hadicha ustoz
                     </h4>
-                    <p className="text-xs text-amber-600 dark:text-amber-400 font-bold mt-0.5">
+                    <p className="text-xs text-amber-600 dark:text-amber-400 font-bold mt-0.5 truncate">
                       Matematika va Mantiq Fani Ustozi
                     </p>
                     <div className="flex items-center gap-1 mt-1 text-xs text-amber-500 font-bold">
@@ -675,7 +675,7 @@ export const LandingPage: React.FC = () => {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500">Vaqti:</span>
-                    <span className="font-semibold text-slate-800 dark:text-slate-200">14:00 - 16:00 (101-xona)</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200 text-[11px] sm:text-xs">14:00 - 16:00 (101-xona)</span>
                   </div>
                 </div>
               </div>
@@ -683,7 +683,7 @@ export const LandingPage: React.FC = () => {
               <Button
                 variant="primary"
                 size="sm"
-                className="w-full justify-center gap-2 font-bold cursor-pointer rounded-xl"
+                className="w-full justify-center gap-2 font-bold cursor-pointer rounded-xl py-2.5"
                 onClick={() => {
                   setSelectedCourseName('Matematika (Hadicha ustoz)');
                   setIsApplyModalOpen(true);
@@ -694,23 +694,23 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* 2. Hasanboy ustoz */}
-            <div className="rounded-3xl border border-slate-200/90 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-6 flex flex-col justify-between">
-              <div className="space-y-5">
-                <div className="flex items-center gap-4">
+            <div className="rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-6 flex flex-col justify-between">
+              <div className="space-y-4 sm:space-y-5">
+                <div className="flex items-center gap-3.5 sm:gap-4">
                   {/* Golden Monogram Avatar */}
-                  <div className="relative flex h-18 w-18 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-600/30 via-yellow-500/20 to-amber-300/30 border border-amber-400/50 text-amber-500 dark:text-amber-400 font-serif font-black text-3xl shadow-md">
+                  <div className="relative flex h-14 w-14 sm:h-18 sm:w-18 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-600/30 via-yellow-500/20 to-amber-300/30 border border-amber-400/50 text-amber-500 dark:text-amber-400 font-serif font-black text-2xl sm:text-3xl shadow-md">
                     H
-                    <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-lg bg-amber-500 text-slate-950 text-[10px] font-black">
+                    <span className="absolute -bottom-1 -right-1 flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-lg bg-amber-500 text-slate-950 text-[9px] sm:text-[10px] font-black">
                       EN
                     </span>
                   </div>
 
-                  <div>
-                    <h4 className="text-xl font-black text-slate-900 dark:text-white">
+                  <div className="min-w-0 flex-1">
+                    <h4 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white truncate">
                       Hasanboy ustoz
                     </h4>
-                    <p className="text-xs text-amber-600 dark:text-amber-400 font-bold mt-0.5">
-                      Ingliz Tili (General English & IELTS) Ustozi
+                    <p className="text-xs text-amber-600 dark:text-amber-400 font-bold mt-0.5 truncate">
+                      Ingliz Tili (General & IELTS) Ustozi
                     </p>
                     <div className="flex items-center gap-1 mt-1 text-xs text-amber-500 font-bold">
                       <Star className="h-3.5 w-3.5 fill-current" />
@@ -731,7 +731,7 @@ export const LandingPage: React.FC = () => {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500">Vaqti:</span>
-                    <span className="font-semibold text-slate-800 dark:text-slate-200">15:30 - 17:30 (102-xona)</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200 text-[11px] sm:text-xs">15:30 - 17:30 (102-xona)</span>
                   </div>
                 </div>
               </div>
@@ -739,7 +739,7 @@ export const LandingPage: React.FC = () => {
               <Button
                 variant="primary"
                 size="sm"
-                className="w-full justify-center gap-2 font-bold cursor-pointer rounded-xl"
+                className="w-full justify-center gap-2 font-bold cursor-pointer rounded-xl py-2.5"
                 onClick={() => {
                   setSelectedCourseName('Ingliz Tili (Hasanboy ustoz)');
                   setIsApplyModalOpen(true);
@@ -930,9 +930,9 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Right Form Card */}
-            <div className="rounded-3xl border border-slate-200/90 bg-white p-8 shadow-xl dark:border-slate-800 dark:bg-slate-900">
-              <div className="mb-6 space-y-1">
-                <h3 className="text-xl font-black text-slate-900 dark:text-white">
+            <div className="rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-8 shadow-xl dark:border-slate-800 dark:bg-slate-900">
+              <div className="mb-5 sm:mb-6 space-y-1">
+                <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
                   Birinchi Bepul Sinov Darsiga Yoziling
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">

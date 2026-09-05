@@ -61,14 +61,14 @@ export const TeacherDashboardPage: React.FC<TeacherDashboardPageProps> = ({
         </div>
 
         {/* Teacher selector dropdown */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-            Ustozni o‘zgartirish:
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <span className="text-[11px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 shrink-0">
+            Ustoz:
           </span>
           <select
             value={activeTeacherId}
             onChange={(e) => setActiveTeacherId(e.target.value)}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 shadow-sm focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            className="w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-800 shadow-sm focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
           >
             {teachers.map(t => (
               <option key={t.id} value={t.id}>
@@ -80,8 +80,8 @@ export const TeacherDashboardPage: React.FC<TeacherDashboardPageProps> = ({
       </div>
 
       {/* Hero Welcome Banner */}
-      <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-950 p-6 text-white shadow-xl sm:p-8">
-        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+      <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-950 p-5 sm:p-8 text-white shadow-xl">
+        <div className="relative z-10 flex flex-col gap-5 sm:gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/20 px-3 py-1 text-xs font-semibold text-indigo-300">
               <Sparkles className="h-3.5 w-3.5" />
@@ -91,30 +91,30 @@ export const TeacherDashboardPage: React.FC<TeacherDashboardPageProps> = ({
             <h1 className="mt-3 text-2xl font-black tracking-tight sm:text-3xl lg:text-4xl">
               Xush kelibsiz, {currentTeacher?.fullName}!
             </h1>
-            <p className="mt-2 text-sm leading-relaxed text-slate-300">
+            <p className="mt-2 text-xs sm:text-sm leading-relaxed text-slate-300">
               Sizda hozirda <strong className="text-indigo-300">{myGroups.length} ta faol guruh</strong> va{' '}
               <strong className="text-indigo-300">{myStudents.length} nafar o‘quvchi</strong> mavjud. Darslar o‘tib, video yuklang va o‘quvchilar uyga vazifalarini 100 ballik tizimda baholang.
             </p>
           </div>
 
           {/* Quick Action Buttons */}
-          <div className="flex flex-wrap gap-3">
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:flex sm:flex-wrap gap-2.5 sm:gap-3 w-full lg:w-auto">
             <button
               type="button"
               onClick={() => (onOpenAddLesson ? onOpenAddLesson() : onNavigate('lessons'))}
-              className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 transition-all hover:bg-indigo-700 active:scale-95"
+              className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 sm:py-3 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 transition-all hover:bg-indigo-700 active:scale-95"
             >
               <Video className="h-4 w-4" />
-              Dars & Video Qo‘shish
+              <span>Dars & Video Qo‘shish</span>
             </button>
 
             <button
               type="button"
               onClick={() => (onOpenAddHomework ? onOpenAddHomework() : onNavigate('homework'))}
-              className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-xs font-bold text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-95"
+              className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 sm:py-3 text-xs font-bold text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-95"
             >
               <Plus className="h-4 w-4" />
-              Vazifa Berish (100 ball)
+              <span>Vazifa Berish (100 ball)</span>
             </button>
           </div>
         </div>

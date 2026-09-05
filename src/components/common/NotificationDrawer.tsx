@@ -29,31 +29,31 @@ export const NotificationDrawer: React.FC<DrawerProps> = ({ isOpen, onClose }) =
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/30 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-white dark:bg-slate-900 shadow-2xl border-l border-slate-200/80 dark:border-slate-800 flex flex-col">
+      <div className="absolute inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
+        <div className="w-screen max-w-full sm:max-w-md bg-white dark:bg-slate-900 shadow-2xl border-l border-slate-200/80 dark:border-slate-800 flex flex-col">
           {/* Header */}
-          <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-900/40 text-[#007AFF] flex items-center justify-center">
+          <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-500 flex items-center justify-center">
                 <Bell className="w-4 h-4" />
               </div>
               <div>
-                <h2 className="text-base font-bold text-slate-900 dark:text-white">Notifications</h2>
-                <p className="text-xs text-slate-400">Updates & activity alerts</p>
+                <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Bildirishnomalar</h2>
+                <p className="text-[11px] text-slate-400">Tizim yangilanishlari va eslatmalar</p>
               </div>
             </div>
 
             <div className="flex items-center gap-1">
               <button 
                 onClick={clearAllNotifications}
-                className="p-2 text-xs font-medium text-slate-400 hover:text-rose-500 transition-colors"
-                title="Clear all"
+                className="p-2 text-xs font-medium text-slate-400 hover:text-rose-500 transition-colors cursor-pointer"
+                title="Barchasini tozalash"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
               <button 
                 onClick={onClose}
-                className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-white"
+                className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -65,8 +65,8 @@ export const NotificationDrawer: React.FC<DrawerProps> = ({ isOpen, onClose }) =
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-64 text-center text-slate-400">
                 <CheckCheck className="w-10 h-10 mb-2 opacity-50 text-emerald-500" />
-                <p className="text-sm font-semibold">All caught up!</p>
-                <p className="text-xs">No pending notifications at this moment.</p>
+                <p className="text-sm font-semibold">Barchasi o‘qilgan!</p>
+                <p className="text-xs">Hozircha yangi bildirishnomalar mavjud emas.</p>
               </div>
             ) : (
               notifications.map((n) => (
