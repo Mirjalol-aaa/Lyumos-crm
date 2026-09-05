@@ -6,12 +6,25 @@
     <link rel="icon" type="image/png" href="./lumos-logo.png" />
     <title>LUMOS O‘quv Markazi — ERP & LMS Boshqaruv Tizimi</title>
     <meta name="description" content="LUMOS O‘quv Markazi — Bilim bilan yorqin kelajakka!" />
+    <!-- Immediate Dark/Light Mode Bootstrapper -->
+    <script>
+      (function() {
+        try {
+          var t = localStorage.getItem('lumos_theme');
+          if (t === 'dark') {
+            document.documentElement.classList.add('dark');
+          } else if (t === 'light') {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
     <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono for PRO SaaS UI -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <script type="module" crossorigin src="./assets/index-WGm9qxnC.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-DSYWM7ok.css">
+    <script type="module" crossorigin src="./assets/index-D7_Hsesr.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BvlSS9tZ.css">
   </head>
   <body class="bg-[#F8F9FA] text-slate-900 antialiased selection:bg-amber-500 selection:text-white dark:bg-slate-950 dark:text-slate-100">
     <div id="root"></div>
