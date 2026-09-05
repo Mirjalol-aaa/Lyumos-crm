@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useLMS } from '../../context/LMSContext';
 import { InteractiveParticles } from '../../components/common/InteractiveParticles';
-import { Eye, EyeOff, CheckCircle2, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, CheckCircle2, ShieldCheck, ArrowRight, ArrowLeft, Home } from 'lucide-react';
 
 interface StudentLoginProps {
   onSwitchToAdmin: () => void;
+  onBackToHome?: () => void;
 }
 
-export const StudentLogin: React.FC<StudentLoginProps> = ({ onSwitchToAdmin }) => {
+export const StudentLogin: React.FC<StudentLoginProps> = ({ onSwitchToAdmin, onBackToHome }) => {
   const { loginWithCredentials } = useLMS();
   const [studentIdInput, setStudentIdInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
@@ -43,6 +44,20 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({ onSwitchToAdmin }) =
     <div className="min-h-screen w-full flex flex-col lg:flex-row bg-white dark:bg-slate-950 font-sans">
       {/* LEFT COLUMN: Student 3D / Isometric Graphic Illustration */}
       <div className="relative hidden lg:flex lg:w-1/2 min-h-screen bg-[#F7F7F4] dark:bg-slate-900 items-center justify-center p-12 border-r border-slate-200/60 dark:border-slate-800 overflow-hidden">
+        {/* Top left return button */}
+        <button
+          type="button"
+          onClick={() => {
+            if (onBackToHome) onBackToHome();
+            else window.location.hash = '#/';
+          }}
+          className="absolute top-8 left-8 z-30 inline-flex items-center gap-2 rounded-xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-md px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-sm hover:bg-white dark:hover:bg-slate-800 hover:border-amber-300 transition-all cursor-pointer border border-slate-200/80 dark:border-slate-700/80"
+          title="LUMOS Asosiy saytiga qaytish"
+        >
+          <ArrowLeft className="h-4 w-4 text-amber-500" />
+          <span>Bosh sahifaga qaytish</span>
+        </button>
+
         {/* Interactive Antigravity Particles Effect */}
         <InteractiveParticles className="opacity-60" particleCount={110} />
 
@@ -103,16 +118,25 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({ onSwitchToAdmin }) =
 
       {/* RIGHT COLUMN: Clean Student Form matching Image 2 */}
       <div className="flex-1 flex flex-col justify-between p-6 sm:p-12 lg:p-16 max-w-lg mx-auto w-full">
-        {/* Top Link */}
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-black uppercase tracking-wider text-amber-700 dark:text-amber-400">
-            Offline Student Panel
-          </span>
+        {/* Top Navigation Bar */}
+        <div className="flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              if (onBackToHome) onBackToHome();
+              else window.location.hash = '#/';
+            }}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-xs hover:bg-amber-50 hover:text-amber-700 hover:border-amber-300 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 transition-all cursor-pointer"
+            title="LUMOS Asosiy saytiga qaytish"
+          >
+            <ArrowLeft className="h-3.5 w-3.5 text-amber-500" />
+            <span>Asosiy saytga qaytish</span>
+          </button>
 
           <button
             type="button"
             onClick={onSwitchToAdmin}
-            className="text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:underline flex items-center gap-1"
+            className="text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:underline flex items-center gap-1 cursor-pointer"
           >
             <span>Ustoz / Admin Portali</span>
             <ArrowRight className="h-3.5 w-3.5" />

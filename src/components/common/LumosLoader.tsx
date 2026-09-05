@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import lumosLogo from '../../assets/lumos-logo.png';
 
 interface LumosLoaderProps {
   message?: string;
@@ -9,12 +10,23 @@ export const LumosLoader: React.FC<LumosLoaderProps> = ({
   message = "Tizim yuklanmoqda…",
   size = 'fullscreen',
 }) => {
+  const [hasImgError, setHasImgError] = useState(false);
+
   if (size === 'sm') {
     return (
       <div className="inline-flex items-center gap-2 text-amber-500 font-semibold text-xs">
         <div className="relative w-5 h-5 flex items-center justify-center">
           <div className="absolute inset-0 rounded-full border-2 border-amber-500/20 border-t-amber-500 animate-spin" />
-          <img src="/lumos-logo.png" alt="LUMOS" className="w-3.5 h-3.5 object-contain" />
+          {!hasImgError ? (
+            <img
+              src={lumosLogo}
+              alt="LUMOS"
+              onError={() => setHasImgError(true)}
+              className="w-3.5 h-3.5 object-contain"
+            />
+          ) : (
+            <span className="text-[10px] font-black text-amber-500">L</span>
+          )}
         </div>
         <span>{message}</span>
       </div>
@@ -22,28 +34,36 @@ export const LumosLoader: React.FC<LumosLoaderProps> = ({
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-radial from-slate-900 via-slate-950 to-black text-white p-6 relative overflow-hidden font-sans select-none z-[9999]">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-slate-950 text-white p-6 relative overflow-hidden font-sans select-none z-[9999]">
       {/* Ambient Gold Radial Glow */}
-      <div className="absolute w-[500px] h-[500px] rounded-full bg-amber-500/10 blur-3xl pointer-events-none -translate-y-12 animate-pulse" />
+      <div className="absolute w-[500px] h-[500px] rounded-full bg-amber-500/15 blur-[120px] pointer-events-none -translate-y-10 animate-pulse" />
       
       {/* Decorative Gold Grid lines */}
-      <div className="absolute inset-0 bg-[radial-gradient(#d4af37_1px,transparent_1px)] [background-size:32px_32px] opacity-10 pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(#d4af37_1px,transparent_1px)] [background-size:28px_28px] opacity-15 pointer-events-none" />
 
       {/* Center Lumos Golden Emblem with Rotating Orbit Rings */}
       <div className="relative flex items-center justify-center mb-8">
         {/* Outer Rotating Glowing Ring */}
-        <div className="absolute w-44 h-44 rounded-full border border-amber-500/30 border-t-amber-400 border-r-amber-500/60 animate-[spin_6s_linear_infinite]" />
+        <div className="absolute w-44 h-44 rounded-full border border-amber-500/30 border-t-amber-400 border-r-amber-500/60 animate-[spin_7s_linear_infinite]" />
         
         {/* Reverse Rotating Inner Ring */}
-        <div className="absolute w-36 h-36 rounded-full border border-dashed border-amber-400/40 border-b-amber-300 animate-[spin_4s_linear_infinite_reverse]" />
+        <div className="absolute w-36 h-36 rounded-full border border-dashed border-amber-400/40 border-b-amber-300 animate-[spin_5s_linear_infinite_reverse]" />
         
         {/* Soft Golden Pulsing Halo Backdrop */}
-        <div className="w-32 h-32 rounded-3xl bg-gradient-to-tr from-amber-600/30 via-yellow-500/20 to-amber-300/30 backdrop-blur-xl border border-amber-400/50 shadow-[0_0_60px_rgba(212,175,55,0.45)] flex items-center justify-center p-1.5 animate-pulse overflow-hidden">
-          <img
-            src="/lumos-logo.png"
-            alt="LUMOS O'QUV MARKAZI"
-            className="w-full h-full object-cover rounded-2xl filter drop-shadow-[0_6px_16px_rgba(212,175,55,0.7)]"
-          />
+        <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-gradient-to-tr from-amber-600/30 via-yellow-500/20 to-amber-300/30 backdrop-blur-xl border border-amber-400/50 shadow-[0_0_50px_rgba(212,175,55,0.45)] flex items-center justify-center p-2 animate-pulse overflow-hidden">
+          {!hasImgError ? (
+            <img
+              src={lumosLogo}
+              alt="LUMOS O'QUV MARKAZI"
+              onError={() => setHasImgError(true)}
+              className="w-full h-full object-contain filter drop-shadow-[0_4px_14px_rgba(212,175,55,0.6)]"
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center text-center">
+              <span className="text-3xl font-serif font-black text-amber-400">L</span>
+              <span className="text-[8px] font-black uppercase tracking-widest text-amber-200">LUMOS</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -52,8 +72,8 @@ export const LumosLoader: React.FC<LumosLoaderProps> = ({
         <h2 className="text-2xl sm:text-3xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 uppercase drop-shadow">
           LUMOS
         </h2>
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20">
-          <span className="text-[11px] font-bold tracking-wider text-amber-300 uppercase">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 backdrop-blur-xs">
+          <span className="text-[11px] font-black tracking-wider text-amber-300 uppercase">
             O‘quv Markazi
           </span>
           <span className="w-1 h-1 rounded-full bg-amber-400" />

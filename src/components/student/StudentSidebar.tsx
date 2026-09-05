@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useCRM } from '../../context/CRMContext';
 import { useLMS } from '../../context/LMSContext';
 import { LogoutConfirmModal } from '../modals/LogoutConfirmModal';
+import lumosLogo from '../../assets/lumos-logo.png';
 import {
   LayoutDashboard,
   PlayCircle,
@@ -12,6 +13,7 @@ import {
   ChevronRight,
   LogOut,
   X,
+  Globe,
 } from 'lucide-react';
 
 export type StudentPageType =
@@ -110,10 +112,17 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
       >
         {/* Brand with Official Lumos Logo */}
         <div className="flex h-[72px] shrink-0 items-center justify-between border-b border-slate-100 px-4 dark:border-slate-800/60">
-          <div className="flex min-w-0 items-center gap-3 overflow-hidden">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500/20 via-yellow-500/10 to-amber-300/20 p-1.5 border border-amber-400/30 shadow-md shadow-amber-500/10">
+          <button
+            type="button"
+            onClick={() => {
+              window.location.hash = '#/landing';
+            }}
+            className="flex min-w-0 items-center gap-3 overflow-hidden text-left group cursor-pointer"
+            title="LUMOS Asosiy saytiga o‘tish"
+          >
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500/20 via-yellow-500/10 to-amber-300/20 p-1.5 border border-amber-400/30 shadow-md shadow-amber-500/10 group-hover:scale-105 transition-transform">
               <img
-                src="/lumos-logo.png"
+                src={lumosLogo}
                 alt="LUMOS"
                 className="h-full w-full object-contain filter drop-shadow-sm"
               />
@@ -121,7 +130,7 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
 
             <div className={`min-w-0 flex-col ${collapsed ? 'lg:hidden' : 'flex'}`}>
               <div className="flex items-center gap-1.5">
-                <span className="text-lg font-black tracking-tight text-slate-900 dark:text-white">
+                <span className="text-lg font-black tracking-tight text-slate-900 dark:text-white group-hover:text-amber-600 transition-colors">
                   LUMOS
                 </span>
                 <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
@@ -132,7 +141,7 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
                 O‘quvchi Kabineti
               </span>
             </div>
-          </div>
+          </button>
 
           <button
             type="button"
@@ -202,6 +211,19 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
 
         {/* Footer with Student Profile & Logout Modal trigger */}
         <div className="shrink-0 border-t border-slate-100 p-3 dark:border-slate-800/60 space-y-2">
+          {/* Main Website / Courses Quick Access */}
+          <button
+            type="button"
+            onClick={() => {
+              window.location.hash = '#/landing';
+            }}
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-emerald-200/80 bg-emerald-50/70 py-2 text-xs font-bold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-900/60 transition-all shadow-xs"
+            title="LUMOS Asosiy sayti va kurslar sahifasiga o‘tish"
+          >
+            <Globe className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span className={collapsed ? 'lg:hidden' : ''}>🌐 Asosiy Sayt & Kurslar</span>
+          </button>
+
           <div className={`flex items-center gap-3 rounded-2xl border border-slate-200/60 bg-slate-50/80 p-2.5 dark:border-slate-700/50 dark:bg-slate-800/50 ${collapsed ? 'lg:justify-center' : ''}`}>
             <img
               src={currentStudent?.avatar || 'https://randomuser.me/api/portraits/men/1.jpg'}

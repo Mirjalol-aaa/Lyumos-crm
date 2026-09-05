@@ -242,7 +242,9 @@ export const LMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const logout = () => {
     setCurrentUser(null);
+    localStorage.removeItem('lumos_auth_user');
     localStorage.removeItem('lyumos_auth_user');
+    window.location.hash = '#/';
   };
 
   const refreshLmsData = useCallback(async () => {

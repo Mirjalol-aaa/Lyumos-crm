@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useLMS } from '../../context/LMSContext';
 import { InteractiveParticles } from '../../components/common/InteractiveParticles';
-import { Sparkles, Eye, EyeOff, CheckCircle2, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Sparkles, Eye, EyeOff, CheckCircle2, ShieldCheck, ArrowRight, ArrowLeft, Home } from 'lucide-react';
+import lumosLogo from '../../assets/lumos-logo.png';
 
 interface AdminTeacherLoginProps {
   onSwitchToStudent: () => void;
+  onBackToHome?: () => void;
 }
 
-export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchToStudent }) => {
+export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchToStudent, onBackToHome }) => {
   const { loginWithCredentials } = useLMS();
   const [loginInput, setLoginInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
@@ -43,6 +45,20 @@ export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchTo
     <div className="min-h-screen w-full flex flex-col lg:flex-row bg-white dark:bg-slate-950 font-sans">
       {/* LEFT COLUMN: Modern Education Center Reception Visual */}
       <div className="relative hidden lg:flex lg:w-1/2 min-h-screen bg-slate-900 overflow-hidden items-end p-12">
+        {/* Top left return button */}
+        <button
+          type="button"
+          onClick={() => {
+            if (onBackToHome) onBackToHome();
+            else window.location.hash = '#/';
+          }}
+          className="absolute top-8 left-8 z-30 inline-flex items-center gap-2 rounded-xl bg-slate-950/70 backdrop-blur-md px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-slate-900 hover:border-amber-400/50 transition-all cursor-pointer border border-white/20"
+          title="LUMOS Asosiy saytiga qaytish"
+        >
+          <ArrowLeft className="h-4 w-4 text-amber-400" />
+          <span>Bosh sahifaga qaytish</span>
+        </button>
+
         <img
           src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1600"
           alt="LUMOS Education Center"
@@ -73,34 +89,57 @@ export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchTo
 
       {/* RIGHT COLUMN: White Clean Login Form */}
       <div className="flex-1 flex flex-col justify-between p-6 sm:p-12 lg:p-16 max-w-xl mx-auto w-full">
-        {/* Top Branding */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500/20 via-yellow-500/10 to-amber-300/20 p-1.5 border border-amber-400/30 shadow-md shadow-amber-500/10">
+        {/* Top Branding & Navigation */}
+        <div className="flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              if (onBackToHome) onBackToHome();
+              else window.location.hash = '#/';
+            }}
+            className="flex items-center gap-3 cursor-pointer text-left group"
+            title="LUMOS Asosiy saytiga qaytish"
+          >
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500/20 via-yellow-500/10 to-amber-300/20 p-1.5 border border-amber-400/30 shadow-md shadow-amber-500/10 group-hover:scale-105 transition-transform">
               <img
-                src="/lumos-logo.png"
+                src={lumosLogo}
                 alt="LUMOS"
                 className="h-full w-full object-contain filter drop-shadow-sm"
               />
             </div>
             <div>
-              <span className="text-lg font-black tracking-tight text-slate-900 dark:text-white">
+              <span className="text-lg font-black tracking-tight text-slate-900 dark:text-white group-hover:text-amber-600 transition-colors">
                 LUMOS
               </span>
               <span className="block text-[10px] uppercase tracking-wider text-amber-600 dark:text-amber-400 font-bold">
                 Admin & Teacher Portal
               </span>
             </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={onSwitchToStudent}
-            className="text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:underline flex items-center gap-1"
-          >
-            <span>Talaba Paneli</span>
-            <ArrowRight className="h-3.5 w-3.5" />
           </button>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (onBackToHome) onBackToHome();
+                else window.location.hash = '#/';
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-xs hover:bg-amber-50 hover:text-amber-700 hover:border-amber-300 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 transition-all cursor-pointer"
+              title="LUMOS Asosiy saytiga qaytish"
+            >
+              <ArrowLeft className="h-3.5 w-3.5 text-amber-500" />
+              <span className="hidden sm:inline">Bosh sahifa</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onSwitchToStudent}
+              className="text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
+            >
+              <span>Talaba Paneli</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
 
         {/* Center Form */}

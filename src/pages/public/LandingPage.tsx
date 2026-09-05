@@ -26,13 +26,16 @@ import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
 import { useI18n } from '../../lib/i18n';
 import { useCRM } from '../../context/CRMContext';
+import { useLMS } from '../../context/LMSContext';
 import { INITIAL_COURSES } from '../../data/coursesData';
 import { INITIAL_TEACHERS } from '../../data/initialData';
 import { fireCelebrationConfetti } from '../../services/paymentGatewayService';
+import lumosLogo from '../../assets/lumos-logo.png';
 
 export const LandingPage: React.FC = () => {
   const { t, language, setLanguage, formatMoney } = useI18n();
   const { settings, updateSettings, addStudent } = useCRM();
+  const { currentUser, currentRole } = useLMS();
 
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [selectedCourseName, setSelectedCourseName] = useState('IELTS Academic Master 8.0+');
@@ -118,6 +121,30 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] text-slate-900 antialiased selection:bg-amber-500 selection:text-white dark:bg-[#080D1A] dark:text-slate-100 font-sans">
+      {/* Active Session Notification Bar */}
+      {currentUser && (
+        <div className="sticky top-0 z-50 bg-gradient-to-r from-amber-600 via-yellow-600 to-amber-700 px-4 py-2 text-white text-xs font-bold shadow-md">
+          <div className="mx-auto max-w-7xl flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse ring-2 ring-white/30" />
+              <span>
+                Faol Sessiya: <strong className="underline">{currentUser.name}</strong> ({currentRole === 'admin' ? 'Super Admin' : currentRole === 'teacher' ? 'Ustoz' : 'Talaba'})
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                window.location.hash = currentRole === 'student' ? '#/student' : '#/dashboard';
+              }}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1 text-xs font-black text-slate-900 shadow-xs hover:bg-amber-50 active:scale-95 transition-all cursor-pointer"
+            >
+              <span>{currentRole === 'student' ? 'Talaba Kabinetiga Qaytish' : 'Boshqaruv Paneliga Qaytish'}</span>
+              <ArrowRight className="h-3.5 w-3.5 text-amber-600" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ─────────────────────────────────────────────────────────────
           1. NAVIGATION BAR
       ───────────────────────────────────────────────────────────── */}
@@ -127,7 +154,7 @@ export const LandingPage: React.FC = () => {
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500/20 via-yellow-500/10 to-amber-300/20 p-1.5 border border-amber-400/30 shadow-md shadow-amber-500/10">
               <img
-                src="/lumos-logo.png"
+                src={lumosLogo}
                 alt="LUMOS"
                 className="h-full w-full object-contain filter drop-shadow-sm"
               />
@@ -198,12 +225,22 @@ export const LandingPage: React.FC = () => {
             <Button
               variant="primary"
               size="sm"
-              className="hidden sm:inline-flex items-center gap-1.5 shadow-md shadow-amber-500/20"
+              className="hidden sm:inline-flex items-center gap-1.5 shadow-md shadow-amber-500/20 cursor-pointer"
               onClick={() => {
-                window.location.hash = '#/admin';
+                if (currentUser) {
+                  window.location.hash = currentRole === 'student' ? '#/student' : '#/dashboard';
+                } else {
+                  window.location.hash = '#/admin';
+                }
               }}
             >
-              <span>{t.landing.loginCta}</span>
+              <span>
+                {currentUser
+                  ? currentRole === 'student'
+                    ? 'Talaba Kabineti'
+                    : 'Boshqaruv Markazi'
+                  : t.landing.loginCta}
+              </span>
               <ArrowRight className="h-3.5 w-3.5" />
             </Button>
           </div>
@@ -238,27 +275,43 @@ export const LandingPage: React.FC = () => {
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+            {currentUser && (
+              <Button
+                variant="primary"
+                size="lg"
+                className="gap-2 shadow-xl shadow-amber-500/25 text-sm font-bold px-7 py-3.5 cursor-pointer"
+                onClick={() => {
+                  window.location.hash = currentRole === 'student' ? '#/student' : '#/dashboard';
+                }}
+              >
+                <span>{currentRole === 'student' ? 'Talaba Kabinetiga Qaytish' : 'Boshqaruv Paneliga Qaytish'}</span>
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            )}
+
             <Button
-              variant="primary"
+              variant={currentUser ? 'secondary' : 'primary'}
               size="lg"
-              className="gap-2 shadow-xl shadow-amber-500/25 text-sm font-bold px-7 py-3.5"
+              className="gap-2 shadow-xl shadow-amber-500/25 text-sm font-bold px-7 py-3.5 cursor-pointer"
               onClick={() => setIsApplyModalOpen(true)}
             >
               <span>{t.landing.registerCta}</span>
               <ChevronRight className="h-4 w-4" />
             </Button>
 
-            <Button
-              variant="secondary"
-              size="lg"
-              className="gap-2 text-sm font-bold px-7 py-3.5 border-slate-300 dark:border-slate-700"
-              onClick={() => {
-                window.location.hash = '#/student';
-              }}
-            >
-              <span>Talaba Portali (LMS)</span>
-              <GraduationCap className="h-4 w-4 text-emerald-500" />
-            </Button>
+            {!currentUser && (
+              <Button
+                variant="secondary"
+                size="lg"
+                className="gap-2 text-sm font-bold px-7 py-3.5 border-slate-300 dark:border-slate-700 cursor-pointer"
+                onClick={() => {
+                  window.location.hash = '#/student';
+                }}
+              >
+                <span>Talaba Portali (LMS)</span>
+                <GraduationCap className="h-4 w-4 text-emerald-500" />
+              </Button>
+            )}
           </div>
         </div>
       </section>
@@ -571,7 +624,7 @@ export const LandingPage: React.FC = () => {
       <footer className="border-t border-slate-200 bg-white py-12 dark:border-slate-800 dark:bg-slate-950">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <img src="/lumos-logo.png" alt="LUMOS" className="h-8 w-8 object-contain" />
+            <img src={lumosLogo} alt="LUMOS" className="h-8 w-8 object-contain" />
             <span className="font-black text-sm text-slate-900 dark:text-white">
               LUMOS O‘quv Markazi
             </span>

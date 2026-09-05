@@ -14,6 +14,7 @@ import {
   ArrowRight,
   TrendingUp,
   CreditCard,
+  Globe,
 } from 'lucide-react';
 
 interface StudentDashboardPageProps {
@@ -67,22 +68,36 @@ export const StudentDashboardPage: React.FC<StudentDashboardPageProps> = ({ onNa
           </div>
         </div>
 
-        {/* Student selector dropdown */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-            Talabani o‘zgartirish:
-          </span>
-          <select
-            value={activeStudentId}
-            onChange={(e) => setActiveStudentId(e.target.value)}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 shadow-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+        {/* Student selector & Site link */}
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              window.location.hash = '#/landing';
+            }}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300/80 bg-white px-3.5 py-1.5 text-xs font-bold text-emerald-800 shadow-xs hover:bg-emerald-50 hover:border-emerald-400 dark:border-emerald-800 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/60 transition-all cursor-pointer"
+            title="LUMOS Asosiy sayti va kurslar ro‘yxatiga o‘tish"
           >
-            {students.slice(0, 15).map(s => (
-              <option key={s.id} value={s.id}>
-                {s.fullName} ({s.groupName || 'Guruh'})
-              </option>
-            ))}
-          </select>
+            <Globe className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>🌐 Asosiy Sayt & Kurslar</span>
+          </button>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+              Talabani o‘zgartirish:
+            </span>
+            <select
+              value={activeStudentId}
+              onChange={(e) => setActiveStudentId(e.target.value)}
+              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 shadow-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            >
+              {students.slice(0, 15).map(s => (
+                <option key={s.id} value={s.id}>
+                  {s.fullName} ({s.groupName || 'Guruh'})
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -121,6 +136,18 @@ export const StudentDashboardPage: React.FC<StudentDashboardPageProps> = ({ onNa
             >
               <FileCheck2 className="h-4 w-4" />
               Vazifani Topshirish ({pendingTasks.length})
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                window.location.hash = '#/landing';
+              }}
+              className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-emerald-400/40 bg-emerald-950/50 px-4 py-3 text-xs font-bold text-emerald-300 backdrop-blur-md transition-all hover:bg-emerald-900/60 active:scale-95"
+              title="LUMOS Asosiy saytini ko‘rish"
+            >
+              <Globe className="h-4 w-4" />
+              Asosiy Sayt
             </button>
           </div>
         </div>

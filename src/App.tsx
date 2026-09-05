@@ -304,13 +304,31 @@ function AppContentRouter() {
     return <PaymentFailedPage />;
   }
 
-  // 2. Unauthenticated Visitor Flow
+  // 2. Explicit Navigation to Public Website / Courses
+  // Allows both visitors and logged in users to browse the public website and course information freely
+  const isExplicitLandingRequested =
+    currentHash.includes('landing') ||
+    currentHash.includes('home') ||
+    currentHash.startsWith('#courses') ||
+    currentHash.startsWith('#teachers') ||
+    currentHash.startsWith('#stats') ||
+    currentHash.startsWith('#reviews') ||
+    currentHash.startsWith('#contact');
+
+  if (isExplicitLandingRequested) {
+    return <LandingPage />;
+  }
+
+  // 3. Unauthenticated Visitor Flow
   if (!currentUser) {
     if (currentHash.includes('student')) {
       return (
         <StudentLogin
           onSwitchToAdmin={() => {
             window.location.hash = '#/admin';
+          }}
+          onBackToHome={() => {
+            window.location.hash = '#/landing';
           }}
         />
       );
@@ -322,11 +340,14 @@ function AppContentRouter() {
           onSwitchToStudent={() => {
             window.location.hash = '#/student';
           }}
+          onBackToHome={() => {
+            window.location.hash = '#/landing';
+          }}
         />
       );
     }
 
-    // Default public landing page at root and #/landing
+    // Default public landing page at root and #/
     return <LandingPage />;
   }
 

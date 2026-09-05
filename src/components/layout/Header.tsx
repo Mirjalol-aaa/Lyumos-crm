@@ -847,6 +847,51 @@ export const Header:
           </button>
 
 
+          {/* VIEW MAIN PUBLIC WEBSITE */}
+          <button
+            type="button"
+            onClick={() => {
+              window.location.hash = '#/landing';
+            }}
+            className="
+              flex
+              h-10
+              cursor-pointer
+              items-center
+              gap-1.5
+              rounded-xl
+              border
+              border-slate-200/80
+              bg-slate-50
+              px-2.5
+              text-xs
+              font-bold
+              text-slate-600
+              transition-all
+              hover:border-amber-300
+              hover:bg-amber-50
+              hover:text-amber-700
+              dark:border-slate-700/60
+              dark:bg-slate-800
+              dark:text-slate-300
+              dark:hover:bg-slate-700
+              sm:px-3
+            "
+            title="LUMOS Asosiy saytini ko‘rish"
+          >
+            <Globe
+              className="
+                h-4
+                w-4
+                text-amber-500
+              "
+            />
+            <span className="hidden sm:inline">
+              Asosiy sayt
+            </span>
+          </button>
+
+
           {/* LANGUAGE */}
 
           <div

@@ -3,6 +3,7 @@ import { useCRM } from '../../context/CRMContext';
 import { useLMS } from '../../context/LMSContext';
 import type { PageType } from '../../types/crm';
 import { LogoutConfirmModal } from '../modals/LogoutConfirmModal';
+import lumosLogo from '../../assets/lumos-logo.png';
 import {
   LayoutDashboard,
   Users,
@@ -19,6 +20,7 @@ import {
   ChevronRight,
   LogOut,
   X,
+  Globe,
 } from 'lucide-react';
 
 interface SidebarNavProps {
@@ -163,10 +165,17 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
       >
         {/* Brand Header with Official Lumos Logo */}
         <div className="flex h-[72px] shrink-0 items-center justify-between border-b border-slate-100 px-4 dark:border-slate-800/60">
-          <div className="flex min-w-0 items-center gap-3 overflow-hidden">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500/20 via-yellow-500/10 to-amber-300/20 p-1.5 border border-amber-400/30 shadow-md shadow-amber-500/10">
+          <button
+            type="button"
+            onClick={() => {
+              window.location.hash = '#/landing';
+            }}
+            className="flex min-w-0 items-center gap-3 overflow-hidden text-left group cursor-pointer"
+            title="LUMOS Asosiy saytiga o‘tish"
+          >
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500/20 via-yellow-500/10 to-amber-300/20 p-1.5 border border-amber-400/30 shadow-md shadow-amber-500/10 group-hover:scale-105 transition-transform">
               <img
-                src="/lumos-logo.png"
+                src={lumosLogo}
                 alt="LUMOS"
                 className="h-full w-full object-contain filter drop-shadow-sm"
               />
@@ -174,7 +183,7 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
 
             <div className={`min-w-0 flex-col ${collapsed ? 'lg:hidden' : 'flex'}`}>
               <div className="flex items-center gap-1.5">
-                <span className="text-lg font-black tracking-tight text-slate-900 dark:text-white">
+                <span className="text-lg font-black tracking-tight text-slate-900 dark:text-white group-hover:text-amber-600 transition-colors">
                   LUMOS
                 </span>
                 <span className="rounded-full bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-300">
@@ -185,7 +194,7 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
                 O‘quv Markazi Boshqaruvi
               </p>
             </div>
-          </div>
+          </button>
 
           <button
             type="button"
@@ -256,6 +265,19 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
 
         {/* Footer with User Profile and Logout Modal trigger */}
         <div className="shrink-0 border-t border-slate-100 p-3 dark:border-slate-800/60 space-y-2">
+          {/* Main Website / Public Page Button */}
+          <button
+            type="button"
+            onClick={() => {
+              window.location.hash = '#/landing';
+            }}
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-amber-200/80 bg-amber-50/70 py-2 text-xs font-bold text-amber-800 hover:bg-amber-100 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-300 dark:hover:bg-amber-900/60 transition-all shadow-xs"
+            title="LUMOS Asosiy saytiga o‘tish"
+          >
+            <Globe className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+            <span className={collapsed ? 'lg:hidden' : ''}>🌐 Asosiy Sayt & Kurslar</span>
+          </button>
+
           <div className={`flex items-center gap-3 rounded-2xl border border-slate-200/60 bg-slate-50/80 p-2.5 dark:border-slate-700/50 dark:bg-slate-800/50 ${collapsed ? 'lg:justify-center' : ''}`}>
             <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-amber-600 to-yellow-500 text-xs font-bold text-white shadow-sm ring-2 ring-amber-500/20">
               👑
