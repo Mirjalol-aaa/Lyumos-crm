@@ -1,26 +1,53 @@
-import React, { useState } from 'react';
-import { useCRM } from '../../context/CRMContext';
+import React, { useState, useEffect } from 'react';
+import { Teacher } from '../../types/crm';
 import { useI18n } from '../../lib/i18n';
-import { X, GraduationCap, Sparkles, Check, Phone, Mail, DollarSign, Calendar, BookOpen } from 'lucide-react';
+import { X, GraduationCap, Save, Star, Phone, Mail, DollarSign, Calendar } from 'lucide-react';
 
 const COMMON_SUBJECTS = ['Matematika', 'Ingliz tili', 'Ona tili', 'Fizika', 'Kimyo', 'Biologiya', 'Tarix', 'IT & Dasturlash'];
 
-export const AddTeacherModal: React.FC = () => {
-  const { isAddTeacherModalOpen, setIsAddTeacherModalOpen, addTeacher } = useCRM();
+interface EditTeacherModalProps {
+  isOpen: boolean;
+  teacher: Teacher | null;
+  onClose: () => void;
+  onSave: (id: string, updated: Partial<Teacher>) => void;
+}
+
+export const EditTeacherModal: React.FC<EditTeacherModalProps> = ({
+  isOpen,
+  teacher,
+  onClose,
+  onSave,
+}) => {
   const { language } = useI18n();
 
   const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('+998 ');
+  const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [selectedSubjects, setSelectedSubjects] = useState<string[]>(['Matematika']);
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [customSubject, setCustomSubject] = useState('');
   const [baseSalary, setBaseSalary] = useState(1200000);
   const [bonusPerStudent, setBonusPerStudent] = useState(15000);
-  const [schedule, setSchedule] = useState('Dush, Chor, Juma (14:00 - 16:00)');
-  const [status, setStatus] = useState<'Active' | 'On Leave'>('Active');
+  const [schedule, setSchedule] = useState('');
+  const [status, setStatus] = useState<'Active' | 'On Leave' | 'Inactive'>('Active');
+  const [rating, setRating] = useState(5.0);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  if (!isAddTeacherModalOpen) return null;
+  useEffect(() => {
+    if (teacher) {
+      setFullName(teacher.fullName || '');
+      setPhone(teacher.phone || '');
+      setEmail(teacher.email || '');
+      setSelectedSubjects(teacher.subjects || ['Matematika']);
+      setBaseSalary(teacher.baseSalary || 1200000);
+      setBonusPerStudent(teacher.bonusPerStudent || 15000);
+      setSchedule(teacher.schedule || '');
+      setStatus((teacher.status as any) || 'Active');
+      setRating(teacher.rating || 5.0);
+      setIsSuccess(false);
+    }
+  }, [teacher, isOpen]);
+
+  if (!isOpen || !teacher) return null;
 
   const toggleSubject = (sub: string) => {
     setSelectedSubjects(prev =>
@@ -39,28 +66,23 @@ export const AddTeacherModal: React.FC = () => {
     e.preventDefault();
     if (!fullName.trim() || !phone.trim()) return;
 
-    addTeacher({
+    onSave(teacher.id, {
       fullName: fullName.trim(),
-      avatar: '',
       phone: phone.trim(),
-      email: email.trim() || `${fullName.toLowerCase().trim().replace(/\s+/g, '.')}@lumos.uz`,
+      email: email.trim(),
       subjects: selectedSubjects,
       baseSalary: Number(baseSalary) || 1200000,
       bonusPerStudent: Number(bonusPerStudent) || 15000,
-      joinedDate: new Date().toISOString().split('T')[0],
-      schedule: schedule.trim() || 'Dush, Chor, Juma (14:00 - 16:00)',
-      status
+      schedule: schedule.trim(),
+      status,
+      rating: Number(rating) || 5.0,
     });
 
     setIsSuccess(true);
     setTimeout(() => {
       setIsSuccess(false);
-      setIsAddTeacherModalOpen(false);
-      setFullName('');
-      setPhone('+998 ');
-      setEmail('');
-      setSelectedSubjects(['Matematika']);
-    }, 900);
+      onClose();
+    }, 800);
   };
 
   return (
@@ -72,21 +94,21 @@ export const AddTeacherModal: React.FC = () => {
         {/* Header */}
         <div className="p-5 sm:p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
               <GraduationCap className="w-5 h-5" />
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                {language === 'en' ? 'Add New Teacher' : language === 'ru' ? 'Добавить Преподавателя' : 'Yangi O‘qituvchi Qo‘shish'}
+                {language === 'en' ? 'Edit Teacher' : language === 'ru' ? 'Редактировать Преподавателя' : 'O‘qituvchini Tahrirlash'}
               </h2>
               <p className="text-[11px] text-slate-500">
-                {language === 'en' ? 'Register instructor, subjects & salary terms' : language === 'ru' ? 'Регистрация преподавателя и условия оплаты' : 'O‘qituvchi ma’lumotlari va dars shartlarini kiriting'}
+                {teacher.fullName} ({teacher.id})
               </p>
             </div>
           </div>
           <button 
             type="button" 
-            onClick={() => setIsAddTeacherModalOpen(false)} 
+            onClick={onClose} 
             className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
             <X className="w-5 h-5" />
@@ -105,8 +127,7 @@ export const AddTeacherModal: React.FC = () => {
               required
               value={fullName}
               onChange={e => setFullName(e.target.value)}
-              placeholder={language === 'en' ? 'e.g. Hasanboy Abdullayev' : 'Masalan: Hasanboy Abdullayev'}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
@@ -121,8 +142,7 @@ export const AddTeacherModal: React.FC = () => {
                 required
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
-                placeholder="+998 90 123-45-67"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
@@ -133,8 +153,7 @@ export const AddTeacherModal: React.FC = () => {
                 type="email" 
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="ustoz@lumos.uz"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -154,7 +173,7 @@ export const AddTeacherModal: React.FC = () => {
                     onClick={() => toggleSubject(sub)}
                     className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
                       active
-                        ? 'bg-amber-500 text-slate-950 font-black shadow-xs'
+                        ? 'bg-blue-600 text-white font-black shadow-xs'
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
                     }`}
                   >
@@ -210,18 +229,33 @@ export const AddTeacherModal: React.FC = () => {
             </div>
           </div>
 
-          {/* Schedule */}
-          <div>
-            <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
-              {language === 'en' ? 'Teaching Schedule' : language === 'ru' ? 'График занятий' : 'Dars kunlari va vaqti'}
-            </label>
-            <input 
-              type="text" 
-              value={schedule}
-              onChange={e => setSchedule(e.target.value)}
-              placeholder="Masalan: Sesh, Pay, Shan (15:30 - 17:30)"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-            />
+          {/* Schedule & Rating */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="sm:col-span-2">
+              <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                {language === 'en' ? 'Teaching Schedule' : language === 'ru' ? 'График занятий' : 'Dars kunlari va vaqti'}
+              </label>
+              <input 
+                type="text" 
+                value={schedule}
+                onChange={e => setSchedule(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                {language === 'en' ? 'KPI Rating (1-5)' : language === 'ru' ? 'Рейтинг KPI' : 'KPI Reyting'}
+              </label>
+              <input 
+                type="number" 
+                step="0.1"
+                min="1"
+                max="5"
+                value={rating}
+                onChange={e => setRating(Number(e.target.value))}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold"
+              />
+            </div>
           </div>
 
           {/* Status */}
@@ -232,10 +266,10 @@ export const AddTeacherModal: React.FC = () => {
             <label className="flex items-center gap-2 cursor-pointer">
               <input 
                 type="radio" 
-                name="status" 
+                name="edit_status" 
                 checked={status === 'Active'} 
                 onChange={() => setStatus('Active')}
-                className="text-amber-500 focus:ring-amber-500"
+                className="text-blue-600 focus:ring-blue-500"
               />
               <span className="font-bold text-emerald-600 dark:text-emerald-400">
                 {language === 'en' ? 'Active' : language === 'ru' ? 'Активный' : 'Faol'}
@@ -244,20 +278,32 @@ export const AddTeacherModal: React.FC = () => {
             <label className="flex items-center gap-2 cursor-pointer">
               <input 
                 type="radio" 
-                name="status" 
+                name="edit_status" 
                 checked={status === 'On Leave'} 
                 onChange={() => setStatus('On Leave')}
                 className="text-amber-500 focus:ring-amber-500"
               />
-              <span className="font-medium text-slate-500">
+              <span className="font-medium text-amber-600 dark:text-amber-400">
                 {language === 'en' ? 'On Leave' : language === 'ru' ? 'В отпуске' : 'Ta’tilda'}
+              </span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input 
+                type="radio" 
+                name="edit_status" 
+                checked={status === 'Inactive'} 
+                onChange={() => setStatus('Inactive')}
+                className="text-rose-500 focus:ring-rose-500"
+              />
+              <span className="font-medium text-rose-500">
+                {language === 'en' ? 'Inactive' : language === 'ru' ? 'Неактивен' : 'Nofaol'}
               </span>
             </label>
           </div>
 
           {isSuccess && (
             <div className="rounded-2xl bg-emerald-50 dark:bg-emerald-950 p-3 text-center text-xs font-black text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 animate-in fade-in">
-              🎉 {language === 'en' ? 'Teacher successfully added!' : language === 'ru' ? 'Преподаватель успешно добавлен!' : 'O‘qituvchi muvaffaqiyatli ro‘yxatdan o‘tkazildi!'}
+              🎉 {language === 'en' ? 'Changes saved successfully!' : language === 'ru' ? 'Изменения успешно сохранены!' : 'O‘zgarishlar muvaffaqiyatli saqlandi!'}
             </div>
           )}
 
@@ -265,7 +311,7 @@ export const AddTeacherModal: React.FC = () => {
           <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2.5">
             <button 
               type="button" 
-              onClick={() => setIsAddTeacherModalOpen(false)} 
+              onClick={onClose} 
               className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-bold transition-all cursor-pointer"
             >
               {language === 'en' ? 'Cancel' : language === 'ru' ? 'Отмена' : 'Bekor qilish'}
@@ -273,10 +319,10 @@ export const AddTeacherModal: React.FC = () => {
             <button 
               type="submit" 
               disabled={isSuccess}
-              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-950 font-black shadow-md shadow-amber-500/20 flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+              className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black shadow-md shadow-blue-500/20 flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
             >
-              <Sparkles className="w-4 h-4" /> 
-              <span>{language === 'en' ? 'Save Teacher' : language === 'ru' ? 'Сохранить' : 'O‘qituvchini Saqlash'}</span>
+              <Save className="w-4 h-4" /> 
+              <span>{language === 'en' ? 'Save Changes' : language === 'ru' ? 'Сохранить изменения' : 'Saqlash'}</span>
             </button>
           </div>
         </form>

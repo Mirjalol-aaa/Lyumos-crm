@@ -109,37 +109,6 @@ export const LandingPage: React.FC = () => {
 
   const isDark = settings.theme === 'dark';
 
-  const testimonials = [
-    {
-      name: 'Azizbek',
-      subject: 'Matematika kursi o‘quvchisi',
-      score: '100% Natija',
-      text: 'Hadicha ustozning tushuntirish uslubi juda sodda va tushunarli. Maktabda tushunmagan murakkab algebra va geometriya masalalarini LUMOSda oson yechishni o‘rgandim. 3 oylik to‘liq davomat va tinimsiz amaliyot o‘z mevasini berdi!',
-      badge: 'Hadicha ustoz guruhi',
-    },
-    {
-      name: 'Shahjahon',
-      subject: 'Matematika kursi o‘quvchisi',
-      score: 'Abituriyent / DTM',
-      text: 'Matematikadan tayyorgarlikni noldan boshlagan edim. Hadicha ustoz har bir o‘quvchiga alohida yondashadilar, tushunmagan misollarni qayta-qayta erinmasdan tushuntirib beradilar. O‘z kuchimga ishonchim ortdi.',
-      badge: 'Hadicha ustoz guruhi',
-    },
-    {
-      name: 'Jasurbek',
-      subject: 'Ingliz tili kursi o‘quvchisi',
-      score: 'IELTS 7.5 Target',
-      text: 'Hasanboy ustoz bilan ingliz tili darslari juda qiziqarli va jonli o‘tadi. Grammatika qoidalarini yodlash emas, balki jonli Speaking Club va muloqot orqali erkin gapirishga erishdik. Har bir dars yangi motivatsiya beradi.',
-      badge: 'Hasanboy ustoz guruhi',
-    },
-    {
-      name: 'Malika opa (Ota-ona)',
-      subject: 'O‘quvchi onasi',
-      score: 'Ota-onalar ishonchi',
-      text: 'Farzandimning darslarga qiziqishi ancha ortdi. Eng muhimi, markaz ma’muriyati har oy davomat va o‘zlashtirish hisobotini berib boradi. Sharoitlar va ustozlarning pedagogik mahorati a’lo darajada.',
-      badge: 'Ota-onalar tavsiyasi',
-    },
-  ];
-
   return (
     <div
       className="min-h-screen font-sans bg-[#F8FAFC] dark:bg-[#080D1A] text-slate-900 dark:text-slate-100 antialiased selection:bg-amber-500 selection:text-white"
@@ -156,13 +125,13 @@ export const LandingPage: React.FC = () => {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
               <span className="text-slate-300">
-                Faol tizim foydalanuvchisi:
+                {t.common.active}:
               </span>
               <span className="px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-300 font-bold">
                 {currentUser.name}
               </span>
               <span className="text-slate-400 text-[11px]">
-                ({currentRole === 'admin' ? 'Super Admin' : currentRole === 'teacher' ? 'O‘qituvchi' : 'O‘quvchi'})
+                ({currentRole === 'admin' ? t.roles.superAdmin : currentRole === 'teacher' ? t.roles.teacher : t.roles.student})
               </span>
             </div>
 
@@ -173,7 +142,7 @@ export const LandingPage: React.FC = () => {
               }}
               className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-500 to-yellow-500 px-3.5 py-1 text-xs font-bold text-slate-950 shadow-sm hover:from-amber-400 hover:to-yellow-400 active:scale-95 transition-all cursor-pointer"
             >
-              <span>{currentRole === 'student' ? 'Talaba Kabinetiga O‘tish' : 'Boshqaruv Markaziga Qaytish'}</span>
+              <span>{currentRole === 'student' ? t.landing.returnToStudentCabinet : t.landing.returnToAdminDashboard}</span>
               <ArrowRight className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -216,31 +185,31 @@ export const LandingPage: React.FC = () => {
               href="#courses"
               className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors py-1 px-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50"
             >
-              Kurslar
+              {t.landing.navCourses}
             </a>
             <a
               href="#teachers"
               className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors py-1 px-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50"
             >
-              Ustozlar
+              {t.landing.navTeachers}
             </a>
             <a
               href="#why-us"
               className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors py-1 px-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50"
             >
-              Afzalliklar
+              {t.landing.navWhyUs}
             </a>
             <a
               href="#reviews"
               className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors py-1 px-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50"
             >
-              Fikrlar
+              {t.landing.navReviews}
             </a>
             <a
               href="#contact"
               className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors py-1 px-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50"
             >
-              Bog‘lanish
+              {t.landing.navContact}
             </a>
           </nav>
 
@@ -296,8 +265,8 @@ export const LandingPage: React.FC = () => {
                 <span>
                   {currentUser
                     ? currentRole === 'student'
-                      ? 'Talaba Kabineti'
-                      : 'Boshqaruv Markazi'
+                      ? t.landing.returnToStudentCabinet
+                      : t.landing.returnToAdminDashboard
                     : t.landing.loginCta}
                 </span>
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -359,11 +328,11 @@ export const LandingPage: React.FC = () => {
             {/* 2. Navigation Links */}
             <nav className="flex flex-col space-y-1 pt-1">
               {[
-                { name: 'Kurslar', href: '#courses' },
-                { name: 'Ustozlar', href: '#teachers' },
-                { name: 'Afzalliklar', href: '#why-us' },
-                { name: 'Fikrlar', href: '#reviews' },
-                { name: 'Bog‘lanish', href: '#contact' },
+                { name: t.landing.navCourses, href: '#courses' },
+                { name: t.landing.navTeachers, href: '#teachers' },
+                { name: t.landing.navWhyUs, href: '#why-us' },
+                { name: t.landing.navReviews, href: '#reviews' },
+                { name: t.landing.navContact, href: '#contact' },
               ].map((item) => (
                 <a
                   key={item.name}
@@ -389,7 +358,7 @@ export const LandingPage: React.FC = () => {
                   className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 py-3 text-xs font-black text-slate-950 shadow-md active:scale-98 transition-all cursor-pointer"
                 >
                   <LogIn className="h-4 w-4" />
-                  <span>{currentRole === 'student' ? 'Talaba Kabineti' : 'Boshqaruv Markazi'}</span>
+                  <span>{currentRole === 'student' ? t.landing.returnToStudentCabinet : t.landing.returnToAdminDashboard}</span>
                 </button>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -402,7 +371,7 @@ export const LandingPage: React.FC = () => {
                     className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 py-3 text-xs font-black text-slate-950 shadow-md active:scale-98 transition-all cursor-pointer"
                   >
                     <LogIn className="h-4 w-4" />
-                    <span>Admin & Ustoz Portali</span>
+                    <span>{t.landing.adminTeacherPortal}</span>
                   </button>
                   <button
                     type="button"
@@ -413,7 +382,7 @@ export const LandingPage: React.FC = () => {
                     className="w-full flex items-center justify-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 py-3 text-xs font-black text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 active:scale-98 transition-all cursor-pointer"
                   >
                     <GraduationCap className="h-4 w-4" />
-                    <span>Talaba Shaxsiy Kabineti</span>
+                    <span>{t.landing.studentCabinet}</span>
                   </button>
                 </div>
               )}
@@ -489,7 +458,7 @@ export const LandingPage: React.FC = () => {
                   window.location.hash = currentRole === 'student' ? '#/student' : '#/dashboard';
                 }}
               >
-                <span>{currentRole === 'student' ? 'Talaba Kabinetiga Qaytish' : 'Boshqaruv Paneliga Qaytish'}</span>
+                <span>{currentRole === 'student' ? t.landing.returnToStudentCabinet : t.landing.returnToAdminDashboard}</span>
                 <ChevronRight className="h-4 w-4 text-amber-500" />
               </Button>
             ) : (
@@ -501,7 +470,7 @@ export const LandingPage: React.FC = () => {
                   window.location.hash = '#/student';
                 }}
               >
-                <span>Talaba Portali (LMS)</span>
+                <span>{t.landing.studentPortalBtn}</span>
                 <GraduationCap className="h-4 w-4 text-emerald-500" />
               </Button>
             )}
@@ -511,15 +480,15 @@ export const LandingPage: React.FC = () => {
           <div className="pt-6 flex flex-wrap items-center justify-center gap-6 text-xs font-semibold text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-              <span>Kichik guruhlar (12-16 nafar)</span>
+              <span>{t.landing.trustSmallGroups}</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-              <span>Oylik to‘lov: 250,000 so‘m</span>
+              <span>{t.landing.trustMonthlyFee}</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-              <span>Birinchi dars — bepul sinov</span>
+              <span>{t.landing.trustFreeTrial}</span>
             </div>
           </div>
         </div>
@@ -548,9 +517,9 @@ export const LandingPage: React.FC = () => {
               </p>
             </div>
             <div className="text-center space-y-1">
-              <span className="text-3xl sm:text-4xl font-black text-blue-500 font-mono">2 Ta</span>
+              <span className="text-3xl sm:text-4xl font-black text-blue-500 font-mono">2</span>
               <p className="text-xs font-bold text-slate-600 dark:text-slate-400">
-                Ixtisoslashgan Yo‘nalish
+                {t.landing.specializedTracks}
               </p>
             </div>
             <div className="text-center space-y-1">
@@ -570,7 +539,7 @@ export const LandingPage: React.FC = () => {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center space-y-3">
             <Badge variant="warning" size="md">
-              Ta’lim Dasturlari
+              {t.landing.coursesBadge}
             </Badge>
             <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
               {t.landing.coursesTitle}
@@ -583,6 +552,13 @@ export const LandingPage: React.FC = () => {
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 max-w-5xl mx-auto">
             {INITIAL_COURSES.map((course) => {
               const isMath = course.title.toLowerCase().includes('matematika');
+              const courseTitle = isMath ? t.landing.mathTitle : t.landing.engTitle;
+              const courseDesc = isMath ? t.landing.mathDesc : t.landing.engDesc;
+              const teacherName = isMath ? t.landing.mathTeacherName : t.landing.engTeacherName;
+              const courseSchedule = isMath ? t.landing.mathSchedule : t.landing.engSchedule;
+              const courseBadge = isMath ? t.landing.mathBadge : t.landing.engBadge;
+              const syllabusItems = isMath ? t.landing.mathSyllabus : t.landing.engSyllabus;
+
               return (
                 <div
                   key={course.id}
@@ -592,36 +568,36 @@ export const LandingPage: React.FC = () => {
                     {/* Header tags */}
                     <div className="flex items-center justify-between">
                       <span className="rounded-xl bg-amber-500/10 px-2.5 sm:px-3 py-1 text-[10px] sm:text-[11px] font-black uppercase text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                        {isMath ? 'Aniq Fanlar & Mantiq' : 'Xalqaro Tillar'}
+                        {courseBadge}
                       </span>
                       <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
                         <Clock className="h-3.5 w-3.5 text-amber-500" />
-                        {course.durationMonths} oylik kurs
+                        {course.durationMonths} {t.landing.courseDurationMonths}
                       </span>
                     </div>
 
                     {/* Title & Description */}
                     <div>
                       <h3 className="text-xl sm:text-2xl font-black text-slate-900 group-hover:text-amber-600 dark:text-white dark:group-hover:text-amber-400 transition-colors">
-                        {course.title}
+                        {courseTitle}
                       </h3>
                       <p className="mt-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                        {course.description}
+                        {courseDesc}
                       </p>
                     </div>
 
                     {/* Schedule & Teacher Info */}
                     <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-3.5 sm:p-4 border border-slate-100 dark:border-slate-800 space-y-2 text-xs">
                       <div className="flex items-center justify-between text-slate-700 dark:text-slate-300">
-                        <span className="text-slate-500 dark:text-slate-400 font-medium">Ustoz:</span>
+                        <span className="text-slate-500 dark:text-slate-400 font-medium">{t.landing.teacherLabel}:</span>
                         <span className="font-bold text-amber-600 dark:text-amber-400">
-                          {isMath ? 'Hadicha ustoz' : 'Hasanboy ustoz'}
+                          {teacherName}
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-slate-700 dark:text-slate-300">
-                        <span className="text-slate-500 dark:text-slate-400 font-medium">Dars vaqti:</span>
+                        <span className="text-slate-500 dark:text-slate-400 font-medium">{t.landing.scheduleLabel}:</span>
                         <span className="font-semibold text-[11px] sm:text-xs">
-                          {isMath ? 'Dush, Chor, Juma (14:00 - 16:00)' : 'Sesh, Pay, Shan (15:30 - 17:30)'}
+                          {courseSchedule}
                         </span>
                       </div>
                     </div>
@@ -629,9 +605,9 @@ export const LandingPage: React.FC = () => {
                     {/* Syllabus points */}
                     <div className="space-y-2.5 border-t border-slate-100 pt-4 dark:border-slate-800 text-xs">
                       <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
-                        Kurs dasturi o‘z ichiga oladi:
+                        {t.landing.syllabusTitle}:
                       </span>
-                      {course.syllabus.map((item, i) => (
+                      {syllabusItems.map((item, i) => (
                         <div key={i} className="flex items-start gap-2.5 text-slate-600 dark:text-slate-300">
                           <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                           <span className="leading-snug text-xs">{item}</span>
@@ -643,7 +619,7 @@ export const LandingPage: React.FC = () => {
                   {/* Price & Action */}
                   <div className="mt-6 sm:mt-8 pt-4 sm:pt-5 border-t border-slate-100 dark:border-slate-800 flex flex-col xs:flex-row xs:items-center xs:justify-between gap-3 sm:gap-4">
                     <div>
-                      <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Oylik to‘lov:</span>
+                      <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">{t.landing.monthlyFeeLabel}:</span>
                       <p className="text-lg sm:text-xl font-black text-amber-600 dark:text-amber-400 font-mono">
                         {formatMoney(course.pricePerMonth, 'UZS')}
                       </p>
@@ -654,11 +630,11 @@ export const LandingPage: React.FC = () => {
                       size="md"
                       className="w-full xs:w-auto px-5 sm:px-6 py-2.5 font-bold shadow-md shadow-amber-500/20 cursor-pointer rounded-xl text-center justify-center"
                       onClick={() => {
-                        setSelectedCourseName(course.title);
+                        setSelectedCourseName(courseTitle);
                         setIsApplyModalOpen(true);
                       }}
                     >
-                      Kursga Yozilish
+                      {t.landing.enrollBtn}
                     </Button>
                   </div>
                 </div>
@@ -675,13 +651,13 @@ export const LandingPage: React.FC = () => {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center space-y-3">
             <Badge variant="info" size="md">
-              Ustozlarimiz
+              {t.landing.teachersBadge}
             </Badge>
             <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
               {t.landing.teachersTitle}
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
-              Matematika va ingliz tili bo‘yicha ko‘p yillik tajribaga ega yetuk pedagoglar
+              {t.landing.teachersSubtitle}
             </p>
           </div>
 
@@ -700,31 +676,31 @@ export const LandingPage: React.FC = () => {
 
                   <div className="min-w-0 flex-1">
                     <h4 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white truncate">
-                      Hadicha ustoz
+                      {t.landing.hadichaTitle}
                     </h4>
                     <p className="text-xs text-amber-600 dark:text-amber-400 font-bold mt-0.5 truncate">
-                      Matematika va Mantiq Fani Ustozi
+                      {t.landing.hadichaRole}
                     </p>
                     <div className="flex items-center gap-1 mt-1 text-xs text-amber-500 font-bold">
                       <Star className="h-3.5 w-3.5 fill-current" />
-                      <span>5.0 Baho</span>
-                      <span className="text-slate-400 text-[11px] font-normal ml-1">· 11+ faol o‘quvchilar</span>
+                      <span>{t.landing.ratingText}</span>
+                      <span className="text-slate-400 text-[11px] font-normal ml-1">· 11+ {t.landing.studentsCount.toLowerCase()}</span>
                     </div>
                   </div>
                 </div>
 
                 <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  Oliy toifali pedagog. Matematika, mantiq, DTM testlari va olimpiadalarga tayyorgarlik bo‘yicha ko‘p yillik tajribaga ega. Har bir o‘quvchining qobiliyatiga qarab individual dastur tuzadi.
+                  {t.landing.hadichaBio}
                 </p>
 
                 <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-3.5 border border-slate-100 dark:border-slate-800 text-xs space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Dars kunlari:</span>
-                    <span className="font-semibold text-slate-800 dark:text-slate-200">Dush, Chor, Juma</span>
+                    <span className="text-slate-500">{t.landing.daysLabel}:</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">{t.landing.hadichaDays}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Vaqti:</span>
-                    <span className="font-semibold text-slate-800 dark:text-slate-200 text-[11px] sm:text-xs">14:00 - 16:00 (101-xona)</span>
+                    <span className="text-slate-500">{t.landing.timeLabel}:</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200 text-[11px] sm:text-xs">{t.landing.hadichaTime}</span>
                   </div>
                 </div>
               </div>
@@ -734,11 +710,11 @@ export const LandingPage: React.FC = () => {
                 size="sm"
                 className="w-full justify-center gap-2 font-bold cursor-pointer rounded-xl py-2.5"
                 onClick={() => {
-                  setSelectedCourseName('Matematika (Hadicha ustoz)');
+                  setSelectedCourseName(t.landing.mathTitle);
                   setIsApplyModalOpen(true);
                 }}
               >
-                Hadicha ustoz guruhiga yozilish
+                {t.landing.hadichaBtn}
               </Button>
             </div>
 
@@ -756,31 +732,31 @@ export const LandingPage: React.FC = () => {
 
                   <div className="min-w-0 flex-1">
                     <h4 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white truncate">
-                      Hasanboy ustoz
+                      {t.landing.hasanboyTitle}
                     </h4>
                     <p className="text-xs text-amber-600 dark:text-amber-400 font-bold mt-0.5 truncate">
-                      Ingliz Tili (General & IELTS) Ustozi
+                      {t.landing.hasanboyRole}
                     </p>
                     <div className="flex items-center gap-1 mt-1 text-xs text-amber-500 font-bold">
                       <Star className="h-3.5 w-3.5 fill-current" />
-                      <span>5.0 Baho</span>
-                      <span className="text-slate-400 text-[11px] font-normal ml-1">· 8+ faol o‘quvchilar</span>
+                      <span>{t.landing.ratingText}</span>
+                      <span className="text-slate-400 text-[11px] font-normal ml-1">· 13+ {t.landing.studentsCount.toLowerCase()}</span>
                     </div>
                   </div>
                 </div>
 
                 <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  Xalqaro sertifikatlarga ega instruktor. Grammatika va jonli so‘zlashuv to‘sig‘ini yengish bo‘yicha interaktiv uslub egasi. Speaking Club va tinglab tushunish mashg‘ulotlari yetakchisi.
+                  {t.landing.hasanboyBio}
                 </p>
 
                 <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-3.5 border border-slate-100 dark:border-slate-800 text-xs space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Dars kunlari:</span>
-                    <span className="font-semibold text-slate-800 dark:text-slate-200">Sesh, Pay, Shan</span>
+                    <span className="text-slate-500">{t.landing.daysLabel}:</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">{t.landing.hasanboyDays}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Vaqti:</span>
-                    <span className="font-semibold text-slate-800 dark:text-slate-200 text-[11px] sm:text-xs">15:30 - 17:30 (102-xona)</span>
+                    <span className="text-slate-500">{t.landing.timeLabel}:</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200 text-[11px] sm:text-xs">{t.landing.hasanboyTime}</span>
                   </div>
                 </div>
               </div>
@@ -790,11 +766,11 @@ export const LandingPage: React.FC = () => {
                 size="sm"
                 className="w-full justify-center gap-2 font-bold cursor-pointer rounded-xl py-2.5"
                 onClick={() => {
-                  setSelectedCourseName('Ingliz Tili (Hasanboy ustoz)');
+                  setSelectedCourseName(t.landing.engTitle);
                   setIsApplyModalOpen(true);
                 }}
               >
-                Hasanboy ustoz guruhiga yozilish
+                {t.landing.hasanboyBtn}
               </Button>
             </div>
           </div>
@@ -808,13 +784,13 @@ export const LandingPage: React.FC = () => {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center space-y-3">
             <Badge variant="success" size="md">
-              Afzalliklarimiz
+              {t.landing.whyUsBadge}
             </Badge>
             <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
-              Nima Uchun LUMOS Markazini Tanlashadi?
+              {t.landing.whyUsTitle}
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
-              Farzandingiz kelajagi uchun eng qulay va professional ta’lim muhiti
+              {t.landing.whyUsSubtitle}
             </p>
           </div>
 
@@ -824,10 +800,10 @@ export const LandingPage: React.FC = () => {
                 <Users className="h-6 w-6" />
               </div>
               <h3 className="text-base font-black text-slate-900 dark:text-white">
-                Kichik Guruhlar
+                {t.landing.whyFeature1Title}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Maksimal 12-16 kishilik ixcham guruhlar tufayli har bir o‘quvchiga ustozning to‘liq e’tibori yetadi.
+                {t.landing.whyFeature1Desc}
               </p>
             </div>
 
@@ -836,10 +812,10 @@ export const LandingPage: React.FC = () => {
                 <ShieldCheck className="h-6 w-6" />
               </div>
               <h3 className="text-base font-black text-slate-900 dark:text-white">
-                Ota-onalar Nazorati
+                {t.landing.whyFeature2Title}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Har oy davomat, o‘zlashtirish va to‘lovlar haqida shaffof elektron hisobot taqdim etiladi.
+                {t.landing.whyFeature2Desc}
               </p>
             </div>
 
@@ -848,10 +824,10 @@ export const LandingPage: React.FC = () => {
                 <Compass className="h-6 w-6" />
               </div>
               <h3 className="text-base font-black text-slate-900 dark:text-white">
-                Amaliy Metodika
+                {t.landing.whyFeature3Title}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Quruq yodlash emas, balki mantiqiy fikrlash, erkin so‘zlashuv va mustaqil misol yechishga o‘rgatiladi.
+                {t.landing.whyFeature3Desc}
               </p>
             </div>
 
@@ -860,10 +836,10 @@ export const LandingPage: React.FC = () => {
                 <Award className="h-6 w-6" />
               </div>
               <h3 className="text-base font-black text-slate-900 dark:text-white">
-                Adolatli Narxlar
+                {t.landing.whyFeature4Title}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Oylik atigi 250,000 so‘m. Bepul sinov darsi va birinchi darsdan natijani his qilish kafolati.
+                {t.landing.whyFeature4Desc}
               </p>
             </div>
           </div>
@@ -877,18 +853,18 @@ export const LandingPage: React.FC = () => {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center space-y-3">
             <Badge variant="warning" size="md">
-              Fikrlar
+              {t.landing.testimonialsBadge}
             </Badge>
             <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
               {t.landing.testimonialsTitle}
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
-              Biz bilan birga yutuqlarga erishayotgan o‘quvchilar va ularning ota-onalari
+              {t.landing.testimonialsSubtitle}
             </p>
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {testimonials.map((item, idx) => (
+            {(t.landing.testimonialsList || []).map((item, idx) => (
               <div
                 key={idx}
                 className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4 flex flex-col justify-between"
@@ -930,7 +906,7 @@ export const LandingPage: React.FC = () => {
             {/* Left Info */}
             <div className="space-y-6">
               <Badge variant="warning" size="md">
-                Qabul Ochiq
+                {t.landing.contactBadge}
               </Badge>
               <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
                 {t.landing.contactTitle}
@@ -945,7 +921,7 @@ export const LandingPage: React.FC = () => {
                     <Phone className="h-4 w-4" />
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-400 block font-medium">Qo‘ng‘iroq uchun:</span>
+                    <span className="text-[10px] text-slate-400 block font-medium">{t.landing.phoneLabel}:</span>
                     <a href="tel:+998712000025" className="text-sm font-bold text-slate-900 dark:text-white hover:text-amber-500 transition-colors">
                       +998 (71) 200-00-25
                     </a>
@@ -957,9 +933,9 @@ export const LandingPage: React.FC = () => {
                     <MapPin className="h-4 w-4" />
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-400 block font-medium">Manzil:</span>
+                    <span className="text-[10px] text-slate-400 block font-medium">{t.landing.addressLabel}:</span>
                     <span className="text-sm font-bold text-slate-900 dark:text-white">
-                      Toshkent sh., Chilonzor tumani, Bunyodkor shoh ko‘chasi 42
+                      {t.landing.addressVal}
                     </span>
                   </div>
                 </div>
@@ -969,9 +945,9 @@ export const LandingPage: React.FC = () => {
                     <Clock className="h-4 w-4" />
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-400 block font-medium">Ish vaqti:</span>
+                    <span className="text-[10px] text-slate-400 block font-medium">{t.landing.workingHoursLabel}:</span>
                     <span className="text-sm font-bold text-slate-900 dark:text-white">
-                      Dushanba - Shanba: 08:30 - 19:30
+                      {t.landing.workingHoursVal}
                     </span>
                   </div>
                 </div>
@@ -982,10 +958,10 @@ export const LandingPage: React.FC = () => {
             <div className="rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-8 shadow-xl dark:border-slate-800 dark:bg-slate-900">
               <div className="mb-5 sm:mb-6 space-y-1">
                 <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
-                  Birinchi Bepul Sinov Darsiga Yoziling
+                  {t.landing.formTitle}
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Formani to‘ldiring, joylar soni cheklangan (16 nafar).
+                  {t.landing.formSubtitle}
                 </p>
               </div>
 
@@ -995,7 +971,7 @@ export const LandingPage: React.FC = () => {
                   required
                   value={applicantName}
                   onChange={(e) => setApplicantName(e.target.value)}
-                  placeholder="Masalan: Azizbek Rahimov"
+                  placeholder={t.landing.fullNamePlaceholder}
                 />
 
                 <Input
@@ -1004,14 +980,17 @@ export const LandingPage: React.FC = () => {
                   type="tel"
                   value={applicantPhone}
                   onChange={(e) => setApplicantPhone(e.target.value)}
-                  placeholder="+998 (90) 123-45-67"
+                  placeholder={t.landing.phonePlaceholder}
                 />
 
                 <Select
                   label={t.landing.selectCourse}
                   value={selectedCourseName}
                   onChange={(e) => setSelectedCourseName(e.target.value)}
-                  options={INITIAL_COURSES.map((c) => ({ value: c.title, label: c.title }))}
+                  options={[
+                    { value: t.landing.mathTitle, label: t.landing.mathTitle },
+                    { value: t.landing.engTitle, label: t.landing.engTitle },
+                  ]}
                 />
 
                 {isSubmitted ? (
@@ -1046,13 +1025,13 @@ export const LandingPage: React.FC = () => {
                 LUMOS O‘quv Markazi
               </span>
               <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider">
-                Bilim bilan yorqin kelajakka!
+                {t.landing.footerSlogan}
               </span>
             </div>
           </div>
 
           <p className="text-xs text-slate-400 text-center sm:text-right">
-            © {new Date().getFullYear()} LUMOS ERP & Education. Barcha huquqlar himoyalangan.
+            © {new Date().getFullYear()} LUMOS ERP & Education. {t.landing.footerRights}
           </p>
         </div>
       </footer>
@@ -1063,40 +1042,43 @@ export const LandingPage: React.FC = () => {
       <Modal
         isOpen={isApplyModalOpen}
         onClose={() => setIsApplyModalOpen(false)}
-        title="Kursga Yozilish (Bepul Sinov Darsi)"
+        title={t.landing.formTitle}
       >
         <form onSubmit={handleApplySubmit} className="space-y-4">
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Tanlangan yo‘nalish bo‘yicha ustozimiz bilan sinov darsiga qatnashish uchun ma’lumotlaringizni qoldiring:
+            {t.landing.formSubtitle}
           </p>
 
           <Select
-            label="Tanlangan Kurs"
+            label={t.landing.selectCourse}
             value={selectedCourseName}
             onChange={(e) => setSelectedCourseName(e.target.value)}
-            options={INITIAL_COURSES.map((c) => ({ value: c.title, label: c.title }))}
+            options={[
+              { value: t.landing.mathTitle, label: t.landing.mathTitle },
+              { value: t.landing.engTitle, label: t.landing.engTitle },
+            ]}
           />
 
           <Input
-            label="Ism va Familiyangiz"
+            label={t.landing.fullName}
             required
             value={applicantName}
             onChange={(e) => setApplicantName(e.target.value)}
-            placeholder="Masalan: Sardor Aliyev"
+            placeholder={t.landing.fullNamePlaceholder}
           />
 
           <Input
-            label="Telefon raqamingiz"
+            label={t.landing.phone}
             required
             type="tel"
             value={applicantPhone}
             onChange={(e) => setApplicantPhone(e.target.value)}
-            placeholder="+998 (90) 123-45-67"
+            placeholder={t.landing.phonePlaceholder}
           />
 
           {isSubmitted ? (
             <div className="rounded-2xl bg-emerald-50 p-3 text-xs font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 text-center border border-emerald-200 dark:border-emerald-800">
-              🎉 Arizangiz qabul qilindi! Tez orada mutaxassislarimiz bog‘lanishadi.
+              🎉 {t.landing.applicationSuccess}
             </div>
           ) : (
             <div className="pt-2 flex items-center justify-end gap-3">
@@ -1106,7 +1088,7 @@ export const LandingPage: React.FC = () => {
                 size="sm"
                 onClick={() => setIsApplyModalOpen(false)}
               >
-                Bekor qilish
+                {t.landing.cancelBtn}
               </Button>
               <Button
                 type="submit"
@@ -1115,7 +1097,7 @@ export const LandingPage: React.FC = () => {
                 className="gap-2 shadow-md shadow-amber-500/20 font-bold px-5"
               >
                 <Send className="h-3.5 w-3.5" />
-                <span>Yuborish</span>
+                <span>{t.landing.submitApplication}</span>
               </Button>
             </div>
           )}
