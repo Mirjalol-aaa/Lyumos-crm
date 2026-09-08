@@ -14,6 +14,7 @@ import {
   CalendarDays,
   CreditCard,
   ReceiptText,
+  Send,
 } from 'lucide-react';
 
 import confetti from 'canvas-confetti';
@@ -21,6 +22,12 @@ import confetti from 'canvas-confetti';
 import {
   PaymentMethod,
 } from '../../types/crm';
+
+import {
+  sendTelegramMessage,
+  formatPaymentReceiptMessage,
+  getTelegramShareUrl,
+} from '../../services/telegramService';
 
 import {
   ACADEMIC_MONTHS,
@@ -79,6 +86,10 @@ export const ReceivePaymentModal:
       setNotes,
     ] = useState('');
 
+    const [
+      sendTelegramReceipt,
+      setSendTelegramReceipt,
+    ] = useState(true);
 
     const MONTHS =
       ACADEMIC_MONTHS as readonly string[];
@@ -242,6 +253,31 @@ export const ReceivePaymentModal:
           undefined,
       });
 
+      // Dispatch Telegram receipt if enabled
+      if (sendTelegramReceipt) {
+        const receiptNo = `REC-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+        const receiptHtml = formatPaymentReceiptMessage({
+          studentName: currentStudent.fullName,
+          groupName: currentStudent.groupName,
+          month: selectedMonth,
+          amount: finalAmount,
+          method,
+          receiptNo,
+          centerPhone: settings.phone,
+          centerName: settings.centerName,
+        });
+
+        if (settings.telegramBotToken && settings.telegramChatId) {
+          sendTelegramMessage(
+            settings.telegramBotToken,
+            settings.telegramChatId,
+            receiptHtml
+          ).catch((err) => console.warn('Telegram receipt send error:', err));
+        } else {
+          // If bot token not yet configured, open direct share window
+          window.open(getTelegramShareUrl(receiptHtml), '_blank');
+        }
+      }
 
       confetti({
         particleCount: 80,
@@ -1174,8 +1210,6 @@ export const ReceivePaymentModal:
                 grid
                 shrink-0
                 grid-cols-[0.8fr_1.2fr]
-                gap-2
-
                 border-t
                 border-slate-100
 
@@ -1185,13 +1219,37 @@ export const ReceivePaymentModal:
                 dark:border-slate-800
                 dark:bg-slate-900
 
-                sm:flex
+                flex
+                flex-col
+                sm:flex-row
                 sm:items-center
-                sm:justify-end
-                sm:gap-3
+                sm:justify-between
+                gap-3
+                px-4
                 sm:px-6
               "
             >
+              <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={sendTelegramReceipt}
+                  onChange={(e) => setSendTelegramReceipt(e.target.checked)}
+                  className="h-4 w-4 accent-[#007AFF] cursor-pointer rounded"
+                />
+                <span className="flex items-center gap-1.5 text-[11px] sm:text-xs">
+                  <Send className="h-3.5 w-3.5 text-sky-500 shrink-0" />
+                  <span>
+                    Telegram chekini yuborish{' '}
+                    {settings.telegramBotToken ? (
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">(Bot orqali)</span>
+                    ) : (
+                      <span className="text-[10px] text-sky-500 font-bold">(Telegram orqali)</span>
+                    )}
+                  </span>
+                </span>
+              </label>
+
+              <div className="flex items-center justify-end gap-2 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={
@@ -1290,6 +1348,7 @@ export const ReceivePaymentModal:
                   Confirm & Issue Receipt
                 </span>
               </button>
+            </div>
             </div>
           </form>
         </div>

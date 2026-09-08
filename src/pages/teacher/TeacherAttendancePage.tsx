@@ -10,10 +10,18 @@ import {
   Clock,
   HelpCircle,
   Users,
+  Send,
 } from 'lucide-react';
 
+import {
+  sendTelegramMessage,
+  formatAttendanceAlertMessage,
+  formatAttendanceSummaryMessage,
+  getTelegramShareUrl,
+} from '../../services/telegramService';
+
 export const TeacherAttendancePage: React.FC = () => {
-  const { groups, students, attendanceRecords, saveAttendance, teachers } = useCRM();
+  const { groups, students, attendanceRecords, saveAttendance, teachers, settings } = useCRM();
   const { activeTeacherId } = useLMS();
 
   const currentTeacher = teachers.find(t => t.id === activeTeacherId) || teachers[0];
@@ -27,6 +35,8 @@ export const TeacherAttendancePage: React.FC = () => {
   );
   const [localStatuses, setLocalStatuses] = useState<Record<string, AttendanceStatus>>({});
   const [isSaved, setIsSaved] = useState(false);
+  const [isSendingTelegram, setIsSendingTelegram] = useState(false);
+  const [telegramSentCount, setTelegramSentCount] = useState<number | null>(null);
 
   const currentGroup = groups.find(g => g.id === selectedGroupId);
   const groupStudents = students.filter(s => s.groupId === selectedGroupId);
@@ -47,6 +57,62 @@ export const TeacherAttendancePage: React.FC = () => {
     setIsSaved(false);
   };
 
+  const handleSendTelegram = async () => {
+    if (!currentGroup || groupStudents.length === 0) return;
+    setIsSendingTelegram(true);
+
+    const absentStudents = groupStudents.filter(
+      (s) => getStudentStatus(s.id) === 'Absent'
+    );
+    const presentStudents = groupStudents.filter(
+      (s) => getStudentStatus(s.id) === 'Present'
+    );
+    const lateStudents = groupStudents.filter(
+      (s) => getStudentStatus(s.id) === 'Late'
+    );
+
+    const summaryText = formatAttendanceSummaryMessage({
+      groupName: currentGroup.name,
+      teacherName: currentTeacher?.fullName || 'Ustoz',
+      date: selectedDate,
+      totalStudents: groupStudents.length,
+      presentCount: presentStudents.length,
+      absentCount: absentStudents.length,
+      lateCount: lateStudents.length,
+    });
+
+    if (settings.telegramBotToken && settings.telegramChatId) {
+      await sendTelegramMessage(
+        settings.telegramBotToken,
+        settings.telegramChatId,
+        summaryText
+      );
+
+      for (const s of absentStudents) {
+        const alertText = formatAttendanceAlertMessage({
+          studentName: s.fullName,
+          groupName: currentGroup.name,
+          date: selectedDate,
+          status: 'Absent',
+          centerPhone: settings.phone,
+          centerName: settings.centerName,
+        });
+        await sendTelegramMessage(
+          settings.telegramBotToken,
+          settings.telegramChatId,
+          alertText
+        );
+      }
+
+      setTelegramSentCount(absentStudents.length + 1);
+      setTimeout(() => setTelegramSentCount(null), 4000);
+    } else {
+      window.open(getTelegramShareUrl(summaryText), '_blank');
+    }
+
+    setIsSendingTelegram(false);
+  };
+
   const handleSaveAll = () => {
     const recordsToSave = groupStudents.map(student => ({
       date: selectedDate,
@@ -58,6 +124,23 @@ export const TeacherAttendancePage: React.FC = () => {
     }));
 
     saveAttendance(recordsToSave);
+
+    // Auto-alert absent via telegram if configured
+    if (settings.enableTelegramAttendance && settings.telegramBotToken && settings.telegramChatId) {
+      const absentStudents = groupStudents.filter((s) => getStudentStatus(s.id) === 'Absent');
+      for (const s of absentStudents) {
+        const alertText = formatAttendanceAlertMessage({
+          studentName: s.fullName,
+          groupName: currentGroup?.name || 'Guruh',
+          date: selectedDate,
+          status: 'Absent',
+          centerPhone: settings.phone,
+          centerName: settings.centerName,
+        });
+        sendTelegramMessage(settings.telegramBotToken, settings.telegramChatId, alertText).catch(() => {});
+      }
+    }
+
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 3000);
   };
@@ -75,14 +158,33 @@ export const TeacherAttendancePage: React.FC = () => {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={handleSaveAll}
-          className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 transition-all hover:bg-indigo-700 active:scale-95"
-        >
-          <Save className="h-4 w-4" />
-          {isSaved ? 'Saqlandi! ✓' : 'Davomatni Saqlash'}
-        </button>
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={handleSendTelegram}
+            disabled={!currentGroup || groupStudents.length === 0 || isSendingTelegram}
+            className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-sky-500/30 bg-sky-500/10 px-4 py-2.5 text-xs font-bold text-sky-700 dark:text-sky-300 hover:bg-sky-500/20 active:scale-95 transition-all shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
+            title="Davomat hisobotini Telegramga yuborish"
+          >
+            <Send className="h-4 w-4 text-sky-500" />
+            <span>
+              {isSendingTelegram
+                ? 'Yuborilmoqda...'
+                : telegramSentCount !== null
+                ? `Yuborildi! (${telegramSentCount} ta)`
+                : 'Telegramga Xabar'}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleSaveAll}
+            className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 transition-all hover:bg-indigo-700 active:scale-95"
+          >
+            <Save className="h-4 w-4" />
+            {isSaved ? 'Saqlandi! ✓' : 'Davomatni Saqlash'}
+          </button>
+        </div>
       </div>
 
       {/* Selectors */}

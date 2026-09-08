@@ -16,7 +16,15 @@ import {
   CheckCircle2,
   MessageSquareText,
   AlarmClock,
+  Send,
+  Bot,
+  ExternalLink,
+  HelpCircle,
+  RefreshCw,
+  AlertCircle,
 } from 'lucide-react';
+
+import { testTelegramBot } from '../services/telegramService';
 
 
 export const SettingsPage:
@@ -98,11 +106,94 @@ export const SettingsPage:
       settings.autoRemindUnpaid
     );
 
+    const [
+      telegramBotToken,
+      setTelegramBotToken,
+    ] = useState(
+      settings.telegramBotToken || ''
+    );
+
+    const [
+      telegramChatId,
+      setTelegramChatId,
+    ] = useState(
+      settings.telegramChatId || ''
+    );
+
+    const [
+      enableTelegramAttendance,
+      setEnableTelegramAttendance,
+    ] = useState(
+      settings.enableTelegramAttendance ?? true
+    );
+
+    const [
+      enableTelegramPayments,
+      setEnableTelegramPayments,
+    ] = useState(
+      settings.enableTelegramPayments ?? true
+    );
+
+    const [
+      isTestingTelegram,
+      setIsTestingTelegram,
+    ] = useState(false);
+
+    const [
+      telegramTestResult,
+      setTelegramTestResult,
+    ] = useState<{ success: boolean; message: string } | null>(null);
+
+    const [
+      showTelegramGuide,
+      setShowTelegramGuide,
+    ] = useState(false);
+
 
     const [
       savedSuccess,
       setSavedSuccess,
     ] = useState(false);
+
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // TEST TELEGRAM CONNECTION
+    // ─────────────────────────────────────────────────────────────────────────
+
+    const handleTestTelegram = async () => {
+      if (!telegramBotToken.trim()) {
+        setTelegramTestResult({
+          success: false,
+          message: 'Iltimos, avval Telegram Bot Tokenini kiriting.',
+        });
+        return;
+      }
+
+      setIsTestingTelegram(true);
+      setTelegramTestResult(null);
+
+      try {
+        const result = await testTelegramBot(telegramBotToken, telegramChatId);
+        if (result.success) {
+          setTelegramTestResult({
+            success: true,
+            message: `Muvaffaqiyatli! Bot (${result.botName || 'LumosBot'}) ulandi va sinov xabari yuborildi.`,
+          });
+        } else {
+          setTelegramTestResult({
+            success: false,
+            message: result.error || 'Ulanishda xatolik yuz berdi.',
+          });
+        }
+      } catch (err: any) {
+        setTelegramTestResult({
+          success: false,
+          message: err.message || 'Xatolik yuz berdi.',
+        });
+      } finally {
+        setIsTestingTelegram(false);
+      }
+    };
 
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -143,6 +234,14 @@ export const SettingsPage:
 
         autoRemindUnpaid:
           autoRemind,
+
+        telegramBotToken,
+
+        telegramChatId,
+
+        enableTelegramAttendance,
+
+        enableTelegramPayments,
       });
 
 
@@ -1313,6 +1412,164 @@ export const SettingsPage:
                   "
                 />
               </label>
+
+              {/* ─────────────────────────────────────────────────────────────
+                  TELEGRAM BOT INTEGRATION SECTION
+              ───────────────────────────────────────────────────────────── */}
+              <div className="mt-6 pt-6 border-t border-slate-200/80 dark:border-slate-800 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600 dark:bg-sky-500/20 dark:text-sky-400">
+                      <Send className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <span>Telegram Bot Integratsiyasi</span>
+                        <span className="rounded bg-sky-500/10 px-1.5 py-0.2 text-[9px] font-bold text-sky-600 dark:text-sky-400">
+                          Bepul
+                        </span>
+                      </h3>
+                      <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400">
+                        To‘lov cheklari va yo‘qlama xabarnomalarini ota-onalarga bot orqali yuborish
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowTelegramGuide(!showTelegramGuide)}
+                    className="flex items-center gap-1 text-[11px] font-bold text-sky-600 hover:text-sky-700 dark:text-sky-400 cursor-pointer self-start sm:self-auto"
+                  >
+                    <HelpCircle className="h-3.5 w-3.5" />
+                    <span>Qanday ulanadi?</span>
+                  </button>
+                </div>
+
+                {/* Step by step guide accordion */}
+                {showTelegramGuide && (
+                  <div className="p-4 rounded-2xl bg-sky-50/60 dark:bg-sky-950/30 border border-sky-200/60 dark:border-sky-800/50 text-xs space-y-2 text-slate-700 dark:text-slate-300 animate-in fade-in duration-200">
+                    <p className="font-bold text-sky-800 dark:text-sky-300">
+                      Telegram botni ulash bo‘yicha 3 ta oson qadam:
+                    </p>
+                    <ol className="list-decimal list-inside space-y-1 text-[11px] leading-relaxed">
+                      <li>
+                        Telegramda <a href="https://t.me/BotFather" target="_blank" rel="noreferrer" className="font-bold text-sky-600 underline">@BotFather</a> ga kiring va <code>/newbot</code> buyrug‘ini bering.
+                      </li>
+                      <li>
+                        Botingizga nom va username bering, berilgan <b>API Token</b> ni quyidagi birinchi qatorga nusxalang.
+                      </li>
+                      <li>
+                        Botingizni markaz guruhiga yoki kanalingizga <b>Admin</b> qilib qo‘shing va kanal/guruh ID sini (masalan <code>@lumos_crm_alerts</code> yoki <code>-100...</code>) ikkinchi qatorga yozing.
+                      </li>
+                    </ol>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className={labelClass}>
+                      Telegram Bot Token
+                    </label>
+                    <div className="relative">
+                      <Bot className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="text"
+                        value={telegramBotToken}
+                        onChange={(e) => setTelegramBotToken(e.target.value)}
+                        placeholder="123456789:ABCdefGHIjkl..."
+                        className={`${inputClass} pl-10 font-mono text-xs`}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>
+                      Telegram Chat ID / Kanal ID
+                    </label>
+                    <div className="relative">
+                      <Send className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="text"
+                        value={telegramChatId}
+                        onChange={(e) => setTelegramChatId(e.target.value)}
+                        placeholder="@lumos_channel yoki -100123456789"
+                        className={`${inputClass} pl-10 font-mono text-xs`}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Toggles */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-slate-200/60 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 p-3 hover:bg-slate-100/60 transition-all">
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-bold text-slate-800 dark:text-white">
+                        To‘lov Kvitansiyasini Yuborish
+                      </p>
+                      <p className="text-[9px] text-slate-400">
+                        Har bir to‘lovda avtomatik chek
+                      </p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={enableTelegramPayments}
+                      onChange={(e) => setEnableTelegramPayments(e.target.checked)}
+                      className="h-4 w-4 accent-[#007AFF] cursor-pointer"
+                    />
+                  </label>
+
+                  <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-slate-200/60 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 p-3 hover:bg-slate-100/60 transition-all">
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-bold text-slate-800 dark:text-white">
+                        Yo‘qlama Xabarnomasi
+                      </p>
+                      <p className="text-[9px] text-slate-400">
+                        Kelmagan o‘quvchilar haqida ogohlantirish
+                      </p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={enableTelegramAttendance}
+                      onChange={(e) => setEnableTelegramAttendance(e.target.checked)}
+                      className="h-4 w-4 accent-[#007AFF] cursor-pointer"
+                    />
+                  </label>
+                </div>
+
+                {/* Test button & result feedback */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={handleTestTelegram}
+                    disabled={isTestingTelegram}
+                    className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-sky-500/40 bg-sky-500/10 hover:bg-sky-500/20 active:scale-[0.98] text-xs font-bold text-sky-700 dark:text-sky-400 transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    {isTestingTelegram ? (
+                      <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Send className="h-3.5 w-3.5" />
+                    )}
+                    <span>{isTestingTelegram ? 'Ulanish tekshirilmoqda...' : 'Botni Sinash (Test Xabar)'}</span>
+                  </button>
+
+                  {telegramTestResult && (
+                    <div
+                      className={`flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-xl ${
+                        telegramTestResult.success
+                          ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300'
+                          : 'bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300'
+                      }`}
+                    >
+                      {telegramTestResult.success ? (
+                        <CheckCircle2 className="h-4 w-4 shrink-0" />
+                      ) : (
+                        <AlertCircle className="h-4 w-4 shrink-0" />
+                      )}
+                      <span className="text-[11px] leading-tight">{telegramTestResult.message}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </section>
 

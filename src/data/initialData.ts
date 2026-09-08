@@ -14,6 +14,10 @@ export const initialSettings: CenterSettings = {
   enableSmsNotifications: true,
   autoRemindUnpaid: true,
   discountPolicyMax: 20,
+  telegramBotToken: "",
+  telegramChatId: "",
+  enableTelegramAttendance: true,
+  enableTelegramPayments: true,
 };
 
 export const INITIAL_TEACHERS: Teacher[] = [

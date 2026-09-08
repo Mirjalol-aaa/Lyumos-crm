@@ -38,6 +38,7 @@ export interface Student {
   email: string;
   parentName: string;
   parentPhone: string;
+  parentTelegram?: string;
   groupId: string;
   groupName: string;
   teacherId: string;
@@ -146,4 +147,8 @@ export interface CenterSettings {
   enableSmsNotifications: boolean;
   autoRemindUnpaid: boolean;
   discountPolicyMax: number;
+  telegramBotToken?: string;
+  telegramChatId?: string;
+  enableTelegramAttendance?: boolean;
+  enableTelegramPayments?: boolean;
 }

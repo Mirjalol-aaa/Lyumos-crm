@@ -12,11 +12,19 @@ import {
   CheckCircle2,
   Users,
   CalendarDays,
+  Send,
 } from 'lucide-react';
 
 import type {
   AttendanceStatus,
 } from '../types/crm';
+
+import {
+  sendTelegramMessage,
+  formatAttendanceAlertMessage,
+  formatAttendanceSummaryMessage,
+  getTelegramShareUrl,
+} from '../services/telegramService';
 
 import confetti from 'canvas-confetti';
 
@@ -42,6 +50,7 @@ export const AttendancePage: React.FC = () => {
     students,
     attendanceRecords,
     saveAttendance,
+    settings,
   } = useCRM();
 
 
@@ -76,6 +85,16 @@ export const AttendancePage: React.FC = () => {
     justSaved,
     setJustSaved,
   ] = useState(false);
+
+  const [
+    isSendingTelegram,
+    setIsSendingTelegram,
+  ] = useState(false);
+
+  const [
+    telegramSentCount,
+    setTelegramSentCount,
+  ] = useState<number | null>(null);
 
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -283,6 +302,30 @@ export const AttendancePage: React.FC = () => {
       records
     );
 
+    // Auto-send telegram alerts for absent students if enabled
+    if (settings.enableTelegramAttendance && settings.telegramBotToken && settings.telegramChatId) {
+      const absentStudents = groupStudents.filter(
+        (s) => (attendanceState[s.id] ?? 'Present') === 'Absent'
+      );
+      if (absentStudents.length > 0) {
+        for (const s of absentStudents) {
+          const alertText = formatAttendanceAlertMessage({
+            studentName: s.fullName,
+            groupName: activeGroup.name,
+            date: selectedDate,
+            status: 'Absent',
+            centerPhone: settings.phone,
+            centerName: settings.centerName,
+          });
+          sendTelegramMessage(
+            settings.telegramBotToken,
+            settings.telegramChatId,
+            alertText
+          ).catch((err) => console.warn('Telegram attendance alert error:', err));
+        }
+      }
+    }
+
     setJustSaved(true);
 
     confetti({
@@ -359,6 +402,64 @@ export const AttendancePage: React.FC = () => {
           100
         ).toFixed(1)
       : '0.0';
+
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // TELEGRAM DISPATCH HANDLER
+  // ─────────────────────────────────────────────────────────────────────────
+
+  const handleSendTelegramAttendance = async () => {
+    if (!activeGroup || groupStudents.length === 0) return;
+    setIsSendingTelegram(true);
+
+    const absentStudents = groupStudents.filter(
+      (s) => (attendanceState[s.id] ?? 'Present') === 'Absent'
+    );
+    const lateStudents = groupStudents.filter(
+      (s) => (attendanceState[s.id] ?? 'Present') === 'Late'
+    );
+
+    const summaryText = formatAttendanceSummaryMessage({
+      groupName: activeGroup.name,
+      teacherName: activeGroup.subject || 'Ustoz',
+      date: selectedDate,
+      totalStudents: groupStudents.length,
+      presentCount,
+      absentCount,
+      lateCount,
+    });
+
+    if (settings.telegramBotToken && settings.telegramChatId) {
+      await sendTelegramMessage(
+        settings.telegramBotToken,
+        settings.telegramChatId,
+        summaryText
+      );
+
+      for (const s of absentStudents) {
+        const alertText = formatAttendanceAlertMessage({
+          studentName: s.fullName,
+          groupName: activeGroup.name,
+          date: selectedDate,
+          status: 'Absent',
+          centerPhone: settings.phone,
+          centerName: settings.centerName,
+        });
+        await sendTelegramMessage(
+          settings.telegramBotToken,
+          settings.telegramChatId,
+          alertText
+        );
+      }
+
+      setTelegramSentCount(absentStudents.length + 1);
+      setTimeout(() => setTelegramSentCount(null), 4000);
+    } else {
+      window.open(getTelegramShareUrl(summaryText), '_blank');
+    }
+
+    setIsSendingTelegram(false);
+  };
 
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -504,85 +605,124 @@ export const AttendancePage: React.FC = () => {
         </div>
 
 
-        <button
-          type="button"
-          onClick={
-            handleSave
-          }
-          disabled={
-            !activeGroup ||
-            groupStudents.length ===
-              0
-          }
-          className={`
-            flex w-full
-            items-center
-            justify-center
-            gap-2
-            rounded-xl
-            px-5 py-2.5
-            text-xs
-            font-bold
-            text-white
-            shadow-lg
-            transition-all
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
+          <button
+            type="button"
+            onClick={handleSendTelegramAttendance}
+            disabled={!activeGroup || groupStudents.length === 0 || isSendingTelegram}
+            className="
+              flex w-full sm:w-auto
+              cursor-pointer
+              items-center
+              justify-center
+              gap-2
+              rounded-xl
+              border border-sky-500/30
+              bg-sky-500/10
+              hover:bg-sky-500/20
+              active:scale-[0.98]
+              px-4 py-2.5
+              text-xs
+              font-bold
+              text-sky-700
+              dark:text-sky-400
+              transition-all
+              shadow-sm
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+            "
+            title="Davomat hisobotini va kelmaganlar xabarini Telegramga yuborish"
+          >
+            <Send className="h-4 w-4 shrink-0 text-sky-500" />
+            <span>
+              {isSendingTelegram
+                ? 'Yuborilmoqda...'
+                : telegramSentCount !== null
+                ? `Yuborildi! (${telegramSentCount} ta)`
+                : 'Telegramga Xabar'}
+            </span>
+          </button>
 
-            active:scale-[0.98]
-
-            sm:w-auto
-
-            ${
-              justSaved
-                ? `
-                  bg-emerald-600
-                  shadow-emerald-500/20
-                `
-                : `
-                  bg-gradient-to-r from-amber-500 to-amber-600
-                  shadow-amber-500/20
-
-                  hover:from-amber-600 hover:to-amber-700
-                `
+          <button
+            type="button"
+            onClick={
+              handleSave
             }
-
-            ${
+            disabled={
               !activeGroup ||
               groupStudents.length ===
                 0
-                ? `
-                  cursor-not-allowed
-                  opacity-50
-                `
-                : `
-                  cursor-pointer
-                `
             }
-          `}
-        >
-          {justSaved ? (
-            <>
-              <CheckCircle2
-                className="
-                  h-4 w-4
-                  shrink-0
-                "
-              />
+            className={`
+              flex w-full
+              items-center
+              justify-center
+              gap-2
+              rounded-xl
+              px-5 py-2.5
+              text-xs
+              font-bold
+              text-white
+              shadow-lg
+              transition-all
 
-              Saqlandi ✓
-            </>
-          ) : (
-            <>
-              <Save
-                className="
-                  h-4 w-4
-                  shrink-0
-                "
-              />
+              active:scale-[0.98]
 
-              Davomatni Saqlash
-            </>
-          )}
-        </button>
+              sm:w-auto
+
+              ${
+                justSaved
+                  ? `
+                    bg-emerald-600
+                    shadow-emerald-500/20
+                  `
+                  : `
+                    bg-gradient-to-r from-amber-500 to-amber-600
+                    shadow-amber-500/20
+
+                    hover:from-amber-600 hover:to-amber-700
+                  `
+              }
+
+              ${
+                !activeGroup ||
+                groupStudents.length ===
+                  0
+                  ? `
+                    cursor-not-allowed
+                    opacity-50
+                  `
+                  : `
+                    cursor-pointer
+                  `
+              }
+            `}
+          >
+            {justSaved ? (
+              <>
+                <CheckCircle2
+                  className="
+                    h-4 w-4
+                    shrink-0
+                  "
+                />
+
+                Saqlandi ✓
+              </>
+            ) : (
+              <>
+                <Save
+                  className="
+                    h-4 w-4
+                    shrink-0
+                  "
+                />
+
+                Davomatni Saqlash
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
 
