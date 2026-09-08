@@ -507,6 +507,16 @@ export const CRMProvider: React.FC<{
       enableSmsNotifications: true,
       autoRemindUnpaid: true,
       discountPolicyMax: 20,
+      telegramBotToken: '',
+      telegramChatId: '',
+      enableTelegramAttendance: true,
+      enableTelegramPayments: true,
+      eskizEmail: '',
+      eskizPassword: '',
+      eskizToken: '',
+      eskizFrom: '4546',
+      enableSmsAttendance: true,
+      enableSmsPayments: true,
     };
   });
 

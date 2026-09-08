@@ -13,6 +13,7 @@ import {
   Users,
   CalendarDays,
   Send,
+  Smartphone,
 } from 'lucide-react';
 
 import type {
@@ -25,6 +26,12 @@ import {
   formatAttendanceSummaryMessage,
   getTelegramShareUrl,
 } from '../services/telegramService';
+
+import {
+  sendEskizSms,
+  formatAttendanceSms,
+  getDirectSmsUrl,
+} from '../services/eskizSmsService';
 
 import confetti from 'canvas-confetti';
 
@@ -94,6 +101,16 @@ export const AttendancePage: React.FC = () => {
   const [
     telegramSentCount,
     setTelegramSentCount,
+  ] = useState<number | null>(null);
+
+  const [
+    isSendingSms,
+    setIsSendingSms,
+  ] = useState(false);
+
+  const [
+    smsSentCount,
+    setSmsSentCount,
   ] = useState<number | null>(null);
 
 
@@ -326,6 +343,36 @@ export const AttendancePage: React.FC = () => {
       }
     }
 
+    // Auto-send Eskiz SMS alerts for absent students if enabled
+    if (settings.enableSmsAttendance && (settings.eskizToken || settings.eskizEmail)) {
+      const absentStudents = groupStudents.filter(
+        (s) => (attendanceState[s.id] ?? 'Present') === 'Absent'
+      );
+      if (absentStudents.length > 0) {
+        for (const s of absentStudents) {
+          const phone = s.parentPhone || s.phone;
+          if (phone) {
+            const smsText = formatAttendanceSms({
+              studentName: s.fullName,
+              groupName: activeGroup.name,
+              date: selectedDate,
+              status: 'Absent',
+              centerPhone: settings.phone,
+              centerName: settings.centerName,
+            });
+            sendEskizSms({
+              phone,
+              message: smsText,
+              token: settings.eskizToken,
+              email: settings.eskizEmail,
+              password: settings.eskizPassword,
+              from: settings.eskizFrom,
+            }).catch((err) => console.warn('Eskiz SMS attendance alert error:', err));
+          }
+        }
+      }
+    }
+
     setJustSaved(true);
 
     confetti({
@@ -459,6 +506,56 @@ export const AttendancePage: React.FC = () => {
     }
 
     setIsSendingTelegram(false);
+  };
+
+  const handleSendSmsAttendance = async () => {
+    if (!activeGroup || groupStudents.length === 0) return;
+
+    const absentStudents = groupStudents.filter(
+      (s) => (attendanceState[s.id] ?? 'Present') === 'Absent'
+    );
+    const lateStudents = groupStudents.filter(
+      (s) => (attendanceState[s.id] ?? 'Present') === 'Late'
+    );
+
+    const targetStudents = [...absentStudents, ...lateStudents];
+
+    if (targetStudents.length === 0) {
+      alert('Bugungi darsda barcha o‘quvchilar qatnashgan (Kelmagan yoki kechikkanlar yo‘q).');
+      return;
+    }
+
+    setIsSendingSms(true);
+    let sentCount = 0;
+
+    for (const s of targetStudents) {
+      const phone = s.parentPhone || s.phone;
+      if (phone) {
+        const isAbsent = (attendanceState[s.id] ?? 'Present') === 'Absent';
+        const smsText = formatAttendanceSms({
+          studentName: s.fullName,
+          groupName: activeGroup.name,
+          date: selectedDate,
+          status: isAbsent ? 'Absent' : 'Late',
+          centerPhone: settings.phone,
+          centerName: settings.centerName,
+        });
+
+        await sendEskizSms({
+          phone,
+          message: smsText,
+          token: settings.eskizToken,
+          email: settings.eskizEmail,
+          password: settings.eskizPassword,
+          from: settings.eskizFrom,
+        });
+        sentCount++;
+      }
+    }
+
+    setSmsSentCount(sentCount);
+    setTimeout(() => setSmsSentCount(null), 4000);
+    setIsSendingSms(false);
   };
 
 
@@ -640,6 +737,43 @@ export const AttendancePage: React.FC = () => {
                 : telegramSentCount !== null
                 ? `Yuborildi! (${telegramSentCount} ta)`
                 : 'Telegramga Xabar'}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleSendSmsAttendance}
+            disabled={!activeGroup || groupStudents.length === 0 || isSendingSms}
+            className="
+              flex w-full sm:w-auto
+              cursor-pointer
+              items-center
+              justify-center
+              gap-2
+              rounded-xl
+              border border-emerald-500/30
+              bg-emerald-500/10
+              hover:bg-emerald-500/20
+              active:scale-[0.98]
+              px-4 py-2.5
+              text-xs
+              font-bold
+              text-emerald-700
+              dark:text-emerald-400
+              transition-all
+              shadow-sm
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+            "
+            title="Kelmagan va kechikkan o‘quvchilar ota-onalariga SMS ogohlantirish yuborish"
+          >
+            <Smartphone className="h-4 w-4 shrink-0 text-emerald-500" />
+            <span>
+              {isSendingSms
+                ? 'SMS Yuborilmoqda...'
+                : smsSentCount !== null
+                ? `SMS Yuborildi! (${smsSentCount} ta)`
+                : 'SMSga Xabar'}
             </span>
           </button>
 

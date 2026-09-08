@@ -18,6 +18,12 @@ export const initialSettings: CenterSettings = {
   telegramChatId: "",
   enableTelegramAttendance: true,
   enableTelegramPayments: true,
+  eskizEmail: "",
+  eskizPassword: "",
+  eskizToken: "",
+  eskizFrom: "4546",
+  enableSmsAttendance: true,
+  enableSmsPayments: true,
 };
 
 export const INITIAL_TEACHERS: Teacher[] = [

@@ -151,4 +151,10 @@ export interface CenterSettings {
   telegramChatId?: string;
   enableTelegramAttendance?: boolean;
   enableTelegramPayments?: boolean;
+  eskizEmail?: string;
+  eskizPassword?: string;
+  eskizToken?: string;
+  eskizFrom?: string;
+  enableSmsAttendance?: boolean;
+  enableSmsPayments?: boolean;
 }

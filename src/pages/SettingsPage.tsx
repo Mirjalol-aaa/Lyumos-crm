@@ -22,9 +22,13 @@ import {
   HelpCircle,
   RefreshCw,
   AlertCircle,
+  Smartphone,
+  KeyRound,
+  ShieldCheck,
 } from 'lucide-react';
 
 import { testTelegramBot } from '../services/telegramService';
+import { testEskizConnection, getEskizBalance } from '../services/eskizSmsService';
 
 
 export const SettingsPage:
@@ -149,6 +153,23 @@ export const SettingsPage:
       setShowTelegramGuide,
     ] = useState(false);
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // ESKIZ SMS STATE
+    // ─────────────────────────────────────────────────────────────────────────
+    const [eskizEmail, setEskizEmail] = useState(settings.eskizEmail || '');
+    const [eskizPassword, setEskizPassword] = useState(settings.eskizPassword || '');
+    const [eskizToken, setEskizToken] = useState(settings.eskizToken || '');
+    const [eskizFrom, setEskizFrom] = useState(settings.eskizFrom || '4546');
+    const [enableSmsAttendance, setEnableSmsAttendance] = useState(settings.enableSmsAttendance ?? true);
+    const [enableSmsPayments, setEnableSmsPayments] = useState(settings.enableSmsPayments ?? true);
+    const [isTestingEskiz, setIsTestingEskiz] = useState(false);
+    const [eskizTestPhone, setEskizTestPhone] = useState('');
+    const [eskizTestResult, setEskizTestResult] = useState<{
+      success: boolean;
+      message: string;
+      remainingLimit?: number;
+    } | null>(null);
+    const [showEskizGuide, setShowEskizGuide] = useState(false);
 
     const [
       savedSuccess,
@@ -192,6 +213,45 @@ export const SettingsPage:
         });
       } finally {
         setIsTestingTelegram(false);
+      }
+    };
+
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // TEST ESKIZ SMS GATEWAY
+    // ─────────────────────────────────────────────────────────────────────────
+
+    const handleTestEskiz = async () => {
+      setIsTestingEskiz(true);
+      setEskizTestResult(null);
+
+      try {
+        const res = await testEskizConnection(
+          eskizEmail,
+          eskizPassword,
+          eskizToken,
+          eskizTestPhone
+        );
+
+        if (res.success) {
+          setEskizTestResult({
+            success: true,
+            message: res.message || 'Eskiz SMS Gateway muvaffaqiyatli ulandi!',
+            remainingLimit: res.remainingLimit,
+          });
+        } else {
+          setEskizTestResult({
+            success: false,
+            message: res.error || 'Eskiz SMS Gateway ulanishida xatolik yuz berdi.',
+          });
+        }
+      } catch (err: any) {
+        setEskizTestResult({
+          success: false,
+          message: err.message || 'Xatolik yuz berdi.',
+        });
+      } finally {
+        setIsTestingEskiz(false);
       }
     };
 
@@ -242,6 +302,18 @@ export const SettingsPage:
         enableTelegramAttendance,
 
         enableTelegramPayments,
+
+        eskizEmail,
+
+        eskizPassword,
+
+        eskizToken,
+
+        eskizFrom,
+
+        enableSmsAttendance,
+
+        enableSmsPayments,
       });
 
 
@@ -1566,6 +1638,198 @@ export const SettingsPage:
                         <AlertCircle className="h-4 w-4 shrink-0" />
                       )}
                       <span className="text-[11px] leading-tight">{telegramTestResult.message}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* ─────────────────────────────────────────────────────────────
+                  ESKIZ.UZ SMS GATEWAY INTEGRATION SECTION
+              ───────────────────────────────────────────────────────────── */}
+              <div className="mt-6 pt-6 border-t border-slate-200/80 dark:border-slate-800 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+                      <Smartphone className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <span>Eskiz.uz SMS Gateway Integratsiyasi</span>
+                        <span className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-bold text-emerald-600 dark:text-emerald-400">
+                          O‘zbekiston SMS
+                        </span>
+                      </h3>
+                      <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400">
+                        Oflayn va interneti yo‘q ota-onalarga to‘g‘ridan-to‘g‘ri telefon raqamiga SMS yuborish
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowEskizGuide(!showEskizGuide)}
+                    className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 cursor-pointer self-start sm:self-auto"
+                  >
+                    <HelpCircle className="h-3.5 w-3.5" />
+                    <span>Eskiz qanday ulanadi?</span>
+                  </button>
+                </div>
+
+                {/* Step by step guide accordion */}
+                {showEskizGuide && (
+                  <div className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-800/50 text-xs space-y-2 text-slate-700 dark:text-slate-300 animate-in fade-in duration-200">
+                    <p className="font-bold text-emerald-800 dark:text-emerald-300">
+                      Eskiz.uz SMS provayderini ulash (100 ta bepul SMS bilan):
+                    </p>
+                    <ol className="list-decimal list-inside space-y-1 text-[11px] leading-relaxed">
+                      <li>
+                        <a href="https://eskiz.uz" target="_blank" rel="noreferrer" className="font-bold text-emerald-600 underline">eskiz.uz</a> saytidan ro‘yxatdan o‘ting va akkaunt yarating (yangi akkauntlarga bepul sinov SMSlari beriladi).
+                      </li>
+                      <li>
+                        Eskiz boshqaruv panelidagi emailingiz va parolingizni yoki <b>API Token</b>ingizni quyidagi maydonlarga kiriting.
+                      </li>
+                      <li>
+                        O‘zingizning tasdiqlangan "From" (Yuboruvchi) nomingiz bo‘lsa kiriting, aks holda standart <code>4546</code> raqami avtomatik ishlatiladi.
+                      </li>
+                    </ol>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className={labelClass}>
+                      Eskiz Email
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="email"
+                        value={eskizEmail}
+                        onChange={(e) => setEskizEmail(e.target.value)}
+                        placeholder="masalan: lumos.edu@gmail.com"
+                        className={`${inputClass} pl-10 text-xs`}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>
+                      Eskiz Parol / Maxfiy Kalit
+                    </label>
+                    <div className="relative">
+                      <KeyRound className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="password"
+                        value={eskizPassword}
+                        onChange={(e) => setEskizPassword(e.target.value)}
+                        placeholder="••••••••••••"
+                        className={`${inputClass} pl-10 text-xs`}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>
+                      Yoki To‘g‘ridan-to‘g‘ri API Token (Ixtiyoriy)
+                    </label>
+                    <div className="relative">
+                      <ShieldCheck className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="text"
+                        value={eskizToken}
+                        onChange={(e) => setEskizToken(e.target.value)}
+                        placeholder="eyJ0eXAiOiJKV1QiLC..."
+                        className={`${inputClass} pl-10 font-mono text-xs`}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>
+                      Yuboruvchi Nomi (From / Sender ID)
+                    </label>
+                    <div className="relative">
+                      <Smartphone className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="text"
+                        value={eskizFrom}
+                        onChange={(e) => setEskizFrom(e.target.value)}
+                        placeholder="4546 (yoki tasdiqlangan nom)"
+                        className={`${inputClass} pl-10 text-xs`}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* SMS Toggles */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-slate-200/60 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 p-3 hover:bg-slate-100/60 transition-all">
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-bold text-slate-800 dark:text-white">
+                        To‘lov Chekini SMS orqali yuborish
+                      </p>
+                      <p className="text-[9px] text-slate-400">
+                        To‘lov qabul qilinganda ota-onaga kvitansiya SMS
+                      </p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={enableSmsPayments}
+                      onChange={(e) => setEnableSmsPayments(e.target.checked)}
+                      className="h-4 w-4 accent-emerald-500 cursor-pointer"
+                    />
+                  </label>
+
+                  <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-slate-200/60 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 p-3 hover:bg-slate-100/60 transition-all">
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-bold text-slate-800 dark:text-white">
+                        Yo‘qlama SMS Ogohlantirishi
+                      </p>
+                      <p className="text-[9px] text-slate-400">
+                        Kelmadi deb belgilanganda darhol SMS boradi
+                      </p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={enableSmsAttendance}
+                      onChange={(e) => setEnableSmsAttendance(e.target.checked)}
+                      className="h-4 w-4 accent-emerald-500 cursor-pointer"
+                    />
+                  </label>
+                </div>
+
+                {/* Test SMS button & balance feedback */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleTestEskiz}
+                      disabled={isTestingEskiz}
+                      className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 active:scale-[0.98] text-xs font-bold text-emerald-700 dark:text-emerald-400 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      {isTestingEskiz ? (
+                        <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Smartphone className="h-3.5 w-3.5" />
+                      )}
+                      <span>{isTestingEskiz ? 'Tekshirilmoqda...' : 'SMS Balansini Tekshirish & Sinash'}</span>
+                    </button>
+                  </div>
+
+                  {eskizTestResult && (
+                    <div
+                      className={`flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-xl ${
+                        eskizTestResult.success
+                          ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300'
+                          : 'bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300'
+                      }`}
+                    >
+                      {eskizTestResult.success ? (
+                        <CheckCircle2 className="h-4 w-4 shrink-0" />
+                      ) : (
+                        <AlertCircle className="h-4 w-4 shrink-0" />
+                      )}
+                      <span className="text-[11px] leading-tight">{eskizTestResult.message}</span>
                     </div>
                   )}
                 </div>

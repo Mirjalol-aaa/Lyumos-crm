@@ -15,6 +15,7 @@ import {
   CreditCard,
   ReceiptText,
   Send,
+  Smartphone,
 } from 'lucide-react';
 
 import confetti from 'canvas-confetti';
@@ -28,6 +29,11 @@ import {
   formatPaymentReceiptMessage,
   getTelegramShareUrl,
 } from '../../services/telegramService';
+
+import {
+  sendEskizSms,
+  formatPaymentSms,
+} from '../../services/eskizSmsService';
 
 import {
   ACADEMIC_MONTHS,
@@ -90,6 +96,11 @@ export const ReceivePaymentModal:
       sendTelegramReceipt,
       setSendTelegramReceipt,
     ] = useState(true);
+
+    const [
+      sendSmsReceipt,
+      setSendSmsReceipt,
+    ] = useState(settings.enableSmsPayments ?? false);
 
     const MONTHS =
       ACADEMIC_MONTHS as readonly string[];
@@ -253,9 +264,10 @@ export const ReceivePaymentModal:
           undefined,
       });
 
+      const receiptNo = `REC-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
       // Dispatch Telegram receipt if enabled
       if (sendTelegramReceipt) {
-        const receiptNo = `REC-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
         const receiptHtml = formatPaymentReceiptMessage({
           studentName: currentStudent.fullName,
           groupName: currentStudent.groupName,
@@ -276,6 +288,30 @@ export const ReceivePaymentModal:
         } else {
           // If bot token not yet configured, open direct share window
           window.open(getTelegramShareUrl(receiptHtml), '_blank');
+        }
+      }
+
+      // Dispatch Eskiz SMS receipt if enabled
+      if (sendSmsReceipt) {
+        const parentPhone = currentStudent.parentPhone || currentStudent.phone;
+        if (parentPhone) {
+          const smsText = formatPaymentSms({
+            studentName: currentStudent.fullName,
+            amount: finalAmount,
+            month: selectedMonth,
+            receiptNo,
+            centerName: settings.centerName,
+            centerPhone: settings.phone,
+          });
+
+          sendEskizSms({
+            phone: parentPhone,
+            message: smsText,
+            token: settings.eskizToken,
+            email: settings.eskizEmail,
+            password: settings.eskizPassword,
+            from: settings.eskizFrom,
+          }).catch((err) => console.warn('Eskiz SMS receipt send error:', err));
         }
       }
 
@@ -1229,25 +1265,47 @@ export const ReceivePaymentModal:
                 sm:px-6
               "
             >
-              <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={sendTelegramReceipt}
-                  onChange={(e) => setSendTelegramReceipt(e.target.checked)}
-                  className="h-4 w-4 accent-[#007AFF] cursor-pointer rounded"
-                />
-                <span className="flex items-center gap-1.5 text-[11px] sm:text-xs">
-                  <Send className="h-3.5 w-3.5 text-sky-500 shrink-0" />
-                  <span>
-                    Telegram chekini yuborish{' '}
-                    {settings.telegramBotToken ? (
-                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">(Bot orqali)</span>
-                    ) : (
-                      <span className="text-[10px] text-sky-500 font-bold">(Telegram orqali)</span>
-                    )}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+                <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={sendTelegramReceipt}
+                    onChange={(e) => setSendTelegramReceipt(e.target.checked)}
+                    className="h-4 w-4 accent-[#007AFF] cursor-pointer rounded"
+                  />
+                  <span className="flex items-center gap-1.5 text-[11px] sm:text-xs">
+                    <Send className="h-3.5 w-3.5 text-sky-500 shrink-0" />
+                    <span>
+                      Telegram cheki{' '}
+                      {settings.telegramBotToken ? (
+                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">(Bot)</span>
+                      ) : (
+                        <span className="text-[10px] text-sky-500 font-bold">(Telegram)</span>
+                      )}
+                    </span>
                   </span>
-                </span>
-              </label>
+                </label>
+
+                <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={sendSmsReceipt}
+                    onChange={(e) => setSendSmsReceipt(e.target.checked)}
+                    className="h-4 w-4 accent-emerald-500 cursor-pointer rounded"
+                  />
+                  <span className="flex items-center gap-1.5 text-[11px] sm:text-xs">
+                    <Smartphone className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                    <span>
+                      SMS cheki{' '}
+                      {settings.eskizToken || settings.eskizEmail ? (
+                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">(Eskiz)</span>
+                      ) : (
+                        <span className="text-[10px] text-slate-400 font-medium">(SMS)</span>
+                      )}
+                    </span>
+                  </span>
+                </label>
+              </div>
 
               <div className="flex items-center justify-end gap-2 w-full sm:w-auto">
               <button

@@ -11,6 +11,7 @@ import {
   HelpCircle,
   Users,
   Send,
+  Smartphone,
 } from 'lucide-react';
 
 import {
@@ -19,6 +20,12 @@ import {
   formatAttendanceSummaryMessage,
   getTelegramShareUrl,
 } from '../../services/telegramService';
+
+import {
+  sendEskizSms,
+  formatAttendanceSms,
+  getDirectSmsUrl,
+} from '../../services/eskizSmsService';
 
 export const TeacherAttendancePage: React.FC = () => {
   const { groups, students, attendanceRecords, saveAttendance, teachers, settings } = useCRM();
@@ -37,6 +44,8 @@ export const TeacherAttendancePage: React.FC = () => {
   const [isSaved, setIsSaved] = useState(false);
   const [isSendingTelegram, setIsSendingTelegram] = useState(false);
   const [telegramSentCount, setTelegramSentCount] = useState<number | null>(null);
+  const [isSendingSms, setIsSendingSms] = useState(false);
+  const [smsSentCount, setSmsSentCount] = useState<number | null>(null);
 
   const currentGroup = groups.find(g => g.id === selectedGroupId);
   const groupStudents = students.filter(s => s.groupId === selectedGroupId);
@@ -113,6 +122,50 @@ export const TeacherAttendancePage: React.FC = () => {
     setIsSendingTelegram(false);
   };
 
+  const handleSendSms = async () => {
+    if (!currentGroup || groupStudents.length === 0) return;
+
+    const absentStudents = groupStudents.filter((s) => getStudentStatus(s.id) === 'Absent');
+    const lateStudents = groupStudents.filter((s) => getStudentStatus(s.id) === 'Late');
+    const targetStudents = [...absentStudents, ...lateStudents];
+
+    if (targetStudents.length === 0) {
+      alert('Bugungi darsda barcha o‘quvchilar qatnashgan (Kelmagan yoki kechikkanlar yo‘q).');
+      return;
+    }
+
+    setIsSendingSms(true);
+    let sent = 0;
+
+    for (const s of targetStudents) {
+      const phone = s.parentPhone || s.phone;
+      if (phone) {
+        const isAbsent = getStudentStatus(s.id) === 'Absent';
+        const smsText = formatAttendanceSms({
+          studentName: s.fullName,
+          groupName: currentGroup?.name || 'Guruh',
+          date: selectedDate,
+          status: isAbsent ? 'Absent' : 'Late',
+          centerPhone: settings.phone,
+          centerName: settings.centerName,
+        });
+        await sendEskizSms({
+          phone,
+          message: smsText,
+          token: settings.eskizToken,
+          email: settings.eskizEmail,
+          password: settings.eskizPassword,
+          from: settings.eskizFrom,
+        });
+        sent++;
+      }
+    }
+
+    setSmsSentCount(sent);
+    setTimeout(() => setSmsSentCount(null), 4000);
+    setIsSendingSms(false);
+  };
+
   const handleSaveAll = () => {
     const recordsToSave = groupStudents.map(student => ({
       date: selectedDate,
@@ -138,6 +191,32 @@ export const TeacherAttendancePage: React.FC = () => {
           centerName: settings.centerName,
         });
         sendTelegramMessage(settings.telegramBotToken, settings.telegramChatId, alertText).catch(() => {});
+      }
+    }
+
+    // Auto-alert absent via Eskiz SMS if configured
+    if (settings.enableSmsAttendance && (settings.eskizToken || settings.eskizEmail)) {
+      const absentStudents = groupStudents.filter((s) => getStudentStatus(s.id) === 'Absent');
+      for (const s of absentStudents) {
+        const phone = s.parentPhone || s.phone;
+        if (phone) {
+          const smsText = formatAttendanceSms({
+            studentName: s.fullName,
+            groupName: currentGroup?.name || 'Guruh',
+            date: selectedDate,
+            status: 'Absent',
+            centerPhone: settings.phone,
+            centerName: settings.centerName,
+          });
+          sendEskizSms({
+            phone,
+            message: smsText,
+            token: settings.eskizToken,
+            email: settings.eskizEmail,
+            password: settings.eskizPassword,
+            from: settings.eskizFrom,
+          }).catch(() => {});
+        }
       }
     }
 
@@ -173,6 +252,23 @@ export const TeacherAttendancePage: React.FC = () => {
                 : telegramSentCount !== null
                 ? `Yuborildi! (${telegramSentCount} ta)`
                 : 'Telegramga Xabar'}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleSendSms}
+            disabled={!currentGroup || groupStudents.length === 0 || isSendingSms}
+            className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 active:scale-95 transition-all shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
+            title="Kelmagan va kechikkan o‘quvchilar ota-onalariga SMS ogohlantirish yuborish"
+          >
+            <Smartphone className="h-4 w-4 text-emerald-500" />
+            <span>
+              {isSendingSms
+                ? 'SMS Yuborilmoqda...'
+                : smsSentCount !== null
+                ? `SMS Yuborildi! (${smsSentCount} ta)`
+                : 'SMSga Xabar'}
             </span>
           </button>
 
