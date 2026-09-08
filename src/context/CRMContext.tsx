@@ -126,6 +126,10 @@ interface CRMContextType {
     student: Omit<Student, 'id' | 'payments'>
   ) => void;
 
+  addStudentsBulk: (
+    students: Omit<Student, 'id' | 'payments'>[]
+  ) => Promise<Student[]>;
+
   updateStudent: (
     id: string,
     updated: Partial<Student>
@@ -246,6 +250,12 @@ interface CRMContextType {
   isAddStudentModalOpen: boolean;
 
   setIsAddStudentModalOpen: (
+    open: boolean
+  ) => void;
+
+  isImportStudentsModalOpen: boolean;
+
+  setIsImportStudentsModalOpen: (
     open: boolean
   ) => void;
 
@@ -595,6 +605,11 @@ export const CRMProvider: React.FC<{
     setIsAddStudentModalOpen,
   ] = useState(false);
 
+  const [
+    isImportStudentsModalOpen,
+    setIsImportStudentsModalOpen,
+  ] = useState(false);
+
 
   const [
     isReceivePaymentModalOpen,
@@ -909,6 +924,81 @@ export const CRMProvider: React.FC<{
           () => refreshData()
         )
       );
+  };
+
+  const addStudentsBulk = async (
+    newStudentsData: Omit<Student, 'id' | 'payments'>[]
+  ): Promise<Student[]> => {
+    if (!newStudentsData || newStudentsData.length === 0) {
+      return [];
+    }
+
+    const initialPayments = buildInitialPayments();
+    const createdStudents: Student[] = [];
+
+    const existingNums = students
+      .map(student =>
+        parseInt(
+          student.id.replace('STU-', ''),
+          10
+        )
+      )
+      .filter(number => !Number.isNaN(number));
+
+    let maxId = existingNums.length > 0 ? Math.max(...existingNums) : 1000;
+
+    for (const data of newStudentsData) {
+      maxId += 1;
+      const newId = `STU-${maxId}`;
+      const student: Student = {
+        ...data,
+        id: newId,
+        payments: initialPayments,
+      };
+      createdStudents.push(student);
+    }
+
+    setStudents(prev => [...createdStudents, ...prev]);
+
+    const groupCountDeltas: Record<string, number> = {};
+    createdStudents.forEach(s => {
+      groupCountDeltas[s.groupId] = (groupCountDeltas[s.groupId] || 0) + 1;
+    });
+
+    setGroups(prev =>
+      enrichGroupsWithCounts(
+        prev.map(group => ({
+          ...group,
+          currentStudentsCount:
+            group.currentStudentsCount + (groupCountDeltas[group.id] || 0),
+        })),
+        [...createdStudents, ...students]
+      )
+    );
+
+    const newNotif: NotificationItem = {
+      id: `NOTIF-${Date.now()}`,
+      title: 'Excel orqali o‘quvchilar yuklandi',
+      message: `${createdStudents.length} nafar yangi o‘quvchi ro‘yxatga kiritildi.`,
+      time: 'Hozirgina',
+      type: 'student',
+      read: false,
+    };
+
+    setNotifications(prev => [newNotif, ...prev]);
+
+    Promise.allSettled(
+      createdStudents.map(s => insertStudent(s, initialPayments))
+    ).then(() => {
+      Object.entries(groupCountDeltas).forEach(([gId, delta]) => {
+        updateGroupStudentCount(gId, delta).catch(() => {});
+      });
+      insertNotification(newNotif).catch(() => {});
+    }).catch(err => {
+      handleAsyncError(err, () => refreshData());
+    });
+
+    return createdStudents;
   };
 
 
@@ -1986,6 +2076,7 @@ export const CRMProvider: React.FC<{
         attendanceRecords,
 
         addStudent,
+        addStudentsBulk,
         updateStudent,
         deleteStudent,
         recordPayment,
@@ -2018,6 +2109,9 @@ export const CRMProvider: React.FC<{
 
         isAddStudentModalOpen,
         setIsAddStudentModalOpen,
+
+        isImportStudentsModalOpen,
+        setIsImportStudentsModalOpen,
 
         isReceivePaymentModalOpen,
         setIsReceivePaymentModalOpen,

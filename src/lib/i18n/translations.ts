@@ -43,6 +43,7 @@ export interface Translations {
     payroll: string;
     receivePayment: string;
     addStudent: string;
+    importExcel: string;
     addGroup: string;
     publicSite: string;
     academicYear: string;
@@ -257,6 +258,7 @@ export const translations: Record<Language, Translations> = {
       payroll: 'Oyliklar & Payroll',
       receivePayment: 'To‘lov Qabul Qilish',
       addStudent: 'O‘quvchi Qo‘shish',
+      importExcel: 'Excel orqali yuklash',
       addGroup: 'Guruh Qo‘shish',
       publicSite: 'Asosiy sayt',
       academicYear: 'Akademik Yil',
@@ -489,6 +491,7 @@ export const translations: Record<Language, Translations> = {
       payroll: 'Зарплаты и Payroll',
       receivePayment: 'Принять оплату',
       addStudent: 'Добавить ученика',
+      importExcel: 'Импорт из Excel',
       addGroup: 'Добавить группу',
       publicSite: 'Основной сайт',
       academicYear: 'Учебный год',
@@ -721,6 +724,7 @@ export const translations: Record<Language, Translations> = {
       payroll: 'Payroll Ledger',
       receivePayment: 'Accept Payment',
       addStudent: 'Register Student',
+      importExcel: 'Import from Excel',
       addGroup: 'Create Group',
       publicSite: 'Main Website',
       academicYear: 'Academic Year',

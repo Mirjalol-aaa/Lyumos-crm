@@ -4,6 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="/lumos-logo.png" />
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="theme-color" content="#080D1A" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="LUMOS" />
+    <link rel="apple-touch-icon" href="/lumos-logo.png" />
     <title>LUMOS O‘quv Markazi — ERP & LMS Boshqaruv Tizimi</title>
     <meta name="description" content="LUMOS O‘quv Markazi — Bilim bilan yorqin kelajakka!" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -32,5 +39,13 @@
   <body class="bg-[#F8F9FA] text-slate-900 antialiased selection:bg-amber-500 selection:text-white dark:bg-slate-950 dark:text-slate-100">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <!-- Service Worker Registration for PWA -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('./sw.js').catch(function() {});
+        });
+      }
+    </script>
   </body>
 </html>

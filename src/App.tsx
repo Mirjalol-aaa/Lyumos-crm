@@ -39,7 +39,9 @@ import { StudentPaymentsPage } from './pages/student/StudentPaymentsPage';
 import { GlobalSearchModal } from './components/common/GlobalSearchModal';
 import { NotificationDrawer } from './components/common/NotificationDrawer';
 import { StudentProfileModal } from './components/common/StudentProfileModal';
+import { PwaInstallPrompt } from './components/common/PwaInstallPrompt';
 import { AddStudentModal } from './components/modals/AddStudentModal';
+import { ImportStudentsModal } from './components/modals/ImportStudentsModal';
 import { ReceivePaymentModal } from './components/modals/ReceivePaymentModal';
 import { AddTeacherModal } from './components/modals/AddTeacherModal';
 import { AddGroupModal } from './components/modals/AddGroupModal';
@@ -160,6 +162,7 @@ function AdminPortalContent() {
 
       <StudentProfileModal />
       <AddStudentModal />
+      <ImportStudentsModal />
       <ReceivePaymentModal />
       <AddTeacherModal />
       <AddGroupModal />
@@ -265,6 +268,8 @@ function TeacherPortalContent() {
       </div>
 
       <StudentProfileModal />
+      <AddStudentModal />
+      <ImportStudentsModal />
     </div>
   );
 }
@@ -410,7 +415,12 @@ function AppContentRouter() {
     currentHash.startsWith('#contact');
 
   if (isExplicitLandingRequested) {
-    return <LandingPage />;
+    return (
+      <>
+        <LandingPage />
+        <PwaInstallPrompt />
+      </>
+    );
   }
 
   // 3. Unauthenticated Visitor Flow
@@ -444,7 +454,12 @@ function AppContentRouter() {
     }
 
     // Default public landing page at root and #/
-    return <LandingPage />;
+    return (
+      <>
+        <LandingPage />
+        <PwaInstallPrompt />
+      </>
+    );
   }
 
   return (
@@ -456,6 +471,7 @@ function AppContentRouter() {
       </div>
 
       <Toast />
+      <PwaInstallPrompt />
     </div>
   );
 }

@@ -1,0 +1,29 @@
+{
+  "name": "LUMOS CRM & LMS — O‘quv Markazi Tizimi",
+  "short_name": "LUMOS",
+  "description": "LUMOS O‘quv Markazi — Boshqaruv, Moliyaviy Tahlil va Masofaviy Ta'lim Platformasi",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#080D1A",
+  "theme_color": "#080D1A",
+  "lang": "uz",
+  "dir": "ltr",
+  "categories": ["education", "productivity", "finance"],
+  "icons": [
+    {
+      "src": "./lumos-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./lumos-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

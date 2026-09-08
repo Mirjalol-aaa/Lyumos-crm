@@ -15,6 +15,7 @@ import {
   LayoutGrid,
   List,
   CheckCircle2,
+  FileSpreadsheet,
 } from 'lucide-react';
 
 
@@ -28,6 +29,7 @@ export const StudentsPage: React.FC = () => {
     setSelectedStudentId,
 
     setIsAddStudentModalOpen,
+    setIsImportStudentsModalOpen,
 
     setIsReceivePaymentModalOpen,
 
@@ -451,43 +453,74 @@ export const StudentsPage: React.FC = () => {
         </div>
 
 
-        <button
-          type="button"
-          onClick={() =>
-            setIsAddStudentModalOpen(
-              true
-            )
-          }
-          className="
-            flex w-full
-            cursor-pointer
-            items-center
-            justify-center
-            gap-2
-            rounded-xl
-            bg-[#007AFF]
-            px-5 py-2.5
-            text-xs
-            font-bold
-            text-white
-            shadow-lg
-            shadow-blue-500/20
-            transition-all
-
-            hover:bg-blue-600
-            active:scale-[0.98]
-
-            sm:w-auto
-          "
-        >
-          <Plus
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
+          <button
+            type="button"
+            onClick={() => setIsImportStudentsModalOpen(true)}
             className="
-              h-4 w-4
+              flex w-full
+              cursor-pointer
+              items-center
+              justify-center
+              gap-2
+              rounded-xl
+              border border-emerald-500/30
+              bg-emerald-500/10
+              hover:bg-emerald-500/20
+              active:scale-[0.98]
+              px-4 py-2.5
+              text-xs
+              font-bold
+              text-emerald-700
+              dark:text-emerald-300
+              transition-all
+              shadow-sm
+              sm:w-auto
             "
-          />
+            title="Excel yoki CSV fayldan o‘quvchilarni avtomatik yuklash"
+          >
+            <FileSpreadsheet className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+            <span>Excel orqali yuklash</span>
+          </button>
 
-          Add New Student
-        </button>
+          <button
+            type="button"
+            onClick={() =>
+              setIsAddStudentModalOpen(
+                true
+              )
+            }
+            className="
+              flex w-full
+              cursor-pointer
+              items-center
+              justify-center
+              gap-2
+              rounded-xl
+              bg-[#007AFF]
+              px-5 py-2.5
+              text-xs
+              font-bold
+              text-white
+              shadow-lg
+              shadow-blue-500/20
+              transition-all
+
+              hover:bg-blue-600
+              active:scale-[0.98]
+
+              sm:w-auto
+            "
+          >
+            <Plus
+              className="
+                h-4 w-4
+              "
+            />
+
+            Add New Student
+          </button>
+        </div>
       </div>
 
 
