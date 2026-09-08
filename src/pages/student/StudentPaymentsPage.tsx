@@ -117,9 +117,8 @@ export const StudentPaymentsPage: React.FC = () => {
           <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
             Oylik To‘lov
           </span>
-          <p className="mt-2 text-2xl font-black text-slate-900 dark:text-white">
-            {settings.currencySymbol}
-            {currentStudent?.monthlyFee?.toLocaleString()}
+          <p className="mt-2 text-2xl font-black text-slate-900 dark:text-white font-mono">
+            {Number(currentStudent?.monthlyFee || 0).toLocaleString()} <span className="text-sm font-bold text-slate-400 font-sans">so‘m</span>
           </p>
           <span className="text-[11px] text-slate-400">{currentStudent?.groupName} guruhi uchun</span>
         </div>
@@ -128,9 +127,8 @@ export const StudentPaymentsPage: React.FC = () => {
           <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
             To‘langan Summa
           </span>
-          <p className="mt-2 text-2xl font-black text-emerald-600 dark:text-emerald-400">
-            {settings.currencySymbol}
-            {totalPaid.toLocaleString()}
+          <p className="mt-2 text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
+            {totalPaid.toLocaleString()} <span className="text-sm font-bold text-emerald-600/70 font-sans">so‘m</span>
           </p>
           <span className="text-[11px] text-emerald-600 font-bold">Muvaffaqiyatli to‘lovlar</span>
         </div>
@@ -139,9 +137,8 @@ export const StudentPaymentsPage: React.FC = () => {
           <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
             Kutilayotgan Qarz
           </span>
-          <p className="mt-2 text-2xl font-black text-rose-600 dark:text-rose-400">
-            {settings.currencySymbol}
-            {totalDue.toLocaleString()}
+          <p className="mt-2 text-2xl font-black text-rose-600 dark:text-rose-400 font-mono">
+            {totalDue.toLocaleString()} <span className="text-sm font-bold text-rose-600/70 font-sans">so‘m</span>
           </p>
           <span className="text-[11px] text-rose-500 font-bold">To‘lanmagan oylar</span>
         </div>
@@ -195,9 +192,8 @@ export const StudentPaymentsPage: React.FC = () => {
                       </span>
                     </td>
 
-                    <td className="px-5 py-3.5 font-semibold text-slate-700 dark:text-slate-300">
-                      {settings.currencySymbol}
-                      {(p?.amountPaid || currentStudent?.monthlyFee || 0).toLocaleString()}
+                    <td className="px-5 py-3.5 font-semibold text-slate-700 dark:text-slate-300 font-mono">
+                      {(p?.amountPaid || currentStudent?.monthlyFee || 0).toLocaleString()} <span className="text-xs font-sans text-slate-400">so‘m</span>
                     </td>
 
                     <td className="px-5 py-3.5 text-slate-500">{p?.paymentDate || '—'}</td>
@@ -259,8 +255,7 @@ export const StudentPaymentsPage: React.FC = () => {
                 To‘lov Summasi:
               </span>
               <span className="text-xl font-black text-amber-600 dark:text-amber-400 font-mono">
-                {settings.currencySymbol}
-                {currentStudent?.monthlyFee?.toLocaleString()}
+                {Number(currentStudent?.monthlyFee || 0).toLocaleString()} so‘m
               </span>
             </div>
             <span className="rounded-xl bg-amber-500/20 px-3 py-1 text-xs font-black text-amber-700 dark:text-amber-300">

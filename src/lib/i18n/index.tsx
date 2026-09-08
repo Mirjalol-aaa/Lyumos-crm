@@ -37,7 +37,7 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
         language,
         setLanguage,
         t,
-        formatMoney: (amt, curr) => formatMoney(amt, curr, language),
+        formatMoney: (amt, curr = 'UZS') => formatMoney(amt, curr, language),
         formatDate: (dt) => formatDate(dt, language),
       }}
     >
@@ -48,18 +48,24 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const formatMoney = (
   amount: number,
-  currency: string = 'USD',
+  currency: string = 'UZS',
   lang: Language = 'uz'
 ): string => {
-  const num = Math.round(amount);
+  const num = Math.round(amount || 0);
   const formatted = new Intl.NumberFormat(
     lang === 'uz' ? 'uz-UZ' : lang === 'ru' ? 'ru-RU' : 'en-US'
   ).format(num);
 
-  if (currency === 'UZS' || currency === 'so‘m' || currency === 'som') {
+  if (!currency || currency === 'UZS' || currency === 'so‘m' || currency === 'som' || currency === 'So‘m') {
     return `${formatted} so‘m`;
   }
-  return `$${formatted}`;
+  if (currency === 'USD' || currency === '$') {
+    return `$${formatted}`;
+  }
+  if (currency === 'EUR' || currency === '€') {
+    return `€${formatted}`;
+  }
+  return `${formatted} ${currency}`;
 };
 
 export const formatDate = (
@@ -84,7 +90,7 @@ export const useI18n = (): I18nContextType => {
       language: 'uz',
       setLanguage: () => {},
       t: translations.uz,
-      formatMoney: (amt: number) => `$${amt.toLocaleString()}`,
+      formatMoney: (amt: number, curr: string = 'UZS') => formatMoney(amt, curr, 'uz'),
       formatDate: (d: any) => new Date(d).toLocaleDateString(),
     };
   }

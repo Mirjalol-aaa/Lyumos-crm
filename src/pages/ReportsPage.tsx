@@ -43,9 +43,7 @@ export const ReportsPage:
     const formatMoney = (
       value: number
     ) => {
-      return `${settings.currencySymbol}${Number(
-        value || 0
-      ).toLocaleString()}`;
+      return `${Number(value || 0).toLocaleString()} so‘m`;
     };
 
 
@@ -135,25 +133,25 @@ export const ReportsPage:
       );
 
       doc.text(
-        `Paid Revenue Collected: ${settings.currencySymbol}${financials.paidIncome.toLocaleString()}`,
+        `Paid Revenue Collected: ${financials.paidIncome.toLocaleString()} so‘m`,
         14,
         66
       );
 
       doc.text(
-        `Unpaid Fee Pending: ${settings.currencySymbol}${financials.unpaidIncome.toLocaleString()}`,
+        `Unpaid Fee Pending: ${financials.unpaidIncome.toLocaleString()} so‘m`,
         14,
         74
       );
 
       doc.text(
-        `Total Operational Expenses: ${settings.currencySymbol}${financials.expensesTotal.toLocaleString()}`,
+        `Total Operational Expenses: ${financials.expensesTotal.toLocaleString()} so‘m`,
         14,
         82
       );
 
       doc.text(
-        `Net Center Profit: ${settings.currencySymbol}${financials.netProfit.toLocaleString()}`,
+        `Net Center Profit: ${financials.netProfit.toLocaleString()} so‘m`,
         14,
         90
       );

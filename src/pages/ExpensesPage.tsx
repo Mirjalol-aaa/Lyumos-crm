@@ -104,7 +104,7 @@ export const ExpensesPage: React.FC = () => {
   const formatMoney = (
     amount: number
   ) =>
-    `${settings.currencySymbol}${amount.toLocaleString()}`;
+    `${Number(amount || 0).toLocaleString()} so‘m`;
 
 
   // ==========================================================================

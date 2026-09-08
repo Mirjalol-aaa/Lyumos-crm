@@ -493,7 +493,7 @@ export const CRMProvider: React.FC<{
       currencySymbol: 'so‘m',
       academicYear: '2025 - 2026',
       language: 'uz',
-      theme: savedTheme || 'light',
+      theme: savedTheme || 'dark',
       enableSmsNotifications: true,
       autoRemindUnpaid: true,
       discountPolicyMax: 20,
@@ -501,7 +501,7 @@ export const CRMProvider: React.FC<{
   });
 
   useEffect(() => {
-    const activeTheme = settings.theme || 'light';
+    const activeTheme = settings.theme || 'dark';
     try {
       localStorage.setItem('lumos_theme', activeTheme);
     } catch {
@@ -1179,7 +1179,7 @@ export const CRMProvider: React.FC<{
           'Payment Recorded',
 
         message:
-          `${settings.currencySymbol}${amount} paid for ${month} by ${targetStudent.fullName} (${method}).`,
+          `${Number(amount).toLocaleString()} so‘m to‘landi (${month}, ${targetStudent.fullName}, ${method}).`,
 
         time:
           'Just now',

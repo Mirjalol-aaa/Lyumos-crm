@@ -672,10 +672,7 @@ export const ReceivePaymentModal:
                         dark:text-emerald-400
                       "
                     >
-                      {
-                        settings.currencySymbol
-                      }
-                      {baseFee.toLocaleString()}
+                      {baseFee.toLocaleString()} so‘m
                     </p>
                   </div>
                 </div>
@@ -1078,12 +1075,10 @@ export const ReceivePaymentModal:
                     className="
                       shrink-0
                       font-semibold
+                      font-mono
                     "
                   >
-                    {
-                      settings.currencySymbol
-                    }
-                    {baseFee.toLocaleString()}
+                    {baseFee.toLocaleString()} so‘m
                   </span>
                 </div>
 
@@ -1111,14 +1106,10 @@ export const ReceivePaymentModal:
                     <span
                       className="
                         shrink-0
+                        font-mono
                       "
                     >
-                      -
-                      {
-                        settings.currencySymbol
-                      }
-                      {discountAmount
-                        .toFixed(0)}
+                      -{Number(discountAmount.toFixed(0)).toLocaleString()} so‘m
                     </span>
                   </div>
                 )}
@@ -1166,13 +1157,10 @@ export const ReceivePaymentModal:
                       dark:text-emerald-400
 
                       sm:text-xl
+                      font-mono
                     "
                   >
-                    {
-                      settings.currencySymbol
-                    }
-                    {finalAmount
-                      .toFixed(0)}
+                    {Number(finalAmount.toFixed(0)).toLocaleString()} so‘m
                   </span>
                 </div>
               </div>

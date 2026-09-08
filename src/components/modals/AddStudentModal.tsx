@@ -860,13 +860,7 @@ export const AddStudentModal:
                               group.teacherName
                             }
                             {' — '}
-                            {
-                              settings.currencySymbol
-                            }
-                            {
-                              group.monthlyFee
-                            }
-                            /mo
+                            {Number(group.monthlyFee).toLocaleString()} so‘m/oy
                           </option>
                         )
                       )
@@ -937,16 +931,12 @@ export const AddStudentModal:
                           className="
                             mt-0.5
                             text-[10px]
+                            font-mono
                             font-bold
                             text-[#007AFF]
                           "
                         >
-                          {
-                            settings.currencySymbol
-                          }
-                          {
-                            selectedGroup.monthlyFee
-                          }
+                          {Number(selectedGroup.monthlyFee).toLocaleString()} so‘m
                         </p>
                       </div>
                     </div>

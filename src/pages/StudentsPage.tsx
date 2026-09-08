@@ -1177,18 +1177,14 @@ export const StudentsPage: React.FC = () => {
                             className="
                               mt-0.5
                               text-[11px]
+                              font-mono
                               font-bold
                               text-slate-900
 
                               dark:text-white
                             "
                           >
-                            {
-                              settings.currencySymbol
-                            }
-                            {
-                              student.monthlyFee
-                            }
+                            {Number(student.monthlyFee || 0).toLocaleString()} <span className="text-[10px] font-semibold text-slate-400">so‘m</span>
                           </p>
                         </div>
                       </div>
@@ -1601,18 +1597,14 @@ export const StudentsPage: React.FC = () => {
                         <td
                           className="
                             p-3.5
+                            font-mono
                             font-bold
                             text-slate-900
 
                             dark:text-white
                           "
                         >
-                          {
-                            settings.currencySymbol
-                          }
-                          {
-                            student.monthlyFee
-                          }
+                          {Number(student.monthlyFee || 0).toLocaleString()} <span className="text-xs font-semibold text-slate-400">so‘m</span>
                         </td>
 
 
@@ -1990,17 +1982,14 @@ export const StudentsPage: React.FC = () => {
                       <span
                         className="
                           font-bold
+                          font-mono
+                          font-bold
                           text-slate-900
 
                           dark:text-white
                         "
                       >
-                        {
-                          settings.currencySymbol
-                        }
-                        {
-                          student.monthlyFee
-                        }
+                        {Number(student.monthlyFee || 0).toLocaleString()} <span className="text-xs font-semibold text-slate-400">so‘m</span>
                       </span>
                     </div>
 

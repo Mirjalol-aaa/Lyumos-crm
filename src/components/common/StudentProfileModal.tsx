@@ -1044,9 +1044,8 @@ export const StudentProfileModal: React.FC = () => {
                     Monthly Fee
                   </p>
 
-                  <p className="mt-1 text-xs font-black text-white">
-                    {settings.currencySymbol}
-                    {student.monthlyFee}
+                  <p className="mt-1 text-xs font-black text-white font-mono">
+                    {Number(student.monthlyFee || 0).toLocaleString()} so‘m
                   </p>
                 </div>
               </div>
@@ -1085,9 +1084,8 @@ export const StudentProfileModal: React.FC = () => {
                     Monthly fee
                   </p>
 
-                  <p className="font-black text-white">
-                    {settings.currencySymbol}
-                    {student.monthlyFee}
+                  <p className="font-black text-white font-mono">
+                    {Number(student.monthlyFee || 0).toLocaleString()} so‘m
                   </p>
                 </div>
               </div>
@@ -1140,9 +1138,9 @@ export const StudentProfileModal: React.FC = () => {
                           )}
                         </td>
 
-                        <td className="px-5 py-3 text-slate-300">
+                        <td className="px-5 py-3 text-slate-300 font-mono">
                           {p.amountPaid
-                            ? `${settings.currencySymbol}${p.amountPaid}`
+                            ? `${Number(p.amountPaid).toLocaleString()} so‘m`
                             : '—'}
                         </td>
 

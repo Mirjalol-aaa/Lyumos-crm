@@ -35,7 +35,7 @@ export const AddExpenseModal: React.FC = () => {
     );
 
   const [amount, setAmount] =
-    useState(250);
+    useState(250000);
 
   const [
     paymentMethod,
@@ -114,9 +114,7 @@ export const AddExpenseModal: React.FC = () => {
         'Expense added successfully',
 
       message:
-        `${cleanTitle} • ` +
-        `${settings.currencySymbol}` +
-        `${cleanAmount.toLocaleString()}`,
+        `${cleanTitle} • ${cleanAmount.toLocaleString()} so‘m`,
 
       duration: 3000,
     });
@@ -131,7 +129,7 @@ export const AddExpenseModal: React.FC = () => {
     setCategory(
       'Utilities & Software'
     );
-    setAmount(250);
+    setAmount(250000);
     setPaymentMethod('Card');
     setRequestedBy(
       'Administration'

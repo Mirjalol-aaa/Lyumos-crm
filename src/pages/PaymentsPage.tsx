@@ -150,9 +150,7 @@ export const PaymentsPage: React.FC = () => {
   const formatMoney = (
     value: number
   ) => {
-    return `${settings.currencySymbol}${Number(
-      value || 0
-    ).toLocaleString()}`;
+    return `${Number(value || 0).toLocaleString()} so‘m`;
   };
 
 

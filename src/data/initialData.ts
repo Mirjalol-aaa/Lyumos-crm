@@ -10,7 +10,7 @@ export const initialSettings: CenterSettings = {
   currencySymbol: "so‘m",
   academicYear: "2025 - 2026",
   language: "uz",
-  theme: "light",
+  theme: "dark",
   enableSmsNotifications: true,
   autoRemindUnpaid: true,
   discountPolicyMax: 20,

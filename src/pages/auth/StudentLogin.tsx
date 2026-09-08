@@ -21,7 +21,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({ onSwitchToAdmin, onB
     document.title = "LUMOS LMS - O‘quvchilar Portali";
     document.documentElement.classList.add('dark');
     return () => {
-      const saved = localStorage.getItem('lumos_theme') || 'light';
+      const saved = localStorage.getItem('lumos_theme') || 'dark';
       if (saved !== 'dark') {
         document.documentElement.classList.remove('dark');
       }

@@ -21,7 +21,7 @@ export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchTo
     document.title = "LUMOS ERP - O‘quv Markazi Boshqaruvi";
     document.documentElement.classList.add('dark');
     return () => {
-      const saved = localStorage.getItem('lumos_theme') || 'light';
+      const saved = localStorage.getItem('lumos_theme') || 'dark';
       if (saved !== 'dark') {
         document.documentElement.classList.remove('dark');
       }

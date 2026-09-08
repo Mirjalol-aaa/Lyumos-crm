@@ -223,7 +223,7 @@ export const DashboardPage: React.FC = () => {
   const formatCurrency = (
     value: number
   ) => {
-    return `${settings.currencySymbol}${value.toLocaleString()}`;
+    return `${Number(value || 0).toLocaleString()} so‘m`;
   };
 
 
@@ -1302,12 +1302,11 @@ export const DashboardPage: React.FC = () => {
                   tickFormatter={(
                     value
                   ) =>
-                    value >= 1000
-                      ? `${settings.currencySymbol}${Math.round(
-                          value /
-                            1000
-                        )}k`
-                      : `${settings.currencySymbol}${value}`
+                    value >= 1000000
+                      ? `${(value / 1000000).toFixed(1)}M so‘m`
+                      : value >= 1000
+                      ? `${Math.round(value / 1000)}k so‘m`
+                      : `${value} so‘m`
                   }
                 />
 

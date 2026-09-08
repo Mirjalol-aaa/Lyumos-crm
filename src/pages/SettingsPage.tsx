@@ -133,7 +133,7 @@ export const SettingsPage:
           currency === 'USD'
             ? '$'
             : currency === 'UZS'
-            ? 'UZS '
+            ? 'so‘m'
             : '€',
 
         academicYear,
