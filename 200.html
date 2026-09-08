@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="uz">
+<html lang="uz" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,25 +9,27 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <!-- Immediate Dark/Light Mode Bootstrapper -->
+    <!-- Immediate Dark Mode Default Bootstrapper -->
     <script>
       (function() {
         try {
           var t = localStorage.getItem('lumos_theme');
-          if (t === 'dark') {
-            document.documentElement.classList.add('dark');
-          } else if (t === 'light') {
+          if (t === 'light') {
             document.documentElement.classList.remove('dark');
+          } else {
+            document.documentElement.classList.add('dark');
           }
-        } catch (e) {}
+        } catch (e) {
+          document.documentElement.classList.add('dark');
+        }
       })();
     </script>
     <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono for PRO SaaS UI -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <script type="module" crossorigin src="./assets/index-DhMUMz7Z.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-DfRaPo0E.css">
+    <script type="module" crossorigin src="./assets/index-BC7SjkhH.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-sLeoVrdu.css">
   </head>
   <body class="bg-[#F8F9FA] text-slate-900 antialiased selection:bg-amber-500 selection:text-white dark:bg-slate-950 dark:text-slate-100">
     <div id="root"></div>
