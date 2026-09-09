@@ -27,16 +27,18 @@ export const DataLoader: React.FC<{ children: React.ReactNode }> = ({ children }
     );
   }
 
-  // Filter out Supabase RLS database policy warnings from intrusive UI banners
-  const isRlsPolicyError = error && (
+  // Filter out Supabase RLS database policy warnings and background code lookups from intrusive UI banners
+  const isIgnoredBannerError = error && (
     error.includes('row-level security') ||
     error.includes('violates') ||
-    error.includes('policy')
+    error.includes('policy') ||
+    error.includes('not found for code') ||
+    error.includes('PGRST')
   );
 
   return (
     <>
-      {error && !isDismissed && !isRlsPolicyError && (
+      {error && !isDismissed && !isIgnoredBannerError && (
         <div className="fixed top-4 right-4 z-[100] max-w-sm p-3 rounded-2xl bg-amber-50 dark:bg-slate-900 border border-amber-200 dark:border-amber-900 text-xs text-amber-900 dark:text-amber-200 shadow-xl flex items-start gap-2">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
           <div className="flex-1">

@@ -25,6 +25,7 @@ export const AdminStudentsHubPage: React.FC = () => {
     groups,
     financials,
     setIsAddStudentModalOpen,
+    setIsImportStudentsModalOpen,
     setSelectedStudentId,
     deleteStudent,
   } = useCRM();
@@ -107,8 +108,8 @@ export const AdminStudentsHubPage: React.FC = () => {
             >
               {isPaid ? 'To‘langan' : isOverdue ? 'Qarzdor' : 'Kutilmoqda'}
             </Badge>
-            <p className="mt-0.5 text-[10px] font-bold text-slate-500">
-              ${s.monthlyFee} / oy
+            <p className="mt-0.5 text-[10px] font-bold text-slate-500 font-mono">
+              {Number(s.monthlyFee || 0).toLocaleString('uz-UZ')} so‘m / oy
             </p>
           </div>
         );
@@ -182,13 +183,24 @@ export const AdminStudentsHubPage: React.FC = () => {
           </p>
         </div>
 
-        <Button
-          variant="primary"
-          leftIcon={<Plus className="h-4 w-4" />}
-          onClick={() => setIsAddStudentModalOpen(true)}
-        >
-          Yangi O‘quvchi Qo‘shish
-        </Button>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+          <Button
+            variant="outline"
+            className="border-emerald-500/40 text-emerald-600 hover:bg-emerald-50 dark:border-emerald-500/30 dark:text-emerald-400 dark:hover:bg-emerald-950/20"
+            leftIcon={<Download className="h-4 w-4" />}
+            onClick={() => setIsImportStudentsModalOpen(true)}
+          >
+            📥 Excel orqali yuklash
+          </Button>
+
+          <Button
+            variant="primary"
+            leftIcon={<Plus className="h-4 w-4" />}
+            onClick={() => setIsAddStudentModalOpen(true)}
+          >
+            + Yangi O‘quvchi Qo‘shish
+          </Button>
+        </div>
       </div>
 
       {/* Advanced Filter Toolbar & Data Table */}
@@ -295,7 +307,9 @@ export const AdminStudentsHubPage: React.FC = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Oylik to‘lov:</span>
-                  <span className="font-black text-emerald-600">${activeStudentDrawer.monthlyFee}</span>
+                  <span className="font-black text-emerald-600 font-mono">
+                    {Number(activeStudentDrawer.monthlyFee || 0).toLocaleString('uz-UZ')} so‘m
+                  </span>
                 </div>
               </div>
 

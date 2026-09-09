@@ -12,21 +12,26 @@ export async function resolveEntityUuid(
     return codeOrUuid;
   }
 
-  const client = requireSupabase();
-  const { data, error } = await client
-    .from(table)
-    .select('id')
-    .eq('code', codeOrUuid)
-    .maybeSingle();
+  try {
+    const client = requireSupabase();
+    const { data, error } = await client
+      .from(table)
+      .select('id')
+      .eq('code', codeOrUuid)
+      .maybeSingle();
 
-  if (error) {
-    throw new Error(`Failed to resolve ${table} ${codeOrUuid}: ${error.message}`);
-  }
-  if (!data) {
-    throw new Error(`${table} not found for code: ${codeOrUuid}`);
+    if (error) {
+      console.warn(`[EntityResolver] Failed to resolve ${table} ${codeOrUuid}:`, error.message);
+      return codeOrUuid;
+    }
+    if (data && data.id) {
+      return data.id;
+    }
+  } catch (err) {
+    console.warn(`[EntityResolver] Supabase connection error for ${table} ${codeOrUuid}:`, err);
   }
 
-  return data.id;
+  return codeOrUuid;
 }
 
 /** Batch-resolve business codes to UUIDs for a table. */

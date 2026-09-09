@@ -124,8 +124,8 @@ export const AdminCoursesGroupsPage: React.FC = () => {
       sortable: true,
       align: 'right',
       render: (g) => (
-        <span className="font-black text-slate-900 dark:text-white">
-          ${g.monthlyFee}
+        <span className="font-black text-slate-900 dark:text-white font-mono">
+          {Number(g.monthlyFee || 0).toLocaleString('uz-UZ')} so‘m
         </span>
       ),
     },
