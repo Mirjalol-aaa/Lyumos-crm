@@ -27,7 +27,12 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 
-import { testTelegramBot } from '../services/telegramService';
+import {
+  testTelegramBot,
+  setupBotMainMenu,
+  sendTelegramMessage,
+  formatLeadApplicationMessage,
+} from '../services/telegramService';
 import { testEskizConnection, getEskizBalance } from '../services/eskizSmsService';
 
 
@@ -213,6 +218,86 @@ export const SettingsPage:
         });
       } finally {
         setIsTestingTelegram(false);
+      }
+    };
+
+    const [isSettingUpMenu, setIsSettingUpMenu] = useState(false);
+    const [isTestingLead, setIsTestingLead] = useState(false);
+
+    const handleSetupTelegramMenu = async () => {
+      if (!telegramBotToken.trim() || !telegramChatId.trim()) {
+        setTelegramTestResult({
+          success: false,
+          message: 'Iltimos, avval Bot Token va Chat ID ni kiriting.',
+        });
+        return;
+      }
+
+      setIsSettingUpMenu(true);
+      setTelegramTestResult(null);
+
+      try {
+        const result = await setupBotMainMenu(telegramBotToken, telegramChatId, centerName);
+        if (result.success) {
+          setTelegramTestResult({
+            success: true,
+            message: 'Bot menyu tugmalari (Jadval, To‘lov, Davomat, Manzil) muvaffaqiyatli o‘rnatildi! ✅',
+          });
+        } else {
+          setTelegramTestResult({
+            success: false,
+            message: result.error || 'Menyuni sozlashda xatolik yuz berdi.',
+          });
+        }
+      } catch (err: any) {
+        setTelegramTestResult({
+          success: false,
+          message: err.message || 'Xatolik yuz berdi.',
+        });
+      } finally {
+        setIsSettingUpMenu(false);
+      }
+    };
+
+    const handleTestLeadApplication = async () => {
+      if (!telegramBotToken.trim() || !telegramChatId.trim()) {
+        setTelegramTestResult({
+          success: false,
+          message: 'Iltimos, avval Bot Token va Chat ID ni kiriting.',
+        });
+        return;
+      }
+
+      setIsTestingLead(true);
+      setTelegramTestResult(null);
+
+      try {
+        const testMsg = formatLeadApplicationMessage({
+          fullName: 'Rustam Karimov (Sinov O‘quvchi)',
+          phone: '+998 (90) 123-45-67',
+          subject: 'Ingliz tili (IELTS)',
+          source: 'LUMOS Rasmiy Sayti (Sinov)',
+          centerName: centerName || 'LUMOS Academy',
+        });
+        const result = await sendTelegramMessage(telegramBotToken, telegramChatId, testMsg);
+        if (result.success) {
+          setTelegramTestResult({
+            success: true,
+            message: 'Sinov arizasi muvaffaqiyatli yuborildi! Guruh yoki kanalingizni tekshiring. 🔥',
+          });
+        } else {
+          setTelegramTestResult({
+            success: false,
+            message: result.error || 'Ariza yuborishda xatolik yuz berdi.',
+          });
+        }
+      } catch (err: any) {
+        setTelegramTestResult({
+          success: false,
+          message: err.message || 'Xatolik yuz berdi.',
+        });
+      } finally {
+        setIsTestingLead(false);
       }
     };
 
@@ -1608,36 +1693,66 @@ export const SettingsPage:
                   </label>
                 </div>
 
-                {/* Test button & result feedback */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={handleTestTelegram}
-                    disabled={isTestingTelegram}
-                    className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-sky-500/40 bg-sky-500/10 hover:bg-sky-500/20 active:scale-[0.98] text-xs font-bold text-sky-700 dark:text-sky-400 transition-all cursor-pointer disabled:opacity-50"
-                  >
-                    {isTestingTelegram ? (
-                      <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <Send className="h-3.5 w-3.5" />
-                    )}
-                    <span>{isTestingTelegram ? 'Ulanish tekshirilmoqda...' : 'Botni Sinash (Test Xabar)'}</span>
-                  </button>
+                {/* Action buttons & feedback */}
+                <div className="space-y-3 pt-2">
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <button
+                      type="button"
+                      onClick={handleTestTelegram}
+                      disabled={isTestingTelegram}
+                      className="flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl border border-sky-500/40 bg-sky-500/10 hover:bg-sky-500/20 active:scale-[0.98] text-xs font-bold text-sky-700 dark:text-sky-400 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      {isTestingTelegram ? (
+                        <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Send className="h-3.5 w-3.5" />
+                      )}
+                      <span>{isTestingTelegram ? 'Tekshirilmoqda...' : '1. Ulanishni Sinash'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleSetupTelegramMenu}
+                      disabled={isSettingUpMenu}
+                      className="flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl border border-indigo-500/40 bg-indigo-500/10 hover:bg-indigo-500/20 active:scale-[0.98] text-xs font-bold text-indigo-700 dark:text-indigo-400 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      {isSettingUpMenu ? (
+                        <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Bot className="h-3.5 w-3.5" />
+                      )}
+                      <span>{isSettingUpMenu ? 'O‘rnatilmoqda...' : '2. 📲 Bot Menyu Tugmalarini O‘rnatish'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleTestLeadApplication}
+                      disabled={isTestingLead}
+                      className="flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 active:scale-[0.98] text-xs font-bold text-amber-700 dark:text-amber-400 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      {isTestingLead ? (
+                        <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <BellRing className="h-3.5 w-3.5" />
+                      )}
+                      <span>{isTestingLead ? 'Yuborilmoqda...' : '3. 🔥 Sinov Arizasi Yuborish'}</span>
+                    </button>
+                  </div>
 
                   {telegramTestResult && (
                     <div
-                      className={`flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-xl ${
+                      className={`flex items-start gap-2.5 text-xs font-medium px-4 py-2.5 rounded-xl border transition-all ${
                         telegramTestResult.success
-                          ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300'
-                          : 'bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300'
+                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
+                          : 'bg-rose-500/10 border-rose-500/30 text-rose-700 dark:text-rose-300'
                       }`}
                     >
                       {telegramTestResult.success ? (
-                        <CheckCircle2 className="h-4 w-4 shrink-0" />
+                        <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5 text-emerald-500" />
                       ) : (
-                        <AlertCircle className="h-4 w-4 shrink-0" />
+                        <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-rose-500" />
                       )}
-                      <span className="text-[11px] leading-tight">{telegramTestResult.message}</span>
+                      <span className="text-xs leading-relaxed">{telegramTestResult.message}</span>
                     </div>
                   )}
                 </div>

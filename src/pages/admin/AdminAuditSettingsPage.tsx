@@ -214,7 +214,7 @@ export const AdminAuditSettingsPage: React.FC = () => {
             <CardContent className="space-y-3">
               <textarea
                 rows={4}
-                defaultValue="Hurmatli {OTA_ONA_ISMI}, farzandingiz {TALABA_ISMI} ning {GURUH_NOMI} guruhi uchun {OY_NOMI} oyi to‘lovi (${SUMMA}) muddati yetib keldi. To‘lovni Click/Payme orqali amalga oshirishingiz mumkin. Rahmat!"
+                defaultValue="Hurmatli {OTA_ONA_ISMI}, farzandingiz {TALABA_ISMI} ning {GURUH_NOMI} guruhi uchun {OY_NOMI} oyi to‘lovi ({SUMMA} so‘m) muddati yetib keldi. To‘lovni Click/Payme orqali amalga oshirishingiz mumkin. Rahmat!"
                 className="w-full rounded-xl border border-slate-200 p-3 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               />
               <Button size="sm" variant="primary">

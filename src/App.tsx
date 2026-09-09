@@ -70,6 +70,7 @@ import { GroupsPage } from './pages/GroupsPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { ExpensesPage } from './pages/ExpensesPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { processTelegramUpdates } from './services/telegramService';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 1. SUPER ADMIN CONTENT (SaaS Redesign)
@@ -477,6 +478,50 @@ function AppContentRouter() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// TELEGRAM BOT BACKGROUND POLLER
+// ─────────────────────────────────────────────────────────────────────────────
+
+function TelegramBotPoller() {
+  const { settings, students, groups } = useCRM();
+
+  useEffect(() => {
+    const token = settings.telegramBotToken;
+    if (!token) return;
+
+    let isSubscribed = true;
+
+    const poll = async () => {
+      try {
+        await processTelegramUpdates({
+          botToken: token,
+          students,
+          groups,
+          centerName: settings.centerName,
+          centerPhone: settings.phone,
+        });
+      } catch (e) {
+        // silent
+      }
+    };
+
+    poll();
+
+    const interval = setInterval(() => {
+      if (isSubscribed) {
+        poll();
+      }
+    }, 10000);
+
+    return () => {
+      isSubscribed = false;
+      clearInterval(interval);
+    };
+  }, [settings.telegramBotToken, settings.centerName, settings.phone, students, groups]);
+
+  return null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // MAIN APP ROOT
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -486,6 +531,7 @@ export default function App() {
       <LMSProvider>
         <I18nProvider>
           <DataLoader>
+            <TelegramBotPoller />
             <AppContentRouter />
           </DataLoader>
         </I18nProvider>

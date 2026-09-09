@@ -38,6 +38,8 @@ import { useLMS } from '../../context/LMSContext';
 import { INITIAL_COURSES } from '../../data/coursesData';
 import { INITIAL_TEACHERS } from '../../data/initialData';
 import { fireCelebrationConfetti } from '../../services/paymentGatewayService';
+import { sendTelegramMessage, formatLeadApplicationMessage } from '../../services/telegramService';
+import { sendEskizSms } from '../../services/eskizSmsService';
 import lumosLogo from '../../assets/lumos-logo.png';
 
 export const LandingPage: React.FC = () => {
@@ -87,19 +89,48 @@ export const LandingPage: React.FC = () => {
         monthlyFee: 250000,
         status: 'Active',
         joinedDate: new Date().toISOString().split('T')[0],
+        notes: `Veb-saytdan ariza: ${selectedCourseName || 'Umumiy'}`,
       });
-    } catch (err) {
-      console.warn('Student auto-register error:', err);
-    }
 
-    fireCelebrationConfetti();
-    setIsSubmitted(true);
-    setTimeout(() => {
-      setIsSubmitted(false);
-      setIsApplyModalOpen(false);
-      setApplicantName('');
-      setApplicantPhone('');
-    }, 2200);
+      // 1. Notify Management via Telegram Bot
+      if (settings.telegramBotToken && settings.telegramChatId) {
+        const leadText = formatLeadApplicationMessage({
+          fullName: applicantName.trim(),
+          phone: applicantPhone.trim(),
+          subject: selectedCourseName || 'Tanlanmagan kurs',
+          source: 'LUMOS Asosiy Veb-sayti',
+          centerName: settings.centerName,
+        });
+        sendTelegramMessage(
+          settings.telegramBotToken,
+          settings.telegramChatId,
+          leadText
+        ).catch((err) => console.warn('Telegram lead notification error:', err));
+      }
+
+      // 2. Send SMS confirmation to applicant if Eskiz is configured
+      if (settings.eskizToken || settings.eskizEmail) {
+        sendEskizSms({
+          phone: applicantPhone.trim(),
+          message: `${settings.centerName}: Hurmatli ${applicantName.trim()}! Sizning arizangiz qabul qilindi. Tez orada ma'muriyat siz bilan bog'lanadi. Tel: ${settings.phone}`,
+          token: settings.eskizToken,
+          email: settings.eskizEmail,
+          password: settings.eskizPassword,
+          from: settings.eskizFrom,
+        }).catch((err) => console.warn('SMS lead acknowledgment error:', err));
+      }
+
+      fireCelebrationConfetti();
+      setIsSubmitted(true);
+      setTimeout(() => {
+        setIsSubmitted(false);
+        setIsApplyModalOpen(false);
+        setApplicantName('');
+        setApplicantPhone('');
+      }, 2200);
+    } catch (error) {
+      console.error('Ariza topshirishda xatolik:', error);
+    }
   };
 
   const toggleTheme = () => {
