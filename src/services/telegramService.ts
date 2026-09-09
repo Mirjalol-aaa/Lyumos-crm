@@ -48,9 +48,13 @@ export async function sendTelegramMessage(
         messageId: data.result?.message_id,
       };
     } else {
+      let friendlyError = data.description || 'Telegram xabar yuborishda xatolik yuz berdi.';
+      if (typeof friendlyError === 'string' && friendlyError.toLowerCase().includes('chat not found')) {
+        friendlyError = `Chat topilmadi (chat not found)! Sababi: Botingiz hali bu guruhga/kanalga qo‘shilmagan (yoki Admin qilinmagan). Agarda shaxsiy profilingiz bo‘lsa, avval botingizga kirib /start bosing.`;
+      }
       return {
         success: false,
-        error: data.description || 'Telegram xabar yuborishda xatolik yuz berdi.',
+        error: friendlyError,
       };
     }
   } catch (err: any) {
@@ -58,6 +62,65 @@ export async function sendTelegramMessage(
     return {
       success: false,
       error: err.message || 'Tarmoq xatosi: Telegram serveriga ulanib bo‘lmadi.',
+    };
+  }
+}
+
+/**
+ * Automatically detect latest Chat ID from recent bot updates
+ */
+export async function detectLatestTelegramChatId(botToken: string): Promise<{
+  success: boolean;
+  chatId?: string;
+  chatTitle?: string;
+  chatType?: string;
+  error?: string;
+}> {
+  const cleanToken = (botToken || '').trim();
+  if (!cleanToken) {
+    return { success: false, error: 'Iltimos, avval Telegram Bot Tokenini kiriting.' };
+  }
+
+  try {
+    const url = `https://api.telegram.org/bot${cleanToken}/getUpdates?limit=20`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (!data.ok) {
+      return { success: false, error: data.description || 'Bot Token yaroqsiz yoki xato.' };
+    }
+
+    const updates = data.result;
+    if (!Array.isArray(updates) || updates.length === 0) {
+      return {
+        success: false,
+        error: 'Hali hech qanday xabar topilmadi. Iltimos, botingizga (/start) yozing yoki botni guruhingizga qo‘shib, guruhga biror xabar (masalan: "salom") yuboring, so‘ng qayta bosing.',
+      };
+    }
+
+    // Search from latest update
+    for (let i = updates.length - 1; i >= 0; i--) {
+      const u = updates[i];
+      const chat = u.message?.chat || u.channel_post?.chat || u.my_chat_member?.chat;
+      if (chat && chat.id) {
+        const title = chat.title || chat.username || [chat.first_name, chat.last_name].filter(Boolean).join(' ') || 'Shaxsiy Chat';
+        return {
+          success: true,
+          chatId: String(chat.id),
+          chatTitle: title,
+          chatType: chat.type === 'supergroup' ? 'Super Guruh' : chat.type === 'group' ? 'Guruh' : chat.type === 'channel' ? 'Kanal' : 'Shaxsiy',
+        };
+      }
+    }
+
+    return {
+      success: false,
+      error: 'Chat ID aniqlanmadi. Botga xabar yuborib qayta urinib ko‘ring.',
+    };
+  } catch (err: any) {
+    return {
+      success: false,
+      error: err.message || 'Telegram serveriga ulanishda xatolik yuz berdi.',
     };
   }
 }

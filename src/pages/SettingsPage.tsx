@@ -25,6 +25,7 @@ import {
   Smartphone,
   KeyRound,
   ShieldCheck,
+  Search,
 } from 'lucide-react';
 
 import {
@@ -32,6 +33,7 @@ import {
   setupBotMainMenu,
   sendTelegramMessage,
   formatLeadApplicationMessage,
+  detectLatestTelegramChatId,
 } from '../services/telegramService';
 import { testEskizConnection, getEskizBalance } from '../services/eskizSmsService';
 
@@ -298,6 +300,44 @@ export const SettingsPage:
         });
       } finally {
         setIsTestingLead(false);
+      }
+    };
+
+    const [isDetectingChatId, setIsDetectingChatId] = useState(false);
+
+    const handleDetectChatId = async () => {
+      if (!telegramBotToken.trim()) {
+        setTelegramTestResult({
+          success: false,
+          message: 'Iltimos, avval yuqoridagi "Telegram Bot Token" maydonini to‘ldiring.',
+        });
+        return;
+      }
+
+      setIsDetectingChatId(true);
+      setTelegramTestResult(null);
+
+      try {
+        const res = await detectLatestTelegramChatId(telegramBotToken);
+        if (res.success && res.chatId) {
+          setTelegramChatId(res.chatId);
+          setTelegramTestResult({
+            success: true,
+            message: `Chat topildi: "${res.chatTitle}" (${res.chatType})! Chat ID avtomatik joylandi: ${res.chatId} ✅ (Endi "1. Ulanishni Sinash" tugmasini bosing)`,
+          });
+        } else {
+          setTelegramTestResult({
+            success: false,
+            message: res.error || 'Chat ID aniqlanmadi.',
+          });
+        }
+      } catch (err: any) {
+        setTelegramTestResult({
+          success: false,
+          message: err.message || 'Xatolik yuz berdi.',
+        });
+      } finally {
+        setIsDetectingChatId(false);
       }
     };
 
@@ -1640,9 +1680,25 @@ export const SettingsPage:
                   </div>
 
                   <div>
-                    <label className={labelClass}>
-                      Telegram Chat ID / Kanal ID
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className={labelClass}>
+                        Telegram Chat ID / Kanal ID
+                      </label>
+                      <button
+                        type="button"
+                        onClick={handleDetectChatId}
+                        disabled={isDetectingChatId}
+                        className="text-[10px] font-bold text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 flex items-center gap-1 cursor-pointer disabled:opacity-50 transition-colors"
+                        title="Botga yozilgan oxirgi xabardan Chat ID ni avtomatik topish"
+                      >
+                        {isDetectingChatId ? (
+                          <RefreshCw className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Search className="h-3 w-3" />
+                        )}
+                        <span>{isDetectingChatId ? 'Qidirilmoqda...' : '🔍 Avtomatik topish'}</span>
+                      </button>
+                    </div>
                     <div className="relative">
                       <Send className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                       <input
@@ -1653,6 +1709,9 @@ export const SettingsPage:
                         className={`${inputClass} pl-10 font-mono text-xs`}
                       />
                     </div>
+                    <p className="mt-1 text-[10px] text-slate-400">
+                      Guruh/Kanal ID si (masalan: <code>-100...</code>) yoki botga yozib "Avtomatik topish"ni bosing.
+                    </p>
                   </div>
                 </div>
 
