@@ -490,7 +490,7 @@ export const CRMProvider: React.FC<{
     setSettings,
   ] = useState<CenterSettings>(() => {
     const savedTheme = typeof window !== 'undefined'
-      ? (localStorage.getItem('lumos_theme') as 'light' | 'dark' | null)
+      ? (localStorage.getItem('lumos_theme') as 'light' | 'dark' | 'system' | null)
       : null;
 
     return {
@@ -503,7 +503,7 @@ export const CRMProvider: React.FC<{
       currencySymbol: 'so‘m',
       academicYear: '2025 - 2026',
       language: 'uz',
-      theme: savedTheme || 'dark',
+      theme: (savedTheme as 'light' | 'dark' | 'system') || 'dark',
       enableSmsNotifications: true,
       autoRemindUnpaid: true,
       discountPolicyMax: 20,
@@ -528,12 +528,28 @@ export const CRMProvider: React.FC<{
       // LocalStorage might be restricted
     }
 
-    if (activeTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-      document.body.classList.add('dark');
+    const applyTheme = (isDark: boolean) => {
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.body.classList.remove('dark');
+      }
+    };
+
+    if (activeTheme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      applyTheme(mediaQuery.matches);
+
+      const handleChange = (e: MediaQueryListEvent) => {
+        applyTheme(e.matches);
+      };
+
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
     } else {
-      document.documentElement.classList.remove('dark');
-      document.body.classList.remove('dark');
+      applyTheme(activeTheme === 'dark');
     }
   }, [settings.theme]);
 
@@ -794,7 +810,13 @@ export const CRMProvider: React.FC<{
 
       document.documentElement.classList.add('theme-transitioning');
 
-      if (nextTheme === 'dark') {
+      const isDark =
+        nextTheme === 'dark' ||
+        (nextTheme === 'system' &&
+          typeof window !== 'undefined' &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+      if (isDark) {
         document.documentElement.classList.add('dark');
         document.body.classList.add('dark');
       } else {

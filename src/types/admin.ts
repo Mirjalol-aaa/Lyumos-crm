@@ -15,7 +15,7 @@ export interface Branch {
 export interface Course {
   id: string;
   title: string;
-  category: 'Languages' | 'IT & Programming' | 'Math & Science' | 'Business';
+  category: 'Languages' | 'IT & Programming' | 'Math & Science' | 'Business' | 'IELTS' | 'Maktab fanlari' | 'Abituriyent' | string;
   level: string;
   durationMonths: number;
   lessonsCount: number;
@@ -23,6 +23,11 @@ export interface Course {
   activeGroupsCount: number;
   syllabus: string[];
   description: string;
+  instructor?: string;
+  schedule?: string;
+  features?: string[];
+  targetAudience?: string;
+  outcomes?: string[];
 }
 
 export interface TeacherWorkload {
