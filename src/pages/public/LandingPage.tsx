@@ -279,12 +279,10 @@ export const LandingPage: React.FC = () => {
               ))}
             </div>
 
-            {/* Portal Entry Button (Hidden on mobile/tablet < lg, visible on desktop) */}
-            <div className="hidden lg:flex items-center">
-              <Button
-                variant="primary"
-                size="sm"
-                className="items-center gap-2 shadow-md shadow-amber-500/20 cursor-pointer font-bold px-4 py-2 text-xs"
+            {/* Portal Entry Button (Visible across all devices: mobile, tablet & desktop) */}
+            <div className="flex items-center">
+              <button
+                type="button"
                 onClick={() => {
                   if (currentUser) {
                     window.location.hash = currentRole === 'student' ? '#/student' : '#/dashboard';
@@ -292,6 +290,7 @@ export const LandingPage: React.FC = () => {
                     window.location.hash = '#/admin';
                   }
                 }}
+                className="inline-flex items-center gap-1.5 sm:gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-3 sm:px-4 py-2 text-xs shadow-md shadow-amber-500/20 border border-amber-300/40 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all cursor-pointer select-none"
               >
                 <span>
                   {currentUser
@@ -300,8 +299,8 @@ export const LandingPage: React.FC = () => {
                       : t.landing.returnToAdminDashboard
                     : t.landing.loginCta}
                 </span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Button>
+                <ArrowRight className="h-3.5 w-3.5 shrink-0" />
+              </button>
             </div>
 
             {/* Mobile Menu Hamburger Toggle (Visible on mobile/tablet < lg) */}
@@ -467,43 +466,40 @@ export const LandingPage: React.FC = () => {
 
           {/* Action Buttons */}
           <div className="flex flex-wrap items-center justify-center gap-3.5 pt-3">
-            <Button
-              variant="primary"
-              size="lg"
-              className="gap-2.5 shadow-xl shadow-amber-500/25 text-sm font-black px-8 py-3.5 cursor-pointer rounded-2xl"
+            <button
+              type="button"
               onClick={() => {
                 setSelectedCourseName('Matematika (Hadicha ustoz)');
                 setIsApplyModalOpen(true);
               }}
+              className="inline-flex items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-8 py-3.5 text-sm shadow-xl shadow-amber-500/25 border border-amber-300/60 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all cursor-pointer select-none"
             >
               <span>{t.landing.registerCta}</span>
               <ArrowRight className="h-4 w-4" />
-            </Button>
+            </button>
 
             {currentUser ? (
-              <Button
-                variant="secondary"
-                size="lg"
-                className="gap-2.5 text-sm font-bold px-7 py-3.5 border-slate-300 dark:border-slate-700 cursor-pointer rounded-2xl"
+              <button
+                type="button"
                 onClick={() => {
                   window.location.hash = currentRole === 'student' ? '#/student' : '#/dashboard';
                 }}
+                className="inline-flex items-center justify-center gap-2.5 rounded-2xl bg-slate-900/90 hover:bg-slate-800 text-amber-400 hover:text-amber-300 font-extrabold border border-amber-500/40 hover:border-amber-400/70 px-7 py-3.5 text-sm shadow-lg shadow-black/30 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all cursor-pointer select-none"
               >
                 <span>{currentRole === 'student' ? t.landing.returnToStudentCabinet : t.landing.returnToAdminDashboard}</span>
-                <ChevronRight className="h-4 w-4 text-amber-500" />
-              </Button>
+                <ChevronRight className="h-4 w-4 text-amber-400" />
+              </button>
             ) : (
-              <Button
-                variant="secondary"
-                size="lg"
-                className="gap-2.5 text-sm font-bold px-7 py-3.5 border-slate-300 dark:border-slate-700 cursor-pointer rounded-2xl"
+              <button
+                type="button"
                 onClick={() => {
-                  window.location.hash = '#/student';
+                  window.location.hash = '#/admin';
                 }}
+                className="inline-flex items-center justify-center gap-2.5 rounded-2xl bg-slate-900/90 hover:bg-slate-800 text-slate-100 hover:text-white font-extrabold border border-slate-700/80 hover:border-amber-500/50 px-7 py-3.5 text-sm shadow-lg shadow-black/30 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all cursor-pointer select-none"
               >
-                <span>{t.landing.studentPortalBtn}</span>
-                <GraduationCap className="h-4 w-4 text-emerald-500" />
-              </Button>
+                <LogIn className="h-4 w-4 text-amber-400" />
+                <span>Boshqaruv Paneli (CRM)</span>
+              </button>
             )}
           </div>
 

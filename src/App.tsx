@@ -440,7 +440,20 @@ function AppContentRouter() {
       );
     }
 
-    if (currentHash.includes('admin') || currentHash.includes('login')) {
+    if (
+      currentHash.includes('admin') ||
+      currentHash.includes('login') ||
+      currentHash.includes('dashboard') ||
+      currentHash.includes('schedule') ||
+      currentHash.includes('attendance') ||
+      currentHash.includes('teachers') ||
+      currentHash.includes('students') ||
+      currentHash.includes('finance') ||
+      currentHash.includes('settings') ||
+      currentHash.includes('applications') ||
+      currentHash.includes('branches') ||
+      currentHash.includes('credentials')
+    ) {
       return (
         <AdminTeacherLogin
           onSwitchToStudent={() => {

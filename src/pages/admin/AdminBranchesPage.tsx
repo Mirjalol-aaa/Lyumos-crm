@@ -81,7 +81,7 @@ export const AdminBranchesPage: React.FC = () => {
       align: 'right',
       render: (b) => (
         <span className="font-black text-emerald-600 dark:text-emerald-400">
-          ${b.monthlyRevenue.toLocaleString()}
+          {b.monthlyRevenue.toLocaleString()} so‘m
         </span>
       ),
     },
@@ -170,7 +170,7 @@ export const AdminBranchesPage: React.FC = () => {
             <div>
               <span className="text-xs font-bold text-slate-400 uppercase">Umumiy Tarmoq Tushumi</span>
               <p className="text-2xl font-black text-purple-600 dark:text-purple-400">
-                ${totalRevenue.toLocaleString()}
+                {totalRevenue.toLocaleString()} so‘m
               </p>
               <span className="text-[11px] text-slate-400">Oylik jami tushum</span>
             </div>

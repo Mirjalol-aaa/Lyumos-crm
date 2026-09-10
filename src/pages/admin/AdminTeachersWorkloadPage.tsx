@@ -49,8 +49,9 @@ export const AdminTeachersWorkloadPage: React.FC = () => {
   // Compute live workload and metrics for each teacher
   const workloadData: (TeacherWorkload & { rawTeacher: Teacher })[] = useMemo(() => {
     return teachers.map((teacher, index) => {
-      const assignedGroups = groups.filter(g => g.teacherId === teacher.id);
-      const studentCount = students.filter(s => s.teacherId === teacher.id).length;
+      const assignedGroups = groups.filter((g) => g.teacherId === teacher.id);
+      const assignedStudents = students.filter((s) => s.teacherId === teacher.id);
+      const studentCount = assignedStudents.length;
 
       // Calculate weekly hours: 3 classes/week * 2h = 6h per group
       const weeklyHours = assignedGroups.length * 6;
@@ -65,9 +66,10 @@ export const AdminTeachersWorkloadPage: React.FC = () => {
       const studentRetentionRate = 94 + (index % 5);
       const kpiScore = teacher.rating || 5.0;
 
-      const baseSalary = teacher.baseSalary || 1200000;
-      const bonusPerStudent = teacher.bonusPerStudent || 15000;
-      const calculatedTotalSalary = baseSalary + studentCount * bonusPerStudent;
+      const grossTuition = assignedStudents.reduce((acc: number, s) => acc + (s.monthlyFee || 250000), 0);
+      const calculatedTotalSalary = Math.round((grossTuition * 50) / 100);
+      const baseSalary = Math.round(calculatedTotalSalary * 0.7);
+      const bonusPerStudent = Math.round((calculatedTotalSalary * 0.3) / Math.max(1, studentCount));
 
       return {
         teacherId: teacher.id,
@@ -237,7 +239,7 @@ export const AdminTeachersWorkloadPage: React.FC = () => {
     },
     {
       key: 'calculatedTotalSalary',
-      header: 'Hisoblangan Oylik (Base + Bonus)',
+      header: 'Hisoblangan Oylik (50% Ulush)',
       sortable: true,
       align: 'right',
       render: (t) => (
@@ -245,8 +247,8 @@ export const AdminTeachersWorkloadPage: React.FC = () => {
           <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 font-mono">
             {formatMoney(t.calculatedTotalSalary, 'UZS')}
           </span>
-          <p className="text-[10px] text-slate-400 font-mono">
-            +{formatMoney(t.activeStudentsCount * t.bonusPerStudent, 'UZS')} bonus
+          <p className="text-[10px] text-slate-400 font-medium">
+            {t.activeStudentsCount} ta o‘quvchi to‘lovidan 50%
           </p>
         </div>
       ),
