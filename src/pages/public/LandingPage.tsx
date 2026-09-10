@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Sparkles,
   ArrowRight,
@@ -13,6 +13,7 @@ import {
   Star,
   Globe,
   ChevronRight,
+  ChevronDown,
   GraduationCap,
   TrendingUp,
   ShieldCheck,
@@ -28,6 +29,7 @@ import {
   HelpCircle,
   Search,
   Check,
+  CheckCircle,
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
@@ -64,8 +66,11 @@ export const LandingPage: React.FC = () => {
   const [selectedCourseForDetails, setSelectedCourseForDetails] = useState<Course | null>(null);
 
   // Course Filter state
-  const [selectedCategory, setSelectedCategory] = useState<string>('Barchasi');
+  const [selectedCategoryKey, setSelectedCategoryKey] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Interactive FAQ Accordion state (inspired by aplusacademy.uz)
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
   // Quick Application Form state
   const [selectedCourseName, setSelectedCourseName] = useState('Matematika (Hadicha ustoz)');
@@ -80,7 +85,13 @@ export const LandingPage: React.FC = () => {
   const [counterRate, setCounterRate] = useState(88);
 
   useEffect(() => {
-    document.title = 'LUMOS Taâ€™lim Markazi â€” Bilim Bilan Yorqin Kelajakka!';
+    document.title =
+      language === 'ru'
+        ? 'LUMOS Учебный Центр — К светлому будущему со знаниями!'
+        : language === 'en'
+        ? 'LUMOS Academy — Toward a Brighter Future with Knowledge!'
+        : 'LUMOS Ta’lim Markazi — Bilim Bilan Yorqin Kelajakka!';
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
@@ -95,30 +106,28 @@ export const LandingPage: React.FC = () => {
       window.removeEventListener('scroll', handleScroll);
       clearInterval(timer);
     };
-  }, []);
+  }, [language]);
 
-  // Course Categories
-  const categories = [
-    'Barchasi',
-    'Matematika',
-    'Ingliz tili',
-    'IELTS',
-    'IT & Dasturlash',
-    'Maktab fanlari',
-    'Abituriyent',
+  // Categories mapped to translation keys
+  const categoryFilters = [
+    { key: 'all', label: t.landing.catAll },
+    { key: 'math', label: t.landing.catMath },
+    { key: 'english', label: t.landing.catEnglish },
+    { key: 'ielts', label: t.landing.catIelts },
+    { key: 'it', label: t.landing.catIt },
+    { key: 'school', label: t.landing.catSchool },
+    { key: 'abiturient', label: t.landing.catAbiturient },
   ];
 
   const filteredCourses = useMemo(() => {
     return INITIAL_COURSES.filter((course) => {
-      const matchCategory =
-        selectedCategory === 'Barchasi' ||
-        course.category.toLowerCase().includes(selectedCategory.toLowerCase()) ||
-        (selectedCategory === 'Matematika' && course.title.toLowerCase().includes('matematika')) ||
-        (selectedCategory === 'Ingliz tili' && course.title.toLowerCase().includes('ingliz')) ||
-        (selectedCategory === 'IELTS' && course.title.toLowerCase().includes('ielts')) ||
-        (selectedCategory === 'IT & Dasturlash' && course.title.toLowerCase().includes('it')) ||
-        (selectedCategory === 'Maktab fanlari' && course.title.toLowerCase().includes('maktab')) ||
-        (selectedCategory === 'Abituriyent' && course.title.toLowerCase().includes('abituriyent'));
+      let matchCat = true;
+      if (selectedCategoryKey === 'math') matchCat = course.category.toLowerCase().includes('matem') || course.title.toLowerCase().includes('matem');
+      else if (selectedCategoryKey === 'english') matchCat = course.category.toLowerCase().includes('ingliz') || course.title.toLowerCase().includes('ingliz');
+      else if (selectedCategoryKey === 'ielts') matchCat = course.category.toLowerCase().includes('ielts') || course.title.toLowerCase().includes('ielts');
+      else if (selectedCategoryKey === 'it') matchCat = course.category.toLowerCase().includes('it') || course.title.toLowerCase().includes('frontend');
+      else if (selectedCategoryKey === 'school') matchCat = course.category.toLowerCase().includes('maktab') || course.title.toLowerCase().includes('maktab');
+      else if (selectedCategoryKey === 'abiturient') matchCat = course.category.toLowerCase().includes('abitur') || course.title.toLowerCase().includes('dtm');
 
       const matchSearch =
         !searchQuery.trim() ||
@@ -126,9 +135,9 @@ export const LandingPage: React.FC = () => {
         course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (course.instructor && course.instructor.toLowerCase().includes(searchQuery.toLowerCase()));
 
-      return matchCategory && matchSearch;
+      return matchCat && matchSearch;
     });
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategoryKey, searchQuery]);
 
   const handlePhoneFormat = (val: string) => {
     let cleaned = val.replace(/\D/g, '');
@@ -192,7 +201,7 @@ export const LandingPage: React.FC = () => {
       if (settings.eskizToken || settings.eskizEmail) {
         sendEskizSms({
           phone: applicantPhone.trim(),
-          message: `${settings.centerName}: Hurmatli ${applicantName.trim()}! Sizning arizangiz qabul qilindi. 1-bepul sinov darsi vaqti boâ€˜yicha tez orada bogâ€˜lanamiz. Tel: ${settings.phone}`,
+          message: `${settings.centerName}: Hurmatli ${applicantName.trim()}! Sizning arizangiz qabul qilindi. 1-bepul sinov darsi vaqti bo‘yicha tez orada bog‘lanamiz. Tel: ${settings.phone}`,
           token: settings.eskizToken,
           email: settings.eskizEmail,
           password: settings.eskizPassword,
@@ -222,9 +231,9 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen font-sans bg-[#F8FAFC] dark:bg-[#050816] text-slate-900 dark:text-slate-100 antialiased selection:bg-amber-500 selection:text-white transition-colors duration-300">
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      {/* ─────────────────────────────────────────────────────────────
           1. ACTIVE SESSION TOP BAR (DISCREET GLASS BANNER)
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      ───────────────────────────────────────────────────────────── */}
       {currentUser && (
         <div className="sticky top-0 z-50 bg-slate-900/90 dark:bg-slate-950/95 backdrop-blur-md border-b border-amber-500/20 px-4 py-2 text-white text-xs font-semibold shadow-md">
           <div className="mx-auto max-w-7xl flex items-center justify-between flex-wrap gap-2">
@@ -233,12 +242,12 @@ export const LandingPage: React.FC = () => {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
-              <span className="text-slate-300">Faol hisob:</span>
+              <span className="text-slate-300">{t.common.active}:</span>
               <span className="px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-300 font-bold">
                 {currentUser.name}
               </span>
               <span className="text-slate-400 text-[11px]">
-                ({currentRole === 'admin' ? 'Bosh Administrator' : currentRole === 'teacher' ? 'Oâ€˜qituvchi' : 'Talaba'})
+                ({currentRole === 'admin' ? t.roles.superAdmin : currentRole === 'teacher' ? t.roles.teacher : t.roles.student})
               </span>
             </div>
 
@@ -249,16 +258,16 @@ export const LandingPage: React.FC = () => {
               }}
               className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-500 to-yellow-500 px-3.5 py-1 text-xs font-bold text-slate-950 shadow-sm hover:from-amber-400 hover:to-yellow-400 active:scale-95 transition-all cursor-pointer"
             >
-              <span>{currentRole === 'student' ? 'Talaba kabinetiga qaytish' : 'Admin paneliga qaytish'}</span>
+              <span>{currentRole === 'student' ? t.landing.returnToStudentCabinet : t.landing.returnToAdminDashboard}</span>
               <ArrowRight className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
       )}
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      {/* ─────────────────────────────────────────────────────────────
           2. STICKY GLASSMORPHISM NAVBAR (ELEVATES ON SCROLL)
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      ───────────────────────────────────────────────────────────── */}
       <header
         className={`sticky top-0 z-40 w-full transition-all duration-300 ${
           isScrolled
@@ -275,7 +284,7 @@ export const LandingPage: React.FC = () => {
             <div className="relative flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500/20 via-yellow-500/10 to-amber-300/20 p-2 border border-amber-400/40 shadow-sm shadow-amber-500/15 group-hover:scale-105 group-hover:border-amber-400 transition-all duration-200">
               <img
                 src={lumosLogo}
-                alt="LUMOS Oâ€˜QUV MARKAZI"
+                alt="LUMOS"
                 className="h-full w-full object-contain filter drop-shadow-sm"
               />
             </div>
@@ -287,7 +296,7 @@ export const LandingPage: React.FC = () => {
                 <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
               </div>
               <span className="block text-[9px] sm:text-[10px] uppercase tracking-widest text-amber-600 dark:text-amber-400 font-black -mt-0.5">
-                Taâ€™lim Markazi
+                {language === 'ru' ? 'Учебный Центр' : language === 'en' ? 'Education Academy' : 'Ta’lim Markazi'}
               </span>
             </div>
           </div>
@@ -295,13 +304,14 @@ export const LandingPage: React.FC = () => {
           {/* Desktop Nav Links */}
           <nav className="hidden lg:flex items-center gap-1 xl:gap-2 text-xs font-bold text-slate-600 dark:text-slate-300">
             {[
-              { label: 'Kurslar', href: '#courses' },
-              { label: 'Natijalar', href: '#results' },
-              { label: 'Oâ€˜qituvchilar', href: '#teachers' },
-              { label: 'Filiallar', href: '#branches' },
-              { label: 'Nega Biz?', href: '#why-us' },
-              { label: 'Fikrlar', href: '#reviews' },
-              { label: 'Aloqa', href: '#contact' },
+              { label: t.landing.navCourses, href: '#courses' },
+              { label: t.landing.navResults, href: '#results' },
+              { label: t.landing.navTeachers, href: '#teachers' },
+              { label: t.landing.navBranches, href: '#branches' },
+              { label: t.landing.navWhyUs, href: '#why-us' },
+              { label: t.landing.navFaq, href: '#faq' },
+              { label: t.landing.navReviews, href: '#reviews' },
+              { label: t.landing.navContact, href: '#contact' },
             ].map((item) => (
               <a
                 key={item.label}
@@ -323,16 +333,16 @@ export const LandingPage: React.FC = () => {
               <ThemeToggle variant="cycle" />
             </div>
 
-            {/* Language Switcher */}
-            <div className="hidden md:flex items-center rounded-xl border border-slate-200/90 bg-slate-100/90 p-0.5 text-[11px] font-black dark:border-slate-800 dark:bg-slate-900/90">
+            {/* Language Switcher (UZ, RU, EN) */}
+            <div className="flex items-center rounded-xl border border-slate-200/90 bg-slate-100/90 p-0.5 text-[11px] font-black dark:border-slate-800 dark:bg-slate-900/90 shadow-xs">
               {(['uz', 'ru', 'en'] as const).map((lang) => (
                 <button
                   key={lang}
                   type="button"
                   onClick={() => setLanguage(lang)}
-                  className={`rounded-lg px-2.5 py-1 uppercase transition-all cursor-pointer ${
+                  className={`rounded-lg px-2 sm:px-2.5 py-1 uppercase transition-all cursor-pointer font-black ${
                     language === lang
-                      ? 'bg-white text-amber-600 dark:bg-slate-800 dark:text-amber-400 shadow-xs font-black'
+                      ? 'bg-white text-amber-600 dark:bg-slate-800 dark:text-amber-400 shadow-xs'
                       : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                   }`}
                 >
@@ -353,7 +363,7 @@ export const LandingPage: React.FC = () => {
               }}
               className="inline-flex items-center gap-1.5 sm:gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-3.5 sm:px-4 py-2 text-xs shadow-md shadow-amber-500/20 border border-amber-300/50 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all cursor-pointer select-none"
             >
-              <span>{currentUser ? 'Kabinetga Kirish' : 'Tizimga Kirish'}</span>
+              <span>{currentUser ? (currentRole === 'student' ? t.landing.returnToStudentCabinet : t.landing.returnToAdminDashboard) : t.landing.loginCta}</span>
               <ArrowRight className="h-3.5 w-3.5 shrink-0" />
             </button>
 
@@ -376,45 +386,18 @@ export const LandingPage: React.FC = () => {
         {/* Mobile Navigation Drawer */}
         {isMobileMenuOpen && (
           <div className="lg:hidden border-t border-slate-200/80 bg-white/98 backdrop-blur-2xl dark:border-slate-800/80 dark:bg-[#050816]/98 px-4 sm:px-6 py-5 space-y-4 shadow-2xl animate-in slide-in-from-top-2 duration-200">
-            {/* Mobile Language Selector */}
-            <div className="space-y-1.5">
-              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block px-1">
-                Tilni tanlang:
-              </span>
-              <div className="grid grid-cols-3 gap-2 p-1 rounded-2xl bg-slate-100/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800">
-                {[
-                  { code: 'uz', label: "Oâ€˜zbek", flag: 'ðŸ‡ºðŸ‡¿' },
-                  { code: 'ru', label: 'Ð ÑƒÑÑÐºÐ¸Ð¹', flag: 'ðŸ‡·ðŸ‡º' },
-                  { code: 'en', label: 'English', flag: 'ðŸ‡¬ðŸ‡§' },
-                ].map((l) => (
-                  <button
-                    key={l.code}
-                    type="button"
-                    onClick={() => setLanguage(l.code as any)}
-                    className={`py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                      language === l.code
-                        ? 'bg-amber-500 text-slate-950 shadow-md font-black'
-                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    <span>{l.flag}</span>
-                    <span>{l.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* Navigation Links */}
             <nav className="flex flex-col space-y-1 pt-1">
               {[
-                { name: 'Kurslar', href: '#courses' },
-                { name: 'Darajani Aniqlash (Test)', action: () => setIsDiagnosticModalOpen(true) },
-                { name: 'Natijalar', href: '#results' },
-                { name: 'Oâ€˜qituvchilar', href: '#teachers' },
-                { name: 'Filiallar', href: '#branches' },
-                { name: 'Nega Aynan Lumos?', href: '#why-us' },
-                { name: 'Ota-onalar fikrlari', href: '#reviews' },
-                { name: 'Aloqa & Manzillar', href: '#contact' },
+                { name: t.landing.navCourses, href: '#courses' },
+                { name: t.landing.diagnosticHeroBtn, action: () => setIsDiagnosticModalOpen(true) },
+                { name: t.landing.navResults, href: '#results' },
+                { name: t.landing.navTeachers, href: '#teachers' },
+                { name: t.landing.navBranches, href: '#branches' },
+                { name: t.landing.navWhyUs, href: '#why-us' },
+                { name: t.landing.navFaq, href: '#faq' },
+                { name: t.landing.navReviews, href: '#reviews' },
+                { name: t.landing.navContact, href: '#contact' },
               ].map((item, idx) => (
                 <a
                   key={idx}
@@ -446,7 +429,7 @@ export const LandingPage: React.FC = () => {
                   className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 py-3 text-xs font-black text-slate-950 shadow-md active:scale-98 transition-all cursor-pointer"
                 >
                   <LogIn className="h-4 w-4" />
-                  <span>Admin & Ustoz Portali</span>
+                  <span>{t.landing.adminTeacherPortal}</span>
                 </button>
                 <button
                   type="button"
@@ -457,16 +440,16 @@ export const LandingPage: React.FC = () => {
                   className="w-full flex items-center justify-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 py-3 text-xs font-black text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 active:scale-98 transition-all cursor-pointer"
                 >
                   <GraduationCap className="h-4 w-4" />
-                  <span>Talaba Kabineti</span>
+                  <span>{t.landing.studentCabinet}</span>
                 </button>
               </div>
 
               {/* Call shortcut */}
               <div className="pt-2 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 px-1">
-                <span>Savollar bormi?</span>
+                <span>{language === 'ru' ? 'Есть вопросы?' : language === 'en' ? 'Have questions?' : 'Savollar bormi?'}</span>
                 <a
                   href="tel:+998712000025"
-                  className="font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1.5"
+                  className="font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1.5 font-mono"
                 >
                   <Phone className="h-3.5 w-3.5" />
                   <span>+998 (71) 200-00-25</span>
@@ -477,35 +460,38 @@ export const LandingPage: React.FC = () => {
         )}
       </header>
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      {/* ─────────────────────────────────────────────────────────────
           3. HERO SECTION (HIGH-CONVERTING & MODERN AMBIENT GLOW)
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      ───────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden py-16 sm:py-24 lg:py-28">
         {/* Ambient background glow layers */}
         <div className="absolute inset-0 pointer-events-none -z-10 flex items-center justify-center">
-          <div className="h-[500px] w-[750px] rounded-full bg-gradient-to-tr from-amber-500/15 via-blue-500/10 to-purple-600/10 blur-[150px]" />
+          <div className="h-[520px] w-[800px] rounded-full bg-gradient-to-tr from-amber-500/15 via-blue-500/10 to-indigo-600/10 blur-[150px]" />
         </div>
 
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8 space-y-7">
-          {/* Badge */}
+          {/* Pulsating Badge */}
           <div className="inline-flex items-center gap-2.5 rounded-full border border-amber-400/40 bg-amber-500/10 px-4 py-1.5 backdrop-blur-md shadow-xs">
-            <Sparkles className="h-4 w-4 text-amber-500 animate-pulse" />
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+            </span>
             <span className="text-xs font-black uppercase tracking-wider text-amber-700 dark:text-amber-300">
-              Yangi Oâ€˜quv Yili 2025â€“2026 Qabuli Ochiq
+              {t.landing.badge}
             </span>
           </div>
 
           {/* Main Headline */}
           <h1 className="mx-auto max-w-4xl text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.15] text-slate-900 dark:text-white">
-            Kelajagingizni Bugundan Boshlang â€”{' '}
+            {t.landing.heroTitle}{' '}
             <span className="bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 bg-clip-text text-transparent drop-shadow-xs">
-              Bilimdan Yuksak Natijalarga!
+              {t.landing.heroHighlight}
             </span>
           </h1>
 
           {/* Subtitle */}
           <p className="mx-auto max-w-2xl text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
-            Matematika, ingliz tili (IELTS), IT va maktab fanlari boâ€˜yicha individual yondashuv, kichik guruhlar va kafolatlangan oâ€˜sish tizimiga ega zamonaviy oâ€˜quv markazi.
+            {t.landing.heroSubtitle}
           </p>
 
           {/* Dual Main CTAs */}
@@ -514,7 +500,7 @@ export const LandingPage: React.FC = () => {
               href="#courses"
               className="inline-flex items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-8 py-3.5 text-sm shadow-xl shadow-amber-500/25 border border-amber-300/60 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all cursor-pointer select-none"
             >
-              <span>Kurslarni Koâ€˜rish</span>
+              <span>{t.landing.navCourses}</span>
               <ArrowRight className="h-4 w-4" />
             </a>
 
@@ -524,7 +510,7 @@ export const LandingPage: React.FC = () => {
               className="inline-flex items-center justify-center gap-2.5 rounded-2xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-900 dark:text-white font-extrabold border border-slate-200/90 dark:border-slate-700/80 px-7 py-3.5 text-sm shadow-lg shadow-black/5 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all cursor-pointer select-none group"
             >
               <Sparkles className="h-4 w-4 text-amber-500 group-hover:rotate-12 transition-transform" />
-              <span>Darajangizni Aniqlang (Test)</span>
+              <span>{t.landing.diagnosticHeroBtn}</span>
             </button>
           </div>
 
@@ -532,27 +518,23 @@ export const LandingPage: React.FC = () => {
           <div className="pt-6 flex flex-wrap items-center justify-center gap-6 text-xs font-semibold text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-              <span>Kichik guruhlar (10â€“12 oâ€˜quvchi)</span>
+              <span>{t.landing.trustSmallGroups}</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-              <span>1-sinov darsi bepul</span>
+              <span>{t.landing.trustFreeTrial}</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-              <span>Ota-onalar uchun Telegram monitoring</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-              <span>DTM & IELTS 7.5+ kafolatlangan dastur</span>
+              <span>{t.landing.trustMonthlyFee}</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      {/* ─────────────────────────────────────────────────────────────
           4. STATS BAR (CREDIBLE & FOCUSED)
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      ───────────────────────────────────────────────────────────── */}
       <section id="stats" className="border-y border-slate-200/80 bg-white py-10 sm:py-12 dark:border-slate-800/80 dark:bg-slate-900/60 transition-colors">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
@@ -561,7 +543,7 @@ export const LandingPage: React.FC = () => {
                 {counterStudents}+
               </span>
               <p className="text-xs font-bold text-slate-600 dark:text-slate-400">
-                Oâ€˜quvchilar Boshqaruvda
+                {t.landing.studentsCount}
               </p>
             </div>
             <div className="text-center space-y-1">
@@ -569,59 +551,59 @@ export const LandingPage: React.FC = () => {
                 {counterRate}%
               </span>
               <p className="text-xs font-bold text-slate-600 dark:text-slate-400">
-                Oliygoh & Grant Natijalari
+                {t.landing.successRate}
               </p>
             </div>
             <div className="text-center space-y-1">
               <span className="text-3xl sm:text-4xl font-black text-blue-500 font-mono">4</span>
               <p className="text-xs font-bold text-slate-600 dark:text-slate-400">
-                Filial va Oâ€˜quv Kampuslari
+                {t.landing.branchesBadge}
               </p>
             </div>
             <div className="text-center space-y-1">
-              <span className="text-3xl sm:text-4xl font-black text-amber-400 font-mono">4.9 â˜…</span>
+              <span className="text-3xl sm:text-4xl font-black text-amber-400 font-mono">4.9 ★</span>
               <p className="text-xs font-bold text-slate-600 dark:text-slate-400">
-                Ota-onalar & Oâ€˜quvchilar Bahosi
+                {t.landing.satisfactionRate}
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      {/* ─────────────────────────────────────────────────────────────
           5. COURSES DISCOVERY & FILTERS
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      ───────────────────────────────────────────────────────────── */}
       <section id="courses" className="py-20 transition-colors">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-10">
           <div className="text-center space-y-3">
             <Badge variant="warning" size="md">
-              Taâ€™lim Dasturlari
+              {t.landing.coursesBadge}
             </Badge>
             <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
-              Bizning Taâ€™lim Dasturlarimiz
+              {t.landing.coursesTitle}
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
-              Barcha darajadagi oâ€˜quvchilar uchun chuqurlashtirilgan, amaliy va natijaga yoâ€˜naltirilgan zamonaviy kurslar
+              {t.landing.coursesSubtitle}
             </p>
           </div>
 
           {/* Category Filter Pills & Search Bar */}
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2 overflow-x-auto pb-2 w-full md:w-auto scrollbar-thin">
-              {categories.map((cat) => {
-                const isSelected = selectedCategory === cat;
+              {categoryFilters.map((cat) => {
+                const isSelected = selectedCategoryKey === cat.key;
                 return (
                   <button
-                    key={cat}
+                    key={cat.key}
                     type="button"
-                    onClick={() => setSelectedCategory(cat)}
+                    onClick={() => setSelectedCategoryKey(cat.key)}
                     className={`px-4 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 font-black'
                         : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800 hover:border-amber-400/50'
                     }`}
                   >
-                    {cat}
+                    {cat.label}
                   </button>
                 );
               })}
@@ -634,7 +616,7 @@ export const LandingPage: React.FC = () => {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Kurs nomi yoki ustoz..."
+                placeholder={t.landing.searchPlaceholder}
                 className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
               />
             </div>
@@ -656,7 +638,7 @@ export const LandingPage: React.FC = () => {
                       </span>
                       <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
                         <Clock className="h-3.5 w-3.5 text-amber-500" />
-                        {course.durationMonths} oylik kurs
+                        {course.durationMonths} {t.landing.courseDurationMonths}
                       </span>
                     </div>
 
@@ -673,14 +655,14 @@ export const LandingPage: React.FC = () => {
                     {/* Schedule & Teacher Info */}
                     <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-3.5 border border-slate-100 dark:border-slate-800 space-y-2 text-xs">
                       <div className="flex items-center justify-between text-slate-700 dark:text-slate-300">
-                        <span className="text-slate-500 dark:text-slate-400 font-medium">Ustoz:</span>
+                        <span className="text-slate-500 dark:text-slate-400 font-medium">{t.landing.teacherLabel}</span>
                         <span className="font-bold text-amber-600 dark:text-amber-400 truncate max-w-[170px]">
                           {course.instructor || 'Yetakchi mutaxassis'}
                         </span>
                       </div>
                       {course.schedule && (
                         <div className="flex items-center justify-between text-slate-700 dark:text-slate-300">
-                          <span className="text-slate-500 dark:text-slate-400 font-medium">Vaqti:</span>
+                          <span className="text-slate-500 dark:text-slate-400 font-medium">{t.landing.scheduleLabel}</span>
                           <span className="font-semibold text-[11px] text-slate-800 dark:text-slate-200">
                             {course.schedule}
                           </span>
@@ -702,7 +684,7 @@ export const LandingPage: React.FC = () => {
                   {/* Price & Actions */}
                   <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Oylik toâ€˜lov:</span>
+                      <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">{t.landing.monthlyFeeLabel}</span>
                       <p className="text-base sm:text-lg font-black text-amber-600 dark:text-amber-400 font-mono">
                         {formatMoney(course.pricePerMonth, 'UZS')}
                       </p>
@@ -714,7 +696,7 @@ export const LandingPage: React.FC = () => {
                         onClick={() => setSelectedCourseForDetails(course)}
                         className="w-full py-2.5 rounded-xl border border-slate-200/90 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer text-center"
                       >
-                        Batafsil
+                        {t.landing.courseDetailsBtn}
                       </button>
 
                       <button
@@ -722,7 +704,7 @@ export const LandingPage: React.FC = () => {
                         onClick={() => openEnrollmentForCourse(course.title)}
                         className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black shadow-md shadow-amber-500/20 transition-all active:scale-95 cursor-pointer text-center"
                       >
-                        Yozilish
+                        {t.landing.courseEnrollBtn}
                       </button>
                     </div>
                   </div>
@@ -733,20 +715,20 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      {/* ─────────────────────────────────────────────────────────────
           6. RESULTS & ACHIEVEMENTS (NATIJALAR & ISHONCH)
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      ───────────────────────────────────────────────────────────── */}
       <section id="results" className="border-t border-slate-200/80 bg-white py-20 dark:border-slate-800/80 dark:bg-slate-900/40 transition-colors">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center space-y-3">
             <Badge variant="success" size="md">
-              Real Natijalar
+              {t.landing.resultsBadge}
             </Badge>
             <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
-              Oâ€˜quvchilarimizning Erishgan Yutuqlari
+              {t.landing.resultsTitle}
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
-              LUMOS da taâ€™lim shunchaki quruq dars emas â€” bu oliygoh granti, xalqaro sertifikat va hayotiy muvaffaqiyat garovidir
+              {t.landing.resultsSubtitle}
             </p>
           </div>
 
@@ -769,8 +751,8 @@ export const LandingPage: React.FC = () => {
                 year: 'Hasanboy ustoz shogirdi',
               },
               {
-                title: 'Matematika Respublika 1-oâ€˜rin',
-                student: 'Amirbek Yoâ€˜ldoshev',
+                title: 'Matematika Respublika 1-o‘rin',
+                student: 'Amirbek Yo‘ldoshev',
                 details: 'Al-Xorazmiy olimpiadasida oltin medal sohibi',
                 badge: 'Oltin Medal',
                 tag: 'Olimpiada',
@@ -779,7 +761,7 @@ export const LandingPage: React.FC = () => {
               {
                 title: 'Prezident Maktabiga Qabul',
                 student: 'Madinabonu Sobirova',
-                details: 'Critical Thinking va Mantiqiy matematika boâ€˜yicha 96 ball',
+                details: 'Critical Thinking va Mantiqiy matematika bo‘yicha 96 ball',
                 badge: 'Prezident Maktabi',
                 tag: 'Tayyorlov',
                 year: '2024 Qabuli',
@@ -821,20 +803,20 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      {/* ─────────────────────────────────────────────────────────────
           7. EXPERT INSTRUCTORS (HADICHA USTOZ & HASANBOY USTOZ)
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      ───────────────────────────────────────────────────────────── */}
       <section id="teachers" className="py-20 transition-colors">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center space-y-3">
             <Badge variant="info" size="md">
-              Oâ€˜qituvchilarimiz
+              {t.landing.teachersBadge}
             </Badge>
             <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
-              Tajribali va Natijador Ustozlar
+              {t.landing.teachersTitle}
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
-              Har bir ustozimiz koâ€˜p yillik amaliy tajribaga ega boâ€˜lib, oâ€˜quvchilarining oliygoh va imtihon natijalari bilan tanilgan
+              {t.landing.teachersSubtitle}
             </p>
           </div>
 
@@ -843,41 +825,40 @@ export const LandingPage: React.FC = () => {
             <div className="rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-6 flex flex-col justify-between">
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
-                  {/* Golden Monogram Avatar */}
                   <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-600/30 via-yellow-500/20 to-amber-300/30 border border-amber-400/50 text-amber-500 dark:text-amber-400 font-serif font-black text-2xl shadow-md">
                     H
                     <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-lg bg-amber-500 text-slate-950 text-[10px] font-black">
-                      âˆ‘
+                      ∑
                     </span>
                   </div>
 
                   <div className="min-w-0 flex-1">
                     <h4 className="text-xl font-black text-slate-900 dark:text-white truncate">
-                      Hadicha ustoz
+                      {t.landing.hadichaTitle}
                     </h4>
                     <p className="text-xs text-amber-600 dark:text-amber-400 font-bold mt-0.5 truncate">
-                      Matematika & Olimpiada boâ€˜yicha Oliy Toifali Ustoz
+                      {t.landing.hadichaRole}
                     </p>
                     <div className="flex items-center gap-1 mt-1 text-xs text-amber-500 font-bold">
                       <Star className="h-3.5 w-3.5 fill-current" />
-                      <span>5.0 (Aâ€™lo reyting)</span>
-                      <span className="text-slate-400 text-[11px] font-normal ml-1">Â· 11 nafar faol oâ€˜quvchi</span>
+                      <span>{t.landing.ratingText}</span>
+                      <span className="text-slate-400 text-[11px] font-normal ml-1">· 11 {t.landing.studentsCount.toLowerCase()}</span>
                     </div>
                   </div>
                 </div>
 
                 <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  Oliy toifali matematika fani oâ€˜qituvchisi. 8 yillik pedagogik tajriba, 100 dan ortiq DTM va xalqaro olimpiada gâ€˜oliblarini tarbiyalagan yetakchi mutaxassis.
+                  {t.landing.hadichaBio}
                 </p>
 
                 <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-3.5 border border-slate-100 dark:border-slate-800 text-xs space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Dars kunlari:</span>
-                    <span className="font-semibold text-slate-800 dark:text-slate-200">Dushanba, Chorshanba, Juma</span>
+                    <span className="text-slate-500">{t.landing.daysLabel}</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">{t.landing.hadichaDays}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Dars vaqti:</span>
-                    <span className="font-semibold text-slate-800 dark:text-slate-200">14:00 - 16:00</span>
+                    <span className="text-slate-500">{t.landing.timeLabel}</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">{t.landing.hadichaTime}</span>
                   </div>
                 </div>
               </div>
@@ -886,9 +867,9 @@ export const LandingPage: React.FC = () => {
                 variant="primary"
                 size="sm"
                 className="w-full justify-center gap-2 font-bold cursor-pointer rounded-xl py-2.5"
-                onClick={() => openEnrollmentForCourse('Matematika (Hadicha ustoz)')}
+                onClick={() => openEnrollmentForCourse(t.landing.mathTitle)}
               >
-                Hadicha ustoz guruhiga yozilish
+                {t.landing.hadichaBtn}
               </Button>
             </div>
 
@@ -896,7 +877,6 @@ export const LandingPage: React.FC = () => {
             <div className="rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-6 flex flex-col justify-between">
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
-                  {/* Golden Monogram Avatar */}
                   <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-600/30 via-yellow-500/20 to-amber-300/30 border border-amber-400/50 text-amber-500 dark:text-amber-400 font-serif font-black text-2xl shadow-md">
                     H
                     <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-lg bg-amber-500 text-slate-950 text-[10px] font-black">
@@ -906,31 +886,31 @@ export const LandingPage: React.FC = () => {
 
                   <div className="min-w-0 flex-1">
                     <h4 className="text-xl font-black text-slate-900 dark:text-white truncate">
-                      Hasanboy ustoz
+                      {t.landing.hasanboyTitle}
                     </h4>
                     <p className="text-xs text-amber-600 dark:text-amber-400 font-bold mt-0.5 truncate">
-                      IELTS Band 8.0 & General English Mutaxassisi
+                      {t.landing.hasanboyRole}
                     </p>
                     <div className="flex items-center gap-1 mt-1 text-xs text-amber-500 font-bold">
                       <Star className="h-3.5 w-3.5 fill-current" />
-                      <span>5.0 (Aâ€™lo reyting)</span>
-                      <span className="text-slate-400 text-[11px] font-normal ml-1">Â· 13 nafar faol oâ€˜quvchi</span>
+                      <span>{t.landing.ratingText}</span>
+                      <span className="text-slate-400 text-[11px] font-normal ml-1">· 13 {t.landing.studentsCount.toLowerCase()}</span>
                     </div>
                   </div>
                 </div>
 
                 <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  IELTS 8.0 sohibi. Oâ€˜quvchilarda erkin jonli muloqot, akademik Writing va yuqori ball olish metodikasi asosida dars beruvchi sertifikatlangan instruktor.
+                  {t.landing.hasanboyBio}
                 </p>
 
                 <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-3.5 border border-slate-100 dark:border-slate-800 text-xs space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Dars kunlari:</span>
-                    <span className="font-semibold text-slate-800 dark:text-slate-200">Seshanba, Payshanba, Shanba</span>
+                    <span className="text-slate-500">{t.landing.daysLabel}</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">{t.landing.hasanboyDays}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Dars vaqti:</span>
-                    <span className="font-semibold text-slate-800 dark:text-slate-200">15:30 - 17:30</span>
+                    <span className="text-slate-500">{t.landing.timeLabel}</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">{t.landing.hasanboyTime}</span>
                   </div>
                 </div>
               </div>
@@ -939,29 +919,29 @@ export const LandingPage: React.FC = () => {
                 variant="primary"
                 size="sm"
                 className="w-full justify-center gap-2 font-bold cursor-pointer rounded-xl py-2.5"
-                onClick={() => openEnrollmentForCourse('Ingliz Tili (Hasanboy ustoz)')}
+                onClick={() => openEnrollmentForCourse(t.landing.engTitle)}
               >
-                Hasanboy ustoz guruhiga yozilish
+                {t.landing.hasanboyBtn}
               </Button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          8. BRANCHES DIRECTORY (FILIALLAR BOâ€˜LIMI)
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ─────────────────────────────────────────────────────────────
+          8. BRANCHES DIRECTORY (FILIALLAR BO‘LIMI)
+      ───────────────────────────────────────────────────────────── */}
       <section id="branches" className="border-t border-slate-200/80 bg-white py-20 dark:border-slate-800/80 dark:bg-slate-900/40 transition-colors">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center space-y-3">
             <Badge variant="warning" size="md">
-              Filiallarimiz
+              {t.landing.branchesBadge}
             </Badge>
             <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
-              Oâ€˜zingizga Qulay Filialni Tanlang
+              {t.landing.branchesTitle}
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
-              Shahar markazida va qulay hududlarda joylashgan, zamonaviy jihozlangan oâ€˜quv kampuslarimiz
+              {t.landing.branchesSubtitle}
             </p>
           </div>
 
@@ -980,7 +960,7 @@ export const LandingPage: React.FC = () => {
                           : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
                       }`}
                     >
-                      {b.status === 'Active' ? 'Faol Filial' : 'Tez Kunda'}
+                      {b.status === 'Active' ? t.landing.branchActive : t.landing.branchPlanned}
                     </span>
                     <span className="text-[10px] font-bold text-slate-400">{b.city}</span>
                   </div>
@@ -1002,13 +982,13 @@ export const LandingPage: React.FC = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       <Clock className="h-4 w-4 text-amber-500 shrink-0" />
-                      <span>08:00 - 20:00 (Har kuni)</span>
+                      <span>08:00 - 20:00</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
-                  <span className="text-slate-400 text-[11px]">Rahbar: {b.managerName}</span>
+                  <span className="text-slate-400 text-[11px]">{t.landing.branchManager} {b.managerName}</span>
                   <button
                     type="button"
                     onClick={() => {
@@ -1017,7 +997,7 @@ export const LandingPage: React.FC = () => {
                     }}
                     className="text-amber-600 dark:text-amber-400 font-bold hover:underline cursor-pointer"
                   >
-                    Yozilish â†’
+                    {t.landing.branchEnroll}
                   </button>
                 </div>
               </div>
@@ -1026,20 +1006,20 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      {/* ─────────────────────────────────────────────────────────────
           9. WHY LUMOS (NEGA AYNAN LUMOS?)
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      ───────────────────────────────────────────────────────────── */}
       <section id="why-us" className="py-20 transition-colors">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center space-y-3">
             <Badge variant="success" size="md">
-              Afzalliklarimiz
+              {t.landing.whyUsBadge}
             </Badge>
             <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
-              Nega Aynan LUMOS Oâ€˜quv Markazi?
+              {t.landing.whyUsTitle}
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
-              Bizning har bir metodikamiz va tizimimiz sizning eng yuqori natijaga tezroq erishishingiz uchun yaratilgan
+              {t.landing.whyUsSubtitle}
             </p>
           </div>
 
@@ -1049,10 +1029,10 @@ export const LandingPage: React.FC = () => {
                 <Users className="h-6 w-6" />
               </div>
               <h3 className="text-base font-black text-slate-900 dark:text-white">
-                Kichik Guruhlar
+                {t.landing.whyFeature1Title}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Har bir guruhda atigi 10-12 nafar oâ€˜quvchi oâ€˜qiydi. Ustoz har bir talaba bilan yakkama-yakka ishlash imkoniga ega boâ€˜ladi.
+                {t.landing.whyFeature1Desc}
               </p>
             </div>
 
@@ -1061,10 +1041,10 @@ export const LandingPage: React.FC = () => {
                 <ShieldCheck className="h-6 w-6" />
               </div>
               <h3 className="text-base font-black text-slate-900 dark:text-white">
-                Doimiy Nazorat & Xisobot
+                {t.landing.whyFeature2Title}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Davomat va test natijalari ota-onalarning Telegramiga avtomatik yuboriladi. Bolaning darsdagi har bir qadami shaffof.
+                {t.landing.whyFeature2Desc}
               </p>
             </div>
 
@@ -1073,10 +1053,10 @@ export const LandingPage: React.FC = () => {
                 <Compass className="h-6 w-6" />
               </div>
               <h3 className="text-base font-black text-slate-900 dark:text-white">
-                Zamonaviy Metodika
+                {t.landing.whyFeature3Title}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Quruq yodlatish emas, balki mantiqiy fikrlash, tushunish va amaliyotda erkin qoâ€˜llashga qaratilgan xalqaro taâ€™lim standarti.
+                {t.landing.whyFeature3Desc}
               </p>
             </div>
 
@@ -1085,30 +1065,117 @@ export const LandingPage: React.FC = () => {
                 <Award className="h-6 w-6" />
               </div>
               <h3 className="text-base font-black text-slate-900 dark:text-white">
-                Kafolatlangan Natija
+                {t.landing.whyFeature4Title}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Muntazam testlar va oraliq imtihonlar orqali bilim darajasining dinamik oâ€˜sishi kafolatlanadi.
+                {t.landing.whyFeature4Desc}
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          10. DIAGNOSTIC TEST CALL-TO-ACTION BANNER
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ─────────────────────────────────────────────────────────────
+          10. INTERACTIVE FAQ ACCORDION (A+ ACADEMY INSPIRED)
+      ───────────────────────────────────────────────────────────── */}
+      <section id="faq" className="border-t border-slate-200/80 bg-white py-20 dark:border-slate-800/80 dark:bg-slate-900/50 transition-colors">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 space-y-12">
+          <div className="text-center space-y-3">
+            <Badge variant="warning" size="md">
+              {t.landing.faqBadge}
+            </Badge>
+            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+              {t.landing.faqTitle}
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+              {t.landing.faqSubtitle}
+            </p>
+          </div>
+
+          <div className="space-y-3.5">
+            {t.landing.faqList.map((item, idx) => {
+              const isOpen = openFaqIndex === idx;
+              return (
+                <div
+                  key={idx}
+                  className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
+                    isOpen
+                      ? 'border-amber-500/60 bg-amber-500/[0.03] dark:bg-amber-500/[0.05] shadow-md shadow-amber-500/5'
+                      : 'border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700'
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                    className="w-full flex items-center justify-between p-5 text-left transition-colors cursor-pointer select-none"
+                  >
+                    <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white pr-4">
+                      {item.q}
+                    </span>
+                    <span
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border transition-transform duration-200 ${
+                        isOpen
+                          ? 'border-amber-500 bg-amber-500 text-slate-950 rotate-180'
+                          : 'border-slate-200 dark:border-slate-800 text-slate-400'
+                      }`}
+                    >
+                      <ChevronDown className="h-4 w-4" />
+                    </span>
+                  </button>
+
+                  {isOpen && (
+                    <div className="px-5 pb-5 pt-0 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-slate-800/60 mt-1 pt-3 animate-in fade-in-50 duration-150">
+                      {item.a}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Direct Telegram Support Box */}
+          <div className="p-6 rounded-3xl border border-amber-500/30 bg-amber-500/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-slate-950 shadow-md">
+                <MessageCircle className="h-6 w-6" />
+              </div>
+              <div>
+                <h4 className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
+                  {language === 'ru' ? 'Остались вопросы? Напишите нам!' : language === 'en' ? 'Still have questions? Chat with us!' : 'Boshqa savollaringiz bormi?'}
+                </h4>
+                <p className="text-xs text-slate-600 dark:text-slate-400">
+                  {language === 'ru' ? 'Ответим в течение 5 минут в Telegram' : language === 'en' ? 'Our mentors respond in 5 minutes via Telegram' : 'Menejerlarimiz Telegram orqali 5 daqiqada javob berishadi'}
+                </p>
+              </div>
+            </div>
+
+            <a
+              href="https://t.me/lumos_edu"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-amber-500 text-slate-950 font-black text-xs hover:bg-amber-400 shadow-md shadow-amber-500/20 transition-all active:scale-95 shrink-0"
+            >
+              <span>Telegramda Bog‘lanish</span>
+              <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ─────────────────────────────────────────────────────────────
+          11. DIAGNOSTIC TEST CALL-TO-ACTION BANNER
+      ───────────────────────────────────────────────────────────── */}
       <section className="py-12 bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-600 text-slate-950">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-2 text-center md:text-left">
             <span className="px-3 py-1 rounded-full bg-slate-950/20 text-slate-950 text-xs font-black uppercase tracking-wider">
-              2 Daqiqalik Bepul Sinov
+              {t.landing.diagnosticBadge}
             </span>
             <h3 className="text-2xl sm:text-3xl font-black">
-              Qaysi guruh sizga toâ€˜gâ€˜ri kelishini bilmaysizmi?
+              {t.landing.diagnosticBannerTitle}
             </h3>
             <p className="text-xs sm:text-sm font-medium text-slate-900/80 max-w-xl">
-              Interaktiv diagnostik testimiz orqali bilim darajangizni aniqlang va sizga eng mos keluvchi taâ€™lim dasturini tanlang.
+              {t.landing.diagnosticBannerSubtitle}
             </p>
           </div>
 
@@ -1117,59 +1184,30 @@ export const LandingPage: React.FC = () => {
             onClick={() => setIsDiagnosticModalOpen(true)}
             className="px-8 py-4 rounded-2xl bg-slate-950 text-amber-400 hover:text-amber-300 font-black text-sm shadow-xl shadow-black/20 hover:scale-105 active:scale-95 transition-all cursor-pointer select-none shrink-0"
           >
-            Darajani Bepul Aniqlash â†’
+            {t.landing.diagnosticBannerBtn}
           </button>
         </div>
       </section>
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          11. TESTIMONIALS (OTA-ONALAR VA TALABALAR FIKRLARI)
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ─────────────────────────────────────────────────────────────
+          12. TESTIMONIALS (OTA-ONALAR VA TALABALAR FIKRLARI)
+      ───────────────────────────────────────────────────────────── */}
       <section id="reviews" className="border-t border-slate-200/80 bg-white py-20 dark:border-slate-800/80 dark:bg-slate-900/40 transition-colors">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center space-y-3">
             <Badge variant="warning" size="md">
-              Fikrlar
+              {t.landing.testimonialsBadge}
             </Badge>
             <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
-              Oâ€˜quvchilar va Ota-onalar Nima Deydi?
+              {t.landing.testimonialsTitle}
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
-              Markazimizda tahsil olayotgan yoshlar va ularning ota-onalarining samimiy fikrlari
+              {t.landing.testimonialsSubtitle}
             </p>
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              {
-                name: 'Gulchehra opa',
-                role: 'Ona (Oâ€˜quvchi: Azizbek)',
-                score: '5.0 â˜…',
-                subject: 'Hadicha ustoz guruhi',
-                text: 'Oâ€˜gâ€˜lim maktabda matematikani uncha yoqtirmasdi. Hadicha ustozga kelganidan keyin mustaqil qiziqib misol ishlaydigan boâ€˜ldi. Har oy toâ€˜liq hisobot berilishi juda qulay.',
-              },
-              {
-                name: 'Jasurbek Mahmudov',
-                role: 'Abituriyent',
-                score: 'IELTS 7.5',
-                subject: 'Hasanboy ustoz guruhi',
-                text: 'Hasanboy ustozning Speaking Club va Writing mashgâ€˜ulotlari tufayli 4 oyda 6.0 dan 7.5 ga chiqdim. Hozirda xorijiy universitet grantiga ariza topshirdim.',
-              },
-              {
-                name: 'Olimjon aka',
-                role: 'Ota (Oâ€˜quvchi: Sardor)',
-                score: '5.0 â˜…',
-                subject: 'IT & Dasturlash',
-                text: 'Oâ€˜gâ€˜lim kompyuterda shunchaki oâ€˜yin oâ€˜ynashdan endi oâ€˜zi mustaqil saytlar va dasturlar yaratishga oâ€˜tdi. LUMOS jamoasiga samimiy minnatdorchilik bildiraman.',
-              },
-              {
-                name: 'Dilnoza Karimova',
-                role: 'Talaba (Yuridik Univ.)',
-                score: '189 Ball',
-                subject: 'Matematika & DTM Bloki',
-                text: 'LUMOS dagi qatâ€™iy tartib va repetitsion testlar boâ€˜lmaganda grantga kura olmasdim. Oâ€˜rgatilgan har bir tezkor usul imtihonda 100% asqatdi!',
-              },
-            ].map((item, idx) => (
+            {t.landing.testimonialsList.map((item, idx) => (
               <div
                 key={idx}
                 className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4 flex flex-col justify-between"
@@ -1202,22 +1240,22 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          12. CONTACT & ENROLLMENT (ARIZA QOLDIRISH)
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ─────────────────────────────────────────────────────────────
+          13. CONTACT & ENROLLMENT (ARIZA QOLDIRISH)
+      ───────────────────────────────────────────────────────────── */}
       <section id="contact" className="py-20 transition-colors">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 items-center">
             {/* Left Info */}
             <div className="space-y-6">
               <Badge variant="warning" size="md">
-                Aloqa va Qabul
+                {t.landing.contactBadge}
               </Badge>
               <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
-                Birinchi Sinov Darsiga Yoziling!
+                {t.landing.contactTitle}
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                Savollaringiz bormi yoki guruh tanlashda ikkilanyapsizmi? Maâ€™lumotlaringizni qoldiring, mutaxassisimiz 10 daqiqada siz bilan bogâ€˜lanadi.
+                {t.landing.contactSubtitle}
               </p>
 
               <div className="space-y-4 pt-2">
@@ -1226,8 +1264,8 @@ export const LandingPage: React.FC = () => {
                     <Phone className="h-4 w-4" />
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-400 block font-medium">Telefon raqam:</span>
-                    <a href="tel:+998712000025" className="text-sm font-bold text-slate-900 dark:text-white hover:text-amber-500 transition-colors">
+                    <span className="text-[10px] text-slate-400 block font-medium">{t.landing.phoneLabel}</span>
+                    <a href="tel:+998712000025" className="text-sm font-bold text-slate-900 dark:text-white hover:text-amber-500 transition-colors font-mono">
                       +998 (71) 200-00-25
                     </a>
                   </div>
@@ -1238,9 +1276,9 @@ export const LandingPage: React.FC = () => {
                     <MapPin className="h-4 w-4" />
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-400 block font-medium">Markaziy Bosh Bino:</span>
+                    <span className="text-[10px] text-slate-400 block font-medium">{t.landing.addressLabel}</span>
                     <span className="text-sm font-bold text-slate-900 dark:text-white">
-                      Toshkent sh., Chilonzor tumani, Bunyodkor shoh koâ€˜chasi 42
+                      {t.landing.addressVal}
                     </span>
                   </div>
                 </div>
@@ -1250,9 +1288,9 @@ export const LandingPage: React.FC = () => {
                     <Clock className="h-4 w-4" />
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-400 block font-medium">Ish vaqti:</span>
+                    <span className="text-[10px] text-slate-400 block font-medium">{t.landing.workingHoursLabel}</span>
                     <span className="text-sm font-bold text-slate-900 dark:text-white">
-                      08:00 - 20:00 (Dushanba - Shanba)
+                      {t.landing.workingHoursVal}
                     </span>
                   </div>
                 </div>
@@ -1263,38 +1301,38 @@ export const LandingPage: React.FC = () => {
             <div className="rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xl dark:border-slate-800 dark:bg-slate-900">
               <div className="mb-6 space-y-1">
                 <h3 className="text-xl font-black text-slate-900 dark:text-white">
-                  Bepul Sinov Darsiga Ariza Qoldirish
+                  {t.landing.formTitle}
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Ismingiz va telefon raqamingizni kiriting, qolganini biz hal qilamiz
+                  {t.landing.formSubtitle}
                 </p>
               </div>
 
               <form onSubmit={handleApplySubmit} className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Ism va Familiyangiz *
+                    {t.landing.fullName} *
                   </label>
                   <input
                     type="text"
                     required
                     value={applicantName}
                     onChange={(e) => setApplicantName(e.target.value)}
-                    placeholder="Masalan: Sardor Aliyev"
+                    placeholder={t.landing.fullNamePlaceholder}
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Telefon Raqamingiz *
+                    {t.landing.phone} *
                   </label>
                   <input
                     type="tel"
                     required
                     value={applicantPhone}
                     onChange={(e) => handlePhoneFormat(e.target.value)}
-                    placeholder="+998 (90) 123-45-67"
+                    placeholder={t.landing.phonePlaceholder}
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs sm:text-sm font-mono font-medium focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all"
                   />
                 </div>
@@ -1302,7 +1340,7 @@ export const LandingPage: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                      Qiziqtirgan kurs
+                      {t.landing.selectCourse}
                     </label>
                     <select
                       value={selectedCourseName}
@@ -1319,7 +1357,7 @@ export const LandingPage: React.FC = () => {
 
                   <div>
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                      Filial
+                      {t.landing.branchesBadge}
                     </label>
                     <select
                       value={applicantBranch}
@@ -1337,7 +1375,7 @@ export const LandingPage: React.FC = () => {
 
                 {isSubmitted ? (
                   <div className="rounded-2xl bg-emerald-50 p-4 text-xs font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 text-center border border-emerald-200 dark:border-emerald-800 animate-fadeIn">
-                    ðŸŽ‰ Arizangiz qabul qilindi! Tez orada mutaxassisimiz siz bilan bogâ€˜lanadi.
+                    🎉 {t.landing.applicationSuccess}
                   </div>
                 ) : (
                   <Button
@@ -1348,11 +1386,11 @@ export const LandingPage: React.FC = () => {
                     className="w-full justify-center gap-2 mt-2 font-black text-sm py-3.5 shadow-lg shadow-amber-500/25 cursor-pointer rounded-2xl"
                   >
                     {isSubmitting ? (
-                      <span>Yuborilmoqda...</span>
+                      <span>{t.common.loading}</span>
                     ) : (
                       <>
                         <Send className="h-4 w-4" />
-                        <span>Arizani Yuborish</span>
+                        <span>{t.landing.submitApplication}</span>
                       </>
                     )}
                   </Button>
@@ -1363,9 +1401,9 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          13. PREMIUM FOOTER
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ─────────────────────────────────────────────────────────────
+          14. PREMIUM FOOTER
+      ───────────────────────────────────────────────────────────── */}
       <footer className="border-t border-slate-200 bg-white py-16 dark:border-slate-800 dark:bg-[#030610] transition-colors">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
@@ -1375,41 +1413,42 @@ export const LandingPage: React.FC = () => {
                 <img src={lumosLogo} alt="LUMOS" className="h-10 w-10 object-contain" />
                 <div>
                   <span className="font-black text-base text-slate-900 dark:text-white font-serif block">
-                    LUMOS Taâ€™lim Markazi
+                    LUMOS
                   </span>
                   <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider">
-                    Bilimdan Natijaga
+                    {t.landing.footerSlogan}
                   </span>
                 </div>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-sm">
-                LUMOS â€” zamonaviy oâ€˜quv markazi, kuchli metodika va real natijalar platformasi. Biz oâ€˜quvchilarimizning kelajagi va oliygohlarga kirishiga kafolat beramiz.
+                {t.landing.heroSubtitle}
               </p>
               <div className="flex items-center gap-3 text-slate-400 text-xs">
-                <span>Telegram: <strong>@lumos_edu</strong></span>
-                <span>â€¢</span>
-                <span>Instagram: <strong>@lumos.uz</strong></span>
+                <span>Telegram: <a href="https://t.me/lumos_edu" className="hover:text-amber-500 font-bold">@lumos_edu</a></span>
+                <span>•</span>
+                <span>Instagram: <a href="https://instagram.com" className="hover:text-amber-500 font-bold">@lumos.uz</a></span>
               </div>
             </div>
 
             {/* Col 2: Navigation */}
             <div className="space-y-3 text-xs">
               <span className="font-black uppercase tracking-wider text-slate-900 dark:text-white block">
-                Navigatsiya
+                {language === 'ru' ? 'Навигация' : language === 'en' ? 'Navigation' : 'Navigatsiya'}
               </span>
               <ul className="space-y-2 text-slate-500 dark:text-slate-400 font-medium">
-                <li><a href="#courses" className="hover:text-amber-500 transition-colors">Kurslarimiz</a></li>
-                <li><a href="#results" className="hover:text-amber-500 transition-colors">Oâ€˜quvchilar natijalari</a></li>
-                <li><a href="#teachers" className="hover:text-amber-500 transition-colors">Oâ€˜qituvchilar jamoasi</a></li>
-                <li><a href="#branches" className="hover:text-amber-500 transition-colors">Filiallar va lokatsiya</a></li>
-                <li><a href="#why-us" className="hover:text-amber-500 transition-colors">Nega biz?</a></li>
+                <li><a href="#courses" className="hover:text-amber-500 transition-colors">{t.landing.navCourses}</a></li>
+                <li><a href="#results" className="hover:text-amber-500 transition-colors">{t.landing.navResults}</a></li>
+                <li><a href="#teachers" className="hover:text-amber-500 transition-colors">{t.landing.navTeachers}</a></li>
+                <li><a href="#branches" className="hover:text-amber-500 transition-colors">{t.landing.navBranches}</a></li>
+                <li><a href="#faq" className="hover:text-amber-500 transition-colors">{t.landing.navFaq}</a></li>
+                <li><a href="#why-us" className="hover:text-amber-500 transition-colors">{t.landing.navWhyUs}</a></li>
               </ul>
             </div>
 
             {/* Col 3: Courses */}
             <div className="space-y-3 text-xs">
               <span className="font-black uppercase tracking-wider text-slate-900 dark:text-white block">
-                Yoâ€˜nalishlar
+                {t.landing.coursesBadge}
               </span>
               <ul className="space-y-2 text-slate-500 dark:text-slate-400 font-medium">
                 <li><a href="#courses" className="hover:text-amber-500 transition-colors">Matematika (Hadicha ustoz)</a></li>
@@ -1423,31 +1462,31 @@ export const LandingPage: React.FC = () => {
             {/* Col 4: Contact */}
             <div className="space-y-3 text-xs">
               <span className="font-black uppercase tracking-wider text-slate-900 dark:text-white block">
-                Aloqa
+                {t.landing.navContact}
               </span>
               <ul className="space-y-2 text-slate-500 dark:text-slate-400 font-medium">
-                <li>Tel: <a href="tel:+998712000025" className="font-bold text-slate-900 dark:text-white hover:text-amber-500">+998 (71) 200-00-25</a></li>
+                <li>Tel: <a href="tel:+998712000025" className="font-bold text-slate-900 dark:text-white hover:text-amber-500 font-mono">+998 (71) 200-00-25</a></li>
                 <li>Email: <strong>admin@lumos.uz</strong></li>
-                <li>Toshkent sh., Chilonzor 9-mavze</li>
-                <li>Har kuni: 08:00 - 20:00</li>
+                <li>{t.landing.addressVal}</li>
+                <li>{t.landing.workingHoursVal}</li>
               </ul>
             </div>
           </div>
 
           <div className="pt-8 border-t border-slate-100 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
-            <p>Â© {new Date().getFullYear()} LUMOS Taâ€™lim & CRM Tizimi. Barcha huquqlar himoyalangan.</p>
+            <p>© {new Date().getFullYear()} {t.landing.footerRights}</p>
             <div className="flex items-center gap-4">
-              <a href="#/admin" className="hover:text-amber-500 transition-colors font-bold">Admin Kirish</a>
-              <span>â€¢</span>
-              <a href="#/student" className="hover:text-amber-500 transition-colors font-bold">Talaba Kirish</a>
+              <a href="#/admin" className="hover:text-amber-500 transition-colors font-bold">{t.landing.adminTeacherPortal}</a>
+              <span>•</span>
+              <a href="#/student" className="hover:text-amber-500 transition-colors font-bold">{t.landing.studentCabinet}</a>
             </div>
           </div>
         </div>
       </footer>
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          14. MODALS: DIAGNOSTIC TEST, COURSE DETAILS, QUICK APPLY
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ─────────────────────────────────────────────────────────────
+          15. MODALS: DIAGNOSTIC TEST, COURSE DETAILS, QUICK APPLY
+      ───────────────────────────────────────────────────────────── */}
       <DiagnosticTestModal
         isOpen={isDiagnosticModalOpen}
         onClose={() => setIsDiagnosticModalOpen(false)}
@@ -1464,15 +1503,15 @@ export const LandingPage: React.FC = () => {
       <Modal
         isOpen={isApplyModalOpen}
         onClose={() => setIsApplyModalOpen(false)}
-        title="Darsga Roâ€˜yxatdan Oâ€˜tish"
+        title={t.landing.formTitle}
       >
         <form onSubmit={handleApplySubmit} className="space-y-4">
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            1-bepul sinov darsi vaqti boâ€˜yicha siz bilan bogâ€˜lanishimiz uchun maâ€™lumotlaringizni kiriting
+            {t.landing.formSubtitle}
           </p>
 
           <Select
-            label="Tanlangan Kurs"
+            label={t.landing.selectCourse}
             value={selectedCourseName}
             onChange={(e) => setSelectedCourseName(e.target.value)}
             options={INITIAL_COURSES.map((c) => ({ value: c.title, label: c.title }))}
@@ -1480,12 +1519,12 @@ export const LandingPage: React.FC = () => {
 
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Filial
+              {t.landing.branchesBadge}
             </label>
             <select
               value={applicantBranch}
               onChange={(e) => setApplicantBranch(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-medium focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all"
+              className="w-full px-3 py-2.5 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-medium focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all"
             >
               {INITIAL_BRANCHES.map((b) => (
                 <option key={b.id} value={b.name}>
@@ -1496,30 +1535,30 @@ export const LandingPage: React.FC = () => {
           </div>
 
           <Input
-            label="Ism va Familiyangiz"
+            label={t.landing.fullName}
             required
             value={applicantName}
             onChange={(e) => setApplicantName(e.target.value)}
-            placeholder="Masalan: Sardor Aliyev"
+            placeholder={t.landing.fullNamePlaceholder}
           />
 
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Telefon Raqamingiz *
+              {t.landing.phone} *
             </label>
             <input
               type="tel"
               required
               value={applicantPhone}
               onChange={(e) => handlePhoneFormat(e.target.value)}
-              placeholder="+998 (90) 123-45-67"
+              placeholder={t.landing.phonePlaceholder}
               className="w-full px-3 py-2 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs sm:text-sm font-mono font-medium focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all"
             />
           </div>
 
           {isSubmitted ? (
             <div className="rounded-2xl bg-emerald-50 p-3 text-xs font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 text-center border border-emerald-200 dark:border-emerald-800">
-              ðŸŽ‰ Arizangiz qabul qilindi! Tez orada mutaxassisimiz bogâ€˜lanadi.
+              🎉 {t.landing.applicationSuccess}
             </div>
           ) : (
             <div className="pt-2 flex items-center justify-end gap-3">
@@ -1529,7 +1568,7 @@ export const LandingPage: React.FC = () => {
                 size="sm"
                 onClick={() => setIsApplyModalOpen(false)}
               >
-                Bekor qilish
+                {t.landing.cancelBtn}
               </Button>
               <Button
                 type="submit"
@@ -1539,7 +1578,7 @@ export const LandingPage: React.FC = () => {
                 className="gap-2 shadow-md shadow-amber-500/20 font-bold px-6"
               >
                 <Send className="h-3.5 w-3.5" />
-                <span>Yuborish</span>
+                <span>{t.landing.submitApplication}</span>
               </Button>
             </div>
           )}

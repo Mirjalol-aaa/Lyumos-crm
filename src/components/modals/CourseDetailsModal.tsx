@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import {
   X,
   Clock,
@@ -11,7 +11,6 @@ import {
   Send,
 } from 'lucide-react';
 import { Button } from '../ui/Button';
-import { Badge } from '../ui/Badge';
 import { Course } from '../../types/admin';
 import { useI18n } from '../../lib/i18n';
 
@@ -22,13 +21,62 @@ interface CourseDetailsModalProps {
   onEnroll: (courseTitle: string) => void;
 }
 
+const MODAL_I18N = {
+  uz: {
+    duration: 'Davomiyligi',
+    lessons: 'Jami Darslar',
+    mentor: 'Ustoz',
+    monthlyFee: 'Oylik To‘lov',
+    schedule: 'Mashg‘ulotlar grafigi:',
+    syllabus: 'Kurs O‘quv Rejasi (Syllabus):',
+    outcomes: 'Kurs yakunida nimalarga erishasiz:',
+    feeAmount: 'To‘lov miqdori:',
+    close: 'Yopish',
+    enroll: 'Guruhga Yozilish',
+    months: 'oy',
+    hours: 'soat',
+    specialist: 'Yetakchi mutaxassis',
+  },
+  ru: {
+    duration: 'Длительность',
+    lessons: 'Всего уроков',
+    mentor: 'Наставник',
+    monthlyFee: 'Ежемесячно',
+    schedule: 'График занятий:',
+    syllabus: 'Программа курса (Syllabus):',
+    outcomes: 'Что вы получите по окончании курса:',
+    feeAmount: 'Сумма оплаты:',
+    close: 'Закрыть',
+    enroll: 'Записаться в группу',
+    months: 'мес.',
+    hours: 'академ. ч.',
+    specialist: 'Ведущий преподаватель',
+  },
+  en: {
+    duration: 'Duration',
+    lessons: 'Total Lessons',
+    mentor: 'Instructor',
+    monthlyFee: 'Monthly Fee',
+    schedule: 'Class Schedule:',
+    syllabus: 'Course Syllabus:',
+    outcomes: 'What you will achieve upon completion:',
+    feeAmount: 'Tuition Amount:',
+    close: 'Close',
+    enroll: 'Enroll in Group',
+    months: 'months',
+    hours: 'hours',
+    specialist: 'Lead Specialist',
+  },
+};
+
 export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
   course,
   isOpen,
   onClose,
   onEnroll,
 }) => {
-  const { formatMoney } = useI18n();
+  const { language, formatMoney } = useI18n();
+  const t = MODAL_I18N[language] || MODAL_I18N.uz;
 
   if (!isOpen || !course) return null;
 
@@ -52,7 +100,7 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
             type="button"
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer"
-            aria-label="Yopish"
+            aria-label={t.close}
           >
             <X className="h-5 w-5" />
           </button>
@@ -73,51 +121,61 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
           {/* Key Metrics Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/70 dark:border-slate-800/80 space-y-1">
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Davomiyligi</span>
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
+                {t.duration}
+              </span>
               <p className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-1.5">
                 <Clock className="h-4 w-4 text-amber-500" />
-                <span>{course.durationMonths} oy</span>
+                <span>{course.durationMonths} {t.months}</span>
               </p>
             </div>
 
             <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/70 dark:border-slate-800/80 space-y-1">
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Jami Darslar</span>
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
+                {t.lessons}
+              </span>
               <p className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-1.5">
                 <BookOpen className="h-4 w-4 text-blue-500" />
-                <span>{course.lessonsCount} soat</span>
+                <span>{course.lessonsCount} {t.hours}</span>
               </p>
             </div>
 
             <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/70 dark:border-slate-800/80 space-y-1">
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Ustoz</span>
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
+                {t.mentor}
+              </span>
               <p className="text-xs font-black text-amber-600 dark:text-amber-400 truncate">
-                {course.instructor || 'Yetakchi mutaxassis'}
+                {course.instructor || t.specialist}
               </p>
             </div>
 
             <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/70 dark:border-slate-800/80 space-y-1">
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Oylik To‘lov</span>
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
+                {t.monthlyFee}
+              </span>
               <p className="text-sm font-black text-emerald-600 dark:text-emerald-400 font-mono">
                 {formatMoney(course.pricePerMonth, 'UZS')}
               </p>
             </div>
           </div>
 
-          {/* Dars Jadvali */}
+          {/* Schedule */}
           {course.schedule && (
             <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center gap-3 text-xs">
               <Calendar className="h-5 w-5 text-amber-500 shrink-0" />
               <div>
-                <span className="text-slate-500 dark:text-slate-400 block font-medium">Mashg‘ulotlar grafigi:</span>
+                <span className="text-slate-500 dark:text-slate-400 block font-medium">
+                  {t.schedule}
+                </span>
                 <span className="font-bold text-slate-900 dark:text-white">{course.schedule}</span>
               </div>
             </div>
           )}
 
-          {/* O‘quv Dasturi (Syllabus) */}
+          {/* Syllabus */}
           <div className="space-y-3">
             <h4 className="text-xs font-black uppercase tracking-wider text-slate-400">
-              Kurs O‘quv Rejasi (Syllabus):
+              {t.syllabus}
             </h4>
             <div className="space-y-2">
               {course.syllabus.map((item, idx) => (
@@ -132,11 +190,11 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
             </div>
           </div>
 
-          {/* Kutilayotgan Natijalar (Outcomes) */}
+          {/* Outcomes */}
           {course.outcomes && course.outcomes.length > 0 && (
             <div className="space-y-3">
               <h4 className="text-xs font-black uppercase tracking-wider text-slate-400">
-                Kurs yakunida nimalarga erishasiz:
+                {t.outcomes}
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {course.outcomes.map((outcome, idx) => (
@@ -156,7 +214,9 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
         {/* Modal Footer */}
         <div className="flex items-center justify-between border-t border-slate-200/80 px-6 py-4 dark:border-slate-800/80 bg-slate-50/60 dark:bg-slate-900/60">
           <div>
-            <span className="text-[10px] text-slate-400 block font-bold uppercase">To‘lov miqdori:</span>
+            <span className="text-[10px] text-slate-400 block font-bold uppercase">
+              {t.feeAmount}
+            </span>
             <span className="text-base sm:text-lg font-black text-amber-600 dark:text-amber-400 font-mono">
               {formatMoney(course.pricePerMonth, 'UZS')}
             </span>
@@ -168,9 +228,9 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
               variant="ghost"
               size="sm"
               onClick={onClose}
-              className="text-xs"
+              className="text-xs cursor-pointer"
             >
-              Yopish
+              {t.close}
             </Button>
             <Button
               type="button"
@@ -183,7 +243,7 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
               className="gap-2 font-bold px-6 shadow-md shadow-amber-500/20 cursor-pointer rounded-xl"
             >
               <Send className="h-4 w-4" />
-              <span>Guruhga Yozilish</span>
+              <span>{t.enroll}</span>
             </Button>
           </div>
         </div>

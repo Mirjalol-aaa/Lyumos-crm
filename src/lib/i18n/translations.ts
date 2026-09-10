@@ -212,6 +212,53 @@ export interface Translations {
     // Footer
     footerSlogan: string;
     footerRights: string;
+
+    // Navigation Additions
+    navResults: string;
+    navBranches: string;
+    navFaq: string;
+
+    // Diagnostic
+    diagnosticBadge: string;
+    diagnosticHeroBtn: string;
+    diagnosticBannerTitle: string;
+    diagnosticBannerSubtitle: string;
+    diagnosticBannerBtn: string;
+
+    // Categories & Actions
+    catAll: string;
+    catMath: string;
+    catEnglish: string;
+    catIelts: string;
+    catIt: string;
+    catSchool: string;
+    catAbiturient: string;
+    searchPlaceholder: string;
+    courseDetailsBtn: string;
+    courseEnrollBtn: string;
+
+    // Results Section
+    resultsBadge: string;
+    resultsTitle: string;
+    resultsSubtitle: string;
+
+    // Branches Section
+    branchesBadge: string;
+    branchesTitle: string;
+    branchesSubtitle: string;
+    branchActive: string;
+    branchPlanned: string;
+    branchManager: string;
+    branchEnroll: string;
+
+    // FAQ Section (A+ Academy inspired)
+    faqBadge: string;
+    faqTitle: string;
+    faqSubtitle: string;
+    faqList: Array<{
+      q: string;
+      a: string;
+    }>;
   };
 }
 
@@ -447,6 +494,69 @@ export const translations: Record<Language, Translations> = {
 
       footerSlogan: 'Bilim bilan yorqin kelajakka!',
       footerRights: 'LUMOS ERP & Education. Barcha huquqlar himoyalangan.',
+
+      navResults: 'Natijalar',
+      navBranches: 'Filiallar',
+      navFaq: 'Savol-Javob',
+
+      diagnosticBadge: '2 daqiqalik bepul sinov',
+      diagnosticHeroBtn: 'Darajangizni Aniqlang (Test)',
+      diagnosticBannerTitle: 'Qaysi guruh sizga to‘g‘ri kelishini bilmaysizmi?',
+      diagnosticBannerSubtitle: 'Interaktiv diagnostik testimiz orqali bilim darajangizni aniqlang va sizga eng mos keluvchi ta’lim dasturini tanlang.',
+      diagnosticBannerBtn: 'Darajani Bepul Aniqlash →',
+
+      catAll: 'Barchasi',
+      catMath: 'Matematika',
+      catEnglish: 'Ingliz tili',
+      catIelts: 'IELTS',
+      catIt: 'IT & Dasturlash',
+      catSchool: 'Maktab fanlari',
+      catAbiturient: 'Abituriyent',
+      searchPlaceholder: 'Kurs nomi yoki ustoz...',
+      courseDetailsBtn: 'Batafsil',
+      courseEnrollBtn: 'Yozilish',
+
+      resultsBadge: 'Real Natijalar',
+      resultsTitle: 'O‘quvchilarimizning Erishgan Yutuqlari',
+      resultsSubtitle: 'LUMOS da ta’lim shunchaki quruq dars emas — bu oliygoh granti, xalqaro sertifikat va hayotiy muvaffaqiyat garovidir.',
+
+      branchesBadge: 'Filiallarimiz',
+      branchesTitle: 'O‘zingizga Qulay Filialni Tanlang',
+      branchesSubtitle: 'Shahar markazida va qulay hududlarda joylashgan, zamonaviy jihozlangan o‘quv kampuslarimiz.',
+      branchActive: 'Faol Filial',
+      branchPlanned: 'Tez Kunda',
+      branchManager: 'Rahbar:',
+      branchEnroll: 'Yozilish →',
+
+      faqBadge: 'Ko‘p Beriladigan Savollar',
+      faqTitle: 'Sizni Qiziqtirgan Savollarga Javoblar',
+      faqSubtitle: 'Ta’lim jarayoni, to‘lovlar va o‘qish tartibi haqida eng ko‘p beriladigan savollar va batafsil javoblar.',
+      faqList: [
+        {
+          q: 'Darslar qanday tartibda o‘tiladi va birinchi sinov darsi bormi?',
+          a: 'Ha, albatta! Birinchi dars mutlaqo bepul sinov darsi hisoblanadi. O‘quvchi o‘z darajasiga mos guruhga kelib darsda qatnashadi, metodika va ustoz bilan yaqindan tanishadi.',
+        },
+        {
+          q: 'Guruhlarda nechta o‘quvchi ta’lim oladi?',
+          a: 'Guruhlarimiz ixcham — maksimal 10-12 nafar o‘quvchidan iborat. Bu ustozga har bir talaba bilan individual ishlash va savollariga to‘liq javob berish imkonini beradi.',
+        },
+        {
+          q: 'Ota-onalar farzandining darsga qatnashayotganini qanday kuzatib boradi?',
+          a: 'LUMOS ning avtomatlashtirilgan Telegram boti orqali farzandingiz darsga kelgan-kelmagani, darsdagi faolligi va test natijalari har kuni ota-onaning telefoniga avtomatik yuboriladi.',
+        },
+        {
+          q: 'To‘lovlarni qanday usulda amalga oshirish mumkin?',
+          a: 'To‘lovlarni Payme, Click ilovalari orqali masofadan yoki markazimizga kelib naqd pul hamda bank kartalari orqali to‘lashingiz mumkin. Har bir to‘lov uchun rasmiy elektron kvitansiya taqdim etiladi.',
+        },
+        {
+          q: 'IELTS va DTM natijalari bo‘yicha kafolat bormi?',
+          a: 'Ha! Bizning intensiv guruhlarimizda barcha darslarga muntazam qatnashgan va topshiriqlarni to‘liq bajargan o‘quvchilar uchun IELTS 7.0+ va DTM da davlat granti kafolatlanadi.',
+        },
+        {
+          q: 'Agar o‘quvchi biror darsni qoldirsa, mavzu qanday o‘zlashtiriladi?',
+          a: 'Har bir o‘quvchining shaxsiy LMS kabinetida dars materiallari, konspektlar va video yozuvlar saqlanadi. Shuningdek, ustoz tomonidan qoldirilgan mavzu bo‘yicha bepul qo‘shimcha konsultatsiya beriladi.',
+        },
+      ],
     },
   },
   ru: {
@@ -678,8 +788,71 @@ export const translations: Record<Language, Translations> = {
       applicationSuccess: 'Ваша заявка принята! Скоро наш менеджер свяжется с вами.',
       cancelBtn: 'Отмена',
 
-      footerSlogan: 'К светлому будущему со знаниями!',
+      footerSlogan: 'К светлому будущему через знание!',
       footerRights: 'LUMOS ERP & Education. Все права защищены.',
+
+      navResults: 'Результаты',
+      navBranches: 'Филиалы',
+      navFaq: 'Вопросы и ответы',
+
+      diagnosticBadge: '2-минутный бесплатный тест',
+      diagnosticHeroBtn: 'Определить уровень (Тест)',
+      diagnosticBannerTitle: 'Не знаете, какая программа вам подходит?',
+      diagnosticBannerSubtitle: 'Пройдите интерактивный тест за 2 минуты и получите точную рекомендацию подходящего курса.',
+      diagnosticBannerBtn: 'Определить уровень бесплатно →',
+
+      catAll: 'Все',
+      catMath: 'Математика',
+      catEnglish: 'Английский язык',
+      catIelts: 'IELTS',
+      catIt: 'IT и Программирование',
+      catSchool: 'Школьные предметы',
+      catAbiturient: 'Абитуриент',
+      searchPlaceholder: 'Название курса или преподаватель...',
+      courseDetailsBtn: 'Подробнее',
+      courseEnrollBtn: 'Записаться',
+
+      resultsBadge: 'Реальные Результаты',
+      resultsTitle: 'Достижения Наших Студентов',
+      resultsSubtitle: 'Обучение в LUMOS — это гарантия поступления на грант, высоких баллов на олимпиадах и международного признания.',
+
+      branchesBadge: 'Наши Филиалы',
+      branchesTitle: 'Выберите Удобный Для Вас Филиал',
+      branchesSubtitle: 'Современные учебные кампусы, расположенные в центральных и удобных локациях города.',
+      branchActive: 'Активный филиал',
+      branchPlanned: 'Скоро открытие',
+      branchManager: 'Руководитель:',
+      branchEnroll: 'Записаться →',
+
+      faqBadge: 'Часто Задаваемые Вопросы',
+      faqTitle: 'Ответы на Популярные Вопросы',
+      faqSubtitle: 'Все о процессе обучения, оплате, пробных уроках и формате занятий.',
+      faqList: [
+        {
+          q: 'Как проходят занятия и есть ли бесплатный пробный урок?',
+          a: 'Да! Первый урок абсолютно бесплатный. Ученик посещает группу своего уровня, знакомится с преподавателем и интерактивной методикой.',
+        },
+        {
+          q: 'Сколько учеников в одной группе?',
+          a: 'Наши группы мини-формата — строго до 10-12 человек, что гарантирует индивидуальное внимание преподавателя каждому.',
+        },
+        {
+          q: 'Как родители контролируют посещаемость и успеваемость?',
+          a: 'Через наш Telegram-бот родители ежедневно получают автоматические отчеты о присутствии, оценках за домашние задания и результатах тестов.',
+        },
+        {
+          q: 'Как можно произвести оплату?',
+          a: 'Оплата принимается через Payme, Click онлайн, а также наличными или банковской картой в филиале. За каждый платеж выдается электронный чек.',
+        },
+        {
+          q: 'Есть ли гарантия результата по IELTS и ДТМ?',
+          a: 'Да! При соблюдении посещаемости и своевременном выполнении заданий мы гарантируем IELTS 7.0+ и поступление на государственный грант.',
+        },
+        {
+          q: 'Что делать, если ученик пропустил занятие?',
+          a: 'Все материалы, презентации и видео доступны в личном кабинете LMS. Также организуются бесплатные консультации с преподавателем.',
+        },
+      ],
     },
   },
   en: {
@@ -913,6 +1086,69 @@ export const translations: Record<Language, Translations> = {
 
       footerSlogan: 'Toward a Brighter Future with Knowledge!',
       footerRights: 'LUMOS ERP & Education. All rights reserved.',
+
+      navResults: 'Results',
+      navBranches: 'Branches',
+      navFaq: 'FAQ',
+
+      diagnosticBadge: '2-minute free assessment',
+      diagnosticHeroBtn: 'Test Your Level',
+      diagnosticBannerTitle: 'Not sure which cohort fits you best?',
+      diagnosticBannerSubtitle: 'Take our interactive 2-minute diagnostic test and discover your recommended learning path.',
+      diagnosticBannerBtn: 'Check Level For Free →',
+
+      catAll: 'All Courses',
+      catMath: 'Mathematics',
+      catEnglish: 'English Language',
+      catIelts: 'IELTS',
+      catIt: 'IT & Coding',
+      catSchool: 'School Subjects',
+      catAbiturient: 'University Prep',
+      searchPlaceholder: 'Course name or mentor...',
+      courseDetailsBtn: 'Details',
+      courseEnrollBtn: 'Enroll',
+
+      resultsBadge: 'Proven Track Record',
+      resultsTitle: 'Our Student Achievements',
+      resultsSubtitle: 'Real results: prestigious university grants, top olympiad gold medals, and certified IELTS 7.5+ scores.',
+
+      branchesBadge: 'Our Campuses',
+      branchesTitle: 'Choose Your Nearest Branch',
+      branchesSubtitle: 'Modern, fully equipped learning centers across prime city locations.',
+      branchActive: 'Active Campus',
+      branchPlanned: 'Coming Soon',
+      branchManager: 'Campus Lead:',
+      branchEnroll: 'Enroll →',
+
+      faqBadge: 'FAQ',
+      faqTitle: 'Frequently Asked Questions',
+      faqSubtitle: 'Everything you need to know about our curriculum, admissions, and tuition.',
+      faqList: [
+        {
+          q: 'How are classes structured and is there a free trial lesson?',
+          a: 'Yes! The very first class is 100% free. Students can experience our interactive methodology and meet their instructor first-hand.',
+        },
+        {
+          q: 'How many students are in each class?',
+          a: 'We strictly cap classes at 10-12 students to ensure focused mentor attention and rapid individual progress.',
+        },
+        {
+          q: 'How can parents track student attendance and progress?',
+          a: 'Our automated Telegram bot sends real-time daily reports on attendance, test scores, and homework evaluations directly to parents.',
+        },
+        {
+          q: 'What payment methods are supported?',
+          a: 'Tuition can be paid online via Payme, Click, or in-person with cash and debit cards. Official digital receipts are issued immediately.',
+        },
+        {
+          q: 'Is there an IELTS and university admission guarantee?',
+          a: 'Yes, in our intensive cohorts with 90%+ attendance and completed coursework, we contractually guarantee Band 7.0+ and grant admissions.',
+        },
+        {
+          q: 'What happens if a student misses a lecture?',
+          a: 'All lectures, summaries, and digital notes are archived in the student LMS cabinet, and extra 1-on-1 consultations are arranged.',
+        },
+      ],
     },
   },
 };
