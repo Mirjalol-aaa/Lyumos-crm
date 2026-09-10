@@ -214,57 +214,6 @@ export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchTo
                 <span>Tizimga Kirish</span>
               )}
             </button>
-
-            {/* Quick Demo Access Buttons */}
-            <div className="pt-3 border-t border-slate-800/80 space-y-2">
-              <span className="text-[10px] uppercase tracking-wider font-extrabold text-slate-400 block text-center">
-                Tezkor Kirish (1-klikda sinash):
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLoginInput('Mirjalol');
-                    setPasswordInput('25073');
-                    setTimeout(() => {
-                      const res = loginWithCredentials('Mirjalol', '25073', 'admin_teacher');
-                      if (res.success) window.location.hash = '#/dashboard';
-                    }, 50);
-                  }}
-                  className="px-2.5 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 text-[11px] font-black text-amber-300 transition-all cursor-pointer text-center"
-                >
-                  👑 Bosh Admin
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLoginInput('hadicha');
-                    setPasswordInput('teacher123');
-                    setTimeout(() => {
-                      const res = loginWithCredentials('hadicha', 'teacher123', 'admin_teacher');
-                      if (res.success) window.location.hash = '#/teacher';
-                    }, 50);
-                  }}
-                  className="px-2.5 py-2.5 rounded-xl bg-purple-500/10 border border-purple-500/30 hover:bg-purple-500/20 text-[11px] font-black text-purple-300 transition-all cursor-pointer text-center"
-                >
-                  📐 Hadicha ustoz
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLoginInput('hasanboy');
-                    setPasswordInput('teacher123');
-                    setTimeout(() => {
-                      const res = loginWithCredentials('hasanboy', 'teacher123', 'admin_teacher');
-                      if (res.success) window.location.hash = '#/teacher';
-                    }, 50);
-                  }}
-                  className="px-2.5 py-2.5 rounded-xl bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 text-[11px] font-black text-blue-300 transition-all cursor-pointer text-center"
-                >
-                  🇬🇧 Hasanboy ustoz
-                </button>
-              </div>
-            </div>
           </form>
         </div>
 
