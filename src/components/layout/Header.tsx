@@ -11,7 +11,7 @@ import {
   Search,
   Bell,
   Plus,
-  DollarSign,
+  CreditCard,
   PanelLeftOpen,
   PanelLeftClose,
   Sun,
@@ -666,6 +666,7 @@ export const Header:
             className="
               hidden
               h-10
+              shrink-0
 
               cursor-pointer
               items-center
@@ -676,11 +677,12 @@ export const Header:
 
               bg-emerald-600
 
-              px-4
+              px-3.5
 
               text-xs
               font-semibold
               text-white
+              whitespace-nowrap
 
               shadow-md
               shadow-emerald-600/20
@@ -696,14 +698,15 @@ export const Header:
               xl:flex
             "
           >
-            <DollarSign
+            <CreditCard
               className="
                 h-4
                 w-4
+                shrink-0
               "
             />
 
-            {t.common.receivePayment}
+            <span>{t.common.receivePayment}</span>
           </button>
 
 
@@ -735,6 +738,7 @@ export const Header:
               text-xs
               font-semibold
               text-white
+              whitespace-nowrap
 
               shadow-md
               shadow-blue-500/20
@@ -755,6 +759,7 @@ export const Header:
               className="
                 h-4
                 w-4
+                shrink-0
               "
             />
 
@@ -763,6 +768,7 @@ export const Header:
               className="
                 hidden
                 md:inline
+                whitespace-nowrap
               "
             >
               {t.common.addStudent}
@@ -872,6 +878,7 @@ export const Header:
               hidden
               sm:flex
               h-10
+              shrink-0
               cursor-pointer
               items-center
               gap-1.5
@@ -883,6 +890,7 @@ export const Header:
               text-xs
               font-bold
               text-slate-600
+              whitespace-nowrap
               transition-all
               hover:border-amber-300
               hover:bg-amber-50
@@ -899,10 +907,11 @@ export const Header:
               className="
                 h-4
                 w-4
+                shrink-0
                 text-amber-500
               "
             />
-            <span className="hidden sm:inline">
+            <span className="hidden sm:inline whitespace-nowrap">
               {t.common.publicSite}
             </span>
           </button>

@@ -10,7 +10,6 @@ import {
   Users,
   GraduationCap,
   BookOpen,
-  DollarSign,
   Building2,
   CalendarCheck2,
   Calendar,
@@ -21,6 +20,8 @@ import {
   KeyRound,
   BarChart3,
   Receipt,
+  Wallet,
+  CreditCard,
   Settings,
   ChevronRight,
   LogOut,
@@ -125,12 +126,12 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
         {
           id: 'expenses',
           label: t.common.expenses,
-          icon: DollarSign,
+          icon: Wallet,
         },
         {
           id: 'finance_payroll',
           label: t.common.payroll,
-          icon: DollarSign,
+          icon: CreditCard,
         },
       ],
     },
@@ -313,7 +314,7 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
             title={t.common.publicSite}
           >
             <Globe className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
-            <span className={collapsed ? 'lg:hidden' : ''}>🌐 {t.common.publicSite}</span>
+            <span className={collapsed ? 'lg:hidden' : ''}>{t.common.publicSite}</span>
           </button>
 
           <div className={`flex items-center gap-3 rounded-2xl border border-slate-200/60 bg-slate-50/80 p-2.5 dark:border-slate-700/50 dark:bg-slate-800/50 ${collapsed ? 'lg:justify-center' : ''}`}>

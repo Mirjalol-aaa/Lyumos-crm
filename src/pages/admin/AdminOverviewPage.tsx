@@ -6,7 +6,8 @@ import { Card, CardHeader, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import {
   Users,
-  DollarSign,
+  Wallet,
+  Building2,
   TrendingUp,
   AlertTriangle,
   BookOpen,
@@ -47,6 +48,7 @@ interface AdminOverviewPageProps {
 }
 
 type MonthKey = 'July' | 'August' | 'September';
+type TeacherScope = 'all' | 'hadicha' | 'hasanboy';
 
 const MONTH_LABELS_BY_LANG: Record<MonthKey, Record<Language, { label: string; full: string }>> = {
   July: {
@@ -373,6 +375,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
     setPaymentModalDefaultMonth,
   } = useCRM();
 
+  const [teacherScope, setTeacherScope] = useState<TeacherScope>('all');
   const [selectedMonth, setSelectedMonth] = useState<MonthKey>('September');
   const [studentSearchQuery, setStudentSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'paid' | 'unpaid' | 'full_attendance'>('all');
@@ -382,24 +385,70 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
   const greeting = getGreeting(language, currentHour);
   const todayFormatted = getTodayFormatted(language);
 
-  const activeStats = MONTHLY_STATS[selectedMonth];
-  const unpaidDebt = activeStats.expectedIncome - activeStats.paidIncome;
-  const profitMargin = activeStats.paidIncome > 0
-    ? Math.round((activeStats.netProfit / activeStats.paidIncome) * 100)
-    : 0;
+  // Filter students based on teacher scope
+  const currentScopeStudents = useMemo(() => {
+    if (teacherScope === 'hadicha') {
+      return students.filter(s =>
+        s.groupId === 'GRP-01' ||
+        s.teacherName?.includes('Hadicha') ||
+        s.groupName?.includes('Matematika')
+      );
+    }
+    if (teacherScope === 'hasanboy') {
+      return students.filter(s =>
+        s.groupId === 'GRP-02' ||
+        s.teacherName?.includes('Hasanboy') ||
+        s.groupName?.includes('Ingliz')
+      );
+    }
+    return students;
+  }, [students, teacherScope]);
 
-  // Real Excel Students for Hadicha ustoz
-  const mathStudents = useMemo(() => {
-    return students.filter(s =>
-      s.groupId === 'GRP-01' ||
-      s.teacherName?.includes('Hadicha') ||
-      s.groupName?.includes('Matematika')
-    );
-  }, [students]);
+  // Dynamically compute monthly stats and teacher 50% payroll based on students' tuition fees
+  const scopeMonthlyStats = useMemo(() => {
+    const months: MonthKey[] = ['July', 'August', 'September'];
+    const res: Record<MonthKey, {
+      expectedIncome: number;
+      paidIncome: number;
+      expenses: number;
+      netProfit: number;
+      paidCount: number;
+      totalStudents: number;
+    }> = {} as any;
 
-  // Filtered Math Students
+    months.forEach((m) => {
+      const totalStudents = currentScopeStudents.length;
+      const expectedIncome = currentScopeStudents.reduce((acc, s) => acc + (s.monthlyFee || 250000), 0);
+      const paidIncome = currentScopeStudents.reduce((acc, s) => {
+        const p = s.payments[m];
+        return acc + (p?.status === 'Paid' ? (p.amountPaid || s.monthlyFee || 250000) : 0);
+      }, 0);
+      const paidCount = currentScopeStudents.filter(s => s.payments[m]?.status === 'Paid').length;
+      
+      // Standard 50% teacher payroll share based on student tuition fees, 50% center margin
+      const expenses = Math.round(expectedIncome * 0.5);
+      const netProfit = expectedIncome - expenses;
+
+      res[m] = {
+        expectedIncome,
+        paidIncome,
+        expenses,
+        netProfit,
+        paidCount,
+        totalStudents,
+      };
+    });
+
+    return res;
+  }, [currentScopeStudents]);
+
+  const activeStats = scopeMonthlyStats[selectedMonth];
+  const unpaidDebt = Math.max(0, activeStats.expectedIncome - activeStats.paidIncome);
+  const profitMargin = 50;
+
+  // Filtered Students for the Table
   const filteredStudents = useMemo(() => {
-    return mathStudents.filter(s => {
+    return currentScopeStudents.filter(s => {
       const matchSearch =
         s.fullName.toLowerCase().includes(studentSearchQuery.toLowerCase()) ||
         s.phone.includes(studentSearchQuery);
@@ -411,44 +460,80 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
 
       if (statusFilter === 'paid') return isPaid;
       if (statusFilter === 'unpaid') return !isPaid;
-      if (statusFilter === 'full_attendance') return s.fullName === 'Azizbek';
+      if (statusFilter === 'full_attendance') return s.fullName === 'Azizbek' || s.fullName === 'Mirjalol';
 
       return true;
     });
-  }, [mathStudents, studentSearchQuery, statusFilter, selectedMonth]);
+  }, [currentScopeStudents, studentSearchQuery, statusFilter, selectedMonth]);
 
   // Debtors for selected month
   const monthDebtors = useMemo(() => {
-    return mathStudents.filter(s => {
+    return currentScopeStudents.filter(s => {
       const p = s.payments[selectedMonth];
       return !p || p.status === 'Unpaid' || (p.amountPaid || 0) === 0;
     });
-  }, [mathStudents, selectedMonth]);
+  }, [currentScopeStudents, selectedMonth]);
 
   // Chart data across the 3 academic months
-  const chartData = [
-    {
-      month: MONTH_LABELS_BY_LANG['July'][language].label,
-      kirim: 500000,
-      chiqim: 250000,
-      foyda: 250000,
-      reja: 2750000,
-    },
-    {
-      month: MONTH_LABELS_BY_LANG['August'][language].label,
-      kirim: 810000,
-      chiqim: 400000,
-      foyda: 410000,
-      reja: 2750000,
-    },
-    {
-      month: MONTH_LABELS_BY_LANG['September'][language].label,
-      kirim: 796000,
-      chiqim: 380000,
-      foyda: 416000,
-      reja: 2750000,
-    },
-  ];
+  const chartData = useMemo(() => {
+    return (['July', 'August', 'September'] as MonthKey[]).map((mKey) => {
+      const st = scopeMonthlyStats[mKey];
+      return {
+        month: MONTH_LABELS_BY_LANG[mKey][language].label,
+        kirim: st.paidIncome,
+        chiqim: Math.round(st.paidIncome * 0.5),
+        foyda: st.paidIncome - Math.round(st.paidIncome * 0.5),
+        reja: st.expectedIncome,
+      };
+    });
+  }, [scopeMonthlyStats, language]);
+
+  // Dynamic scope titles and descriptors
+  const scopeInfo = useMemo(() => {
+    if (teacherScope === 'hadicha') {
+      return {
+        title: language === 'en'
+          ? 'Teacher Hadicha (Mathematics) & Financial Center'
+          : language === 'ru'
+          ? 'Преподаватель Хадича (Математика) и Финансы'
+          : 'Hadicha Ustoz (Matematika) & Moliya Markazi',
+        desc: language === 'en'
+          ? 'Real Excel data: 11 students, tuition collections, 50% teacher remuneration, and center profit.'
+          : language === 'ru'
+          ? 'Данные Excel: 11 учеников, оплаты, 50% доля преподавателя и чистая прибыль.'
+          : 'Real Excel jadvali bo‘yicha: 11 nafar o‘quvchi to‘lovlari, 50% ustoz ulushi va markaz sof foydasi.',
+        badge: '📐 Matematika (1-Guruh)',
+      };
+    }
+    if (teacherScope === 'hasanboy') {
+      return {
+        title: language === 'en'
+          ? 'Teacher Hasanboy (English) & Financial Center'
+          : language === 'ru'
+          ? 'Преподаватель Хасанбой (Английский) и Финансы'
+          : 'Hasanboy Ustoz (Ingliz tili) & Moliya Markazi',
+        desc: language === 'en'
+          ? 'Google Sheets data: 13 students, tuition collections, 50% teacher remuneration, and center profit.'
+          : language === 'ru'
+          ? 'Данные Google Sheets: 13 учеников, оплаты, 50% доля преподавателя и чистая прибыль.'
+          : 'Google Sheets bazasi bo‘yicha: 13 nafar o‘quvchi to‘lovlari, 50% ustoz ulushi va markaz sof foydasi.',
+        badge: '🇬🇧 Ingliz tili (2-Guruh)',
+      };
+    }
+    return {
+      title: language === 'en'
+        ? 'LUMOS Academy • Executive & Financial Center'
+        : language === 'ru'
+        ? 'LUMOS Academy • Главный Центр Управления и Финансов'
+        : 'LUMOS Academy • Boshqaruv & Moliya Markazi',
+      desc: language === 'en'
+        ? 'Combined Academy overview: 24 students across Mathematics and English, 50% teacher payroll balance, and net center profit.'
+        : language === 'ru'
+        ? 'Общий обзор академии: 24 ученика по Математике и Английскому, баланс 50% зарплат учителей и чистая прибыль.'
+        : 'Umumiy markaz nazorati: Matematika va Ingliz tili bo‘yicha 24 nafar o‘quvchi, ustozlar 50% ish haqi balansi va markaz sof foydasi.',
+      badge: '👑 Barcha Markaz',
+    };
+  }, [teacherScope, language]);
 
   const handleSendBatchReminders = () => {
     setReminderSent(true);
@@ -456,16 +541,17 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
   };
 
   const handleExportCSV = () => {
-    const headers = ["ID", "FISH", "Telefon", "Guruh", "Iyul (UZS)", "Avgust (UZS)", "Sentabr (UZS)", "Holat"];
-    const rows = mathStudents.map((s, idx) => [
+    const headers = ["ID", "FISH", "Telefon", "Guruh", "Ustoz", "Iyul (UZS)", "Avgust (UZS)", "Sentabr (UZS)", "Holat"];
+    const rows = currentScopeStudents.map((s, idx) => [
       idx + 1,
       s.fullName,
       s.phone,
       s.groupName,
+      s.teacherName || (s.groupId === 'GRP-01' ? 'Hadicha ustoz' : 'Hasanboy ustoz'),
       s.payments['July']?.amountPaid || 0,
       s.payments['August']?.amountPaid || 0,
       s.payments['September']?.amountPaid || 0,
-      s.fullName === 'Azizbek' ? '100% Davomat' : 'Faol',
+      s.fullName === 'Azizbek' || s.fullName === 'Mirjalol' ? '100% Davomat' : 'Faol',
     ]);
 
     const csvContent = "data:text/csv;charset=utf-8," 
@@ -474,7 +560,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `LUMOS_Hadicha_Ustoz_Matematika_${selectedMonth}.csv`);
+    link.setAttribute("download", `LUMOS_${teacherScope}_${selectedMonth}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -503,15 +589,15 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
           </p>
         </div>
 
-        {/* Quick Action Buttons */}
+        {/* Quick Action Buttons - Harmonized and resilient to overflow */}
         <div className="flex flex-wrap items-center gap-2">
           <Button
             variant="primary"
             size="sm"
             onClick={() => setIsAddStudentModalOpen(true)}
-            className="gap-1.5 shadow-xs cursor-pointer text-xs"
+            className="gap-1.5 shadow-xs cursor-pointer text-xs whitespace-nowrap shrink-0 font-bold"
           >
-            <Plus className="h-3.5 w-3.5" />
+            <Plus className="h-3.5 w-3.5 shrink-0" />
             <span>{txt.addStudent}</span>
           </Button>
 
@@ -522,9 +608,9 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
               setPaymentModalDefaultMonth(selectedMonth);
               setIsReceivePaymentModalOpen(true);
             }}
-            className="gap-1.5 cursor-pointer text-xs"
+            className="gap-1.5 cursor-pointer text-xs whitespace-nowrap shrink-0 font-bold"
           >
-            <CreditCard className="h-3.5 w-3.5 text-emerald-600" />
+            <CreditCard className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
             <span>{txt.receivePayment}</span>
           </Button>
 
@@ -532,9 +618,9 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
             variant="secondary"
             size="sm"
             onClick={() => setIsAddGroupModalOpen(true)}
-            className="gap-1.5 cursor-pointer text-xs"
+            className="gap-1.5 cursor-pointer text-xs whitespace-nowrap shrink-0 font-bold"
           >
-            <BookOpen className="h-3.5 w-3.5 text-blue-600" />
+            <BookOpen className="h-3.5 w-3.5 text-blue-600 shrink-0" />
             <span>{txt.addGroup}</span>
           </Button>
 
@@ -542,9 +628,9 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
             variant="ghost"
             size="sm"
             onClick={() => onNavigateTab('schedule')}
-            className="gap-1.5 cursor-pointer text-xs border border-slate-200 dark:border-slate-800"
+            className="gap-1.5 cursor-pointer text-xs border border-slate-200 dark:border-slate-800 whitespace-nowrap shrink-0 font-bold"
           >
-            <Calendar className="h-3.5 w-3.5 text-purple-600" />
+            <Calendar className="h-3.5 w-3.5 text-purple-600 shrink-0" />
             <span>{txt.schedule}</span>
           </Button>
         </div>
@@ -553,11 +639,11 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
       {/* ─────────────────────────────────────────────────────────────
           1. EXECUTIVE HEADER & CONTROLS
       ───────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between border-b border-slate-200/80 pb-5 dark:border-slate-800">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between border-b border-slate-200/80 pb-5 dark:border-slate-800">
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-lg bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-300">
-              {txt.superAdminBadge}
+              {scopeInfo.badge}
             </span>
             <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-lg">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -568,26 +654,66 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
             </span>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
-            {txt.mainTitle}
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+            {scopeInfo.title}
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-3xl">
-            {txt.mainDesc}
+            {scopeInfo.desc}
           </p>
         </div>
 
-        {/* Right Action Bar */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        {/* Controls Toolbar: Scope Switcher, Month Pills & Excel Export */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Teacher / Center Scope Switcher */}
+          <div className="flex items-center gap-1 rounded-2xl border border-slate-200/90 bg-white p-1 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+            <button
+              type="button"
+              onClick={() => setTeacherScope('all')}
+              className={`rounded-xl px-2.5 py-1.5 text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
+                teacherScope === 'all'
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+              }`}
+              title="Barcha Markaz (24 o‘quvchi)"
+            >
+              👑 Barchasi (24)
+            </button>
+            <button
+              type="button"
+              onClick={() => setTeacherScope('hadicha')}
+              className={`rounded-xl px-2.5 py-1.5 text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
+                teacherScope === 'hadicha'
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+              }`}
+              title="Hadicha ustoz • Matematika (11 o‘quvchi)"
+            >
+              📐 Hadicha (11)
+            </button>
+            <button
+              type="button"
+              onClick={() => setTeacherScope('hasanboy')}
+              className={`rounded-xl px-2.5 py-1.5 text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
+                teacherScope === 'hasanboy'
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+              }`}
+              title="Hasanboy ustoz • Ingliz tili (13 o‘quvchi)"
+            >
+              🇬🇧 Hasanboy (13)
+            </button>
+          </div>
+
           {/* Month Selector Pills */}
-          <div className="flex items-center gap-1 rounded-2xl border border-slate-200/90 bg-white p-1.5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex items-center gap-1 rounded-2xl border border-slate-200/90 bg-white p-1 shadow-xs dark:border-slate-800 dark:bg-slate-900 shrink-0">
             {(['July', 'August', 'September'] as MonthKey[]).map((mKey) => (
               <button
                 key={mKey}
                 type="button"
                 onClick={() => setSelectedMonth(mKey)}
-                className={`rounded-xl px-3.5 py-1.5 text-xs font-black transition-all cursor-pointer ${
+                className={`rounded-xl px-2.5 sm:px-3 py-1.5 text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
                   selectedMonth === mKey
-                    ? 'bg-gradient-to-r from-amber-500 via-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/25 scale-[1.02]'
+                    ? 'bg-amber-500 text-white shadow-xs scale-[1.02]'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 }`}
               >
@@ -596,41 +722,16 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
             ))}
           </div>
 
-          {/* New Payment Button */}
-          <Button
-            variant="primary"
-            size="sm"
-            className="gap-1.5 shadow-md shadow-amber-500/20 cursor-pointer"
-            onClick={() => {
-              setPaymentModalDefaultMonth(selectedMonth);
-              setIsReceivePaymentModalOpen(true);
-            }}
-          >
-            <Plus className="h-3.5 w-3.5" />
-            <span>{txt.receivePaymentBtn}</span>
-          </Button>
-
-          {/* Add Student Button */}
-          <Button
-            variant="secondary"
-            size="sm"
-            className="gap-1.5 cursor-pointer"
-            onClick={() => setIsAddStudentModalOpen(true)}
-          >
-            <Users className="h-3.5 w-3.5 text-amber-500" />
-            <span className="hidden sm:inline">{txt.addStudentBtn}</span>
-          </Button>
-
           {/* Export CSV Button */}
           <Button
             variant="ghost"
             size="sm"
-            className="gap-1.5 cursor-pointer border border-slate-200 dark:border-slate-800"
+            className="gap-1.5 cursor-pointer border border-slate-200 dark:border-slate-800 whitespace-nowrap shrink-0 text-xs font-bold"
             onClick={handleExportCSV}
             title="Excel formatida yuklab olish"
           >
-            <Download className="h-3.5 w-3.5 text-slate-500" />
-            <span className="hidden md:inline">{txt.exportBtn}</span>
+            <Download className="h-3.5 w-3.5 text-slate-500 shrink-0" />
+            <span className="hidden sm:inline">{txt.exportBtn}</span>
           </Button>
         </div>
       </div>
@@ -638,135 +739,135 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
       {/* ─────────────────────────────────────────────────────────────
           2. 6 KEY PERFORMANCE INDICATORS FOR SELECTED MONTH
       ───────────────────────────────────────────────────────────── */}
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        {/* Expected Revenue */}
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-4.5 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-2">
-          <div className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400">
-            <span>{txt.expectedRevenue}</span>
-            <div className="rounded-xl bg-amber-500/10 p-2 text-amber-600 dark:text-amber-400">
-              <Calendar className="h-4 w-4" />
+      <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4">
+        {/* 1. Expected Revenue */}
+        <div className="rounded-2xl border border-slate-200/90 bg-white p-3.5 sm:p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-2">
+          <div className="flex items-center justify-between gap-1 text-xs font-bold text-slate-500 dark:text-slate-400 min-w-0">
+            <span className="truncate" title={txt.expectedRevenue}>{txt.expectedRevenue}</span>
+            <div className="rounded-xl bg-amber-500/10 p-1.5 text-amber-600 dark:text-amber-400 shrink-0">
+              <Calendar className="h-3.5 w-3.5" />
             </div>
           </div>
           <div>
-            <p className="text-xl font-black text-slate-900 dark:text-white font-mono">
+            <p className="text-sm sm:text-base xl:text-[15px] 2xl:text-lg font-black text-slate-900 dark:text-white font-mono tracking-tight truncate" title={formatMoney(activeStats.expectedIncome, 'UZS')}>
               {formatMoney(activeStats.expectedIncome, 'UZS')}
             </p>
             <div className="mt-2 w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
               <div
                 className="bg-amber-500 h-full rounded-full transition-all duration-500"
                 style={{
-                  width: `${Math.min(100, Math.round((activeStats.paidIncome / activeStats.expectedIncome) * 100))}%`,
+                  width: `${activeStats.expectedIncome > 0 ? Math.min(100, Math.round((activeStats.paidIncome / activeStats.expectedIncome) * 100)) : 0}%`,
                 }}
               />
             </div>
           </div>
-          <p className="text-[10px] text-slate-400 font-medium">
-            {txt.expectedSub}
+          <p className="text-[10px] text-slate-400 font-medium truncate">
+            {activeStats.totalStudents} o‘quvchi x 250,000 UZS
           </p>
         </div>
 
-        {/* Actual Paid Cash */}
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-4.5 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-2">
-          <div className="flex items-center justify-between text-xs font-bold text-emerald-600 dark:text-emerald-400">
-            <span>{txt.actualRevenue}</span>
-            <div className="rounded-xl bg-emerald-500/10 p-2 text-emerald-600 dark:text-emerald-400">
-              <DollarSign className="h-4 w-4" />
+        {/* 2. Actual Paid Cash */}
+        <div className="rounded-2xl border border-slate-200/90 bg-white p-3.5 sm:p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-2">
+          <div className="flex items-center justify-between gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400 min-w-0">
+            <span className="truncate" title={txt.actualRevenue}>{txt.actualRevenue}</span>
+            <div className="rounded-xl bg-emerald-500/10 p-1.5 text-emerald-600 dark:text-emerald-400 shrink-0">
+              <CreditCard className="h-3.5 w-3.5" />
             </div>
           </div>
           <div>
-            <p className="text-xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
+            <p className="text-sm sm:text-base xl:text-[15px] 2xl:text-lg font-black text-emerald-600 dark:text-emerald-400 font-mono tracking-tight truncate" title={formatMoney(activeStats.paidIncome, 'UZS')}>
               {formatMoney(activeStats.paidIncome, 'UZS')}
             </p>
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mt-1">
-              <TrendingUp className="h-3 w-3" />
-              {Math.round((activeStats.paidIncome / activeStats.expectedIncome) * 100)}% {txt.collected}
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mt-1 truncate">
+              <TrendingUp className="h-3 w-3 shrink-0" />
+              {activeStats.expectedIncome > 0 ? Math.round((activeStats.paidIncome / activeStats.expectedIncome) * 100) : 0}% {txt.collected}
             </span>
           </div>
-          <p className="text-[10px] text-slate-400 font-medium">
+          <p className="text-[10px] text-slate-400 font-medium truncate">
             {activeStats.paidCount} {txt.paidCountSub}
           </p>
         </div>
 
-        {/* Expenses */}
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-4.5 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-2">
-          <div className="flex items-center justify-between text-xs font-bold text-rose-600 dark:text-rose-400">
-            <span>{txt.teacherExpenses}</span>
-            <div className="rounded-xl bg-rose-500/10 p-2 text-rose-600 dark:text-rose-400">
-              <AlertTriangle className="h-4 w-4" />
+        {/* 3. Teacher Expenses (50% share) */}
+        <div className="rounded-2xl border border-slate-200/90 bg-white p-3.5 sm:p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-2">
+          <div className="flex items-center justify-between gap-1 text-xs font-bold text-rose-600 dark:text-rose-400 min-w-0">
+            <span className="truncate" title={txt.teacherExpenses}>{txt.teacherExpenses}</span>
+            <div className="rounded-xl bg-rose-500/10 p-1.5 text-rose-600 dark:text-rose-400 shrink-0">
+              <GraduationCap className="h-3.5 w-3.5" />
             </div>
           </div>
           <div>
-            <p className="text-xl font-black text-rose-600 dark:text-rose-400 font-mono">
+            <p className="text-sm sm:text-base xl:text-[15px] 2xl:text-lg font-black text-rose-600 dark:text-rose-400 font-mono tracking-tight truncate" title={formatMoney(activeStats.expenses, 'UZS')}>
               {formatMoney(activeStats.expenses, 'UZS')}
             </p>
-            <span className="inline-block text-[11px] font-bold text-slate-500 dark:text-slate-400 mt-1">
-              {txt.teacherSalaryShare}
+            <span className="inline-block text-[11px] font-bold text-slate-500 dark:text-slate-400 mt-1 truncate">
+              50% ustoz ulushi
             </span>
           </div>
-          <p className="text-[10px] text-slate-400 font-medium">
+          <p className="text-[10px] text-slate-400 font-medium truncate">
             {txt.fullyPaid}
           </p>
         </div>
 
-        {/* Net Profit - Harmonized with dark theme, removing via-white glare */}
-        <div className="rounded-2xl border border-amber-400/40 bg-gradient-to-br from-amber-500/10 via-amber-50/40 to-white dark:from-amber-950/20 dark:via-slate-900 dark:to-slate-900 p-4.5 shadow-sm dark:border-amber-500/30 space-y-2">
-          <div className="flex items-center justify-between text-xs font-bold text-amber-700 dark:text-amber-400">
-            <span>{txt.netProfit}</span>
-            <div className="rounded-xl bg-amber-500/20 p-2 text-amber-600 dark:text-amber-400">
-              <TrendingUp className="h-4 w-4" />
+        {/* 4. Net Profit */}
+        <div className="rounded-2xl border border-amber-400/40 bg-gradient-to-br from-amber-500/10 via-amber-50/40 to-white dark:from-amber-950/20 dark:via-slate-900 dark:to-slate-900 p-3.5 sm:p-4 shadow-sm dark:border-amber-500/30 space-y-2">
+          <div className="flex items-center justify-between gap-1 text-xs font-bold text-amber-700 dark:text-amber-400 min-w-0">
+            <span className="truncate" title={txt.netProfit}>{txt.netProfit}</span>
+            <div className="rounded-xl bg-amber-500/20 p-1.5 text-amber-600 dark:text-amber-400 shrink-0">
+              <TrendingUp className="h-3.5 w-3.5" />
             </div>
           </div>
           <div>
-            <p className="text-xl font-black text-amber-600 dark:text-amber-400 font-mono">
+            <p className="text-sm sm:text-base xl:text-[15px] 2xl:text-lg font-black text-amber-600 dark:text-amber-400 font-mono tracking-tight truncate" title={formatMoney(activeStats.netProfit, 'UZS')}>
               {formatMoney(activeStats.netProfit, 'UZS')}
             </p>
-            <span className="inline-flex items-center gap-1 text-[11px] font-black text-amber-700 dark:text-amber-300 mt-1">
-              {txt.profitMargin}: {profitMargin}%
+            <span className="inline-flex items-center gap-1 text-[11px] font-black text-amber-700 dark:text-amber-300 mt-1 truncate">
+              {txt.profitMargin}: 50%
             </span>
           </div>
-          <p className="text-[10px] text-slate-400 font-medium">
+          <p className="text-[10px] text-slate-400 font-medium truncate">
             {txt.centerMargin}
           </p>
         </div>
 
-        {/* Active Students */}
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-4.5 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-2">
-          <div className="flex items-center justify-between text-xs font-bold text-blue-600 dark:text-blue-400">
-            <span>{txt.totalStudents}</span>
-            <div className="rounded-xl bg-blue-500/10 p-2 text-blue-600 dark:text-blue-400">
-              <Users className="h-4 w-4" />
+        {/* 5. Active Students */}
+        <div className="rounded-2xl border border-slate-200/90 bg-white p-3.5 sm:p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-2">
+          <div className="flex items-center justify-between gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 min-w-0">
+            <span className="truncate" title={txt.totalStudents}>{txt.totalStudents}</span>
+            <div className="rounded-xl bg-blue-500/10 p-1.5 text-blue-600 dark:text-blue-400 shrink-0">
+              <Users className="h-3.5 w-3.5" />
             </div>
           </div>
           <div>
-            <p className="text-xl font-black text-slate-900 dark:text-white font-mono">
+            <p className="text-sm sm:text-base xl:text-[15px] 2xl:text-lg font-black text-slate-900 dark:text-white font-mono tracking-tight truncate">
               {activeStats.totalStudents} {txt.studentsCountUnit}
             </p>
-            <span className="inline-block text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mt-1">
+            <span className="inline-block text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mt-1 truncate">
               {txt.activeParticipation}
             </span>
           </div>
-          <p className="text-[10px] text-slate-400 font-medium">
-            {txt.group1Math}
+          <p className="text-[10px] text-slate-400 font-medium truncate">
+            {teacherScope === 'all' ? '2 ta guruh faol' : teacherScope === 'hadicha' ? '1-Guruh Matematika' : '2-Guruh Ingliz tili'}
           </p>
         </div>
 
-        {/* Attendance Rate */}
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-4.5 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-2">
-          <div className="flex items-center justify-between text-xs font-bold text-purple-600 dark:text-purple-400">
-            <span>{txt.attendanceRate}</span>
-            <div className="rounded-xl bg-purple-500/10 p-2 text-purple-600 dark:text-purple-400">
-              <UserCheck className="h-4 w-4" />
+        {/* 6. Attendance Rate */}
+        <div className="rounded-2xl border border-slate-200/90 bg-white p-3.5 sm:p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-2">
+          <div className="flex items-center justify-between gap-1 text-xs font-bold text-purple-600 dark:text-purple-400 min-w-0">
+            <span className="truncate max-w-[110px]" title={txt.attendanceRate}>{txt.attendanceRate}</span>
+            <div className="rounded-xl bg-purple-500/10 p-1.5 text-purple-600 dark:text-purple-400 shrink-0">
+              <UserCheck className="h-3.5 w-3.5" />
             </div>
           </div>
           <div>
-            <p className="text-xl font-black text-slate-900 dark:text-white font-mono">
+            <p className="text-sm sm:text-base xl:text-[15px] 2xl:text-lg font-black text-slate-900 dark:text-white font-mono tracking-tight truncate">
               96.4%
             </p>
-            <span className="inline-block text-[11px] font-bold text-purple-600 dark:text-purple-400 mt-1">
+            <span className="inline-block text-[11px] font-bold text-purple-600 dark:text-purple-400 mt-1 truncate">
               {txt.highAttendance}
             </span>
           </div>
-          <p className="text-[10px] text-slate-400 font-medium">
+          <p className="text-[10px] text-slate-400 font-medium truncate">
             {txt.noExcuses}
           </p>
         </div>
@@ -845,19 +946,19 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
               <div className="rounded-xl bg-slate-50 p-2.5 dark:bg-slate-800/50">
                 <span className="text-[10px] uppercase font-bold text-slate-400">{txt.total3MonthsIncome}</span>
                 <p className="text-sm font-black text-emerald-600 font-mono mt-0.5">
-                  {formatMoney(500000 + 810000 + 796000, 'UZS')}
+                  {formatMoney(chartData.reduce((acc, c) => acc + c.kirim, 0), 'UZS')}
                 </p>
               </div>
               <div className="rounded-xl bg-slate-50 p-2.5 dark:bg-slate-800/50">
                 <span className="text-[10px] uppercase font-bold text-slate-400">{txt.total3MonthsExpenses}</span>
                 <p className="text-sm font-black text-rose-600 font-mono mt-0.5">
-                  {formatMoney(250000 + 400000 + 380000, 'UZS')}
+                  {formatMoney(chartData.reduce((acc, c) => acc + c.chiqim, 0), 'UZS')}
                 </p>
               </div>
               <div className="rounded-xl bg-slate-50 p-2.5 dark:bg-slate-800/50">
                 <span className="text-[10px] uppercase font-bold text-slate-400">{txt.total3MonthsProfit}</span>
                 <p className="text-sm font-black text-amber-600 font-mono mt-0.5">
-                  {formatMoney(250000 + 410000 + 416000, 'UZS')}
+                  {formatMoney(chartData.reduce((acc, c) => acc + c.foyda, 0), 'UZS')}
                 </p>
               </div>
             </div>
@@ -978,19 +1079,19 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
             <button
               type="button"
               onClick={() => setStatusFilter('all')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 statusFilter === 'all'
                   ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
                   : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
               }`}
             >
-              {txt.filterAll} ({mathStudents.length})
+              {txt.filterAll} ({currentScopeStudents.length})
             </button>
 
             <button
               type="button"
               onClick={() => setStatusFilter('paid')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 statusFilter === 'paid'
                   ? 'bg-emerald-600 text-white shadow-xs'
                   : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
@@ -1002,7 +1103,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
             <button
               type="button"
               onClick={() => setStatusFilter('unpaid')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 statusFilter === 'unpaid'
                   ? 'bg-rose-600 text-white shadow-xs'
                   : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
@@ -1014,7 +1115,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
             <button
               type="button"
               onClick={() => setStatusFilter('full_attendance')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 statusFilter === 'full_attendance'
                   ? 'bg-amber-600 text-white shadow-xs'
                   : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
@@ -1069,7 +1170,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
                             {s.fullName}
                           </p>
                           <span className="text-[10px] text-slate-400 font-medium">
-                            {s.groupName} • Hadicha ustoz
+                            {s.groupName} • {s.teacherName || (s.groupId === 'GRP-01' ? 'Hadicha ustoz' : 'Hasanboy ustoz')}
                           </span>
                         </div>
                       </div>
@@ -1263,7 +1364,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({ onNavigate
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold">
-                      <DollarSign className="h-4 w-4" />
+                      <CreditCard className="h-4 w-4" />
                     </div>
                     <div>
                       <p className="font-bold text-xs text-slate-900 dark:text-white">

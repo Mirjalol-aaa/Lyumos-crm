@@ -11,7 +11,7 @@ import {
   Users,
   GraduationCap,
   BookOpen,
-  DollarSign,
+  CreditCard,
   Phone,
   MapPin,
   TrendingUp,
@@ -165,7 +165,7 @@ export const AdminBranchesPage: React.FC = () => {
         <Card>
           <CardContent className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400">
-              <DollarSign className="h-6 w-6" />
+              <CreditCard className="h-6 w-6" />
             </div>
             <div>
               <span className="text-xs font-bold text-slate-400 uppercase">Umumiy Tarmoq Tushumi</span>
