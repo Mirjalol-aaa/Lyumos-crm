@@ -441,7 +441,96 @@ body {
   touch-action: manipulation;
 }
 
+/* ==========================================================================
+   LUMOS LUXURY DARK & GOLD DESIGN SYSTEM TOKENS & UTILITIES
+   ========================================================================== */
 
+.font-luxury-display {
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.02em;
+}
+
+.font-luxury-serif {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Luxury Colors */
+.bg-luxury-black {
+  background-color: #0B0808;
+}
+
+.bg-luxury-brown {
+  background-color: #17100F;
+}
+
+.text-luxury-gold {
+  color: #D9A83F;
+}
+
+.text-luxury-lightgold {
+  color: #F4D27A;
+}
+
+.text-luxury-champagne {
+  color: #FFE7A3;
+}
+
+.text-luxury-white {
+  color: #F8F5EF;
+}
+
+.text-luxury-muted {
+  color: #B8AEA2;
+}
+
+.border-luxury-gold {
+  border-color: rgba(217, 168, 63, 0.22);
+}
+
+.border-luxury-gold-strong {
+  border-color: rgba(217, 168, 63, 0.55);
+}
+
+/* Luxury Gold Gradients */
+.gold-gradient-text {
+  background: linear-gradient(135deg, #FFE7A3 0%, #F4D27A 40%, #D9A83F 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-gradient-btn {
+  background: linear-gradient(135deg, #D9A83F 0%, #F4D27A 100%);
+  color: #0B0808;
+  font-weight: 800;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gold-gradient-btn:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 8px 25px -4px rgba(217, 168, 63, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Luxury Cards */
+.gold-card {
+  background-color: #17100F;
+  border: 1px solid rgba(217, 168, 63, 0.2);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gold-card:hover {
+  border-color: rgba(217, 168, 63, 0.5);
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.6), 0 0 25px -5px rgba(217, 168, 63, 0.18);
+  transform: translateY(-3px);
+}
+
+.gold-glow {
+  box-shadow: 0 0 45px rgba(217, 168, 63, 0.15);
+}
+
+.gold-glow-strong {
+  box-shadow: 0 0 65px rgba(217, 168, 63, 0.28);
+}
 
 /* --------------------------------------------------------------------------
    REDUCED MOTION ACCESSIBILITY
