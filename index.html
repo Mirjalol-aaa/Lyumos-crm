@@ -39,13 +39,24 @@
   <body class="bg-[#F8F9FA] text-slate-900 antialiased selection:bg-amber-500 selection:text-white dark:bg-slate-950 dark:text-slate-100">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- Service Worker Registration for PWA -->
+    <!-- Auto-unregister legacy Service Workers and clear old CacheStorage -->
     <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-          navigator.serviceWorker.register('./sw.js').catch(function() {});
-        });
-      }
+      (function() {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for (var reg of registrations) {
+              reg.unregister();
+            }
+          });
+        }
+        if ('caches' in window) {
+          caches.keys().then(function(names) {
+            for (var name of names) {
+              caches.delete(name);
+            }
+          });
+        }
+      })();
     </script>
   </body>
 </html>
