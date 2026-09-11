@@ -29,6 +29,11 @@ import {
   HelpCircle,
   Search,
   Check,
+  Package,
+  ClipboardCheck,
+  Sun,
+  Moon,
+  Laptop,
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
@@ -36,6 +41,7 @@ import { Modal } from '../../components/ui/Modal';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
 import { ThemeToggle } from '../../components/ui/ThemeToggle';
+import { LumosLogo } from '../../components/ui/LumosLogo';
 import { DiagnosticTestModal } from '../../components/modals/DiagnosticTestModal';
 import { CourseDetailsModal } from '../../components/modals/CourseDetailsModal';
 import { useI18n } from '../../lib/i18n';
@@ -48,13 +54,12 @@ import { Course } from '../../types/admin';
 import { fireCelebrationConfetti } from '../../services/paymentGatewayService';
 import { sendTelegramMessage, formatLeadApplicationMessage } from '../../services/telegramService';
 import { sendEskizSms } from '../../services/eskizSmsService';
-import lumosLogo from '../../assets/lumos-logo.png';
-import heroStudentImg from '../../assets/lumos_hero_student.jpg';
+import heroStudentImg from '../../assets/lumos_hero_student_hd.jpg';
 import aboutAcademyImg from '../../assets/lumos_about_academy.jpg';
 
 export const LandingPage: React.FC = () => {
   const { t, language, setLanguage, formatMoney } = useI18n();
-  const { settings, addStudent } = useCRM();
+  const { settings, addStudent, updateSettings } = useCRM();
   const { currentUser, currentRole } = useLMS();
 
   // Scroll detection for sticky elevated glass navbar
@@ -72,6 +77,9 @@ export const LandingPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
+  // Language Dropdown open state in Header
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+
   // Interactive FAQ Accordion state
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
@@ -84,13 +92,13 @@ export const LandingPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Animated counters
-  const [counterStudents, setCounterStudents] = useState(420);
+  const [counterStudents, setCounterStudents] = useState(450);
   const [counterRate, setCounterRate] = useState(88);
 
   useEffect(() => {
     document.title =
       language === 'ru'
-        ? 'LUMOS Учебный Центр — К светлому будущему со знаниями!'
+        ? 'LUMOS Ta’lim Markazi — K kelajakka bilim bilan!'
         : language === 'en'
         ? 'LUMOS Academy — Toward a Brighter Future with Knowledge!'
         : 'LUMOS Ta’lim Markazi — Bilim Bilan Yorqin Kelajakka!';
@@ -99,7 +107,7 @@ export const LandingPage: React.FC = () => {
       setIsScrolled(window.scrollY > 25);
 
       const sections = ['home', 'courses', 'why-us', 'results', 'teachers', 'about', 'branches', 'faq'];
-      const scrollPos = window.scrollY + 120;
+      const scrollPos = window.scrollY + 140;
       for (const s of sections) {
         const el = document.getElementById(s);
         if (el) {
@@ -125,16 +133,16 @@ export const LandingPage: React.FC = () => {
     };
   }, [language]);
 
-  // Category filter items
+  // Category filter items (matching the exact mockup pills)
   const categoryFilters = [
-    { key: 'all', label: language === 'ru' ? 'Все курсы' : language === 'en' ? 'All Courses' : 'Barchasi' },
-    { key: 'math', label: language === 'ru' ? 'Математика' : language === 'en' ? 'Mathematics' : 'Matematika' },
-    { key: 'english', label: language === 'ru' ? 'Английский' : language === 'en' ? 'English' : 'Ingliz tili' },
+    { key: 'all', label: 'Barchasi' },
+    { key: 'math', label: 'Matematika' },
+    { key: 'english', label: 'Ingliz tili' },
+    { key: 'it', label: 'IT' },
     { key: 'ielts', label: 'IELTS' },
-    { key: 'it', label: language === 'ru' ? 'IT и Программирование' : language === 'en' ? 'IT & Coding' : 'IT' },
-    { key: 'school', label: language === 'ru' ? 'Школьные предметы' : language === 'en' ? 'School Subjects' : 'Maktab fanlari' },
-    { key: 'abiturient', label: language === 'ru' ? 'Абитуриент' : language === 'en' ? 'University Prep' : 'Abituriyent' },
-    { key: 'kids', label: language === 'ru' ? 'Для детей' : language === 'en' ? 'For Kids' : 'Bolalar uchun' },
+    { key: 'school', label: 'Maktab fanlari' },
+    { key: 'abiturient', label: 'Abituriyent' },
+    { key: 'kids', label: 'Bolalar uchun' },
   ];
 
   // Filtered courses
@@ -251,226 +259,188 @@ export const LandingPage: React.FC = () => {
     setIsApplyModalOpen(true);
   };
 
-  // 6 A+ Academy inspired FAQ questions
+  // 6 FAQ questions
   const faqList = [
     {
-      q: language === 'ru' 
-        ? 'Как проходят занятия и сколько учеников в каждой группе?' 
-        : language === 'en' 
-        ? 'How are classes organized and how many students are in each group?' 
-        : 'Darslar qanday tartibda va necha kishilik guruhlarda o‘tiladi?',
-      a: language === 'ru'
-        ? 'Занятия проводятся 3 раза в неделю по 2 академических часа. В группах обучается максимум 10–12 учеников. Это позволяет наставнику уделять персональное внимание каждому ребенку и подробно разбирать все вопросы.'
-        : language === 'en'
-        ? 'Lessons are held 3 times a week, 2 hours each. Groups are strictly capped at 10–12 students to guarantee individual attention, personalized tracking, and rapid mastery.'
-        : 'Darslar haftada 3 kun, 2 soatdan tashkil etiladi. Har bir guruhda qat’iy ravishda maksimum 10-12 nafar o‘quvchi o‘qiydi. Bu ustozga har bir o‘quvchi bilan individual shug‘ullanish va barcha mavzularni to‘liq mustahkamlash imkonini beradi.',
+      q: 'Darslar qanday tartibda va necha kishilik guruhlarda o‘tiladi?',
+      a: 'Darslar haftada 3 kun, 2 soatdan tashkil etiladi. Har bir guruhda qat’iy ravishda maksimum 10-12 nafar o‘quvchi o‘qiydi. Bu ustozga har bir o‘quvchi bilan individual shug‘ullanish va barcha mavzularni to‘liq mustahkamlash imkonini beradi.',
     },
     {
-      q: language === 'ru'
-        ? 'Первый пробный урок действительно бесплатный?'
-        : language === 'en'
-        ? 'Is the first trial lesson truly free?'
-        : 'Birinchi sinov darsi rostdan ham bepulmi?',
-      a: language === 'ru'
-        ? 'Да, абсолютно бесплатно! Перед началом обучения вы можете посетить любой урок, ознакомиться с преподавателем, методикой преподавания и атмосферой нашего центра без каких-либо обязательств.'
-        : language === 'en'
-        ? 'Yes, 100% free! Before enrolling, you and your child can attend any class, experience our teaching methodology, and meet the instructor with zero obligations.'
-        : 'Ha, 100% bepul! Kursga yozilishdan oldin istalgan fan bo‘yicha sinov darsimizda qatnashib, ustozning o‘qitish uslubi, dars formati va markazimiz muhiti bilan hech qanday to‘lovsiz tanishishingiz mumkin.',
+      q: 'Birinchi sinov darsi rostdan ham bepulmi?',
+      a: 'Ha, 100% bepul! Kursga yozilishdan oldin istalgan fan bo‘yicha sinov darsimizda qatnashib, ustozning o‘qitish uslubi, dars formati va markazimiz muhiti bilan hech qanday to‘lovsiz tanishishingiz mumkin.',
     },
     {
-      q: language === 'ru'
-        ? 'Как родители могут отслеживать посещаемость и успеваемость?'
-        : language === 'en'
-        ? 'How do parents monitor attendance and academic progress?'
-        : 'Farzandimning davomati va o‘zlashtirishini qanday kuzatib boraman?',
-      a: language === 'ru'
-        ? 'LUMOS использует автоматизированную систему оповещения в Telegram. После каждого урока родители получают отчет о посещаемости, оценку за домашнее задание и комментарии преподавателя.'
-        : language === 'en'
-        ? 'LUMOS features an automated Telegram reporting bot. After every class, parents receive instant notifications on attendance, test scores, homework completion, and instructor feedback.'
-        : 'LUMOS tizimida maxsus avtomatlashtirilgan Telegram bot ishlaydi. Har bir dars yakunlangach, ota-onaga farzandining darsga kelganligi, uyga vazifa bahosi va ustozning fikri bir zumda yuboriladi.',
+      q: 'Farzandimning davomati va o‘zlashtirishini qanday kuzatib boraman?',
+      a: 'LUMOS tizimida maxsus avtomatlashtirilgan Telegram bot ishlaydi. Har bir dars yakunlangach, ota-onaga farzandining darsga kelganligi, uyga vazifa bahosi va ustozning fikri bir zumda yuboriladi.',
     },
     {
-      q: language === 'ru'
-        ? 'Сколько стоит обучение и какие способы оплаты доступны?'
-        : language === 'en'
-        ? 'What is the tuition fee and what payment methods are accepted?'
-        : 'O‘quv to‘lovlari qancha va qanday to‘lov usullari mavjud?',
-      a: language === 'ru'
-        ? 'Стоимость курсов варьируется от 250 000 до 380 000 сум в месяц в зависимости от направления. Оплату можно производить через Payme, Click, банковские карты или наличными в кассе любого филиала.'
-        : language === 'en'
-        ? 'Monthly tuition ranges from 250,000 to 380,000 UZS depending on the track. We accept Payme, Click, bank cards, or cash at any of our branches.'
-        : 'Kurslarimiz oylik to‘lovi yo‘nalishga qarab 250 000 so‘mdan 380 000 so‘mgacha. To‘lovlarni Payme, Click ilovalari, Uzcard/Humo bank kartalari yoki markazimiz filiallarida naqd shaklda amalga oshirishingiz mumkin.',
+      q: 'O‘quv to‘lovlari qancha va qanday to‘lov usullari mavjud?',
+      a: 'Kurslarimiz oylik to‘lovi yo‘nalishga qarab 250 000 so‘mdan 380 000 so‘mgacha. To‘lovlarni Payme, Click ilovalari, Uzcard/Humo bank kartalari yoki markazimiz filiallarida naqd shaklda amalga oshirishingiz mumkin.',
     },
     {
-      q: language === 'ru'
-        ? 'Какая гарантия предоставляется на достижение результата?'
-        : language === 'en'
-        ? 'What guarantee is provided for student outcomes?'
-        : 'Natijaga qanday kafolat beriladi?',
-      a: language === 'ru'
-        ? 'Мы проводим первоначальную диагностику, регулярные контрольные тесты каждые 2 недели и предоставляем дополнительные бесплатные консультации для отстающих тем. 95% наших выпускников поступают в целевые вузы или сдают IELTS на 7.0+.'
-        : language === 'en'
-        ? 'We conduct rigorous diagnostic entry tests, bi-weekly mock exams, and provide complimentary extra mentoring hours for any topics that need strengthening. 95% of our students achieve target university admission or IELTS 7.0+.'
-        : 'Biz o‘quvchini qabul qilishda dastlabki diagnostik test olamiz, har 2 haftada oraliq nazorat sinovlarini o‘tkazamiz va mavzuni tushunmagan o‘quvchilarga bepul qo‘shimcha konsultatsiya ajratamiz. Bitiruvchilarimizning 95% i o‘z maqsadiga erishadi.',
+      q: 'Natijaga qanday kafolat beriladi?',
+      a: 'Biz o‘quvchini qabul qilishda dastlabki diagnostik test olamiz, har 2 haftada oraliq nazorat sinovlarini o‘tkazamiz va mavzuni tushunmagan o‘quvchilarga bepul qo‘shimcha konsultatsiya ajratamiz. Bitiruvchilarimizning 95% i o‘z maqsadiga erishadi.',
     },
     {
-      q: language === 'ru'
-        ? 'Какой документ выдается после окончания курса?'
-        : language === 'en'
-        ? 'What credential or certificate is awarded upon graduation?'
-        : 'Kursni muvaffaqiyatli tamomlagach qanday hujjat beriladi?',
-      a: language === 'ru'
-        ? 'По окончании полного курса и успешной сдачи финального экзамена выдается официальный двуязычный сертификат LUMOS Academy с индивидуальным QR-кодом для проверки подлинности.'
-        : language === 'en'
-        ? 'Upon completing the curriculum and passing the final exam, students receive an official bilingual LUMOS Academy Certificate of Excellence with a verifiable online QR code.'
-        : 'Kursni to‘liq tugatib, yakuniy imtihonni muvaffaqiyatli topshirgan o‘quvchilarga haqiqiyligini onlayn tekshirish imkonini beruvchi QR-kodli rasmiy ikki tilli LUMOS Academy sertifikati topshiriladi.',
+      q: 'Kursni muvaffaqiyatli tamomlagach qanday hujjat beriladi?',
+      a: 'Kursni to‘liq tugatib, yakuniy imtihonni muvaffaqiyatli topshirgan o‘quvchilarga haqiqiyligini onlayn tekshirish imkonini beruvchi QR-kodli rasmiy ikki tilli LUMOS Academy sertifikati topshiriladi.',
     },
   ];
 
   return (
-    <div className="min-h-screen bg-[#0B0808] text-[#F8F5EF] antialiased selection:bg-[#D9A83F] selection:text-[#0B0808] relative overflow-x-hidden">
-      {/* Background ambient lighting glows */}
+    <div className="min-h-screen bg-[#0B0808] text-[#F8F5EF] antialiased selection:bg-[#D9A83F] selection:text-[#0B0808] relative overflow-x-hidden font-sans">
+      {/* Background warm golden ambient lighting */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-[#D9A83F]/12 via-[#17100F]/30 to-transparent blur-[140px] rounded-full" />
-        <div className="absolute top-[35%] right-[-15%] w-[600px] h-[600px] bg-[#D9A83F]/8 blur-[160px] rounded-full" />
-        <div className="absolute top-[65%] left-[-15%] w-[600px] h-[600px] bg-[#D9A83F]/7 blur-[160px] rounded-full" />
+        <div className="absolute top-[-5%] left-1/4 w-[850px] h-[550px] bg-gradient-to-b from-[#D9A83F]/14 via-[#1C1310]/40 to-transparent blur-[140px] rounded-full" />
+        <div className="absolute top-[25%] right-[-10%] w-[700px] h-[700px] bg-[#D9A83F]/9 blur-[160px] rounded-full" />
+        <div className="absolute top-[60%] left-[-15%] w-[650px] h-[650px] bg-[#D9A83F]/7 blur-[160px] rounded-full" />
       </div>
 
       {/* =========================================================================
-          1. HEADER / NAVBAR (Sticky, Luxury Glassmorphism & Gold Accent)
+          1. HEADER / NAVBAR (Exact Match to Reference Mockup)
           ========================================================================= */}
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled
-            ? 'bg-[#0B0808]/90 backdrop-blur-xl border-b border-[#D9A83F]/20 shadow-[0_10px_30px_rgba(0,0,0,0.8)] py-3'
-            : 'bg-transparent py-5 border-b border-transparent'
+            ? 'bg-[#0B0808]/92 backdrop-blur-xl border-b border-[#D9A83F]/20 shadow-[0_12px_36px_rgba(0,0,0,0.85)] py-3'
+            : 'bg-transparent py-4 border-b border-transparent'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          {/* Brand Logo */}
-          <a href="#" className="flex items-center gap-3 group focus:outline-none select-none">
-            <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-[#17100F] border border-[#D9A83F]/40 shadow-lg shadow-[#D9A83F]/15 group-hover:border-[#D9A83F] transition-all">
-              <img src={lumosLogo} alt="LUMOS Logo" className="h-7 w-7 object-contain drop-shadow" />
-              <div className="absolute -inset-0.5 rounded-2xl bg-[#D9A83F]/20 blur-xs opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl sm:text-2xl font-luxury-display font-black tracking-wider text-[#F8F5EF] flex items-center gap-1.5">
-                LUMOS
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#D9A83F] shadow-[0_0_8px_#D9A83F]" />
-              </span>
-              <span className="text-[10px] tracking-[0.2em] font-semibold text-[#B8AEA2] uppercase">
-                Academy & Center
-              </span>
-            </div>
+        <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+          {/* Logo on the left */}
+          <a href="#" className="flex items-center group focus:outline-none select-none">
+            <LumosLogo size="md" />
           </a>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-7">
+          {/* Navigation Links in Center */}
+          <nav className="hidden lg:flex items-center gap-7 text-sm font-medium">
             {[
-              { id: 'home', label: language === 'ru' ? 'Главная' : language === 'en' ? 'Home' : 'Bosh sahifa', href: '#' },
-              { id: 'courses', label: language === 'ru' ? 'Курсы' : language === 'en' ? 'Courses' : 'Kurslar', href: '#courses' },
-              { id: 'why-us', label: language === 'ru' ? 'Почему мы' : language === 'en' ? 'Why Lumos' : 'Nega Lumos?', href: '#why-us' },
-              { id: 'results', label: language === 'ru' ? 'Результаты' : language === 'en' ? 'Results' : 'Natijalar', href: '#results' },
-              { id: 'teachers', label: language === 'ru' ? 'Преподаватели' : language === 'en' ? 'Teachers' : 'O‘qituvchilar', href: '#teachers' },
-              { id: 'about', label: language === 'ru' ? 'О нас' : language === 'en' ? 'About Us' : 'Biz haqimizda', href: '#about' },
-              { id: 'branches', label: language === 'ru' ? 'Филиалы' : language === 'en' ? 'Branches' : 'Filiallar', href: '#branches' },
+              { id: 'home', label: 'Bosh sahifa', href: '#' },
+              { id: 'courses', label: 'Kurslar', href: '#courses' },
+              { id: 'results', label: 'Natijalar', href: '#results' },
+              { id: 'teachers', label: 'O‘qituvchilar', href: '#teachers' },
+              { id: 'about', label: 'Biz haqimizda', href: '#about' },
+              { id: 'branches', label: 'Filiallar', href: '#branches' },
             ].map((item) => {
               const isActive = activeSection === item.id;
               return (
                 <a
                   key={item.id}
                   href={item.href}
-                  className={`text-sm font-semibold transition-all relative py-1 ${
+                  className={`transition-all relative py-1 ${
                     isActive
                       ? 'text-[#F4D27A] font-bold'
-                      : 'text-[#B8AEA2] hover:text-[#F8F5EF]'
+                      : 'text-[#C7BCB1] hover:text-[#F8F5EF]'
                   }`}
                 >
                   {item.label}
                   {isActive && (
-                    <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#D9A83F] to-transparent rounded-full" />
+                    <span className="absolute -bottom-1 left-0 right-0 h-[2px] bg-gradient-to-r from-[#D9A83F] via-[#F4D27A] to-[#D9A83F] rounded-full shadow-[0_0_8px_#D9A83F]" />
                   )}
                 </a>
               );
             })}
           </nav>
 
-          {/* Right Action Tools */}
-          <div className="hidden sm:flex items-center gap-3.5">
-            {/* Search Toggle */}
+          {/* Action Tools on Right */}
+          <div className="hidden sm:flex items-center gap-3">
+            {/* Search Icon */}
             <button
               type="button"
               onClick={() => {
-                setIsSearchOpen(!isSearchOpen);
                 const el = document.getElementById('courses');
                 if (el) el.scrollIntoView({ behavior: 'smooth' });
               }}
-              className="p-2 rounded-xl text-[#B8AEA2] hover:text-[#D9A83F] hover:bg-[#17100F] border border-transparent hover:border-[#D9A83F]/30 transition-all cursor-pointer"
-              title="Qidiruv"
-              aria-label="Qidiruv"
+              className="p-2 rounded-full text-[#C7BCB1] hover:text-[#D9A83F] hover:bg-[#1C1412] transition-colors cursor-pointer"
+              title="Qidirish"
+              aria-label="Qidirish"
             >
               <Search className="h-4 w-4" />
             </button>
 
-            {/* Theme Toggle */}
-            <ThemeToggle variant="cycle" className="h-9 w-9 !bg-[#17100F] !border-[#D9A83F]/30 !text-[#D9A83F] hover:!border-[#D9A83F]" />
+            {/* Theme Toggle Button (Sun/Moon pill matching mockup) */}
+            <button
+              type="button"
+              onClick={() => {
+                const next = settings.theme === 'dark' ? 'light' : 'dark';
+                updateSettings({ theme: next });
+              }}
+              className="flex items-center justify-center h-8 w-8 rounded-full border border-[#D9A83F]/30 bg-[#1C1412] text-[#D9A83F] hover:border-[#D9A83F] transition-all cursor-pointer"
+              title="Mavzu"
+            >
+              <Sun className="h-3.5 w-3.5" />
+            </button>
 
-            {/* Language Selector */}
-            <div className="flex items-center p-1 rounded-xl bg-[#17100F] border border-[#D9A83F]/25 text-xs font-bold">
-              {(['uz', 'ru', 'en'] as const).map((lng) => (
-                <button
-                  key={lng}
-                  type="button"
-                  onClick={() => setLanguage(lng)}
-                  className={`px-2 py-1 rounded-lg uppercase tracking-wider transition-all cursor-pointer ${
-                    language === lng
-                      ? 'bg-[#D9A83F] text-[#0B0808] font-black shadow-xs'
-                      : 'text-[#B8AEA2] hover:text-[#F8F5EF]'
-                  }`}
-                >
-                  {lng}
-                </button>
-              ))}
+            {/* Language Selector Pill (Globe + O‘zbekcha + chevron) */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#D9A83F]/30 bg-[#1C1412] text-xs font-semibold text-[#F8F5EF] hover:border-[#D9A83F] transition-all cursor-pointer"
+              >
+                <Globe className="h-3.5 w-3.5 text-[#D9A83F]" />
+                <span>{language === 'uz' ? 'O‘zbekcha' : language === 'ru' ? 'Русский' : 'English'}</span>
+                <ChevronDown className="h-3 w-3 text-[#C7BCB1]" />
+              </button>
+
+              {isLangDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-32 rounded-2xl bg-[#1C1412] border border-[#D9A83F]/30 p-1.5 shadow-2xl z-50 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => { setLanguage('uz'); setIsLangDropdownOpen(false); }}
+                    className={`w-full text-left px-3 py-1.5 rounded-xl transition-colors ${language === 'uz' ? 'bg-[#D9A83F] text-[#0B0808] font-bold' : 'text-[#F8F5EF] hover:bg-white/5'}`}
+                  >
+                    O‘zbekcha
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setLanguage('ru'); setIsLangDropdownOpen(false); }}
+                    className={`w-full text-left px-3 py-1.5 rounded-xl transition-colors ${language === 'ru' ? 'bg-[#D9A83F] text-[#0B0808] font-bold' : 'text-[#F8F5EF] hover:bg-white/5'}`}
+                  >
+                    Русский
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setLanguage('en'); setIsLangDropdownOpen(false); }}
+                    className={`w-full text-left px-3 py-1.5 rounded-xl transition-colors ${language === 'en' ? 'bg-[#D9A83F] text-[#0B0808] font-bold' : 'text-[#F8F5EF] hover:bg-white/5'}`}
+                  >
+                    English
+                  </button>
+                </div>
+              )}
             </div>
 
-            {/* Portal / Login Button */}
+            {/* Kirish Pill */}
             <a
               href="#/login"
-              className="px-4 py-2 rounded-xl text-xs font-bold text-[#F8F5EF] hover:text-[#D9A83F] bg-[#17100F]/80 border border-[#D9A83F]/30 hover:border-[#D9A83F]/60 transition-all flex items-center gap-1.5"
+              className="px-4 py-1.5 rounded-full border border-[#D9A83F]/35 bg-[#1C1412] text-xs font-bold text-[#F8F5EF] hover:text-[#D9A83F] hover:border-[#D9A83F] transition-all"
             >
-              <LogIn className="h-3.5 w-3.5 text-[#D9A83F]" />
-              <span>{language === 'ru' ? 'Вход' : language === 'en' ? 'Log In' : 'Kirish'}</span>
+              Kirish
             </a>
 
-            {/* Registration CTA Button */}
+            {/* Ro‘yxatdan o‘tish (Warm Golden Pill Button) */}
             <button
               type="button"
               onClick={() => setIsApplyModalOpen(true)}
-              className="gold-gradient-btn px-5 py-2 rounded-xl text-xs uppercase tracking-wider font-extrabold cursor-pointer shadow-md shadow-[#D9A83F]/20 flex items-center gap-1.5"
+              className="gold-gradient-btn px-5 py-2 rounded-full text-xs font-black tracking-wide cursor-pointer shadow-md shadow-[#D9A83F]/25 hover:scale-[1.02] transition-transform"
             >
-              <span>{language === 'ru' ? 'Записаться' : language === 'en' ? 'Register' : 'Ro‘yxatdan o‘tish'}</span>
-              <ArrowRight className="h-3.5 w-3.5" />
+              Ro‘yxatdan o‘tish
             </button>
           </div>
 
-          {/* Mobile Menu Toggle */}
+          {/* Mobile Menu Icon */}
           <div className="flex items-center gap-2 lg:hidden">
-            {/* Quick Theme for Mobile */}
-            <ThemeToggle variant="cycle" className="h-8 w-8 !bg-[#17100F] !border-[#D9A83F]/30 !text-[#D9A83F]" />
-
-            {/* Quick Lang for Mobile */}
             <button
               type="button"
               onClick={() => setLanguage(language === 'uz' ? 'ru' : language === 'ru' ? 'en' : 'uz')}
-              className="px-2.5 py-1 rounded-lg bg-[#17100F] border border-[#D9A83F]/30 text-xs font-mono font-bold text-[#D9A83F] uppercase"
+              className="px-2.5 py-1 rounded-full bg-[#1C1412] border border-[#D9A83F]/30 text-xs font-mono font-bold text-[#D9A83F] uppercase"
             >
               {language}
             </button>
-
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-xl bg-[#17100F] border border-[#D9A83F]/30 text-[#F8F5EF] hover:text-[#D9A83F] transition-colors"
+              className="p-2 rounded-xl bg-[#1C1412] border border-[#D9A83F]/30 text-[#F8F5EF]"
               aria-label="Menyu"
             >
               {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -480,23 +450,21 @@ export const LandingPage: React.FC = () => {
 
         {/* Mobile Navigation Drawer */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden bg-[#17100F] border-b border-[#D9A83F]/25 px-5 py-6 space-y-4 animate-in slide-in-from-top-4 duration-300 shadow-2xl">
+          <div className="lg:hidden bg-[#1C1412] border-b border-[#D9A83F]/25 px-5 py-6 space-y-4 animate-in slide-in-from-top-4 duration-300 shadow-2xl">
             <div className="flex flex-col space-y-3">
               {[
                 { id: 'home', label: 'Bosh sahifa', href: '#' },
                 { id: 'courses', label: 'Kurslar', href: '#courses' },
-                { id: 'why-us', label: 'Nega Lumos?', href: '#why-us' },
                 { id: 'results', label: 'Natijalar', href: '#results' },
                 { id: 'teachers', label: 'O‘qituvchilar', href: '#teachers' },
                 { id: 'about', label: 'Biz haqimizda', href: '#about' },
                 { id: 'branches', label: 'Filiallar', href: '#branches' },
-                { id: 'faq', label: 'FAQ', href: '#faq' },
               ].map((link) => (
                 <a
                   key={link.id}
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-base font-semibold text-[#B8AEA2] hover:text-[#D9A83F] py-1 border-b border-white/5 flex items-center justify-between"
+                  className="text-sm font-semibold text-[#C7BCB1] hover:text-[#D9A83F] py-1 border-b border-white/5 flex items-center justify-between"
                 >
                   <span>{link.label}</span>
                   <ChevronRight className="h-4 w-4 text-[#D9A83F]/60" />
@@ -504,17 +472,17 @@ export const LandingPage: React.FC = () => {
               ))}
             </div>
 
-            <div className="pt-3 flex flex-col gap-2.5">
+            <div className="pt-2 flex flex-col gap-2.5">
               <button
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
                   setIsDiagnosticModalOpen(true);
                 }}
-                className="w-full py-2.5 rounded-xl border border-[#D9A83F]/40 text-[#D9A83F] text-xs font-bold flex items-center justify-center gap-2 bg-[#0B0808]/60"
+                className="w-full py-2.5 rounded-full border border-[#D9A83F]/40 text-[#D9A83F] text-xs font-bold flex items-center justify-center gap-2 bg-[#0B0808]"
               >
-                <Sparkles className="h-4 w-4" />
-                <span>Darajani Aniqlash (Test)</span>
+                <BookOpen className="h-4 w-4" />
+                <span>Darajani aniqlash</span>
               </button>
 
               <button
@@ -523,7 +491,7 @@ export const LandingPage: React.FC = () => {
                   setIsMobileMenuOpen(false);
                   setIsApplyModalOpen(true);
                 }}
-                className="w-full gold-gradient-btn py-3 rounded-xl text-xs uppercase tracking-wider font-extrabold flex items-center justify-center gap-2"
+                className="w-full gold-gradient-btn py-3 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2"
               >
                 <span>Ro‘yxatdan o‘tish</span>
                 <ArrowRight className="h-4 w-4" />
@@ -531,9 +499,9 @@ export const LandingPage: React.FC = () => {
 
               <a
                 href="#/login"
-                className="w-full py-2.5 rounded-xl text-center text-xs font-bold text-[#B8AEA2] hover:text-[#F8F5EF]"
+                className="w-full py-2 text-center text-xs font-bold text-[#C7BCB1] hover:text-[#F8F5EF]"
               >
-                Kabinetga kirish (Login)
+                Kirish (Login)
               </a>
             </div>
           </div>
@@ -541,327 +509,332 @@ export const LandingPage: React.FC = () => {
       </header>
 
       {/* =========================================================================
-          2. HERO SECTION (Cinematic, Large Typography, Student Visual, 3 Glass Cards)
+          2. HERO SECTION (Exact Match: Typography, Student Visual, 2 Glass Cards)
           ========================================================================= */}
       <section
         id="home"
-        className="relative pt-32 sm:pt-40 pb-20 lg:pb-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col justify-center min-h-[92vh]"
+        className="relative pt-32 sm:pt-36 lg:pt-40 pb-28 lg:pb-36 px-4 sm:px-6 lg:px-8 max-w-[1360px] mx-auto min-h-[92vh] flex flex-col justify-center"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-          {/* Left Column: Typography & CTAs */}
-          <div className="lg:col-span-7 space-y-7 text-center lg:text-left">
-            {/* Top Small Luxury Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#17100F] border border-[#D9A83F]/40 shadow-lg shadow-[#D9A83F]/10">
-              <Sparkles className="h-4 w-4 text-[#D9A83F]" />
-              <span className="text-xs font-bold tracking-wide text-[#F4D27A]">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+          {/* Left Side: Badge, Title, Subtitle, Buttons & 4 Feature Icons */}
+          <div className="lg:col-span-6 space-y-6 text-left z-10">
+            {/* Top Badge: "⭐ Bilim — eng katta kuch!" */}
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1C1412]/85 border border-[#D9A83F]/35 shadow-lg shadow-[#D9A83F]/10">
+              <Star className="h-3.5 w-3.5 fill-[#D9A83F] text-[#D9A83F]" />
+              <span className="text-xs font-bold text-[#F4D27A] tracking-wide">
                 Bilim — eng katta kuch!
               </span>
-              <span className="flex h-1.5 w-1.5 rounded-full bg-[#10B981] animate-pulse" />
             </div>
 
-            {/* Main Heading: "KELAJAGINGIZNI BUGUNDAN BOSHLANG!" */}
-            <div className="space-y-2">
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl xl:text-7xl font-luxury-display font-black leading-[1.08] tracking-tight uppercase">
-                <span className="text-[#F8F5EF] block drop-shadow-sm">
+            {/* Main Headline (Exact Typography Match: Playfair Display / Serif) */}
+            <div className="space-y-1">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl xl:text-[4.2rem] font-luxury-serif font-black leading-[1.08] tracking-tight">
+                <span className="text-[#FFFFFF] block drop-shadow-md">
                   Kelajagingizni
                 </span>
-                <span className="gold-gradient-text block mt-1 drop-shadow-md">
-                  Bugundan Boshlang!
+                <span className="text-[#D9A83F] block mt-1 drop-shadow-lg font-luxury-serif">
+                  bugundan boshlang!
                 </span>
               </h1>
             </div>
 
             {/* Subtitle */}
-            <p className="text-base sm:text-lg text-[#B8AEA2] max-w-2xl mx-auto lg:mx-0 font-normal leading-relaxed">
+            <p className="text-sm sm:text-base text-[#D4C8BE] max-w-xl font-normal leading-relaxed">
               Lumos — zamonaviy ta’lim, kuchli ustozlar va real natijalar uchun yaratilgan ta’lim markazi.
-              Har bir o‘quvchining qobiliyatini kashf etib, nufuzli oliygohlar va xalqaro marralar sari yetaklaymiz.
             </p>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
+            {/* 2 Action Buttons */}
+            <div className="flex flex-col sm:flex-row items-center gap-4 pt-1">
+              {/* Primary: Kurslarni ko‘rish → */}
               <a
                 href="#courses"
-                className="w-full sm:w-auto gold-gradient-btn px-8 py-4 rounded-2xl text-sm uppercase tracking-wider font-black flex items-center justify-center gap-2.5 shadow-xl shadow-[#D9A83F]/25 cursor-pointer"
+                className="w-full sm:w-auto gold-gradient-btn px-8 py-3.5 rounded-full text-sm font-bold flex items-center justify-center gap-2 shadow-xl shadow-[#D9A83F]/25 hover:brightness-105 cursor-pointer"
               >
                 <span>Kurslarni ko‘rish</span>
                 <ArrowRight className="h-4 w-4" />
               </a>
 
+              {/* Secondary: [icon] Darajani aniqlash */}
               <button
                 type="button"
                 onClick={() => setIsDiagnosticModalOpen(true)}
-                className="w-full sm:w-auto px-7 py-4 rounded-2xl text-sm font-bold text-[#F8F5EF] hover:text-[#D9A83F] bg-[#17100F]/90 border border-[#D9A83F]/35 hover:border-[#D9A83F] transition-all flex items-center justify-center gap-2.5 shadow-lg cursor-pointer"
+                className="w-full sm:w-auto px-7 py-3.5 rounded-full text-sm font-bold text-[#F8F5EF] hover:text-[#D9A83F] bg-[#1C1412]/80 border border-[#D9A83F]/35 hover:border-[#D9A83F] transition-all flex items-center justify-center gap-2.5 shadow-md cursor-pointer"
               >
-                <Sparkles className="h-4 w-4 text-[#D9A83F]" />
+                <BookOpen className="h-4 w-4 text-[#D9A83F]" />
                 <span>Darajani aniqlash</span>
               </button>
             </div>
 
-            {/* 4 Small Benefits */}
-            <div className="pt-6 border-t border-[#D9A83F]/15 grid grid-cols-2 sm:grid-cols-4 gap-4 text-left">
-              {[
-                { title: 'Sifatli ta’lim', desc: 'Xalqaro standart' },
-                { title: 'Kuchli ustozlar', desc: 'Oliy toifa mutaxassislar' },
-                { title: 'Zamonaviy metodika', desc: 'Interaktiv darslar' },
-                { title: 'Real natijalar', desc: '95% talabalikka qabul' },
-              ].map((b, idx) => (
-                <div key={idx} className="flex items-start gap-2.5">
-                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#D9A83F]/20 text-[#D9A83F] shrink-0 mt-0.5">
-                    <Check className="h-3 w-3 stroke-[3]" />
-                  </div>
-                  <div>
-                    <h5 className="text-xs font-bold text-[#F8F5EF] leading-snug">{b.title}</h5>
-                    <p className="text-[10px] text-[#B8AEA2]">{b.desc}</p>
-                  </div>
-                </div>
-              ))}
+            {/* 4 Feature Icons Underneath Buttons (Exact Match to Mockup) */}
+            <div className="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-semibold text-[#F8F5EF]">
+              <div className="flex items-center gap-2">
+                <Package className="h-4 w-4 text-[#D9A83F] shrink-0" />
+                <span>Sifatli ta’lim</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <GraduationCap className="h-4 w-4 text-[#D9A83F] shrink-0" />
+                <span>Kuchli ustozlar</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <ClipboardCheck className="h-4 w-4 text-[#D9A83F] shrink-0" />
+                <span>Zamonaviy metodika</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-[#D9A83F] shrink-0" />
+                <span>Real natijalar</span>
+              </div>
             </div>
           </div>
 
-          {/* Right Column: Large Premium Education Visual with 3 Floating Glass Cards */}
-          <div className="lg:col-span-5 relative flex justify-center mt-6 lg:mt-0">
-            <div className="relative w-full max-w-md lg:max-w-none">
-              {/* Outer Golden Halo Glow */}
-              <div className="absolute -inset-2 rounded-3xl bg-gradient-to-tr from-[#D9A83F]/30 via-[#F4D27A]/10 to-transparent blur-2xl opacity-70" />
+          {/* Right Side: The Exact Student with Giant Golden Sundial Ring & 2 Floating Glass Cards */}
+          <div className="lg:col-span-6 relative flex justify-center lg:justify-end mt-4 lg:mt-0">
+            <div className="relative w-full max-w-[540px]">
+              {/* Golden Ambient Glow behind image */}
+              <div className="absolute -inset-4 rounded-full bg-gradient-to-tr from-[#D9A83F]/25 via-[#F4D27A]/15 to-transparent blur-3xl opacity-80 pointer-events-none" />
 
-              {/* Main Image Frame */}
-              <div className="relative rounded-3xl overflow-hidden border-2 border-[#D9A83F]/40 shadow-[0_20px_60px_rgba(0,0,0,0.9)] bg-[#17100F]">
+              {/* Main Student Frame */}
+              <div className="relative rounded-[36px] overflow-hidden border-2 border-[#D9A83F]/35 shadow-[0_20px_70px_rgba(0,0,0,0.85)] bg-[#17100F] aspect-square">
                 <img
                   src={heroStudentImg}
-                  alt="LUMOS O‘quvchisi"
-                  className="w-full h-[420px] sm:h-[480px] lg:h-[520px] object-cover object-center transform hover:scale-105 transition-transform duration-700"
+                  alt="LUMOS Iqtidorli O‘quvchisi"
+                  className="w-full h-full object-cover object-center transform hover:scale-[1.03] transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0B0808] via-transparent to-black/30" />
-
-                {/* Internal Brand Stamp */}
-                <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0B0808]/75 backdrop-blur-md border border-[#D9A83F]/30">
-                  <span className="text-[11px] font-luxury-display font-black tracking-widest text-[#F4D27A] uppercase">
-                    LUMOS ACADEMIC EXCELLENCE
-                  </span>
-                </div>
+                {/* Subtle dark vignette blend */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0B0808]/70 via-transparent to-transparent pointer-events-none" />
               </div>
 
-              {/* Floating Glass Card 1: Top Right */}
-              <div className="absolute -top-5 -right-4 sm:-right-6 p-3.5 rounded-2xl bg-[#17100F]/85 backdrop-blur-xl border border-[#D9A83F]/40 shadow-2xl max-w-[210px] hidden sm:flex items-center gap-3 animate-bounce duration-[6000ms]">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#D9A83F]/20 text-[#D9A83F] shrink-0">
-                  <Star className="h-5 w-5 fill-[#D9A83F]" />
+              {/* Floating Glass Card 1 (Left): "O‘rzularingizga yetish uchun biz bilan!" */}
+              <div className="absolute top-[38%] -left-6 sm:-left-10 p-3.5 rounded-2xl bg-[#1C1412]/85 backdrop-blur-xl border border-[#D9A83F]/40 shadow-2xl max-w-[215px] flex items-center gap-3 animate-pulse duration-[5000ms] select-none">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#D9A83F]/20 text-[#D9A83F] shrink-0">
+                  <GraduationCap className="h-5 w-5" />
                 </div>
-                <p className="text-xs font-bold text-[#F8F5EF] leading-tight">
-                  Orzularingizga yetish uchun biz bilan!
+                <p className="text-xs font-bold text-[#F8F5EF] leading-snug">
+                  O‘rzularingizga yetish uchun biz bilan!
                 </p>
               </div>
 
-              {/* Floating Glass Card 2: Bottom Left */}
-              <div className="absolute -bottom-6 -left-4 sm:-left-6 p-3.5 rounded-2xl bg-[#17100F]/85 backdrop-blur-xl border border-[#D9A83F]/40 shadow-2xl max-w-[220px] flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#D9A83F]/20 text-[#D9A83F] shrink-0">
-                  <GraduationCap className="h-5 w-5 text-[#D9A83F]" />
+              {/* Floating Glass Card 2 (Top Right): "Bilim bilan chegaralar yo‘q!" */}
+              <div className="absolute top-4 -right-4 sm:-right-8 p-3.5 rounded-2xl bg-[#1C1412]/85 backdrop-blur-xl border border-[#D9A83F]/40 shadow-2xl max-w-[210px] flex items-center gap-3 select-none">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#D9A83F]/20 text-[#D9A83F] shrink-0">
+                  <TrendingUp className="h-5 w-5" />
                 </div>
-                <p className="text-xs font-bold text-[#F8F5EF] leading-tight">
+                <p className="text-xs font-bold text-[#F8F5EF] leading-snug">
                   Bilim bilan chegaralar yo‘q!
                 </p>
-              </div>
-
-              {/* Floating Glass Card 3: Center Bottom Badge */}
-              <div className="absolute bottom-4 right-4 px-4 py-2 rounded-xl bg-[#0B0808]/85 backdrop-blur-md border border-[#D9A83F]/50 shadow-lg flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-[#D9A83F]" />
-                <span className="text-xs font-black text-[#F4D27A]">
-                  95% Natijadorlik & Kafolat
-                </span>
               </div>
             </div>
           </div>
         </div>
 
         {/* =========================================================================
-            3. HERO FLOATING STATISTICS BAR (4 Statistics, 2x2 on mobile)
+            3. FLOATING STATISTICS BAR CAPSULE (Overlapping Transition)
             ========================================================================= */}
-        <div className="mt-14 lg:mt-20 relative z-20">
-          <div className="p-6 sm:p-8 rounded-3xl bg-[#17100F]/95 backdrop-blur-xl border border-[#D9A83F]/30 shadow-[0_20px_50px_rgba(0,0,0,0.8)] grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-            <div className="space-y-1 border-r border-[#D9A83F]/15 last:border-none">
-              <div className="flex items-center justify-center gap-1.5 text-2xl sm:text-4xl font-luxury-display font-black text-[#F8F5EF]">
-                <span className="gold-gradient-text">500+</span>
+        <div className="mt-16 lg:mt-24 relative z-30">
+          <div className="max-w-4xl mx-auto rounded-full bg-gradient-to-r from-[#201715]/95 via-[#2A1D1A]/95 to-[#201715]/95 backdrop-blur-2xl border border-[#D9A83F]/40 shadow-[0_20px_50px_rgba(0,0,0,0.7)] px-6 sm:px-10 py-5 grid grid-cols-2 md:grid-cols-4 gap-4 items-center">
+            {/* Stat 1: 500+ O‘quvchi */}
+            <div className="flex items-center justify-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#D9A83F]/20 border border-[#D9A83F]/40 text-[#D9A83F] shrink-0">
+                <Users className="h-5 w-5" />
               </div>
-              <p className="text-xs sm:text-sm font-bold text-[#B8AEA2] uppercase tracking-wider">
-                O‘quvchi
-              </p>
+              <div className="text-left">
+                <span className="text-xl sm:text-2xl font-luxury-display font-black text-[#FFFFFF] block leading-none">
+                  500+
+                </span>
+                <span className="text-xs text-[#C7BCB1] font-semibold mt-1 block">
+                  O‘quvchi
+                </span>
+              </div>
             </div>
 
-            <div className="space-y-1 md:border-r border-[#D9A83F]/15 last:border-none">
-              <div className="flex items-center justify-center gap-1.5 text-2xl sm:text-4xl font-luxury-display font-black text-[#F8F5EF]">
-                <span className="gold-gradient-text">20+</span>
+            {/* Stat 2: 20+ O‘qituvchi */}
+            <div className="flex items-center justify-center gap-3 md:border-l border-[#D9A83F]/15 md:pl-6">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#D9A83F]/20 border border-[#D9A83F]/40 text-[#D9A83F] shrink-0">
+                <GraduationCap className="h-5 w-5" />
               </div>
-              <p className="text-xs sm:text-sm font-bold text-[#B8AEA2] uppercase tracking-wider">
-                O‘qituvchi
-              </p>
+              <div className="text-left">
+                <span className="text-xl sm:text-2xl font-luxury-display font-black text-[#FFFFFF] block leading-none">
+                  20+
+                </span>
+                <span className="text-xs text-[#C7BCB1] font-semibold mt-1 block">
+                  O‘qituvchi
+                </span>
+              </div>
             </div>
 
-            <div className="space-y-1 border-r border-[#D9A83F]/15 last:border-none">
-              <div className="flex items-center justify-center gap-1.5 text-2xl sm:text-4xl font-luxury-display font-black text-[#F8F5EF]">
-                <span className="gold-gradient-text">10+</span>
+            {/* Stat 3: 10+ Yo‘nalish */}
+            <div className="flex items-center justify-center gap-3 md:border-l border-[#D9A83F]/15 md:pl-6">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#D9A83F]/20 border border-[#D9A83F]/40 text-[#D9A83F] shrink-0">
+                <BookOpen className="h-5 w-5" />
               </div>
-              <p className="text-xs sm:text-sm font-bold text-[#B8AEA2] uppercase tracking-wider">
-                Yo‘nalish
-              </p>
+              <div className="text-left">
+                <span className="text-xl sm:text-2xl font-luxury-display font-black text-[#FFFFFF] block leading-none">
+                  10+
+                </span>
+                <span className="text-xs text-[#C7BCB1] font-semibold mt-1 block">
+                  Yo‘nalish
+                </span>
+              </div>
             </div>
 
-            <div className="space-y-1">
-              <div className="flex items-center justify-center gap-1.5 text-2xl sm:text-4xl font-luxury-display font-black text-[#F8F5EF]">
-                <span className="gold-gradient-text">95%</span>
+            {/* Stat 4: 95% Natija */}
+            <div className="flex items-center justify-center gap-3 md:border-l border-[#D9A83F]/15 md:pl-6">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#D9A83F]/20 border border-[#D9A83F]/40 text-[#D9A83F] shrink-0">
+                <TrendingUp className="h-5 w-5" />
               </div>
-              <p className="text-xs sm:text-sm font-bold text-[#B8AEA2] uppercase tracking-wider">
-                Natija
-              </p>
+              <div className="text-left">
+                <span className="text-xl sm:text-2xl font-luxury-display font-black text-[#FFFFFF] block leading-none">
+                  95%
+                </span>
+                <span className="text-xs text-[#C7BCB1] font-semibold mt-1 block">
+                  Natija
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* =========================================================================
-          4. COURSES SECTION ("Mashhur yo‘nalishlar")
+          4. COURSES SECTION (Luxury Warm Ivory Background Matching Mockup!)
           ========================================================================= */}
-      <section id="courses" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative">
-        <div className="text-center space-y-3 mb-10">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#17100F] border border-[#D9A83F]/30 text-xs font-bold text-[#D9A83F]">
-            <BookOpen className="h-3.5 w-3.5" />
-            <span>AKADEMIK DASTURLAR</span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-luxury-display font-black text-[#F8F5EF] uppercase">
-            Mashhur Yo‘nalishlar
-          </h2>
-          <p className="text-sm sm:text-base text-[#B8AEA2] max-w-2xl mx-auto">
-            O‘zingizga mos kursni tanlang va kelajagingizni qurishni boshlang. Har bir dastur natijadorlikka qat’iy yo‘naltirilgan.
-          </p>
-        </div>
-
-        {/* Category Filters Pills + Search */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-10">
-          <div className="flex items-center gap-2 overflow-x-auto w-full pb-2 scrollbar-none">
-            {categoryFilters.map((cat) => {
-              const isSelected = selectedCategoryKey === cat.key;
-              return (
-                <button
-                  key={cat.key}
-                  type="button"
-                  onClick={() => setSelectedCategoryKey(cat.key)}
-                  className={`px-4 py-2 rounded-full text-xs font-bold tracking-wide whitespace-nowrap transition-all cursor-pointer select-none ${
-                    isSelected
-                      ? 'gold-gradient-btn shadow-md shadow-[#D9A83F]/25'
-                      : 'bg-[#17100F] border border-[#D9A83F]/20 text-[#B8AEA2] hover:text-[#F8F5EF] hover:border-[#D9A83F]/50'
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Quick Search */}
-          <div className="w-full md:w-64 relative shrink-0">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#B8AEA2]" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Kursni qidirish..."
-              className="w-full pl-10 pr-4 py-2 rounded-full bg-[#17100F] border border-[#D9A83F]/25 text-xs text-[#F8F5EF] placeholder-[#B8AEA2]/60 focus:border-[#D9A83F] outline-none transition-all"
-            />
-          </div>
-        </div>
-
-        {/* Course Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCourses.map((course) => (
-            <div
-              key={course.id}
-              className="gold-card rounded-3xl p-6 flex flex-col justify-between group"
-            >
-              <div className="space-y-4">
-                {/* Badge & Level */}
-                <div className="flex items-center justify-between">
-                  <span className="px-3 py-1 rounded-xl bg-[#D9A83F]/15 border border-[#D9A83F]/30 text-[11px] font-black text-[#F4D27A] uppercase">
-                    {course.category}
-                  </span>
-                  <span className="text-xs font-semibold text-[#B8AEA2]">
-                    {course.level}
-                  </span>
-                </div>
-
-                {/* Title & Description */}
-                <div>
-                  <h3 className="text-xl font-black text-[#F8F5EF] group-hover:text-[#F4D27A] transition-colors leading-snug">
-                    {course.title}
-                  </h3>
-                  <p className="text-xs text-[#B8AEA2] line-clamp-3 mt-2 leading-relaxed">
-                    {course.description}
-                  </p>
-                </div>
-
-                {/* Key Metrics */}
-                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#D9A83F]/15 text-xs">
-                  <div className="flex items-center gap-2 text-[#B8AEA2]">
-                    <Clock className="h-3.5 w-3.5 text-[#D9A83F]" />
-                    <span>{course.durationMonths} oy davomiyligi</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-[#B8AEA2]">
-                    <Users className="h-3.5 w-3.5 text-[#D9A83F]" />
-                    <span className="truncate">{course.instructor || 'Yetakchi ustoz'}</span>
-                  </div>
-                </div>
-
-                {/* Schedule if available */}
-                {course.schedule && (
-                  <div className="p-2.5 rounded-xl bg-[#0B0808]/70 border border-[#D9A83F]/15 text-[11px] text-[#B8AEA2] flex items-center gap-2">
-                    <Calendar className="h-3.5 w-3.5 text-[#D9A83F] shrink-0" />
-                    <span className="truncate">{course.schedule}</span>
-                  </div>
-                )}
+      <section
+        id="courses"
+        className="pt-16 pb-24 px-4 sm:px-6 lg:px-8 bg-[#F9F6F0] text-[#1C1514] relative z-20 transition-colors"
+      >
+        <div className="max-w-[1360px] mx-auto">
+          {/* Header of Courses Section */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+            <div className="space-y-2 text-left">
+              {/* ⭐ Kurslar Pill */}
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#F0E9DC] border border-[#D9A83F]/35 text-xs font-bold text-[#8B6B23]">
+                <Star className="h-3 w-3 fill-[#8B6B23]" />
+                <span>Kurslar</span>
               </div>
-
-              {/* Price and CTAs */}
-              <div className="pt-6 mt-4 border-t border-[#D9A83F]/15 flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] text-[#B8AEA2] uppercase font-bold block">Oylik to‘lov</span>
-                  <span className="text-lg font-black text-[#F4D27A] font-mono">
-                    {formatMoney(course.pricePerMonth, 'UZS')}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedCourseForDetails(course)}
-                    className="px-3 py-2 rounded-xl text-xs font-bold text-[#F8F5EF] hover:text-[#D9A83F] hover:bg-[#0B0808] transition-colors cursor-pointer"
-                  >
-                    Batafsil →
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleOpenEnrollModal(course.title)}
-                    className="gold-gradient-btn px-3.5 py-2 rounded-xl text-xs uppercase font-extrabold cursor-pointer shadow-sm shadow-[#D9A83F]/20"
-                  >
-                    Yozilish
-                  </button>
-                </div>
-              </div>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#1C1514] tracking-tight">
+                Mashhur yo‘nalishlar
+              </h2>
+              <p className="text-xs sm:text-sm text-[#6E645F] font-normal">
+                O‘zingizga mos kursni tanlang va kelajagingizni qurishni boshlang.
+              </p>
             </div>
-          ))}
+
+            {/* Category Filter Pills (Exact Style to Mockup) */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+              {categoryFilters.map((cat) => {
+                const isSelected = selectedCategoryKey === cat.key;
+                return (
+                  <button
+                    key={cat.key}
+                    type="button"
+                    onClick={() => setSelectedCategoryKey(cat.key)}
+                    className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer select-none ${
+                      isSelected
+                        ? 'gold-gradient-btn shadow-md shadow-[#D9A83F]/30 text-[#0B0808]'
+                        : 'bg-white border border-[#E6DCCF] text-[#4A3E39] hover:border-[#D9A83F] hover:text-[#0B0808]'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Courses Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredCourses.map((course) => (
+              <div
+                key={course.id}
+                className="rounded-3xl p-6 bg-white border border-[#EADFCF] shadow-sm hover:shadow-xl hover:border-[#D9A83F]/50 transition-all flex flex-col justify-between group"
+              >
+                <div className="space-y-4 text-left">
+                  {/* Category & Level */}
+                  <div className="flex items-center justify-between">
+                    <span className="px-3 py-1 rounded-full bg-[#F5EFE4] border border-[#D9A83F]/30 text-[11px] font-black text-[#8B6B23] uppercase">
+                      {course.category}
+                    </span>
+                    <span className="text-xs font-medium text-[#7D736D]">
+                      {course.level}
+                    </span>
+                  </div>
+
+                  {/* Course Title */}
+                  <div>
+                    <h3 className="text-xl font-luxury-serif font-black text-[#1C1514] group-hover:text-[#997322] transition-colors leading-snug">
+                      {course.title}
+                    </h3>
+                    <p className="text-xs text-[#6E645F] line-clamp-3 mt-2 leading-relaxed">
+                      {course.description}
+                    </p>
+                  </div>
+
+                  {/* Duration & Teacher */}
+                  <div className="grid grid-cols-2 gap-2 pt-3 border-t border-[#F0E8DC] text-xs">
+                    <div className="flex items-center gap-1.5 text-[#5C524C]">
+                      <Clock className="h-3.5 w-3.5 text-[#D9A83F]" />
+                      <span>{course.durationMonths} oy</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[#5C524C]">
+                      <Users className="h-3.5 w-3.5 text-[#D9A83F]" />
+                      <span className="truncate">{course.instructor || 'Yetakchi ustoz'}</span>
+                    </div>
+                  </div>
+
+                  {/* Schedule */}
+                  {course.schedule && (
+                    <div className="p-2.5 rounded-2xl bg-[#FAF6EE] border border-[#EDE3D4] text-[11px] text-[#6E645F] flex items-center gap-2">
+                      <Calendar className="h-3.5 w-3.5 text-[#D9A83F] shrink-0" />
+                      <span className="truncate">{course.schedule}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Price and CTA Actions */}
+                <div className="pt-6 mt-4 border-t border-[#F0E8DC] flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] text-[#7D736D] uppercase font-bold block">Oylik to‘lov</span>
+                    <span className="text-lg font-black text-[#8B6B23] font-mono">
+                      {formatMoney(course.pricePerMonth, 'UZS')}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCourseForDetails(course)}
+                      className="px-3.5 py-2 rounded-full text-xs font-bold text-[#1C1514] hover:text-[#8B6B23] hover:bg-[#FAF6EE] transition-colors cursor-pointer"
+                    >
+                      Batafsil →
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEnrollModal(course.title)}
+                      className="gold-gradient-btn px-4 py-2 rounded-full text-xs font-extrabold cursor-pointer shadow-md shadow-[#D9A83F]/20"
+                    >
+                      Yozilish
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* =========================================================================
           5. WHY LUMOS SECTION ("Nega aynan Lumos?")
           ========================================================================= */}
-      <section id="why-us" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative">
+      <section id="why-us" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1360px] mx-auto relative z-20">
         <div className="text-center space-y-3 mb-14">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#17100F] border border-[#D9A83F]/30 text-xs font-bold text-[#D9A83F]">
-            <ShieldCheck className="h-3.5 w-3.5" />
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1C1412] border border-[#D9A83F]/35 text-xs font-bold text-[#F4D27A]">
+            <ShieldCheck className="h-4 w-4 text-[#D9A83F]" />
             <span>AFZALLIKLARIMIZ</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-luxury-display font-black text-[#F8F5EF] uppercase">
-            Nega Aynan Lumos?
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F8F5EF]">
+            Nega aynan Lumos?
           </h2>
-          <p className="text-sm sm:text-base text-[#B8AEA2] max-w-2xl mx-auto">
-            Biz shunchaki o‘qitmaymiz — har bir o‘quvchining ichki salohiyatini ochib, oliy ta’lim va xalqaro marralar tomon yetaklaymiz.
+          <p className="text-sm sm:text-base text-[#D4C8BE] max-w-2xl mx-auto">
+            Biz shunchaki dars o‘tmaymiz — har bir o‘quvchining ichki salohiyatini kashf etib, nufuzli oliygohlar va xalqaro marralar tomon yetaklaymiz.
           </p>
         </div>
 
@@ -869,12 +842,12 @@ export const LandingPage: React.FC = () => {
           {[
             {
               title: 'Kuchli ustozlar',
-              desc: 'Tajribali va natijaga yo‘naltirilgan yetakchi mentorlar. Har bir o‘qituvchimiz o‘z sohasining xalqaro sertifikatlariga ega.',
+              desc: 'Tajribali va natijaga yo‘naltirilgan yetakchi mentorlar. Har bir o‘qituvchimiz xalqaro toifadagi sertifikatlarga ega.',
               icon: Users,
             },
             {
               title: 'Zamonaviy metodika',
-              desc: 'O‘quvchilar uchun qulay, interaktiv va samarali ta’lim tizimi. Zerikarli nazariya o‘rniga amaliy yondashuv.',
+              desc: 'O‘quvchilar uchun qulay, interaktiv va samarali ta’lim tizimi. Zerikarli qoidalar o‘rniga amaliy yondashuv.',
               icon: Sparkles,
             },
             {
@@ -884,7 +857,7 @@ export const LandingPage: React.FC = () => {
             },
             {
               title: 'Individual yondashuv',
-              desc: 'Har bir o‘quvchining darajasi va maqsadiga mos yondashuv. Savollarni erkin berish va tushunmagan mavzularni qayta tahlil qilish.',
+              desc: 'Har bir o‘quvchining darajasi va maqsadiga mos yondashuv. Savollarni erkin berish va har bir mavzuni 100% mustahkamlash.',
               icon: HeartHandshake,
             },
             {
@@ -894,20 +867,20 @@ export const LandingPage: React.FC = () => {
             },
             {
               title: 'Kichik guruhlar (10-12 kishi)',
-              desc: 'Guruhlarda talabalar soni qat’iy chegaralangan, bu esa ustozning to‘liq e’tiborini kafolatlaydi.',
+              desc: 'Guruhlarda o‘quvchilar soni qat’iy chegaralangan, bu esa ustozning to‘liq e’tiborini va erkin savol-javobni kafolatlaydi.',
               icon: ShieldCheck,
             },
           ].map((item, idx) => {
             const Icon = item.icon;
             return (
-              <div key={idx} className="gold-card rounded-3xl p-7 space-y-4 group">
+              <div key={idx} className="gold-card rounded-3xl p-7 space-y-4 group text-left">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#D9A83F]/15 border border-[#D9A83F]/35 text-[#D9A83F] group-hover:scale-110 group-hover:bg-[#D9A83F] group-hover:text-[#0B0808] transition-all">
                   <Icon className="h-6 w-6" />
                 </div>
-                <h4 className="text-xl font-luxury-display font-black text-[#F8F5EF] group-hover:text-[#F4D27A] transition-colors">
+                <h4 className="text-xl font-luxury-serif font-black text-[#F8F5EF] group-hover:text-[#F4D27A] transition-colors">
                   {item.title}
                 </h4>
-                <p className="text-xs sm:text-sm text-[#B8AEA2] leading-relaxed">
+                <p className="text-xs sm:text-sm text-[#C7BCB1] leading-relaxed">
                   {item.desc}
                 </p>
               </div>
@@ -919,19 +892,19 @@ export const LandingPage: React.FC = () => {
       {/* =========================================================================
           6. RESULTS / ACHIEVEMENTS SECTION ("Natijalar")
           ========================================================================= */}
-      <section id="results" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative">
-        <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-b from-[#17100F] to-[#0B0808] border border-[#D9A83F]/30 shadow-2xl relative overflow-hidden">
+      <section id="results" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1360px] mx-auto relative z-20">
+        <div className="p-8 sm:p-12 rounded-[36px] bg-gradient-to-b from-[#1C1412] to-[#0B0808] border border-[#D9A83F]/35 shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-80 h-80 bg-[#D9A83F]/10 blur-3xl pointer-events-none rounded-full" />
 
           <div className="text-center space-y-3 mb-12 relative z-10">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#0B0808] border border-[#D9A83F]/30 text-xs font-bold text-[#D9A83F]">
-              <Award className="h-3.5 w-3.5" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0B0808] border border-[#D9A83F]/30 text-xs font-bold text-[#F4D27A]">
+              <Award className="h-4 w-4 text-[#D9A83F]" />
               <span>ISBOTLANGAN NATIJALAR</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-luxury-display font-black text-[#F8F5EF] uppercase">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F8F5EF]">
               Bizning Faxrli Natijalarimiz
             </h2>
-            <p className="text-sm sm:text-base text-[#B8AEA2] max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base text-[#D4C8BE] max-w-2xl mx-auto">
               Lumos bitiruvchilarining yutuqlari — bizning haqiqiy yuzimiz va mashaqqatli mehnatimiz mevasidir.
             </p>
           </div>
@@ -944,7 +917,7 @@ export const LandingPage: React.FC = () => {
                 student: 'Bekzod Rahmonov',
                 achievement: 'Toshkent Davlat Yuridik Universiteti',
                 detail: '100% Davlat Granti',
-                teacher: 'Hadicha ustoz o‘quvchisi',
+                teacher: 'Hadicha ustoz shogirdi',
                 color: 'from-amber-500/20 to-yellow-500/10 border-amber-500/40',
               },
               {
@@ -952,7 +925,7 @@ export const LandingPage: React.FC = () => {
                 student: 'Madina Karimova',
                 achievement: 'Listening 8.5, Reading 8.5',
                 detail: 'Xalqaro Grant Sohibasi',
-                teacher: 'Hasanboy ustoz o‘quvchisi',
+                teacher: 'Hasanboy ustoz shogirdi',
                 color: 'from-blue-500/20 to-cyan-500/10 border-blue-500/40',
               },
               {
@@ -960,7 +933,7 @@ export const LandingPage: React.FC = () => {
                 student: 'Jasur Shokirov',
                 achievement: 'Al-Xorazmiy Olimpiadasi',
                 detail: 'Oltin Medal Sohibi',
-                teacher: 'Hadicha ustoz o‘quvchisi',
+                teacher: 'Hadicha ustoz shogirdi',
                 color: 'from-emerald-500/20 to-teal-500/10 border-emerald-500/40',
               },
               {
@@ -968,23 +941,23 @@ export const LandingPage: React.FC = () => {
                 student: 'Fotima Zokirova',
                 achievement: '96 Ball bilan Qabul',
                 detail: 'Eng Yuqori Ko‘rsatkich',
-                teacher: 'Lumos Akademik Guruhi',
+                teacher: 'Lumos Murabbiylar Guruhi',
                 color: 'from-purple-500/20 to-indigo-500/10 border-purple-500/40',
               },
             ].map((card, idx) => (
               <div
                 key={idx}
-                className={`p-6 rounded-2xl bg-[#0B0808]/85 border ${card.color} space-y-3 relative group hover:-translate-y-1.5 transition-transform`}
+                className={`p-6 rounded-3xl bg-[#0B0808]/85 border ${card.color} space-y-3 relative group hover:-translate-y-1.5 transition-transform text-left`}
               >
-                <div className="inline-block px-2.5 py-1 rounded-lg bg-[#D9A83F]/20 text-[10px] font-black text-[#F4D27A] tracking-wider uppercase">
+                <div className="inline-block px-3 py-1 rounded-full bg-[#D9A83F]/20 text-[10px] font-black text-[#F4D27A] tracking-wider uppercase">
                   {card.badge}
                 </div>
                 <div>
                   <h4 className="text-base font-black text-[#F8F5EF]">{card.student}</h4>
                   <p className="text-xs text-[#D9A83F] font-semibold mt-0.5">{card.achievement}</p>
-                  <p className="text-[11px] text-[#B8AEA2] mt-1">{card.detail}</p>
+                  <p className="text-[11px] text-[#C7BCB1] mt-1">{card.detail}</p>
                 </div>
-                <div className="pt-2 border-t border-white/5 text-[10px] font-semibold text-[#B8AEA2]">
+                <div className="pt-2 border-t border-white/5 text-[10px] font-semibold text-[#C7BCB1]">
                   {card.teacher}
                 </div>
               </div>
@@ -996,32 +969,32 @@ export const LandingPage: React.FC = () => {
       {/* =========================================================================
           7. TEACHERS SECTION ("Bizning ustozlar")
           ========================================================================= */}
-      <section id="teachers" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative">
+      <section id="teachers" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1360px] mx-auto relative z-20">
         <div className="text-center space-y-3 mb-12">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#17100F] border border-[#D9A83F]/30 text-xs font-bold text-[#D9A83F]">
-            <Users className="h-3.5 w-3.5" />
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1C1412] border border-[#D9A83F]/35 text-xs font-bold text-[#F4D27A]">
+            <Users className="h-4 w-4 text-[#D9A83F]" />
             <span>YETAKCHI MUTAXASSISLAR</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-luxury-display font-black text-[#F8F5EF] uppercase">
-            Bizning Ustozlar
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F8F5EF]">
+            Bizning ustozlar
           </h2>
-          <p className="text-sm sm:text-base text-[#B8AEA2] max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base text-[#D4C8BE] max-w-2xl mx-auto">
             O‘z fanini chuqur sevadigan, yuksak natijalar yaratgan va har bir o‘quvchini yuksak marralarga yetaklaydigan tajribali pedagoglar.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {/* Hadicha Ustoz Card */}
-          <div className="gold-card rounded-3xl p-8 space-y-6 group">
+          <div className="gold-card rounded-3xl p-8 space-y-6 group text-left">
             <div className="flex items-center gap-5">
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#D9A83F] to-[#F4D27A] text-[#0B0808] font-luxury-display font-black text-3xl shadow-xl shadow-[#D9A83F]/20 group-hover:scale-105 transition-transform">
+              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#D9A83F] to-[#F4D27A] text-[#0B0808] font-luxury-serif font-black text-3xl shadow-xl shadow-[#D9A83F]/20 group-hover:scale-105 transition-transform">
                 ∑
               </div>
               <div>
                 <span className="px-2.5 py-0.5 rounded-full bg-[#D9A83F]/15 border border-[#D9A83F]/30 text-[10px] font-black text-[#F4D27A] uppercase">
                   Oliy Toifali Mutaxassis
                 </span>
-                <h3 className="text-2xl font-luxury-display font-black text-[#F8F5EF] mt-1">
+                <h3 className="text-2xl font-luxury-serif font-black text-[#F8F5EF] mt-1">
                   Hadicha ustoz
                 </h3>
                 <p className="text-xs text-[#D9A83F] font-semibold">
@@ -1030,18 +1003,18 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            <p className="text-xs sm:text-sm text-[#B8AEA2] leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#C7BCB1] leading-relaxed">
               O‘quvchilarni olimpiadalar va nufuzli oliygohlarga tayyorlash bo‘yicha 8 yillik tajribaga ega.
               Murakkab tenglamalar va geometriyani eng oson mantiqiy formulalar bilan tushuntiradi.
             </p>
 
             <div className="grid grid-cols-2 gap-3 pt-3 border-t border-[#D9A83F]/15 text-xs">
               <div>
-                <span className="text-[10px] text-[#B8AEA2] uppercase block">Dars kunlari:</span>
+                <span className="text-[10px] text-[#C7BCB1] uppercase block">Dars kunlari:</span>
                 <span className="font-bold text-[#F8F5EF]">Dush - Chor - Juma</span>
               </div>
               <div>
-                <span className="text-[10px] text-[#B8AEA2] uppercase block">Dars vaqti:</span>
+                <span className="text-[10px] text-[#C7BCB1] uppercase block">Dars vaqti:</span>
                 <span className="font-bold text-[#F8F5EF]">14:00 - 16:00</span>
               </div>
             </div>
@@ -1049,7 +1022,7 @@ export const LandingPage: React.FC = () => {
             <button
               type="button"
               onClick={() => handleOpenEnrollModal('Matematika (Hadicha ustoz)')}
-              className="w-full gold-gradient-btn py-3 rounded-xl text-xs uppercase tracking-wider font-extrabold cursor-pointer shadow-md shadow-[#D9A83F]/20 flex items-center justify-center gap-2"
+              className="w-full gold-gradient-btn py-3.5 rounded-full text-xs font-black uppercase tracking-wider cursor-pointer shadow-md shadow-[#D9A83F]/20 flex items-center justify-center gap-2"
             >
               <span>Hadicha ustoz guruhiga yozilish</span>
               <ArrowRight className="h-3.5 w-3.5" />
@@ -1057,16 +1030,16 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Hasanboy Ustoz Card */}
-          <div className="gold-card rounded-3xl p-8 space-y-6 group">
+          <div className="gold-card rounded-3xl p-8 space-y-6 group text-left">
             <div className="flex items-center gap-5">
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#3B82F6] to-[#60A5FA] text-white font-luxury-display font-black text-3xl shadow-xl shadow-blue-500/20 group-hover:scale-105 transition-transform">
+              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#3B82F6] to-[#60A5FA] text-white font-luxury-serif font-black text-3xl shadow-xl shadow-blue-500/20 group-hover:scale-105 transition-transform">
                 EN
               </div>
               <div>
                 <span className="px-2.5 py-0.5 rounded-full bg-blue-500/15 border border-blue-500/30 text-[10px] font-black text-blue-400 uppercase">
                   IELTS Band 8.0 Expert
                 </span>
-                <h3 className="text-2xl font-luxury-display font-black text-[#F8F5EF] mt-1">
+                <h3 className="text-2xl font-luxury-serif font-black text-[#F8F5EF] mt-1">
                   Hasanboy ustoz
                 </h3>
                 <p className="text-xs text-blue-400 font-semibold">
@@ -1075,18 +1048,18 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            <p className="text-xs sm:text-sm text-[#B8AEA2] leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#C7BCB1] leading-relaxed">
               Xalqaro sertifikat egasi, speaking to‘siqlarini yengish va akademik yozish (Writing) bo‘yicha mualliflik metodikasi asoschisi.
               Shogirdlarining 90% dan ortig‘i 7.0+ ball to‘plagan.
             </p>
 
             <div className="grid grid-cols-2 gap-3 pt-3 border-t border-[#D9A83F]/15 text-xs">
               <div>
-                <span className="text-[10px] text-[#B8AEA2] uppercase block">Dars kunlari:</span>
+                <span className="text-[10px] text-[#C7BCB1] uppercase block">Dars kunlari:</span>
                 <span className="font-bold text-[#F8F5EF]">Sesh - Pay - Shan</span>
               </div>
               <div>
-                <span className="text-[10px] text-[#B8AEA2] uppercase block">Dars vaqti:</span>
+                <span className="text-[10px] text-[#C7BCB1] uppercase block">Dars vaqti:</span>
                 <span className="font-bold text-[#F8F5EF]">15:30 - 17:30</span>
               </div>
             </div>
@@ -1094,7 +1067,7 @@ export const LandingPage: React.FC = () => {
             <button
               type="button"
               onClick={() => handleOpenEnrollModal('Ingliz Tili (Hasanboy ustoz)')}
-              className="w-full gold-gradient-btn py-3 rounded-xl text-xs uppercase tracking-wider font-extrabold cursor-pointer shadow-md shadow-[#D9A83F]/20 flex items-center justify-center gap-2"
+              className="w-full gold-gradient-btn py-3.5 rounded-full text-xs font-black uppercase tracking-wider cursor-pointer shadow-md shadow-[#D9A83F]/20 flex items-center justify-center gap-2"
             >
               <span>Hasanboy ustoz guruhiga yozilish</span>
               <ArrowRight className="h-3.5 w-3.5" />
@@ -1104,9 +1077,9 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* =========================================================================
-          8. ABOUT LUMOS ("Lumos haqida" — 2-Column Layout)
+          8. ABOUT LUMOS ("Biz haqimizda" — 2-Column Layout)
           ========================================================================= */}
-      <section id="about" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative">
+      <section id="about" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1360px] mx-auto relative z-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Left: Luxury Image Visual */}
           <div className="lg:col-span-6 relative">
@@ -1120,29 +1093,29 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Floating Experience Badge */}
-            <div className="absolute -bottom-5 right-6 p-4 rounded-2xl bg-[#17100F]/90 backdrop-blur-xl border border-[#D9A83F]/50 shadow-2xl flex items-center gap-3">
+            <div className="absolute -bottom-5 right-6 p-4 rounded-2xl bg-[#1C1412]/90 backdrop-blur-xl border border-[#D9A83F]/50 shadow-2xl flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#D9A83F] text-[#0B0808] font-black text-lg">
                 ★
               </div>
               <div>
                 <span className="text-sm font-black text-[#F8F5EF] block">10 Yillik Tajriba</span>
-                <span className="text-[11px] text-[#B8AEA2]">Ilmiy va pedagogik yondashuv</span>
+                <span className="text-[11px] text-[#C7BCB1]">Ilmiy va pedagogik yondashuv</span>
               </div>
             </div>
           </div>
 
           {/* Right: Story, Mission & Values */}
           <div className="lg:col-span-6 space-y-6 text-left">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#17100F] border border-[#D9A83F]/30 text-xs font-bold text-[#D9A83F]">
-              <Compass className="h-3.5 w-3.5" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1C1412] border border-[#D9A83F]/35 text-xs font-bold text-[#F4D27A]">
+              <Compass className="h-4 w-4 text-[#D9A83F]" />
               <span>BIZNING MISSIYA</span>
             </div>
 
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-luxury-display font-black text-[#F8F5EF] uppercase leading-tight">
-              Lumos — Maqsad Sari Ishonchli Ta’lim Makoni
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F8F5EF] leading-tight">
+              Lumos — Maqsad sari ishonchli ta’lim makoni
             </h2>
 
-            <p className="text-sm sm:text-base text-[#B8AEA2] leading-relaxed">
+            <p className="text-sm sm:text-base text-[#D4C8BE] leading-relaxed">
               LUMOS ta’lim markazi yoshlarni faqatgina imtihonlarga tayyorlash bilan cheklanmaydi.
               Biz har bir o‘quvchida mustaqil fikrlash, muammolarga yechim topish va o‘z kuchiga ishonch hissini shakllantiramiz.
             </p>
@@ -1154,7 +1127,7 @@ export const LandingPage: React.FC = () => {
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-[#F8F5EF]">Halollik va Ochiqlik</h4>
-                  <p className="text-xs text-[#B8AEA2]">Har bir o‘quvchi natijasi va ota-onalar hisoboti 100% shaffof olib boriladi.</p>
+                  <p className="text-xs text-[#C7BCB1]">Har bir o‘quvchi natijasi va ota-onalar hisoboti 100% shaffof olib boriladi.</p>
                 </div>
               </div>
 
@@ -1164,7 +1137,7 @@ export const LandingPage: React.FC = () => {
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-[#F8F5EF]">Zamonaviy Ilmiy Standartlar</h4>
-                  <p className="text-xs text-[#B8AEA2]">Eng so‘nggi darsliklar, interaktiv texnologiyalar va amaliy keyslar.</p>
+                  <p className="text-xs text-[#C7BCB1]">Eng so‘nggi darsliklar, interaktiv texnologiyalar va amaliy keyslar.</p>
                 </div>
               </div>
 
@@ -1174,7 +1147,7 @@ export const LandingPage: React.FC = () => {
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-[#F8F5EF]">Kafolatlangan Natijaviylik</h4>
-                  <p className="text-xs text-[#B8AEA2]">Har bir talaba darslarni o‘z vaqtida bajarsa, belgilangan marraga kafolat bilan erishadi.</p>
+                  <p className="text-xs text-[#C7BCB1]">Har bir talaba darslarni o‘z vaqtida bajarsa, belgilangan marraga kafolat bilan erishadi.</p>
                 </div>
               </div>
             </div>
@@ -1183,7 +1156,7 @@ export const LandingPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsApplyModalOpen(true)}
-                className="gold-gradient-btn px-7 py-3.5 rounded-2xl text-xs uppercase tracking-wider font-extrabold flex items-center gap-2 shadow-lg shadow-[#D9A83F]/20 cursor-pointer"
+                className="gold-gradient-btn px-8 py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-[#D9A83F]/20 cursor-pointer"
               >
                 <span>Markaz bilan tanishish →</span>
               </button>
@@ -1195,26 +1168,26 @@ export const LandingPage: React.FC = () => {
       {/* =========================================================================
           9. BRANCHES SECTION ("Filiallarimiz")
           ========================================================================= */}
-      <section id="branches" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative">
+      <section id="branches" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1360px] mx-auto relative z-20">
         <div className="text-center space-y-3 mb-12">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#17100F] border border-[#D9A83F]/30 text-xs font-bold text-[#D9A83F]">
-            <MapPin className="h-3.5 w-3.5" />
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1C1412] border border-[#D9A83F]/35 text-xs font-bold text-[#F4D27A]">
+            <MapPin className="h-4 w-4 text-[#D9A83F]" />
             <span>KAMPUSLAR VA FILIALLAR</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-luxury-display font-black text-[#F8F5EF] uppercase">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F8F5EF]">
             Filiallarimiz
           </h2>
-          <p className="text-sm sm:text-base text-[#B8AEA2] max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base text-[#D4C8BE] max-w-2xl mx-auto">
             O‘zingizga eng yaqin bo‘lgan qulay filialni tanlang va birinchi bepul sinov darsimizda ishtirok eting.
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {INITIAL_BRANCHES.map((b) => (
-            <div key={b.id} className="gold-card rounded-3xl p-6 flex flex-col justify-between group">
+            <div key={b.id} className="gold-card rounded-3xl p-6 flex flex-col justify-between group text-left">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-0.5 rounded-md bg-[#D9A83F]/15 border border-[#D9A83F]/30 text-[10px] font-black text-[#F4D27A] uppercase">
+                  <span className="px-3 py-1 rounded-full bg-[#D9A83F]/15 border border-[#D9A83F]/30 text-[10px] font-black text-[#F4D27A] uppercase">
                     {b.city}
                   </span>
                   <span className="text-[10px] font-bold text-[#10B981] flex items-center gap-1">
@@ -1223,16 +1196,16 @@ export const LandingPage: React.FC = () => {
                   </span>
                 </div>
 
-                <h3 className="text-lg font-luxury-display font-black text-[#F8F5EF] group-hover:text-[#F4D27A] transition-colors leading-snug">
+                <h3 className="text-lg font-luxury-serif font-black text-[#F8F5EF] group-hover:text-[#F4D27A] transition-colors leading-snug">
                   {b.name}
                 </h3>
 
-                <p className="text-xs text-[#B8AEA2] flex items-start gap-2 pt-1">
+                <p className="text-xs text-[#C7BCB1] flex items-start gap-2 pt-1">
                   <MapPin className="h-4 w-4 text-[#D9A83F] shrink-0 mt-0.5" />
                   <span>{b.address}</span>
                 </p>
 
-                <p className="text-xs text-[#B8AEA2] flex items-center gap-2">
+                <p className="text-xs text-[#C7BCB1] flex items-center gap-2">
                   <Phone className="h-3.5 w-3.5 text-[#D9A83F] shrink-0" />
                   <span className="font-mono">{b.phone}</span>
                 </p>
@@ -1255,7 +1228,7 @@ export const LandingPage: React.FC = () => {
                     setApplicantBranch(b.name);
                     setIsApplyModalOpen(true);
                   }}
-                  className="px-3 py-1.5 rounded-lg bg-[#0B0808] border border-[#D9A83F]/30 text-[11px] font-bold text-[#F8F5EF] hover:border-[#D9A83F] transition-colors"
+                  className="px-3.5 py-1.5 rounded-full bg-[#0B0808] border border-[#D9A83F]/35 text-[11px] font-bold text-[#F8F5EF] hover:border-[#D9A83F] transition-colors cursor-pointer"
                 >
                   Tanlash
                 </button>
@@ -1268,21 +1241,21 @@ export const LandingPage: React.FC = () => {
       {/* =========================================================================
           10. FAQ ACCORDION SECTION ("Ko‘p beriladigan savollar")
           ========================================================================= */}
-      <section id="faq" className="py-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto relative">
+      <section id="faq" className="py-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto relative z-20">
         <div className="text-center space-y-3 mb-12">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#17100F] border border-[#D9A83F]/30 text-xs font-bold text-[#D9A83F]">
-            <HelpCircle className="h-3.5 w-3.5" />
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1C1412] border border-[#D9A83F]/35 text-xs font-bold text-[#F4D27A]">
+            <HelpCircle className="h-4 w-4 text-[#D9A83F]" />
             <span>SAVOLLAR VA JAVOBLAR</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-luxury-display font-black text-[#F8F5EF] uppercase">
-            Ko‘p Beriladigan Savollar
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F8F5EF]">
+            Ko‘p beriladigan savollar
           </h2>
-          <p className="text-sm sm:text-base text-[#B8AEA2]">
+          <p className="text-sm sm:text-base text-[#D4C8BE]">
             Ota-onalar va o‘quvchilarimiz tomonidan eng ko‘p beriladigan muhim savollarga aniq javoblar.
           </p>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 text-left">
           {faqList.map((item, idx) => {
             const isOpen = openFaqIndex === idx;
             return (
@@ -1298,13 +1271,13 @@ export const LandingPage: React.FC = () => {
                   <span className="text-base font-bold text-[#F8F5EF]">
                     {item.q}
                   </span>
-                  <div className={`flex h-7 w-7 items-center justify-center rounded-lg bg-[#0B0808] border border-[#D9A83F]/30 text-[#D9A83F] shrink-0 transition-transform ${isOpen ? 'rotate-180 bg-[#D9A83F] text-[#0B0808]' : ''}`}>
+                  <div className={`flex h-7 w-7 items-center justify-center rounded-full bg-[#0B0808] border border-[#D9A83F]/30 text-[#D9A83F] shrink-0 transition-transform ${isOpen ? 'rotate-180 bg-[#D9A83F] text-[#0B0808]' : ''}`}>
                     <ChevronDown className="h-4 w-4" />
                   </div>
                 </button>
 
                 {isOpen && (
-                  <div className="px-5 sm:px-6 pb-6 pt-1 text-xs sm:text-sm text-[#B8AEA2] leading-relaxed border-t border-[#D9A83F]/15 animate-in fade-in duration-200">
+                  <div className="px-5 sm:px-6 pb-6 pt-1 text-xs sm:text-sm text-[#C7BCB1] leading-relaxed border-t border-[#D9A83F]/15 animate-in fade-in duration-200">
                     {item.a}
                   </div>
                 )}
@@ -1315,12 +1288,11 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* =========================================================================
-          11. FINAL POWERFUL CTA SECTION (Dark background with Gold glow)
+          11. FINAL POWERFUL CTA SECTION (Golden Glow)
           ========================================================================= */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative">
-        <div className="relative rounded-3xl p-10 sm:p-16 text-center bg-gradient-to-b from-[#17100F] via-[#17100F] to-[#0B0808] border-2 border-[#D9A83F]/40 shadow-[0_20px_80px_rgba(0,0,0,0.9)] overflow-hidden">
-          {/* Ambient center gold bulb */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-[#D9A83F]/15 blur-[120px] rounded-full pointer-events-none" />
+      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1360px] mx-auto relative z-20">
+        <div className="relative rounded-[36px] p-10 sm:p-16 text-center bg-gradient-to-b from-[#1C1412] via-[#1C1412] to-[#0B0808] border-2 border-[#D9A83F]/40 shadow-[0_20px_80px_rgba(0,0,0,0.9)] overflow-hidden">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[350px] bg-[#D9A83F]/15 blur-[120px] rounded-full pointer-events-none" />
 
           <div className="relative z-10 max-w-3xl mx-auto space-y-6">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0B0808] border border-[#D9A83F]/40 text-xs font-bold text-[#F4D27A]">
@@ -1328,18 +1300,18 @@ export const LandingPage: React.FC = () => {
               <span>YANGI O‘QUV MAVSUMIGA QABUL DAVOM ETMOQDA</span>
             </div>
 
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-display font-black text-[#F8F5EF] uppercase leading-tight">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F8F5EF] leading-tight">
               Kelajagingiz uchun birinchi qadamni bugun tashlang.
             </h2>
 
-            <p className="text-sm sm:text-base text-[#B8AEA2] max-w-2xl mx-auto leading-relaxed">
+            <p className="text-sm sm:text-base text-[#D4C8BE] max-w-2xl mx-auto leading-relaxed">
               Lumos bilan bilim, rivojlanish va natija sari harakat qiling. Hoziroq ro‘yxatdan o‘ting va birinchi bepul sinov darsimizga taklifnoma oling!
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <a
                 href="#courses"
-                className="w-full sm:w-auto gold-gradient-btn px-9 py-4 rounded-2xl text-sm uppercase tracking-wider font-black shadow-xl shadow-[#D9A83F]/30 flex items-center justify-center gap-2"
+                className="w-full sm:w-auto gold-gradient-btn px-9 py-4 rounded-full text-sm font-black shadow-xl shadow-[#D9A83F]/30 flex items-center justify-center gap-2"
               >
                 <span>Kurslarni ko‘rish</span>
                 <ArrowRight className="h-4 w-4" />
@@ -1348,7 +1320,7 @@ export const LandingPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsApplyModalOpen(true)}
-                className="w-full sm:w-auto px-8 py-4 rounded-2xl text-sm font-bold text-[#F8F5EF] hover:text-[#D9A83F] bg-[#0B0808] border border-[#D9A83F]/40 hover:border-[#D9A83F] transition-all flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 py-4 rounded-full text-sm font-bold text-[#F8F5EF] hover:text-[#D9A83F] bg-[#0B0808] border border-[#D9A83F]/40 hover:border-[#D9A83F] transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>Ro‘yxatdan o‘tish</span>
               </button>
@@ -1360,17 +1332,12 @@ export const LandingPage: React.FC = () => {
       {/* =========================================================================
           12. LUXURY FOOTER
           ========================================================================= */}
-      <footer className="bg-[#080505] border-t border-[#D9A83F]/20 pt-16 pb-12 px-4 sm:px-6 lg:px-8 relative z-10 text-xs text-[#B8AEA2]">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-[#D9A83F]/15">
+      <footer className="bg-[#080505] border-t border-[#D9A83F]/20 pt-16 pb-12 px-4 sm:px-6 lg:px-8 relative z-20 text-xs text-[#C7BCB1]">
+        <div className="max-w-[1360px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-[#D9A83F]/15 text-left">
           {/* Col 1: Brand */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center gap-3">
-              <img src={lumosLogo} alt="LUMOS Logo" className="h-8 w-8 object-contain" />
-              <span className="text-2xl font-luxury-display font-black text-[#F8F5EF] tracking-wider">
-                LUMOS
-              </span>
-            </div>
-            <p className="text-xs text-[#B8AEA2] leading-relaxed max-w-sm">
+            <LumosLogo size="lg" />
+            <p className="text-xs text-[#C7BCB1] leading-relaxed max-w-sm pt-2">
               Lumos — zamonaviy metodika, tajribali ustozlar va yuqori natijadorlikni birlashtirgan yetakchi ta’lim markazi.
             </p>
             <div className="flex items-center gap-3 pt-2">
@@ -1378,26 +1345,26 @@ export const LandingPage: React.FC = () => {
                 href="https://t.me/lumos_edu"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#17100F] border border-[#D9A83F]/30 text-[#D9A83F] hover:bg-[#D9A83F] hover:text-[#0B0808] transition-colors"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1C1412] border border-[#D9A83F]/35 text-[#D9A83F] hover:bg-[#D9A83F] hover:text-[#0B0808] transition-colors"
                 title="Telegram"
               >
-                <Send className="h-3.5 w-3.5" />
+                <Send className="h-4 w-4" />
               </a>
               <a
                 href="https://instagram.com/lumos_edu"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#17100F] border border-[#D9A83F]/30 text-[#D9A83F] hover:bg-[#D9A83F] hover:text-[#0B0808] transition-colors"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1C1412] border border-[#D9A83F]/35 text-[#D9A83F] hover:bg-[#D9A83F] hover:text-[#0B0808] transition-colors"
                 title="Instagram"
               >
-                <Star className="h-3.5 w-3.5" />
+                <Star className="h-4 w-4" />
               </a>
             </div>
           </div>
 
-          {/* Col 2: Tezkor Havolalar */}
+          {/* Col 2: Navigatsiya */}
           <div className="space-y-3">
-            <h5 className="font-luxury-display font-bold text-sm text-[#F8F5EF] uppercase tracking-wider">
+            <h5 className="font-luxury-serif font-bold text-sm text-[#F8F5EF] uppercase tracking-wider">
               Navigatsiya
             </h5>
             <ul className="space-y-2">
@@ -1406,13 +1373,13 @@ export const LandingPage: React.FC = () => {
               <li><a href="#why-us" className="hover:text-[#F4D27A] transition-colors">Nega Lumos?</a></li>
               <li><a href="#results" className="hover:text-[#F4D27A] transition-colors">Natijalar</a></li>
               <li><a href="#teachers" className="hover:text-[#F4D27A] transition-colors">O‘qituvchilar</a></li>
-              <li><a href="#about" className="hover:text-[#F4D27A] transition-colors">Lumos haqida</a></li>
+              <li><a href="#about" className="hover:text-[#F4D27A] transition-colors">Biz haqimizda</a></li>
             </ul>
           </div>
 
-          {/* Col 3: Ommabop Kurslar */}
+          {/* Col 3: Kurslar */}
           <div className="space-y-3">
-            <h5 className="font-luxury-display font-bold text-sm text-[#F8F5EF] uppercase tracking-wider">
+            <h5 className="font-luxury-serif font-bold text-sm text-[#F8F5EF] uppercase tracking-wider">
               Kurslar
             </h5>
             <ul className="space-y-2">
@@ -1424,24 +1391,24 @@ export const LandingPage: React.FC = () => {
             </ul>
           </div>
 
-          {/* Col 4: Aloqa va Manzil */}
+          {/* Col 4: Bog‘lanish */}
           <div className="space-y-3">
-            <h5 className="font-luxury-display font-bold text-sm text-[#F8F5EF] uppercase tracking-wider">
+            <h5 className="font-luxury-serif font-bold text-sm text-[#F8F5EF] uppercase tracking-wider">
               Bog‘lanish
             </h5>
-            <p className="text-xs text-[#B8AEA2]">
+            <p className="text-xs text-[#C7BCB1]">
               Toshkent sh., Amir Temur shox ko‘chasi, 108
             </p>
             <p className="text-xs font-mono font-bold text-[#F4D27A]">
               +998 (71) 200-00-25
             </p>
-            <p className="text-xs text-[#B8AEA2]">
+            <p className="text-xs text-[#C7BCB1]">
               Dush - Shan: 08:00 - 20:00
             </p>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#B8AEA2]">
+        <div className="max-w-[1360px] mx-auto pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#C7BCB1]">
           <p>© {new Date().getFullYear()} LUMOS Ta’lim Markazi. Barcha huquqlar himoyalangan.</p>
           <div className="flex items-center gap-4">
             <a href="#/login" className="hover:text-[#D9A83F] transition-colors font-semibold">Tizimga Kirish</a>
@@ -1469,24 +1436,24 @@ export const LandingPage: React.FC = () => {
       {/* Quick Application Modal */}
       {isApplyModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
           role="dialog"
           aria-modal="true"
         >
-          <div className="relative w-full max-w-md rounded-3xl bg-[#17100F] border border-[#D9A83F]/40 shadow-2xl p-6 sm:p-8 space-y-6">
+          <div className="relative w-full max-w-md rounded-[32px] bg-[#1C1412] border border-[#D9A83F]/40 shadow-2xl p-6 sm:p-8 space-y-6 text-left">
             <div className="flex items-center justify-between border-b border-[#D9A83F]/15 pb-4">
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#D9A83F]/20 text-[#D9A83F]">
-                  <Sparkles className="h-4 w-4" />
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#D9A83F]/20 text-[#D9A83F]">
+                  <Sparkles className="h-5 w-5" />
                 </div>
-                <h3 className="text-lg font-luxury-display font-black text-[#F8F5EF]">
+                <h3 className="text-xl font-luxury-serif font-black text-[#F8F5EF]">
                   Guruhga Yozilish
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setIsApplyModalOpen(false)}
-                className="p-1.5 rounded-lg text-[#B8AEA2] hover:text-[#F8F5EF] hover:bg-[#0B0808] transition-colors cursor-pointer"
+                className="p-1.5 rounded-full text-[#C7BCB1] hover:text-[#F8F5EF] hover:bg-[#0B0808] transition-colors cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -1498,14 +1465,14 @@ export const LandingPage: React.FC = () => {
                   <CheckCircle2 className="h-8 w-8" />
                 </div>
                 <h4 className="text-xl font-bold text-[#F8F5EF]">Arizangiz qabul qilindi!</h4>
-                <p className="text-xs text-[#B8AEA2]">
-                  15 daqiqa ichida administratorimiz siz bilan bog‘lanadi va birinchi sinov darsi vaqtini tasdiqlaydi.
+                <p className="text-xs text-[#C7BCB1]">
+                  15 daqiqa ichida administratorimiz siz bilan bog‘lanadi va birinchi bepul sinov darsi vaqtini tasdiqlaydi.
                 </p>
               </div>
             ) : (
               <form onSubmit={handleApplicationSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-[#B8AEA2] mb-1.5">
+                  <label className="block text-xs font-bold text-[#C7BCB1] mb-1.5">
                     Ism va Familiyangiz *
                   </label>
                   <input
@@ -1514,12 +1481,12 @@ export const LandingPage: React.FC = () => {
                     value={applicantName}
                     onChange={(e) => setApplicantName(e.target.value)}
                     placeholder="Masalan: Jasur Olimov"
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#0B0808] border border-[#D9A83F]/30 text-xs text-[#F8F5EF] placeholder-[#B8AEA2]/50 focus:border-[#D9A83F] outline-none"
+                    className="w-full px-4 py-2.5 rounded-full bg-[#0B0808] border border-[#D9A83F]/30 text-xs text-[#F8F5EF] placeholder-[#C7BCB1]/50 focus:border-[#D9A83F] outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#B8AEA2] mb-1.5">
+                  <label className="block text-xs font-bold text-[#C7BCB1] mb-1.5">
                     Telefon raqamingiz *
                   </label>
                   <input
@@ -1528,18 +1495,18 @@ export const LandingPage: React.FC = () => {
                     value={applicantPhone}
                     onChange={handlePhoneChange}
                     placeholder="+998 (90) 123-45-67"
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#0B0808] border border-[#D9A83F]/30 text-xs text-[#F8F5EF] font-mono placeholder-[#B8AEA2]/50 focus:border-[#D9A83F] outline-none"
+                    className="w-full px-4 py-2.5 rounded-full bg-[#0B0808] border border-[#D9A83F]/30 text-xs text-[#F8F5EF] font-mono placeholder-[#C7BCB1]/50 focus:border-[#D9A83F] outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#B8AEA2] mb-1.5">
+                  <label className="block text-xs font-bold text-[#C7BCB1] mb-1.5">
                     Tanlangan Kurs
                   </label>
                   <select
                     value={selectedCourseName}
                     onChange={(e) => setSelectedCourseName(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#0B0808] border border-[#D9A83F]/30 text-xs text-[#F8F5EF] focus:border-[#D9A83F] outline-none cursor-pointer"
+                    className="w-full px-4 py-2.5 rounded-full bg-[#0B0808] border border-[#D9A83F]/30 text-xs text-[#F8F5EF] focus:border-[#D9A83F] outline-none cursor-pointer"
                   >
                     {INITIAL_COURSES.map((c) => (
                       <option key={c.id} value={c.title}>
@@ -1550,13 +1517,13 @@ export const LandingPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#B8AEA2] mb-1.5">
+                  <label className="block text-xs font-bold text-[#C7BCB1] mb-1.5">
                     Qulay Filial
                   </label>
                   <select
                     value={applicantBranch}
                     onChange={(e) => setApplicantBranch(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#0B0808] border border-[#D9A83F]/30 text-xs text-[#F8F5EF] focus:border-[#D9A83F] outline-none cursor-pointer"
+                    className="w-full px-4 py-2.5 rounded-full bg-[#0B0808] border border-[#D9A83F]/30 text-xs text-[#F8F5EF] focus:border-[#D9A83F] outline-none cursor-pointer"
                   >
                     {INITIAL_BRANCHES.map((b) => (
                       <option key={b.id} value={b.name}>
@@ -1570,7 +1537,7 @@ export const LandingPage: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting || !applicantName.trim() || applicantPhone.length < 18}
-                    className="w-full gold-gradient-btn py-3 rounded-xl text-xs uppercase tracking-wider font-extrabold shadow-lg shadow-[#D9A83F]/25 flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full gold-gradient-btn py-3.5 rounded-full text-xs font-black uppercase tracking-wider shadow-lg shadow-[#D9A83F]/25 flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <span>{isSubmitting ? 'Yuborilmoqda...' : 'Bepul Sinov Darsiga Yozilish'}</span>
                     <ArrowRight className="h-4 w-4" />
