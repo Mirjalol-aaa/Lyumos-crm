@@ -40,7 +40,6 @@ import { GlobalSearchModal } from './components/common/GlobalSearchModal';
 import { NotificationDrawer } from './components/common/NotificationDrawer';
 import { StudentProfileModal } from './components/common/StudentProfileModal';
 import { PwaInstallPrompt } from './components/common/PwaInstallPrompt';
-import { CursorFollower } from './components/common/CursorFollower';
 import { AddStudentModal } from './components/modals/AddStudentModal';
 import { ImportStudentsModal } from './components/modals/ImportStudentsModal';
 import { ReceivePaymentModal } from './components/modals/ReceivePaymentModal';
@@ -419,7 +418,6 @@ function AppContentRouter() {
   if (isExplicitLandingRequested) {
     return (
       <>
-        <CursorFollower />
         <LandingPage />
         <PwaInstallPrompt />
       </>
@@ -472,7 +470,6 @@ function AppContentRouter() {
     // Default public landing page at root and #/
     return (
       <>
-        <CursorFollower />
         <LandingPage />
         <PwaInstallPrompt />
       </>

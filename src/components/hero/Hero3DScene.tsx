@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   GraduationCap,
   TrendingUp,
@@ -18,15 +18,14 @@ export const Hero3DScene: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Parallax mouse position state (normalized -1 to 1)
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  // Parallax tracking refs (ZERO React re-renders!)
   const mouseTargetRef = useRef({ x: 0, y: 0 });
   const mouseCurrentRef = useRef({ x: 0, y: 0 });
 
   // Floating ambient time counter
   const timeRef = useRef(0);
 
-  // 1. Mouse & Touch Parallax Tracking
+  // 1. Mouse & Touch Parallax Tracking via GPU CSS Variables
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -45,24 +44,35 @@ export const Hero3DScene: React.FC = () => {
       mouseTargetRef.current = { x: 0, y: 0 };
     };
 
-    // Global listener so movement feels silky smooth even around borders
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
     container.addEventListener('mouseleave', handleMouseLeave);
 
     let animationFrameId: number;
     const updatePhysics = () => {
-      // Damped spring lerp (0.055 factor for luxurious Apple-like inertia)
       mouseCurrentRef.current.x +=
-        (mouseTargetRef.current.x - mouseCurrentRef.current.x) * 0.055;
+        (mouseTargetRef.current.x - mouseCurrentRef.current.x) * 0.05;
       mouseCurrentRef.current.y +=
-        (mouseTargetRef.current.y - mouseCurrentRef.current.y) * 0.055;
+        (mouseTargetRef.current.y - mouseCurrentRef.current.y) * 0.05;
 
       timeRef.current += 0.016;
 
-      setMousePos({
-        x: mouseCurrentRef.current.x,
-        y: mouseCurrentRef.current.y,
-      });
+      if (containerRef.current) {
+        const mx = mouseCurrentRef.current.x;
+        const my = mouseCurrentRef.current.y;
+        const rotX = -my * 12 + Math.sin(timeRef.current * 0.7) * 1.5;
+        const rotY = mx * 15 + Math.cos(timeRef.current * 0.6) * 1.6;
+        const floatY = Math.sin(timeRef.current * 0.9) * 8;
+        const ringRotation = (timeRef.current * 3.5) % 360;
+
+        containerRef.current.style.setProperty('--rot-x', `${rotX.toFixed(2)}deg`);
+        containerRef.current.style.setProperty('--rot-y', `${rotY.toFixed(2)}deg`);
+        containerRef.current.style.setProperty('--stage-rot-x', `${(rotX * 0.38).toFixed(2)}deg`);
+        containerRef.current.style.setProperty('--stage-rot-y', `${(rotY * 0.38).toFixed(2)}deg`);
+        containerRef.current.style.setProperty('--float-y', `${floatY.toFixed(2)}px`);
+        containerRef.current.style.setProperty('--ring-rot', `${ringRotation.toFixed(2)}deg`);
+        containerRef.current.style.setProperty('--mouse-x', `${mx.toFixed(3)}`);
+        containerRef.current.style.setProperty('--mouse-y', `${my.toFixed(3)}`);
+      }
 
       animationFrameId = requestAnimationFrame(updatePhysics);
     };
@@ -147,11 +157,6 @@ export const Hero3DScene: React.FC = () => {
   }, []);
 
   // Compute 3D rotations based on mouse parallax (counter-motion) & continuous wave
-  const rotX = -mousePos.y * 14 + Math.sin(timeRef.current * 0.7) * 1.6;
-  const rotY = mousePos.x * 18 + Math.cos(timeRef.current * 0.6) * 1.8;
-  const floatY = Math.sin(timeRef.current * 0.9) * 9;
-  const ringRotation = (timeRef.current * 4) % 360;
-
   return (
     <div
       ref={containerRef}
@@ -177,8 +182,8 @@ export const Hero3DScene: React.FC = () => {
         className="relative w-full h-full rounded-[42px] border border-[#D9A83F]/35 bg-gradient-to-br from-[#1B0A0E]/85 via-[#13070A]/90 to-[#090405]/95 backdrop-blur-2xl shadow-[0_25px_80px_rgba(0,0,0,0.92),0_0_60px_rgba(217,168,63,0.18)] overflow-hidden flex items-center justify-center"
         style={{
           transformStyle: 'preserve-3d',
-          transform: `rotateX(${rotX * 0.45}deg) rotateY(${rotY * 0.45}deg)`,
-          transition: 'transform 0.1s ease-out',
+          transform: 'rotateX(var(--stage-rot-x, 0deg)) rotateY(var(--stage-rot-y, 0deg))',
+          willChange: 'transform',
         }}
       >
         {/* Subtle Top Metallic Highlight on the Glass Frame */}
@@ -192,7 +197,8 @@ export const Hero3DScene: React.FC = () => {
           className="relative w-full h-full flex items-center justify-center"
           style={{
             transformStyle: 'preserve-3d',
-            transform: `translateY(${floatY}px) rotateX(${rotX}deg) rotateY(${rotY}deg)`,
+            transform: 'translateY(var(--float-y, 0px)) rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))',
+            willChange: 'transform',
           }}
         >
           {/* =========================================================
@@ -208,7 +214,7 @@ export const Hero3DScene: React.FC = () => {
             <svg
               className="w-[380px] h-[380px] sm:w-[440px] sm:h-[440px] drop-shadow-[0_0_40px_rgba(217,168,63,0.45)]"
               style={{
-                transform: `rotate(${ringRotation}deg)`,
+                transform: 'rotate(var(--ring-rot, 0deg))',
               }}
               viewBox="0 0 400 400"
               fill="none"
@@ -306,7 +312,7 @@ export const Hero3DScene: React.FC = () => {
           <div
             className="absolute top-12 left-6 pointer-events-none transition-transform duration-200"
             style={{
-              transform: `translateZ(35px) rotateX(${15 + mousePos.y * 10}deg) rotateY(${-20 + mousePos.x * 12}deg) rotateZ(-10deg)`,
+              transform: 'translateZ(35px) rotateX(calc(15deg + var(--mouse-y, 0) * 8deg)) rotateY(calc(-20deg + var(--mouse-x, 0) * 10deg)) rotateZ(-10deg)',
             }}
           >
             <div className="relative w-14 h-10 rounded-sm bg-gradient-to-r from-[#5B131E] via-[#851C2C] to-[#400B14] p-1 border border-[#FFE7A3]/50 shadow-[0_10px_25px_rgba(0,0,0,0.8),0_0_15px_rgba(217,168,63,0.3)] flex items-center justify-center">
@@ -332,7 +338,7 @@ export const Hero3DScene: React.FC = () => {
           <div
             className="absolute top-8 right-24 pointer-events-none"
             style={{
-              transform: `translateZ(45px) rotateX(${mousePos.y * 15}deg) rotateY(${timeRef.current * 25}deg)`,
+              transform: 'translateZ(45px) rotateX(calc(var(--mouse-y, 0) * 12deg)) rotateY(calc(var(--ring-rot, 0deg) * 2.5))',
             }}
           >
             <div className="relative w-12 h-12 flex items-center justify-center">
@@ -354,7 +360,7 @@ export const Hero3DScene: React.FC = () => {
           <div
             className="absolute top-20 right-6 pointer-events-none"
             style={{
-              transform: `translateZ(55px) rotateX(${-mousePos.y * 12}deg) rotateY(${-mousePos.x * 15}deg)`,
+              transform: 'translateZ(55px) rotateX(calc(var(--mouse-y, 0) * -10deg)) rotateY(calc(var(--mouse-x, 0) * -12deg))',
             }}
           >
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#241216]/90 to-[#100709]/90 border border-[#D9A83F]/50 backdrop-blur-md shadow-[0_10px_20px_rgba(0,0,0,0.8),0_0_15px_rgba(217,168,63,0.25)] flex items-center justify-center text-[#F4D27A] font-serif font-black text-sm">
@@ -380,7 +386,7 @@ export const Hero3DScene: React.FC = () => {
           <div
             className="absolute bottom-20 left-6 pointer-events-none"
             style={{
-              transform: `translateZ(40px) rotateX(${25 - mousePos.y * 10}deg) rotateY(${20 + mousePos.x * 12}deg)`,
+              transform: 'translateZ(40px) rotateX(calc(25deg - var(--mouse-y, 0) * 8deg)) rotateY(calc(20deg + var(--mouse-x, 0) * 10deg))',
             }}
           >
             <div className="w-12 h-14 rounded-lg bg-gradient-to-b from-[#1E1114] to-[#0D0709] border border-[#D9A83F]/40 p-1 shadow-[0_12px_24px_rgba(0,0,0,0.85)] flex flex-col justify-between">
@@ -476,7 +482,7 @@ export const Hero3DScene: React.FC = () => {
                   <div
                     className="absolute -inset-full bg-gradient-to-tr from-transparent via-white/[0.08] to-transparent pointer-events-none"
                     style={{
-                      transform: `rotate(35deg) translateY(${mousePos.x * 35}px)`,
+                      transform: 'rotate(35deg) translateY(calc(var(--mouse-x, 0) * 25px))',
                     }}
                   />
 
@@ -613,9 +619,9 @@ export const Hero3DScene: React.FC = () => {
 
           {/* Floating Glass Card 1 (Top-Right): "Bilim bilan chegaralar yo‘q!" */}
           <div
-            className="absolute top-6 -right-2 sm:-right-6 p-4 rounded-2xl bg-[#1C0A0E]/85 backdrop-blur-xl border border-[#D9A83F]/50 shadow-[0_15px_35px_rgba(0,0,0,0.85),0_0_25px_rgba(217,168,63,0.2)] max-w-[225px] flex items-center gap-3 transition-transform duration-100 select-none group"
+            className="absolute top-6 -right-2 sm:-right-6 p-4 rounded-2xl bg-[#1C0A0E]/85 backdrop-blur-xl border border-[#D9A83F]/50 shadow-[0_15px_35px_rgba(0,0,0,0.85),0_0_25px_rgba(217,168,63,0.2)] max-w-[225px] flex items-center gap-3 select-none group"
             style={{
-              transform: `translateZ(110px) rotateX(${mousePos.y * 6}deg) rotateY(${-mousePos.x * 6}deg)`,
+              transform: 'translateZ(110px) rotateX(calc(var(--mouse-y, 0) * 4.5deg)) rotateY(calc(var(--mouse-x, 0) * -4.5deg))',
             }}
           >
             {/* Shifting Glass Glare */}
@@ -631,9 +637,9 @@ export const Hero3DScene: React.FC = () => {
 
           {/* Floating Glass Card 2 (Bottom-Left): "Orzularingizga yetish uchun biz bilan!" */}
           <div
-            className="absolute -bottom-4 -left-2 sm:-left-6 p-4 rounded-2xl bg-[#1C0A0E]/85 backdrop-blur-xl border border-[#D9A83F]/50 shadow-[0_15px_35px_rgba(0,0,0,0.85),0_0_25px_rgba(217,168,63,0.2)] max-w-[235px] flex items-center gap-3 transition-transform duration-100 select-none group"
+            className="absolute -bottom-4 -left-2 sm:-left-6 p-4 rounded-2xl bg-[#1C0A0E]/85 backdrop-blur-xl border border-[#D9A83F]/50 shadow-[0_15px_35px_rgba(0,0,0,0.85),0_0_25px_rgba(217,168,63,0.2)] max-w-[235px] flex items-center gap-3 select-none group"
             style={{
-              transform: `translateZ(125px) rotateX(${-mousePos.y * 6}deg) rotateY(${mousePos.x * 6}deg)`,
+              transform: 'translateZ(125px) rotateX(calc(var(--mouse-y, 0) * -4.5deg)) rotateY(calc(var(--mouse-x, 0) * 4.5deg))',
             }}
           >
             {/* Shifting Glass Glare */}

@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
-  Sparkles,
+  Star,
   ArrowRight,
   BookOpen,
   Award,
@@ -10,7 +10,6 @@ import {
   Phone,
   MapPin,
   Send,
-  Star,
   Globe,
   ChevronRight,
   ChevronDown,
@@ -21,31 +20,24 @@ import {
   Layers,
   HeartHandshake,
   MessageCircle,
-  Compass,
   Menu,
   X,
-  Search,
   Check,
   Package,
   ClipboardCheck,
-  Sun,
-  Moon,
   ExternalLink,
   HelpCircle,
   Mail,
-  CheckCircle,
 } from 'lucide-react';
 import { LumosLogo } from '../../components/ui/LumosLogo';
 import { Hero3DScene } from '../../components/hero/Hero3DScene';
-import { Ambient3D } from '../../components/common/Ambient3D';
-import { WebsiteSearchOverlay } from '../../components/common/WebsiteSearchOverlay';
+import { MathematicalUniverse3D } from '../../components/hero/MathematicalUniverse3D';
 import { PublicTeacherModal } from '../../components/modals/PublicTeacherModal';
 import { MultiStepRegisterModal } from '../../components/modals/MultiStepRegisterModal';
 import { DiagnosticTestModal } from '../../components/modals/DiagnosticTestModal';
 import { CourseDetailsModal } from '../../components/modals/CourseDetailsModal';
 import { useI18n } from '../../lib/i18n';
 import { useCRM } from '../../context/CRMContext';
-import { useLMS } from '../../context/LMSContext';
 import { INITIAL_COURSES } from '../../data/coursesData';
 import { INITIAL_TEACHERS } from '../../data/initialData';
 import { INITIAL_BRANCHES } from '../../data/branchesData';
@@ -54,22 +46,23 @@ import aboutAcademyImg from '../../assets/lumos_about_academy.jpg';
 
 export const LandingPage: React.FC = () => {
   const { t, language, setLanguage, formatMoney } = useI18n();
-  const { settings, updateSettings } = useCRM();
+  const { settings } = useCRM();
 
-  // Scroll detection for compact floating navbar
+  // Scroll detection & Reading Progress Indicator
   const [isScrolled, setIsScrolled] = useState(false);
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 40);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  // Active navigation section
+  const [activeSection, setActiveSection] = useState<string>('hero');
+
+  // "Bosh sahifa" transition effect state
+  const [isHomeTransitioning, setIsHomeTransitioning] = useState(false);
 
   // UI States & Modals
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const langDropdownRef = useRef<HTMLDivElement>(null);
+
   const [isDiagnosticModalOpen, setIsDiagnosticModalOpen] = useState(false);
   const [selectedCourseForDetails, setSelectedCourseForDetails] = useState<Course | null>(null);
 
@@ -97,94 +90,185 @@ export const LandingPage: React.FC = () => {
   // Selected branch in branches section
   const [selectedBranchId, setSelectedBranchId] = useState<string>(INITIAL_BRANCHES[0]?.id || '');
 
-  // Newsletter subscription
-  const [newsletterEmail, setNewsletterEmail] = useState('');
-  const [newsletterSuccess, setNewsletterSuccess] = useState(false);
-
   // Course category filtering
   const [selectedCategoryKey, setSelectedCategoryKey] = useState<string>('all');
   const categoryFilters = [
     { key: 'all', label: 'Barchasi' },
-    { key: 'til', label: 'Til kurslari' },
+    { key: 'til', label: 'Xorijiy tillar' },
     { key: 'it', label: 'IT & Dasturlash' },
     { key: 'aniq', label: 'Aniq fanlar & DTM' },
   ];
 
-  const filteredCourses = useMemo(() => {
-    if (selectedCategoryKey === 'all') return INITIAL_COURSES;
-    if (selectedCategoryKey === 'til') {
-      return INITIAL_COURSES.filter((c) =>
-        c.category.toLowerCase().includes('til') ||
-        c.title.toLowerCase().includes('english') ||
-        c.title.toLowerCase().includes('ielts') ||
-        c.title.toLowerCase().includes('rus')
-      );
-    }
-    if (selectedCategoryKey === 'it') {
-      return INITIAL_COURSES.filter((c) =>
-        c.category.toLowerCase().includes('it') ||
-        c.title.toLowerCase().includes('frontend') ||
-        c.title.toLowerCase().includes('dasturlash') ||
-        c.title.toLowerCase().includes('savodxonlik')
-      );
-    }
-    if (selectedCategoryKey === 'aniq') {
-      return INITIAL_COURSES.filter((c) =>
-        c.category.toLowerCase().includes('aniq') ||
-        c.category.toLowerCase().includes('maktab') ||
-        c.title.toLowerCase().includes('matematika') ||
-        c.title.toLowerCase().includes('fizika') ||
-        c.title.toLowerCase().includes('prezident')
-      );
-    }
-    return INITIAL_COURSES;
-  }, [selectedCategoryKey]);
-
-  // Teachers data with rich presentation
-  const teacherProfiles = [
-    {
-      name: 'Hadicha ustoz',
-      role: 'Matematika, Mantiq & DTM Bo‘yicha Bosh Murabbiy',
-      specialization: 'Oliy Matematika, Mental Arifmetika, DTM Testlari',
-      experience: '8 yillik pedagogik staj',
-      rating: '5.0 ★ (480+ o‘quvchi)',
-      badge: 'Oliy Toifali Mutaxassis',
-      bio: 'O‘quvchilarni olimpiadalar va nufuzli davlat oliygohlariga tayyorlash bo‘yicha 8 yillik boy tajribaga ega. Murakkab tenglamalar va geometriyani eng oson mantiqiy usullar bilan tushuntiradi. Shogirdlarining 95% dan ortig‘i grant asosida talaba bo‘lgan.',
-      achievements: [
-        'DTM imtihonlarida 189.0 maksimal natija ko‘rsatgan 40+ shogird',
-        'Al-Xorazmiy olimpiadasi g‘oliblari ustozi',
-        'Prezident maktabiga kirish imtihonlari bo‘yicha maxsus mualliflik dasturi',
-      ],
-      scheduleDays: 'Dush - Chor - Juma',
-      scheduleTime: '14:00 - 16:00',
-      symbol: '∑',
-      gradient: 'bg-gradient-to-tr from-[#D9A93A] to-[#F3D276]',
-    },
-    {
-      name: 'Hasanboy ustoz',
-      role: 'IELTS Band 8.5 & General English Bosh Murabbiyi',
-      specialization: 'IELTS Intensive, Academic Writing, Speaking Club',
-      experience: '7 yillik xalqaro tajriba',
-      rating: '4.9 ★ (620+ o‘quvchi)',
-      badge: 'IELTS Band 8.5 Expert',
-      bio: 'Xalqaro sertifikat egasi, speaking to‘siqlarini yengish va akademik yozish (Writing) bo‘yicha maxsus tezkor metodika asoschisi. O‘quvchilari xalqaro universitetlar va xorijiy grantlar sohibiga aylangan.',
-      achievements: [
-        'IELTS umumiy balli 7.5 va 8.0 bo‘lgan 150+ bitiruvchi',
-        'Xalqaro nufuzli grant dasturlari g‘oliblari murabbiyi',
-        'Britaniya kengashi (British Council) tomonidan akkreditatsiyalangan metodist',
-      ],
-      scheduleDays: 'Sesh - Pay - Shan',
-      scheduleTime: '15:30 - 17:30',
-      symbol: 'EN',
-      gradient: 'bg-gradient-to-tr from-[#3B82F6] to-[#60A5FA]',
-    },
-  ];
-
-  // FAQ list with category and live search
+  // FAQ state
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [faqCategory, setFaqCategory] = useState<string>('all');
   const [faqSearch, setFaqSearch] = useState<string>('');
 
+  // Newsletter
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterSuccess, setNewsletterSuccess] = useState(false);
+
+  // 1. Scroll & Progress Tracking
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setIsScrolled(scrollY > 30);
+
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (totalHeight > 0) {
+        setScrollProgress(Math.min(100, Math.max(0, (scrollY / totalHeight) * 100)));
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // 2. Active Section Detection (IntersectionObserver)
+  useEffect(() => {
+    const sectionIds = ['hero', 'courses', 'benefits', 'results', 'teachers', 'about', 'branches', 'faq'];
+    const observers: IntersectionObserver[] = [];
+
+    sectionIds.forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setActiveSection(id);
+            }
+          });
+        },
+        { rootMargin: '-25% 0px -60% 0px', threshold: 0 }
+      );
+
+      observer.observe(el);
+      observers.push(observer);
+    });
+
+    return () => {
+      observers.forEach((obs) => obs.disconnect());
+    };
+  }, []);
+
+  // 3. Close language dropdown on outside click or ESC
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (langDropdownRef.current && !langDropdownRef.current.contains(e.target as Node)) {
+        setIsLangDropdownOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsLangDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  // 4. "Bosh sahifa" click transition handler
+  const handleHomeClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setActiveSection('hero');
+    setIsHomeTransitioning(true);
+    setTimeout(() => setIsHomeTransitioning(false), 650);
+  };
+
+  // Nav menu items
+  const navMenuItems = [
+    { id: 'hero', label: 'Bosh sahifa', href: '#hero', onClick: handleHomeClick },
+    { id: 'courses', label: 'Kurslar', href: '#courses' },
+    { id: 'benefits', label: 'Afzalliklar', href: '#benefits' },
+    { id: 'results', label: 'Natijalar', href: '#results' },
+    { id: 'teachers', label: 'Ustozlar', href: '#teachers' },
+    { id: 'about', label: 'Biz haqimizda', href: '#about' },
+    { id: 'branches', label: 'Filiallar', href: '#branches' },
+    { id: 'faq', label: 'FAQ', href: '#faq' },
+  ];
+
+  // Filtered courses
+  const filteredCourses = useMemo(() => {
+    if (selectedCategoryKey === 'all') return INITIAL_COURSES;
+    return INITIAL_COURSES.filter((c) => {
+      const cat = (c.category || '').toLowerCase();
+      const title = c.title.toLowerCase();
+      if (selectedCategoryKey === 'til') return cat.includes('language') || cat.includes('til') || title.includes('ielts') || title.includes('cefr') || title.includes('english') || title.includes('ingliz');
+      if (selectedCategoryKey === 'it') return cat.includes('programming') || cat.includes('it') || title.includes('dastur') || title.includes('python') || title.includes('frontend');
+      if (selectedCategoryKey === 'aniq') return cat.includes('math') || cat.includes('aniq') || cat.includes('science') || title.includes('matematika') || title.includes('fizika') || title.includes('dtm');
+      return true;
+    });
+  }, [selectedCategoryKey]);
+
+  // Teacher Profiles
+  const teacherProfiles = [
+    {
+      name: 'Sherzodbek Rahimov',
+      role: 'Katta Ustoz & Metodist',
+      specialization: 'IELTS & Akademik Ingliz tili',
+      experience: '9+ yil',
+      rating: '4.98',
+      badge: 'IELTS Band 8.5',
+      bio: 'Buyuk Britaniyada tahsil olgan. 1200 dan ortiq o‘quvchisi 7.0+ va 8.0+ natijalarni qayd etgan.',
+      achievements: ['Cambridge CELTA sertifikati', '1200+ IELTS bitiruvchilari', 'Top 10 eng yaxshi metodist'],
+      scheduleDays: 'Dush - Chor - Juma',
+      scheduleTime: '15:00 - 17:00 / 18:30 - 20:30',
+      symbol: 'SR',
+      gradient: 'from-[#4A1520] via-[#851C2C] to-[#2B0910]',
+    },
+    {
+      name: 'Malika Karimova',
+      role: 'Bosh Dasturlash Ustozi',
+      specialization: 'Full Stack & Python Dasturlash',
+      experience: '6+ yil',
+      rating: '4.95',
+      badge: 'Senior Full Stack',
+      bio: 'Xalqaro IT kompaniyalarda ishlagan dasturchi. Real loyihalar va amaliy keyslar asosida o‘qitadi.',
+      achievements: ['Ex-EPAM dasturchisi', '650+ IT bitiruvchilari', '15+ xalqaro startap loyihalar'],
+      scheduleDays: 'Sesh - Pay - Shan',
+      scheduleTime: '14:00 - 16:00 / 18:00 - 20:00',
+      symbol: 'MK',
+      gradient: 'from-[#1B2836] via-[#2A3E54] to-[#121C26]',
+    },
+    {
+      name: 'Akmal Rustamov',
+      role: 'DTM & Matematika Koordinatori',
+      specialization: 'Oliy Matematika & Mantiq',
+      experience: '11+ yil',
+      rating: '4.99',
+      badge: '100% Grant Natija',
+      bio: 'O‘zbekiston Respublikasi fan olimpiadalari g‘olibi. 189 ballik DTM rekordchilarini yetishtirgan.',
+      achievements: ['189 ball DTM rekordchisi tayyorlagan', '98% OTMga grant qabul', 'Mualliflik qo‘llanmalari'],
+      scheduleDays: 'Dush - Chor - Juma',
+      scheduleTime: '09:00 - 11:00 / 14:00 - 16:00',
+      symbol: 'AR',
+      gradient: 'from-[#2D2411] via-[#5C4517] to-[#1A1509]',
+    },
+    {
+      name: 'Zilola Alimova',
+      role: 'Rus tili & Grammatika Mutaxassisi',
+      specialization: 'So‘zlashuv & Akademik Rus tili',
+      experience: '7+ yil',
+      rating: '4.92',
+      badge: 'TORFL C2 Ekspert',
+      bio: 'Moskva Davlat Universitetida amaliyot o‘tagan. 1 oylik ekspress so‘zlashuv metodikasi muallifi.',
+      achievements: ['TORFL C2 oliy daraja', '800+ faol talabalar', 'Zamonaviy audio-vizual metod'],
+      scheduleDays: 'Sesh - Pay - Shan',
+      scheduleTime: '10:00 - 12:00 / 16:00 - 18:00',
+      symbol: 'ZA',
+      gradient: 'from-[#381B2E] via-[#5A2649] to-[#1F0E1A]',
+    },
+  ];
+
+  // FAQ Raw Data
   const rawFaqList = [
     {
       category: 'general',
@@ -251,87 +335,59 @@ export const LandingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#080607] text-[#F7F4EE] antialiased selection:bg-[#D9A93A] selection:text-[#080607] relative overflow-x-hidden font-sans">
       {/* -------------------------------------------------------------------------
-          0. AMBIENT 3D BACKGROUND SYSTEM
-          ------------------------------------------------------------------------- */}
-      <Ambient3D />
-
-      {/* -------------------------------------------------------------------------
-          1. HEADER / FLOATING GLASS NAVBAR (Single Theme Toggle + Spotlight Search)
+          1. HEADER / MINIMAL FLOATING GLASS NAVBAR (Active Indicator + Scroll Progress)
           ------------------------------------------------------------------------- */}
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled
-            ? 'bg-[#080607]/88 backdrop-blur-xl border-b border-[#D9A93A]/20 shadow-[0_12px_40px_rgba(0,0,0,0.85)] py-3'
-            : 'bg-transparent py-4 border-b border-transparent'
+            ? 'bg-[#080607]/90 backdrop-blur-xl border-b border-[#D9A93A]/20 shadow-[0_12px_40px_rgba(0,0,0,0.85)] py-2.5'
+            : 'bg-gradient-to-b from-[#080607]/80 to-transparent py-4 border-b border-transparent'
         }`}
       >
         <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           {/* Logo on Left */}
-          <a href="#" className="flex items-center group focus:outline-none select-none">
+          <a
+            href="#hero"
+            onClick={handleHomeClick}
+            className="flex items-center gap-2 group focus:outline-none select-none"
+          >
             <LumosLogo size="md" />
           </a>
 
-          {/* Centered Navigation Links */}
-          <nav className="hidden xl:flex items-center gap-7 text-xs font-semibold uppercase tracking-wider text-[#A9A3A0]">
-            {[
-              { id: 'home', label: 'Bosh sahifa', href: '#' },
-              { id: 'courses', label: 'Kurslar', href: '#courses' },
-              { id: 'why-us', label: 'Afzalliklar', href: '#why-us' },
-              { id: 'results', label: 'Natijalar', href: '#results' },
-              { id: 'teachers', label: 'Ustozlar', href: '#teachers' },
-              { id: 'about', label: 'Biz haqimizda', href: '#about' },
-              { id: 'branches', label: 'Filiallar', href: '#branches' },
-              { id: 'faq', label: 'FAQ', href: '#faq' },
-            ].map((item) => (
-              <a
-                key={item.id}
-                href={item.href}
-                className="hover:text-[#F3D276] transition-colors relative py-1"
-              >
-                {item.label}
-              </a>
-            ))}
+          {/* Centered Navigation Links with Active Indicator */}
+          <nav className="hidden xl:flex items-center gap-6 text-xs font-semibold uppercase tracking-wider text-[#A9A3A0]">
+            {navMenuItems.map((item) => {
+              const isActive = activeSection === item.id;
+              return (
+                <a
+                  key={item.id}
+                  href={item.href}
+                  onClick={item.onClick}
+                  className={`relative py-2 px-1 transition-all duration-300 ${
+                    isActive
+                      ? 'text-[#F3D276] font-bold drop-shadow-[0_0_8px_rgba(243,210,118,0.4)]'
+                      : 'hover:text-[#F7F4EE]'
+                  }`}
+                >
+                  <span>{item.label}</span>
+                  {/* Active animated gold underline */}
+                  {isActive && (
+                    <span className="absolute bottom-0 inset-x-0 h-[2px] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] rounded-full shadow-[0_0_10px_#D9A93A] transition-all duration-300 animate-in fade-in" />
+                  )}
+                </a>
+              );
+            })}
           </nav>
 
-          {/* Action Tools on Right */}
+          {/* Action Tools on Right: Language, Kirish, Ro‘yxatdan o‘tish */}
           <div className="hidden sm:flex items-center gap-3">
-            {/* Spotlight Search Icon */}
-            <button
-              type="button"
-              onClick={() => setIsSearchOpen(true)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#D9A93A]/30 bg-[#16090D]/80 hover:border-[#D9A93A] text-xs font-semibold text-[#A9A3A0] hover:text-[#F7F4EE] transition-all cursor-pointer"
-              title="Qidirish (Ctrl+K)"
-            >
-              <Search className="h-3.5 w-3.5 text-[#D9A93A]" />
-              <span className="text-[11px]">Qidirish</span>
-              <span className="hidden md:inline text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#080607] border border-[#D9A93A]/20 text-[#D9A93A]">
-                ⌘K
-              </span>
-            </button>
-
-            {/* SINGLE Theme Toggle Button (Dark <-> Light) */}
-            <button
-              type="button"
-              onClick={() => {
-                const next = settings.theme === 'dark' ? 'light' : 'dark';
-                updateSettings({ theme: next });
-              }}
-              className="flex items-center justify-center h-8 w-8 rounded-full border border-[#D9A93A]/35 bg-[#16090D] text-[#D9A93A] hover:border-[#D9A93A] hover:bg-[#2A0D14] transition-all cursor-pointer"
-              title={settings.theme === 'dark' ? 'Yorug‘ rejimga o‘tish' : 'Qorong‘i rejimga o‘tish'}
-            >
-              {settings.theme === 'dark' ? (
-                <Sun className="h-3.5 w-3.5" />
-              ) : (
-                <Moon className="h-3.5 w-3.5" />
-              )}
-            </button>
-
             {/* Language Selector Dropdown */}
-            <div className="relative">
+            <div className="relative" ref={langDropdownRef}>
               <button
                 type="button"
                 onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#D9A93A]/30 bg-[#16090D] text-xs font-semibold text-[#F7F4EE] hover:border-[#D9A93A] transition-all cursor-pointer"
+                aria-expanded={isLangDropdownOpen}
               >
                 <Globe className="h-3.5 w-3.5 text-[#D9A93A]" />
                 <span>{language === 'uz' ? 'O‘zbekcha' : language === 'ru' ? 'Русский' : 'English'}</span>
@@ -339,37 +395,42 @@ export const LandingPage: React.FC = () => {
               </button>
 
               {isLangDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-32 rounded-2xl bg-[#16090D] border border-[#D9A93A]/35 p-1.5 shadow-2xl z-50 text-xs">
-                  {['uz', 'ru', 'en'].map((lng) => (
+                <div className="absolute right-0 mt-2 w-36 rounded-2xl bg-[#16090D] border border-[#D9A93A]/40 p-1.5 shadow-2xl z-50 text-xs backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150">
+                  {[
+                    { code: 'uz', label: 'O‘zbekcha' },
+                    { code: 'ru', label: 'Русский' },
+                    { code: 'en', label: 'English' },
+                  ].map((lng) => (
                     <button
-                      key={lng}
+                      key={lng.code}
                       type="button"
                       onClick={() => {
-                        setLanguage(lng as any);
+                        setLanguage(lng.code as any);
                         setIsLangDropdownOpen(false);
                       }}
-                      className={`w-full text-left px-3 py-1.5 rounded-xl transition-colors ${
-                        language === lng
-                          ? 'bg-[#D9A93A] text-[#080607] font-bold'
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-colors ${
+                        language === lng.code
+                          ? 'bg-[#D9A93A] text-[#080607] font-bold shadow-sm'
                           : 'text-[#F7F4EE] hover:bg-white/5'
                       }`}
                     >
-                      {lng === 'uz' ? 'O‘zbekcha' : lng === 'ru' ? 'Русский' : 'English'}
+                      <span>{lng.label}</span>
+                      {language === lng.code && <Check className="h-3.5 w-3.5 stroke-[2.5]" />}
                     </button>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Glass Login Button */}
+            {/* Compact Glass Login Button */}
             <a
               href="#/login"
-              className="px-4 py-1.5 rounded-full border border-[#D9A93A]/35 bg-[#16090D]/80 text-xs font-bold text-[#F7F4EE] hover:text-[#F3D276] hover:border-[#D9A93A] transition-all"
+              className="px-4 py-1.5 rounded-full border border-[#D9A93A]/35 bg-[#16090D]/80 text-xs font-bold text-[#F7F4EE] hover:text-[#F3D276] hover:border-[#D9A93A] hover:bg-[#200A11] transition-all"
             >
               Kirish
             </a>
 
-            {/* Premium Gold Registration CTA */}
+            {/* Medium-size, Compact Gold Registration CTA */}
             <button
               type="button"
               onClick={() => {
@@ -377,10 +438,10 @@ export const LandingPage: React.FC = () => {
                 setRegisterBranch('');
                 setIsRegisterModalOpen(true);
               }}
-              className="gold-gradient-btn px-5 py-2 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md shadow-[#D9A93A]/20 cursor-pointer"
+              className="px-4 py-1.5 rounded-full text-xs font-bold text-[#080607] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] hover:brightness-110 shadow-sm shadow-[#D9A93A]/30 flex items-center gap-1.5 transition-all cursor-pointer"
             >
               <span>Ro‘yxatdan o‘tish</span>
-              <ArrowRight className="h-3.5 w-3.5" />
+              <ArrowRight className="h-3 w-3" />
             </button>
           </div>
 
@@ -388,16 +449,8 @@ export const LandingPage: React.FC = () => {
           <div className="flex items-center gap-2 xl:hidden">
             <button
               type="button"
-              onClick={() => setIsSearchOpen(true)}
-              className="p-2 rounded-xl bg-[#16090D] border border-[#D9A93A]/30 text-[#D9A93A]"
-              title="Qidirish"
-            >
-              <Search className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-xl bg-[#16090D] border border-[#D9A93A]/30 text-[#F7F4EE]"
+              className="p-2 rounded-xl border border-[#D9A93A]/30 text-[#F7F4EE] hover:border-[#D9A93A]"
               aria-label="Menyu"
             >
               {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -405,25 +458,27 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation Drawer */}
+        {/* Page Top Scroll Progress Indicator */}
+        <div
+          className="absolute bottom-0 left-0 h-[1.5px] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] transition-all duration-100"
+          style={{ width: `${scrollProgress}%` }}
+        />
+
+        {/* Mobile Dropdown Menu */}
         {isMobileMenuOpen && (
-          <div className="xl:hidden bg-[#14080B] border-b border-[#D9A93A]/25 px-5 py-6 space-y-4 animate-in slide-in-from-top-4 duration-300 shadow-2xl">
-            <div className="flex flex-col space-y-3">
-              {[
-                { id: 'home', label: 'Bosh sahifa', href: '#' },
-                { id: 'courses', label: 'Kurslar', href: '#courses' },
-                { id: 'why-us', label: 'Afzalliklar', href: '#why-us' },
-                { id: 'results', label: 'Natijalar', href: '#results' },
-                { id: 'teachers', label: 'Ustozlar', href: '#teachers' },
-                { id: 'about', label: 'Biz haqimizda', href: '#about' },
-                { id: 'branches', label: 'Filiallar', href: '#branches' },
-                { id: 'faq', label: 'FAQ', href: '#faq' },
-              ].map((link) => (
+          <div className="xl:hidden bg-[#120609]/98 backdrop-blur-2xl border-b border-[#D9A93A]/30 px-6 py-5 space-y-4 shadow-2xl animate-in slide-in-from-top-2">
+            <div className="flex flex-col gap-2.5">
+              {navMenuItems.map((link) => (
                 <a
                   key={link.id}
                   href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-sm font-semibold text-[#A9A3A0] hover:text-[#F3D276] py-1 border-b border-white/5 flex items-center justify-between"
+                  onClick={(e) => {
+                    if (link.onClick) link.onClick(e);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`text-sm font-semibold py-1.5 border-b border-white/5 flex items-center justify-between ${
+                    activeSection === link.id ? 'text-[#F3D276] font-bold' : 'text-[#A9A3A0]'
+                  }`}
                 >
                   <span>{link.label}</span>
                   <ChevronRight className="h-4 w-4 text-[#D9A93A]/60" />
@@ -452,10 +507,10 @@ export const LandingPage: React.FC = () => {
                   setRegisterBranch('');
                   setIsRegisterModalOpen(true);
                 }}
-                className="w-full gold-gradient-btn py-3 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2"
+                className="w-full py-2.5 rounded-full text-xs font-bold text-[#080607] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] flex items-center justify-center gap-1.5"
               >
                 <span>Ro‘yxatdan o‘tish</span>
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-3.5 w-3.5" />
               </button>
 
               <a
@@ -470,15 +525,22 @@ export const LandingPage: React.FC = () => {
       </header>
 
       {/* -------------------------------------------------------------------------
-          2. HERO SECTION (Cinematic Pro 3D Multi-Layer Experience)
+          2. HERO SECTION (Living 3D Mathematical Universe + Cinematic 3D Scene)
           ------------------------------------------------------------------------- */}
       <section
-        id="home"
-        className="relative pt-32 sm:pt-36 lg:pt-40 pb-28 lg:pb-36 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto min-h-[92vh] flex flex-col justify-center overflow-visible"
+        id="hero"
+        className="relative pt-32 sm:pt-36 lg:pt-40 pb-24 lg:pb-32 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto min-h-[92vh] flex flex-col justify-center overflow-visible"
       >
+        {/* Living Mathematical 3D Universe Canvas Background */}
+        <MathematicalUniverse3D isHomeTransitioning={isHomeTransitioning} />
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center relative z-10">
           {/* Left Side: Badge, Headline, Subtitle, CTAs & 4 Advantages */}
-          <div className="lg:col-span-6 space-y-6 text-left z-10">
+          <div
+            className={`lg:col-span-6 space-y-6 text-left z-10 transition-all duration-500 ${
+              isHomeTransitioning ? 'opacity-90 -translate-y-1' : 'opacity-100 translate-y-0'
+            }`}
+          >
             {/* Top Badge: ⭐ Bilim — eng katta kuch! */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#16090D]/90 backdrop-blur-md border border-[#D9A93A]/40 shadow-lg shadow-[#D9A93A]/10 hover:border-[#D9A93A]/70 transition-all duration-300">
               <Star className="h-3.5 w-3.5 fill-[#D9A93A] text-[#D9A93A]" />
@@ -487,7 +549,7 @@ export const LandingPage: React.FC = () => {
               </span>
             </div>
 
-            {/* Main Headline (Playfair Editorial Serif) */}
+            {/* Main Headline (Playfair Editorial Luxury Serif) */}
             <div className="space-y-1">
               <h1 className="text-4xl sm:text-5xl md:text-6xl xl:text-[4.3rem] font-luxury-serif font-black leading-[1.08] tracking-tight">
                 <span className="text-[#FFFFFF] block drop-shadow-md">
@@ -526,7 +588,7 @@ export const LandingPage: React.FC = () => {
               </button>
             </div>
 
-            {/* 4 Feature Icons Underneath Buttons */}
+            {/* 4 Feature Benefits Underneath Buttons */}
             <div className="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-semibold text-[#F7F4EE]">
               <div className="flex items-center gap-2">
                 <Package className="h-4 w-4 text-[#D9A93A] shrink-0" />
@@ -547,268 +609,80 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Side: Pro 3D Educational Scene */}
-          <div className="lg:col-span-6 relative flex justify-center lg:justify-end mt-4 lg:mt-0 z-10">
+          {/* Right Side: Pro 3D Educational Scene (Zero-lag GPU CSS variables) */}
+          <div className="lg:col-span-6 flex items-center justify-center relative z-10">
             <Hero3DScene />
           </div>
         </div>
-
-        {/* ---------------------------------------------------------------------
-            3. TRUST / PROVEN SOCIAL PROOF CAPSULE (5000+ Students, 95% Result)
-            --------------------------------------------------------------------- */}
-        <div className="mt-16 lg:mt-24 relative z-30">
-          <div className="max-w-5xl mx-auto rounded-3xl bg-gradient-to-r from-[#14080B]/95 via-[#220B12]/95 to-[#14080B]/95 backdrop-blur-2xl border border-[#D9A93A]/40 shadow-[0_20px_60px_rgba(0,0,0,0.85)] px-6 sm:px-10 py-6 grid grid-cols-2 md:grid-cols-4 gap-6 items-center">
-            {/* Stat 1 */}
-            <div className="flex items-center justify-center gap-3.5">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#D9A93A]/20 border border-[#D9A93A]/45 text-[#D9A93A] shrink-0">
-                <Users className="h-5 w-5" />
-              </div>
-              <div className="text-left">
-                <span className="text-2xl sm:text-3xl font-luxury-serif font-black text-[#FFFFFF] block leading-none">
-                  5000+
-                </span>
-                <span className="text-xs text-[#A9A3A0] font-semibold mt-1 block">
-                  O‘quvchilar
-                </span>
-              </div>
-            </div>
-
-            {/* Stat 2 */}
-            <div className="flex items-center justify-center gap-3.5 md:border-l border-[#D9A93A]/20 md:pl-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#D9A93A]/20 border border-[#D9A93A]/45 text-[#D9A93A] shrink-0">
-                <TrendingUp className="h-5 w-5" />
-              </div>
-              <div className="text-left">
-                <span className="text-2xl sm:text-3xl font-luxury-serif font-black text-[#FFFFFF] block leading-none">
-                  95%
-                </span>
-                <span className="text-xs text-[#A9A3A0] font-semibold mt-1 block">
-                  Natija ko‘rsatkichi
-                </span>
-              </div>
-            </div>
-
-            {/* Stat 3 */}
-            <div className="flex items-center justify-center gap-3.5 md:border-l border-[#D9A93A]/20 md:pl-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#D9A93A]/20 border border-[#D9A93A]/45 text-[#D9A93A] shrink-0">
-                <GraduationCap className="h-5 w-5" />
-              </div>
-              <div className="text-left">
-                <span className="text-2xl sm:text-3xl font-luxury-serif font-black text-[#FFFFFF] block leading-none">
-                  50+
-                </span>
-                <span className="text-xs text-[#A9A3A0] font-semibold mt-1 block">
-                  Professional ustoz
-                </span>
-              </div>
-            </div>
-
-            {/* Stat 4 */}
-            <div className="flex items-center justify-center gap-3.5 md:border-l border-[#D9A93A]/20 md:pl-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#D9A93A]/20 border border-[#D9A93A]/45 text-[#D9A93A] shrink-0">
-                <Award className="h-5 w-5" />
-              </div>
-              <div className="text-left">
-                <span className="text-2xl sm:text-3xl font-luxury-serif font-black text-[#FFFFFF] block leading-none">
-                  10+
-                </span>
-                <span className="text-xs text-[#A9A3A0] font-semibold mt-1 block">
-                  Yillik tajriba
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
       </section>
 
       {/* -------------------------------------------------------------------------
-          4. COURSES SECTION (Premium 3D Interactive Cards + Filters)
+          3. AFZALLIKLAR / BENEFITS SECTION (#benefits)
           ------------------------------------------------------------------------- */}
-      <section
-        id="courses"
-        className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-20"
-      >
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-          <div className="space-y-3 text-left">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#16090D] border border-[#D9A93A]/35 text-xs font-bold text-[#F3D276]">
-              <BookOpen className="h-3.5 w-3.5 text-[#D9A93A]" />
-              <span>O‘QUV DASTURLARI</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE] tracking-tight">
-              Mashhur yo‘nalishlar
-            </h2>
-            <p className="text-xs sm:text-sm text-[#A9A3A0] font-normal max-w-lg">
-              O‘zingizga mos kursni tanlang va eng kuchli mentorlar rahbarligida o‘qishni boshlang.
-            </p>
-          </div>
-
-          {/* Category Filter Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-            {categoryFilters.map((cat) => {
-              const isSelected = selectedCategoryKey === cat.key;
-              return (
-                <button
-                  key={cat.key}
-                  type="button"
-                  onClick={() => setSelectedCategoryKey(cat.key)}
-                  className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer select-none ${
-                    isSelected
-                      ? 'gold-gradient-btn shadow-md shadow-[#D9A93A]/30 text-[#080607]'
-                      : 'bg-[#14080B] border border-[#D9A93A]/25 text-[#A9A3A0] hover:border-[#D9A93A] hover:text-[#F7F4EE]'
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Courses Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCourses.map((course) => (
-            <div
-              key={course.id}
-              className="rounded-3xl p-6 bg-gradient-to-b from-[#16090D]/90 to-[#0F0608]/90 border border-[#D9A93A]/25 hover:border-[#D9A93A]/60 shadow-xl hover:shadow-2xl hover:shadow-[#D9A93A]/10 hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group text-left"
-            >
-              <div className="space-y-4">
-                {/* Category & Level */}
-                <div className="flex items-center justify-between">
-                  <span className="px-3 py-1 rounded-full bg-[#D9A93A]/15 border border-[#D9A93A]/30 text-[11px] font-black text-[#F3D276] uppercase tracking-wider">
-                    {course.category}
-                  </span>
-                  <span className="text-xs font-semibold text-[#A9A3A0]">
-                    {course.level}
-                  </span>
-                </div>
-
-                {/* Course Title */}
-                <div>
-                  <h3 className="text-xl font-luxury-serif font-black text-[#F7F4EE] group-hover:text-[#F3D276] transition-colors leading-snug">
-                    {course.title}
-                  </h3>
-                  <p className="text-xs text-[#A9A3A0] line-clamp-3 mt-2 leading-relaxed">
-                    {course.description}
-                  </p>
-                </div>
-
-                {/* Duration & Mentor */}
-                <div className="grid grid-cols-2 gap-2 pt-3 border-t border-white/5 text-xs">
-                  <div className="flex items-center gap-1.5 text-[#A9A3A0]">
-                    <Clock className="h-3.5 w-3.5 text-[#D9A93A]" />
-                    <span>{course.durationMonths} oy</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-[#A9A3A0]">
-                    <Users className="h-3.5 w-3.5 text-[#D9A93A]" />
-                    <span className="truncate">{course.instructor || 'Yetakchi ustoz'}</span>
-                  </div>
-                </div>
-
-                {/* Schedule */}
-                {course.schedule && (
-                  <div className="p-2.5 rounded-2xl bg-[#080607]/80 border border-[#D9A93A]/20 text-[11px] text-[#A9A3A0] flex items-center gap-2">
-                    <Calendar className="h-3.5 w-3.5 text-[#D9A93A] shrink-0" />
-                    <span className="truncate">{course.schedule}</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Price and Action Buttons */}
-              <div className="pt-6 mt-4 border-t border-white/5 flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] text-[#A9A3A0] uppercase font-bold block">Oylik to‘lov</span>
-                  <span className="text-lg font-black text-[#F3D276] font-mono">
-                    {formatMoney(course.pricePerMonth, 'UZS')}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedCourseForDetails(course)}
-                    className="px-3.5 py-2 rounded-full text-xs font-bold text-[#F7F4EE] hover:text-[#F3D276] hover:bg-white/5 transition-colors cursor-pointer"
-                  >
-                    Batafsil →
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleOpenRegisterWithCourse(course.title)}
-                    className="gold-gradient-btn px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider cursor-pointer shadow-md shadow-[#D9A93A]/20"
-                  >
-                    Yozilish
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* -------------------------------------------------------------------------
-          5. WHY LUMOS SECTION (AFZALLIKLARIMIZ)
-          ------------------------------------------------------------------------- */}
-      <section id="why-us" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-20">
-        <div className="text-center space-y-3 mb-14">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#16090D] border border-[#D9A93A]/35 text-xs font-bold text-[#F3D276]">
-            <ShieldCheck className="h-4 w-4 text-[#D9A93A]" />
-            <span>AFZALLIKLARIMIZ</span>
+      <section id="benefits" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-10">
+        <div className="text-center max-w-3xl mx-auto space-y-3 mb-16">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#16090D] border border-[#D9A93A]/30 text-[11px] font-bold uppercase tracking-widest text-[#D9A93A]">
+            <Award className="h-3.5 w-3.5" />
+            <span>Nega aynan LUMOS?</span>
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE]">
-            Nega aynan Lumos?
+            Bizning asosiy <span className="text-[#D9A93A]">afzalliklarimiz</span>
           </h2>
-          <p className="text-sm sm:text-base text-[#D4C8BE] max-w-2xl mx-auto">
-            Biz shunchaki dars o‘tmaymiz — har bir o‘quvchining ichki salohiyatini kashf etib, nufuzli oliygohlar va xalqaro marralar tomon yetaklaymiz.
+          <p className="text-xs sm:text-sm text-[#A9A3A0] leading-relaxed">
+            Har bir talabaning individual salohiyatini kashf etish va xalqaro marralarni zabt etish uchun yaratilgan mukammal ekotizim.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
             {
+              num: '01',
+              title: 'Sifatli ta’lim',
+              desc: 'Xalqaro Cambridge, CEFR va milliy DTM standartlariga to‘liq javob beruvchi sinovdan o‘tgan o‘quv dasturlari.',
+              icon: Package,
+            },
+            {
+              num: '02',
               title: 'Kuchli ustozlar',
-              desc: 'Tajribali va natijaga yo‘naltirilgan yetakchi mentorlar. Har bir o‘qituvchimiz xalqaro toifadagi sertifikatlarga ega.',
-              icon: Users,
+              desc: 'IELTS 8.5+, xalqaro ilmiy darajaga ega va ko‘p yillik amaliy tajribaga ega yetakchi pedagoglar jamoasi.',
+              icon: GraduationCap,
             },
             {
+              num: '03',
               title: 'Zamonaviy metodika',
-              desc: 'O‘quvchilar uchun qulay, interaktiv va samarali ta’lim tizimi. Zerikarli qoidalar o‘rniga amaliy yondashuv.',
-              icon: Sparkles,
+              desc: 'Raqamli LMS tizimi, 24/7 o‘quv platformasi, avtomatlashtirilgan Telegram bot va sun’iy intellekt tahlillari.',
+              icon: ClipboardCheck,
             },
             {
+              num: '04',
               title: 'Real natijalar',
-              desc: 'O‘quvchilarimizning natijalari bizning asosiy mezonimizdir. DTM maksimal ballari va IELTS 7.5+ ko‘rsatkichlari.',
+              desc: 'Bitiruvchilarimizning 95% dan ortig‘i xalqaro sertifikatlar va nufuzli OTMlarning grant o‘rinlarini qo‘lga kiritgan.',
               icon: TrendingUp,
-            },
-            {
-              title: 'Individual yondashuv',
-              desc: 'Har bir o‘quvchining darajasi va maqsadiga mos yondashuv. Savollarni erkin berish va har bir mavzuni 100% mustahkamlash.',
-              icon: HeartHandshake,
-            },
-            {
-              title: 'Shaffof monitoring',
-              desc: 'Har bir darsdan so‘ng ota-onalarga avtomatik Telegram xabarnomasi: davomat, darsdagi faollik va o‘zlashtirish nazorati.',
-              icon: MessageCircle,
-            },
-            {
-              title: 'Kichik guruhlar (10-12 kishi)',
-              desc: 'Guruhlarda o‘quvchilar soni qat’iy chegaralangan, bu esa ustozning to‘liq e’tiborini va erkin savol-javobni kafolatlaydi.',
-              icon: ShieldCheck,
             },
           ].map((item, idx) => {
             const Icon = item.icon;
             return (
               <div
                 key={idx}
-                className="rounded-3xl p-7 bg-[#16090D]/80 hover:bg-[#220B12]/90 border border-[#D9A93A]/25 hover:border-[#D9A93A]/60 shadow-lg hover:shadow-2xl transition-all duration-300 space-y-4 group text-left"
+                className="group relative p-8 rounded-[32px] bg-gradient-to-b from-[#14080B] to-[#0A0406] border border-[#D9A93A]/20 hover:border-[#D9A93A]/60 transition-all duration-300 shadow-[0_15px_40px_rgba(0,0,0,0.8)] hover:-translate-y-1.5 flex flex-col justify-between"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#D9A93A]/15 border border-[#D9A93A]/35 text-[#D9A93A] group-hover:scale-110 group-hover:bg-[#D9A93A] group-hover:text-[#080607] transition-all">
-                  <Icon className="h-6 w-6" />
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-3xl font-luxury-serif font-black text-[#D9A93A]/40 group-hover:text-[#D9A93A] transition-colors">
+                      {item.num}
+                    </span>
+                    <div className="h-10 w-10 rounded-2xl bg-[#D9A93A]/10 border border-[#D9A93A]/30 flex items-center justify-center text-[#D9A93A] group-hover:scale-110 transition-transform">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                  </div>
+                  <div className="w-8 h-[2px] bg-[#D9A93A]/30 group-hover:w-16 group-hover:bg-[#D9A93A] transition-all duration-300" />
+                  <h3 className="text-xl font-bold text-[#F7F4EE] group-hover:text-[#F3D276] transition-colors">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs text-[#A9A3A0] leading-relaxed">
+                    {item.desc}
+                  </p>
                 </div>
-                <h4 className="text-xl font-luxury-serif font-black text-[#F7F4EE] group-hover:text-[#F3D276] transition-colors">
-                  {item.title}
-                </h4>
-                <p className="text-xs sm:text-sm text-[#A9A3A0] leading-relaxed">
-                  {item.desc}
-                </p>
               </div>
             );
           })}
@@ -816,160 +690,107 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* -------------------------------------------------------------------------
-          6. RESULTS / ACHIEVEMENTS SECTION (Interactive Student Success Stories)
+          4. KURSLAR / COURSES SECTION (#courses)
           ------------------------------------------------------------------------- */}
-      <section id="results" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-20">
-        <div className="p-8 sm:p-12 rounded-[36px] bg-gradient-to-b from-[#1C0A10] to-[#080607] border border-[#D9A93A]/35 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-[#D9A93A]/10 blur-[120px] pointer-events-none rounded-full" />
-
-          <div className="text-center space-y-3 mb-12 relative z-10">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#080607] border border-[#D9A93A]/30 text-xs font-bold text-[#F3D276]">
-              <Award className="h-4 w-4 text-[#D9A93A]" />
-              <span>ISBOTLANGAN NATIJALAR</span>
+      <section id="courses" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+          <div className="space-y-3 max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#16090D] border border-[#D9A93A]/30 text-[11px] font-bold uppercase tracking-widest text-[#D9A93A]">
+              <BookOpen className="h-3.5 w-3.5" />
+              <span>Ta’lim Yo‘nalishlari</span>
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE]">
-              Bizning Faxrli Natijalarimiz
+              Kelajak kasblari va <span className="text-[#D9A93A]">akademik fanlar</span>
             </h2>
-            <p className="text-sm sm:text-base text-[#D4C8BE] max-w-2xl mx-auto">
-              Lumos bitiruvchilarining yutuqlari — bizning haqiqiy yuzimiz va mashaqqatli mehnatimiz mevasidir.
+            <p className="text-xs sm:text-sm text-[#A9A3A0]">
+              Har bir kurs amaliy mashg‘ulotlar, diagnostik testlar va shaxsiy murabbiy ko‘magi bilan ta’minlangan.
             </p>
           </div>
 
-          {/* 4 Featured Achievements Cards with Before / After */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 relative z-10">
-            {[
-              {
-                badge: 'DTM 189.0 BALL',
-                student: 'Bekzod Rahmonov',
-                achievement: 'Toshkent Davlat Yuridik Universiteti',
-                detail: '100% Davlat Granti',
-                beforeAfter: 'Boshlang‘ich: 72 ball → Yakuniy: 189.0 ball',
-                teacher: 'Hadicha ustoz shogirdi',
-                color: 'from-amber-500/20 to-yellow-500/10 border-amber-500/40',
-              },
-              {
-                badge: 'IELTS BAND 8.0',
-                student: 'Madina Karimova',
-                achievement: 'Listening 8.5, Reading 8.5',
-                detail: 'Xalqaro Grant Sohibasi',
-                beforeAfter: 'Boshlang‘ich: 4.5 Band → Yakuniy: 8.0 Band',
-                teacher: 'Hasanboy ustoz shogirdi',
-                color: 'from-blue-500/20 to-cyan-500/10 border-blue-500/40',
-              },
-              {
-                badge: 'RESPUBLIKA 1-O‘RINI',
-                student: 'Jasur Shokirov',
-                achievement: 'Al-Xorazmiy Olimpiadasi',
-                detail: 'Oltin Medal Sohibi',
-                beforeAfter: 'Tuman bosqichi → Respublika Absolyut G‘olibi',
-                teacher: 'Hadicha ustoz shogirdi',
-                color: 'from-emerald-500/20 to-teal-500/10 border-emerald-500/40',
-              },
-              {
-                badge: 'PREZIDENT MAKTABI',
-                student: 'Fotima Zokirova',
-                achievement: '96 Ball bilan Qabul',
-                detail: 'Eng Yuqori Ko‘rsatkich',
-                beforeAfter: 'Diagnostika: 48 ball → Imtihon: 96 ball',
-                teacher: 'Lumos Murabbiylar Guruhi',
-                color: 'from-purple-500/20 to-indigo-500/10 border-purple-500/40',
-              },
-            ].map((card, idx) => (
-              <div
-                key={idx}
-                className={`p-6 rounded-3xl bg-[#080607]/85 border ${card.color} space-y-3 relative group hover:-translate-y-1.5 transition-transform text-left`}
+          {/* Category Filter Pills */}
+          <div className="flex flex-wrap items-center gap-2">
+            {categoryFilters.map((cat) => (
+              <button
+                key={cat.key}
+                type="button"
+                onClick={() => setSelectedCategoryKey(cat.key)}
+                className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                  selectedCategoryKey === cat.key
+                    ? 'bg-[#D9A93A] text-[#080607] shadow-lg shadow-[#D9A93A]/20'
+                    : 'bg-[#14080B] border border-[#D9A93A]/30 text-[#A9A3A0] hover:text-[#F7F4EE] hover:border-[#D9A93A]'
+                }`}
               >
-                <div className="inline-block px-3 py-1 rounded-full bg-[#D9A93A]/20 text-[10px] font-black text-[#F3D276] tracking-wider uppercase">
-                  {card.badge}
-                </div>
-                <div>
-                  <h4 className="text-base font-black text-[#F7F4EE]">{card.student}</h4>
-                  <p className="text-xs text-[#D9A93A] font-semibold mt-0.5">{card.achievement}</p>
-                  <p className="text-[11px] text-[#A9A3A0] mt-1">{card.detail}</p>
-                </div>
-                <div className="p-2 rounded-xl bg-white/5 text-[10px] text-[#F3D276] font-mono">
-                  {card.beforeAfter}
-                </div>
-                <div className="pt-2 border-t border-white/5 text-[10px] font-semibold text-[#A9A3A0]">
-                  {card.teacher}
-                </div>
-              </div>
+                {cat.label}
+              </button>
             ))}
           </div>
         </div>
-      </section>
 
-      {/* -------------------------------------------------------------------------
-          7. TEACHERS SECTION (Profile Cards + Modal Trigger)
-          ------------------------------------------------------------------------- */}
-      <section id="teachers" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-20">
-        <div className="text-center space-y-3 mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#16090D] border border-[#D9A93A]/35 text-xs font-bold text-[#F3D276]">
-            <Users className="h-4 w-4 text-[#D9A93A]" />
-            <span>YETAKCHI PEDAGOGLAR</span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE]">
-            Bizning ustozlar
-          </h2>
-          <p className="text-sm sm:text-base text-[#D4C8BE] max-w-2xl mx-auto">
-            O‘z fanini chuqur sevadigan, yuksak natijalar yaratgan va har bir o‘quvchini yuksak marralarga yetaklaydigan tajribali pedagoglar.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {teacherProfiles.map((tp, idx) => (
+        {/* Courses 3D Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {filteredCourses.map((course) => (
             <div
-              key={idx}
-              className="rounded-3xl p-8 bg-[#16090D]/85 hover:bg-[#220B12]/95 border border-[#D9A93A]/30 hover:border-[#D9A93A]/70 shadow-2xl space-y-6 group text-left transition-all duration-300"
+              key={course.id}
+              className="group relative rounded-[32px] bg-gradient-to-b from-[#14080B] via-[#0E0507] to-[#080607] border border-[#D9A93A]/20 hover:border-[#D9A93A]/60 p-7 shadow-[0_20px_50px_rgba(0,0,0,0.85)] hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between"
             >
-              <div className="flex items-center gap-5">
-                <div className={`flex h-20 w-20 items-center justify-center rounded-2xl ${tp.gradient} text-[#080607] font-luxury-serif font-black text-3xl shadow-xl shadow-[#D9A93A]/20 group-hover:scale-105 transition-transform`}>
-                  {tp.symbol}
-                </div>
-                <div>
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#D9A93A]/15 border border-[#D9A93A]/30 text-[10px] font-black text-[#F3D276] uppercase">
-                    {tp.badge}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#D9A93A]/15 text-[#F3D276] border border-[#D9A93A]/30">
+                    {course.category}
                   </span>
-                  <h3 className="text-2xl font-luxury-serif font-black text-[#F7F4EE] mt-1">
-                    {tp.name}
-                  </h3>
-                  <p className="text-xs text-[#D9A93A] font-semibold">
-                    {tp.role}
-                  </p>
+                  <div className="flex items-center gap-1 text-[#F3D276] text-xs font-bold">
+                    <Star className="h-3.5 w-3.5 fill-[#D9A93A] text-[#D9A93A]" />
+                    <span>4.95</span>
+                  </div>
+                </div>
+
+                <h3 className="text-xl font-luxury-serif font-black text-[#F7F4EE] group-hover:text-[#F3D276] transition-colors line-clamp-1">
+                  {course.title}
+                </h3>
+
+                <p className="text-xs text-[#A9A3A0] line-clamp-2 leading-relaxed">
+                  {course.description}
+                </p>
+
+                <div className="grid grid-cols-2 gap-3 py-3 border-y border-[#D9A93A]/15 text-xs text-[#F7F4EE]">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-3.5 w-3.5 text-[#D9A93A]" />
+                    <span>{course.durationMonths} oy</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-3.5 w-3.5 text-[#D9A93A]" />
+                    <span>Haftada 3 kun</span>
+                  </div>
                 </div>
               </div>
 
-              <p className="text-xs sm:text-sm text-[#A9A3A0] leading-relaxed line-clamp-3">
-                {tp.bio}
-              </p>
-
-              <div className="grid grid-cols-2 gap-3 pt-3 border-t border-[#D9A93A]/15 text-xs">
+              <div className="pt-6 flex items-center justify-between mt-4">
                 <div>
-                  <span className="text-[10px] text-[#A9A3A0] uppercase block">Dars kunlari:</span>
-                  <span className="font-bold text-[#F7F4EE]">{tp.scheduleDays}</span>
+                  <span className="text-[10px] uppercase font-bold text-[#A9A3A0] block">Oylik to‘lov</span>
+                  <span className="text-lg font-black text-[#F3D276]">
+                    {formatMoney(course.pricePerMonth)}
+                  </span>
                 </div>
-                <div>
-                  <span className="text-[10px] text-[#A9A3A0] uppercase block">Dars vaqti:</span>
-                  <span className="font-bold text-[#F7F4EE]">{tp.scheduleTime}</span>
-                </div>
-              </div>
 
-              <div className="flex items-center gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setSelectedTeacherForModal(tp)}
-                  className="px-4 py-3 rounded-full border border-[#D9A93A]/35 text-xs font-bold text-[#F7F4EE] hover:bg-white/5 transition-colors cursor-pointer"
-                >
-                  Batafsil ma’lumot
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOpenRegisterWithCourse(tp.name)}
-                  className="flex-1 gold-gradient-btn py-3 rounded-full text-xs font-black uppercase tracking-wider cursor-pointer shadow-md shadow-[#D9A93A]/20 flex items-center justify-center gap-2"
-                >
-                  <span>Guruhga yozilish</span>
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCourseForDetails(course)}
+                    className="p-2.5 rounded-full border border-[#D9A93A]/30 hover:border-[#D9A93A] text-[#A9A3A0] hover:text-[#F7F4EE] transition-colors"
+                    title="Batafsil"
+                  >
+                    <BookOpen className="h-4 w-4" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleOpenRegisterWithCourse(course.title)}
+                    className="px-4 py-2.5 rounded-full text-xs font-bold text-[#080607] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] hover:brightness-110 shadow-md shadow-[#D9A93A]/20 transition-all flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>Yozilish</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -977,170 +798,312 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* -------------------------------------------------------------------------
-          8. ABOUT LUMOS SECTION (Story, Mission & 3D Golden Timeline)
+          5. NATIJALAR / RESULTS SECTION (#results)
           ------------------------------------------------------------------------- */}
-      <section id="about" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-20">
+      <section id="results" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-10">
+        <div className="p-8 sm:p-12 rounded-[40px] bg-gradient-to-br from-[#18080C] via-[#100608] to-[#080607] border border-[#D9A93A]/30 shadow-[0_30px_90px_rgba(0,0,0,0.9)] relative overflow-hidden">
+          {/* Subtle Background Mathematical Grid */}
+          <div className="absolute inset-0 bg-[radial-gradient(#D9A93A_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none" />
+
+          <div className="text-center max-w-3xl mx-auto space-y-3 mb-14 relative z-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#080607] border border-[#D9A93A]/30 text-[11px] font-bold uppercase tracking-widest text-[#D9A93A]">
+              <TrendingUp className="h-3.5 w-3.5" />
+              <span>Shon-Sharaf Kengashi</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE]">
+              Raqamlarda ifodalangan <span className="text-[#D9A93A]">haqiqiy natijalar</span>
+            </h2>
+            <p className="text-xs sm:text-sm text-[#A9A3A0]">
+              Quruq va’dalar emas, balki qabul qilingan grantlar, xalqaro sertifikatlar va tasdiqlangan yutuqlar.
+            </p>
+          </div>
+
+          {/* 4 Big Metrics */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center relative z-10 mb-14">
+            <div className="p-6 rounded-2xl bg-[#080607]/80 border border-[#D9A93A]/20">
+              <span className="text-3xl sm:text-5xl font-luxury-serif font-black text-[#D9A93A] block">189</span>
+              <span className="text-xs font-bold text-[#F7F4EE] mt-1 block">DTM Maksimal Ball</span>
+              <span className="text-[11px] text-[#A9A3A0]">Davlat granti sohibi</span>
+            </div>
+            <div className="p-6 rounded-2xl bg-[#080607]/80 border border-[#D9A93A]/20">
+              <span className="text-3xl sm:text-5xl font-luxury-serif font-black text-[#D9A93A] block">8.0</span>
+              <span className="text-xs font-bold text-[#F7F4EE] mt-1 block">IELTS Band Natija</span>
+              <span className="text-[11px] text-[#A9A3A0]">Cambridge imtihoni</span>
+            </div>
+            <div className="p-6 rounded-2xl bg-[#080607]/80 border border-[#D9A93A]/20">
+              <span className="text-3xl sm:text-5xl font-luxury-serif font-black text-[#D9A93A] block">C1</span>
+              <span className="text-xs font-bold text-[#F7F4EE] mt-1 block">CEFR Xalqaro Daraja</span>
+              <span className="text-[11px] text-[#A9A3A0]">Til bilish sertifikati</span>
+            </div>
+            <div className="p-6 rounded-2xl bg-[#080607]/80 border border-[#D9A93A]/20">
+              <span className="text-3xl sm:text-5xl font-luxury-serif font-black text-[#D9A93A] block">95%</span>
+              <span className="text-xs font-bold text-[#F7F4EE] mt-1 block">O‘zlashtirish & Kirish</span>
+              <span className="text-[11px] text-[#A9A3A0]">Nufuzli OTMlarga</span>
+            </div>
+          </div>
+
+          {/* Before/After Verified Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+            {[
+              {
+                student: 'Jasur Bekmurodov',
+                faculty: 'Jahon Iqtisodiyoti va Diplomatiya Universiteti (Grant)',
+                before: 'IELTS 5.5',
+                after: 'IELTS 8.0',
+                time: '6 oy o‘qish davri',
+                quote: 'Lumosdagi mock imtihonlar va ustozlarning individual yondashuvi natijani 8.0 ga olib chiqdi.',
+              },
+              {
+                student: 'Dildora Ahmedova',
+                faculty: 'Toshkent Davlat Yuridik Universiteti (Grant)',
+                before: 'DTM 58 ball',
+                after: 'DTM 189 ball',
+                time: '8 oy o‘qish davri',
+                quote: 'Aniq fanlar va mantiqiy testlar bo‘yicha mualliflik metodikasi imtihonda 100% ishonch berdi.',
+              },
+              {
+                student: 'Temur Soliyev',
+                faculty: 'EPAM Junior Python Developer',
+                before: 'Noldan boshlagan',
+                after: 'Full Stack Dev',
+                time: '7 oy o‘qish davri',
+                quote: 'Amaliy keyslar va xalqaro startap loyihalarida ishtirok etib, kurs yakunidayoq ishga kirdim.',
+              },
+            ].map((card, i) => (
+              <div
+                key={i}
+                className="p-6 rounded-3xl bg-[#0C0507]/90 border border-[#D9A93A]/25 space-y-4 hover:border-[#D9A93A]/60 transition-all"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs text-[#D9A93A] font-bold">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>Tasdiqlangan</span>
+                  </div>
+                  <span className="text-[11px] text-[#A9A3A0]">{card.time}</span>
+                </div>
+
+                <div className="space-y-1">
+                  <h4 className="text-base font-bold text-[#F7F4EE]">{card.student}</h4>
+                  <p className="text-xs text-[#F3D276] leading-tight">{card.faculty}</p>
+                </div>
+
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-[#080607] border border-[#D9A93A]/20 text-xs">
+                  <div>
+                    <span className="text-[10px] text-[#A9A3A0] block">Boshlang‘ich:</span>
+                    <span className="font-semibold text-rose-300">{card.before}</span>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-[#D9A93A]" />
+                  <div className="text-right">
+                    <span className="text-[10px] text-[#A9A3A0] block">Erishilgan:</span>
+                    <span className="font-black text-emerald-400">{card.after}</span>
+                  </div>
+                </div>
+
+                <p className="text-xs text-[#A9A3A0] italic leading-relaxed">
+                  "{card.quote}"
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* -------------------------------------------------------------------------
+          6. USTOZLAR / TEACHERS SECTION (#teachers)
+          ------------------------------------------------------------------------- */}
+      <section id="teachers" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-10">
+        <div className="text-center max-w-3xl mx-auto space-y-3 mb-16">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#16090D] border border-[#D9A93A]/30 text-[11px] font-bold uppercase tracking-widest text-[#D9A93A]">
+            <Users className="h-3.5 w-3.5" />
+            <span>Bizning Murabbiylar</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE]">
+            Oliy toifali <span className="text-[#D9A93A]">ustoz va mutaxassislar</span>
+          </h2>
+          <p className="text-xs sm:text-sm text-[#A9A3A0]">
+            Har bir murabbiy o‘z sohasining haqiqiy professionali bo‘lib, o‘quvchilarni eng yuqori marralarga yetaklaydi.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {teacherProfiles.map((teacher, idx) => (
+            <div
+              key={idx}
+              onClick={() => setSelectedTeacherForModal(teacher)}
+              className="group cursor-pointer rounded-[32px] bg-gradient-to-b from-[#14080B] to-[#0A0406] border border-[#D9A93A]/20 hover:border-[#D9A93A]/70 p-6 shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between"
+            >
+              <div className="space-y-4 text-center">
+                {/* Avatar / Monogram */}
+                <div className="mx-auto w-24 h-24 rounded-full p-[2px] bg-gradient-to-tr from-[#D9A93A] via-[#FFE7A3] to-[#8A5A12] shadow-lg shadow-[#D9A93A]/20 group-hover:scale-105 transition-transform">
+                  <div className={`w-full h-full rounded-full bg-gradient-to-br ${teacher.gradient} flex items-center justify-center text-xl font-luxury-serif font-black text-[#F7F4EE]`}>
+                    {teacher.symbol}
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#D9A93A]/15 text-[#F3D276] border border-[#D9A93A]/30">
+                    {teacher.badge}
+                  </span>
+                  <h3 className="text-lg font-bold text-[#F7F4EE] group-hover:text-[#F3D276] transition-colors">
+                    {teacher.name}
+                  </h3>
+                  <p className="text-xs text-[#D9A93A]">{teacher.specialization}</p>
+                </div>
+
+                <p className="text-xs text-[#A9A3A0] line-clamp-2 leading-relaxed">
+                  {teacher.bio}
+                </p>
+              </div>
+
+              <div className="pt-4 mt-4 border-t border-[#D9A93A]/15 flex items-center justify-between text-xs">
+                <span className="text-[#A9A3A0]">Tajriba: {teacher.experience}</span>
+                <span className="text-[#D9A93A] font-bold flex items-center gap-1">
+                  Batafsil <ChevronRight className="h-3.5 w-3.5" />
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* -------------------------------------------------------------------------
+          7. BIZ HAQIMIZDA / ABOUT US SECTION (#about)
+          ------------------------------------------------------------------------- */}
+      <section id="about" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          {/* Left Column: Academy Visual & Experience Badge */}
-          <div className="lg:col-span-6 relative">
-            <div className="relative rounded-3xl overflow-hidden border-2 border-[#D9A93A]/40 shadow-2xl bg-[#14080B]">
-              <img
-                src={aboutAcademyImg}
-                alt="Lumos Ta’lim Zali"
-                className="w-full h-[380px] sm:h-[460px] object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#080607] via-transparent to-black/40" />
+          {/* Left: Academy Philosophy & Story */}
+          <div className="lg:col-span-6 space-y-6 text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#16090D] border border-[#D9A93A]/30 text-[11px] font-bold uppercase tracking-widest text-[#D9A93A]">
+              <GraduationCap className="h-3.5 w-3.5" />
+              <span>Biz Haqimizda</span>
             </div>
 
-            {/* Floating Experience Badge */}
-            <div className="absolute -bottom-5 right-6 p-4 rounded-2xl bg-[#16090D]/95 backdrop-blur-xl border border-[#D9A93A]/50 shadow-2xl flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#D9A93A] text-[#080607] font-black text-lg">
-                ★
-              </div>
-              <div>
-                <span className="text-sm font-black text-[#F7F4EE] block">10 Yillik Tajriba</span>
-                <span className="text-[11px] text-[#A9A3A0]">Ilmiy va pedagogik yondashuv</span>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE] leading-tight">
+              LUMOS — bilimni nurga, <span className="text-[#D9A93A]">orzu-maqsadlarni haqiqatga</span> aylantiramiz
+            </h2>
+
+            <p className="text-sm text-[#D4C8BE] leading-relaxed">
+              Lumos Ta’lim Markazi 2014-yilda professional ustozlar va ta’lim innovatorlari tomonidan tashkil etilgan. Bizning vazifamiz — shunchaki imtihonga tayyorlash emas, balki talabalarda mustaqil tahlil, mantiqiy fikrlash va yuqori akademik intizomni shakllantirishdir.
+            </p>
+
+            {/* Golden 3D Timeline */}
+            <div className="space-y-4 pt-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#F3D276] block">
+                Rivojlanish Xronologiyasi:
+              </span>
+              <div className="space-y-3 relative pl-6 border-l-2 border-[#D9A93A]/30">
+                {[
+                  { year: '2014', title: 'Akademiya tashkil etilishi', desc: 'Dastlabki 120 nafar iqtidorli talabalar bilan boshlangan yo‘l.' },
+                  { year: '2018', title: 'Filiallar tarmog‘i kengayishi', desc: 'Toshkentning 4 ta markaziy tumanida zamonaviy o‘quv kampuslari ochildi.' },
+                  { year: '2022', title: 'Raqamli LMS & CRM Ekotizimi', desc: 'Ota-onalar va talabalar uchun avtomatlashtirilgan yagona monitoring tizimi joriy etildi.' },
+                  { year: '2026', title: 'Xalqaro AI & Cambridge Standartlari', desc: 'Sun’iy intellekt asosidagi diagnostik testlar va xalqaro akkreditatsiyalangan metodika.' },
+                ].map((item, idx) => (
+                  <div key={idx} className="relative group">
+                    <div className="absolute -left-[31px] top-1 h-3.5 w-3.5 rounded-full bg-[#080607] border-2 border-[#D9A93A] group-hover:bg-[#D9A93A] transition-colors" />
+                    <span className="text-xs font-mono font-bold text-[#D9A93A] block">{item.year}</span>
+                    <h4 className="text-sm font-bold text-[#F7F4EE]">{item.title}</h4>
+                    <p className="text-xs text-[#A9A3A0] leading-snug">{item.desc}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
 
-          {/* Right Column: Mission, Vision & 3D Timeline */}
-          <div className="lg:col-span-6 space-y-6 text-left">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#16090D] border border-[#D9A93A]/35 text-xs font-bold text-[#F3D276]">
-              <Compass className="h-4 w-4 text-[#D9A93A]" />
-              <span>BIZNING MISSIYA</span>
-            </div>
-
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE] leading-tight">
-              Lumos — Maqsad sari ishonchli ta’lim makoni
-            </h2>
-
-            <p className="text-sm sm:text-base text-[#D4C8BE] leading-relaxed">
-              LUMOS ta’lim markazi yoshlarni faqatgina imtihonlarga tayyorlash bilan cheklanmaydi. Biz har bir o‘quvchida mustaqil fikrlash, muammolarga yechim topish va o‘z kuchiga ishonch hissini shakllantiramiz.
-            </p>
-
-            {/* 3D Golden Timeline */}
-            <div className="space-y-4 pt-2 border-t border-white/5">
-              <span className="text-xs font-black uppercase text-[#D9A93A] tracking-wider block">
-                Rivojlanish Bosqichlari (Timeline)
-              </span>
-              <div className="grid grid-cols-2 gap-3 text-xs">
-                <div className="p-3 rounded-2xl bg-[#16090D] border border-[#D9A93A]/20">
-                  <span className="text-[#F3D276] font-mono font-bold block">2014-yil</span>
-                  <p className="text-[11px] text-[#A9A3A0] mt-0.5">Lumos akademiyasi tashkil topishi va birinchi 50 nafar o‘quvchi</p>
-                </div>
-                <div className="p-3 rounded-2xl bg-[#16090D] border border-[#D9A93A]/20">
-                  <span className="text-[#F3D276] font-mono font-bold block">2018-yil</span>
-                  <p className="text-[11px] text-[#A9A3A0] mt-0.5">Xalqaro IELTS metodikasi va bosh murabbiylar jamoasi shakllanishi</p>
-                </div>
-                <div className="p-3 rounded-2xl bg-[#16090D] border border-[#D9A93A]/20">
-                  <span className="text-[#F3D276] font-mono font-bold block">2022-yil</span>
-                  <p className="text-[11px] text-[#A9A3A0] mt-0.5">DTM va Prezident maktabiga tayyorlovda 95% grant ko‘rsatkichi</p>
-                </div>
-                <div className="p-3 rounded-2xl bg-[#16090D] border border-[#D9A93A]/20">
-                  <span className="text-[#F3D276] font-mono font-bold block">2026-yil</span>
-                  <p className="text-[11px] text-[#A9A3A0] mt-0.5">AI-quvvatlangan yangi avlod raqamli ta’lim platformasi</p>
-                </div>
+          {/* Right: Academy Campus Imagery */}
+          <div className="lg:col-span-6 relative">
+            <div className="relative rounded-[36px] overflow-hidden border border-[#D9A93A]/35 shadow-[0_25px_70px_rgba(0,0,0,0.9)] group">
+              <img
+                src={aboutAcademyImg}
+                alt="Lumos Academy Campus"
+                className="w-full h-[460px] object-cover group-hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#080607] via-black/30 to-transparent" />
+              <div className="absolute bottom-6 left-6 right-6 p-6 rounded-2xl bg-[#14080B]/90 backdrop-blur-xl border border-[#D9A93A]/30">
+                <h4 className="text-base font-bold text-[#F7F4EE]">Zamonaviy va qulay muhit</h4>
+                <p className="text-xs text-[#A9A3A0] mt-1">
+                  Har bir xonamiz interaktiv smart-doskalar, konditsionerlar va zamonaviy kutubxona bilan jihozlangan.
+                </p>
               </div>
-            </div>
-
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setRegisterCourse('');
-                  setRegisterBranch('');
-                  setIsRegisterModalOpen(true);
-                }}
-                className="gold-gradient-btn px-8 py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-[#D9A93A]/20 cursor-pointer"
-              >
-                <span>Markaz bilan tanishish →</span>
-              </button>
             </div>
           </div>
         </div>
       </section>
 
       {/* -------------------------------------------------------------------------
-          9. BRANCHES SECTION (Interactive Selector & Map Link)
+          8. FILIALLAR / BRANCHES SECTION (#branches)
           ------------------------------------------------------------------------- */}
-      <section id="branches" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-20">
-        <div className="text-center space-y-3 mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#16090D] border border-[#D9A93A]/35 text-xs font-bold text-[#F3D276]">
-            <MapPin className="h-4 w-4 text-[#D9A93A]" />
-            <span>KAMPUSLAR VA FILIALLAR</span>
+      <section id="branches" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-10">
+        <div className="text-center max-w-3xl mx-auto space-y-3 mb-16">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#16090D] border border-[#D9A93A]/30 text-[11px] font-bold uppercase tracking-widest text-[#D9A93A]">
+            <MapPin className="h-3.5 w-3.5" />
+            <span>Markazlarimiz</span>
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE]">
-            Filiallarimiz
+            Sizga eng yaqin <span className="text-[#D9A93A]">LUMOS filiali</span>
           </h2>
-          <p className="text-sm sm:text-base text-[#D4C8BE] max-w-2xl mx-auto">
-            O‘zingizga eng yaqin bo‘lgan qulay filialni tanlang va birinchi bepul sinov darsimizda ishtirok eting.
+          <p className="text-xs sm:text-sm text-[#A9A3A0]">
+            Metro va jamoat transportiga yaqin, qulay lokatsiyalarda joylashgan filiallarimiz.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {INITIAL_BRANCHES.map((b) => {
-            const isSelected = selectedBranchId === b.id;
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {INITIAL_BRANCHES.map((branch) => {
+            const isSelected = selectedBranchId === branch.id;
             return (
               <div
-                key={b.id}
-                onClick={() => setSelectedBranchId(b.id)}
-                className={`rounded-3xl p-6 flex flex-col justify-between group text-left cursor-pointer transition-all duration-300 ${
+                key={branch.id}
+                onClick={() => setSelectedBranchId(branch.id)}
+                className={`p-7 rounded-[32px] transition-all duration-300 cursor-pointer flex flex-col justify-between ${
                   isSelected
-                    ? 'bg-[#220B12] border-2 border-[#D9A93A] shadow-xl shadow-[#D9A93A]/20 scale-[1.02]'
-                    : 'bg-[#16090D]/85 border border-[#D9A93A]/25 hover:border-[#D9A93A]/50 shadow-md'
+                    ? 'bg-gradient-to-b from-[#1E0B11] to-[#120609] border-2 border-[#D9A93A] shadow-[0_20px_60px_rgba(217,169,58,0.25)] -translate-y-1'
+                    : 'bg-[#14080B] border border-[#D9A93A]/25 hover:border-[#D9A93A]/60'
                 }`}
               >
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="px-3 py-1 rounded-full bg-[#D9A93A]/15 border border-[#D9A93A]/30 text-[10px] font-black text-[#F3D276] uppercase">
-                      {b.city}
+                    <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#D9A93A]/15 text-[#F3D276] border border-[#D9A93A]/30">
+                      {branch.city}
                     </span>
-                    <span className="text-[10px] font-bold text-[#10B981] flex items-center gap-1">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[#10B981]" />
-                      Faol
-                    </span>
+                    <MapPin className="h-5 w-5 text-[#D9A93A]" />
                   </div>
 
-                  <h3 className="text-lg font-luxury-serif font-black text-[#F7F4EE] group-hover:text-[#F3D276] transition-colors leading-snug">
-                    {b.name}
-                  </h3>
+                  <h3 className="text-xl font-bold text-[#F7F4EE]">{branch.name}</h3>
 
-                  <p className="text-xs text-[#A9A3A0] flex items-start gap-2 pt-1">
-                    <MapPin className="h-4 w-4 text-[#D9A93A] shrink-0 mt-0.5" />
-                    <span>{b.address}</span>
-                  </p>
-
-                  <p className="text-xs text-[#A9A3A0] flex items-center gap-2">
-                    <Phone className="h-3.5 w-3.5 text-[#D9A93A] shrink-0" />
-                    <span className="font-mono">{b.phone}</span>
-                  </p>
-
-                  <p className="text-[11px] text-[#A9A3A0] flex items-center gap-1.5">
-                    <Clock className="h-3 w-3 text-[#D9A93A] shrink-0" />
-                    <span>Dush - Shan: 08:00 - 20:00</span>
-                  </p>
+                  <div className="space-y-2 text-xs text-[#A9A3A0]">
+                    <div className="flex items-start gap-2">
+                      <MapPin className="h-4 w-4 text-[#D9A93A] shrink-0 mt-0.5" />
+                      <span>{branch.address}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-[#D9A93A] shrink-0" />
+                      <span>{branch.phone}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-[#D9A93A] shrink-0" />
+                      <span>08:00 - 20:00 (Dush - Shan)</span>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="pt-5 mt-4 border-t border-white/5 flex items-center justify-between">
+                <div className="pt-6 mt-6 border-t border-[#D9A93A]/20 flex items-center gap-3">
                   <a
-                    href={`https://maps.google.com/?q=${encodeURIComponent(b.address + ' ' + b.city)}`}
+                    href="https://maps.google.com"
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="text-xs font-bold text-[#F3D276] hover:underline flex items-center gap-1"
+                    className="flex-1 py-2 rounded-full border border-[#D9A93A]/30 hover:border-[#D9A93A] text-xs font-bold text-center text-[#F7F4EE] flex items-center justify-center gap-1.5 transition-colors"
                   >
-                    <span>Xaritada ko‘rish</span>
-                    <ExternalLink className="h-3 w-3" />
+                    <span>Xaritada ochish</span>
+                    <ExternalLink className="h-3.5 w-3.5" />
                   </a>
 
                   <button
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleOpenRegisterWithBranch(b.name);
+                      handleOpenRegisterWithBranch(branch.name);
                     }}
-                    className="px-3.5 py-1.5 rounded-full bg-[#080607] border border-[#D9A93A]/35 text-[11px] font-bold text-[#F7F4EE] hover:border-[#D9A93A] hover:text-[#F3D276] transition-colors cursor-pointer"
+                    className="flex-1 py-2 rounded-full bg-[#D9A93A] hover:bg-[#F3D276] text-[#080607] text-xs font-bold text-center transition-colors cursor-pointer"
                   >
                     Tanlash
                   </button>
@@ -1152,261 +1115,222 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* -------------------------------------------------------------------------
-          10. FAQ ACCORDION SECTION (Category Filter + Live Search)
+          9. FAQ SECTION (#faq)
           ------------------------------------------------------------------------- */}
-      <section id="faq" className="py-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto relative z-20">
-        <div className="text-center space-y-3 mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#16090D] border border-[#D9A93A]/35 text-xs font-bold text-[#F3D276]">
-            <HelpCircle className="h-4 w-4 text-[#D9A93A]" />
-            <span>SAVOLLAR VA JAVOBLAR</span>
+      <section id="faq" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1000px] mx-auto relative z-10">
+        <div className="text-center space-y-3 mb-12">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#16090D] border border-[#D9A93A]/30 text-[11px] font-bold uppercase tracking-widest text-[#D9A93A]">
+            <HelpCircle className="h-3.5 w-3.5" />
+            <span>Ko‘p Beriladigan Savollar</span>
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE]">
-            Ko‘p beriladigan savollar
+            Barcha savollaringizga <span className="text-[#D9A93A]">aniq javoblar</span>
           </h2>
-          <p className="text-sm sm:text-base text-[#D4C8BE]">
-            Ota-onalar va o‘quvchilarimiz tomonidan eng ko‘p beriladigan muhim savollarga aniq javoblar.
-          </p>
         </div>
 
-        {/* FAQ Search Box */}
-        <div className="mb-6 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#D9A93A]" />
-          <input
-            type="text"
-            value={faqSearch}
-            onChange={(e) => setFaqSearch(e.target.value)}
-            placeholder="Savolingiz bo‘yicha qidiring..."
-            className="w-full pl-11 pr-4 py-3 rounded-2xl bg-[#16090D] border border-[#D9A93A]/30 text-xs text-[#F7F4EE] placeholder-[#A9A3A0]/60 focus:border-[#D9A93A] outline-none"
-          />
+        {/* Live Search & Category Tabs */}
+        <div className="space-y-4 mb-8">
+          <div className="relative">
+            <input
+              type="text"
+              value={faqSearch}
+              onChange={(e) => setFaqSearch(e.target.value)}
+              placeholder="Savolingiz bo‘yicha qidiring (masalan: sinov darsi, to‘lov, sertifikat)..."
+              className="w-full px-5 py-3.5 rounded-full bg-[#14080B] border border-[#D9A93A]/30 text-xs text-[#F7F4EE] placeholder-[#A9A3A0] focus:border-[#D9A93A] outline-none transition-colors"
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {[
+              { key: 'all', label: 'Barchasi' },
+              { key: 'general', label: 'Umumiy' },
+              { key: 'lessons', label: 'Darslar' },
+              { key: 'courses', label: 'Sifat & Natija' },
+              { key: 'payments', label: 'To‘lovlar' },
+              { key: 'branches', label: 'Filiallar' },
+            ].map((cat) => (
+              <button
+                key={cat.key}
+                type="button"
+                onClick={() => setFaqCategory(cat.key)}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                  faqCategory === cat.key
+                    ? 'bg-[#D9A93A] text-[#080607]'
+                    : 'bg-[#14080B] border border-[#D9A93A]/25 text-[#A9A3A0] hover:text-[#F7F4EE]'
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* FAQ Category Pills */}
-        <div className="flex items-center justify-center gap-2 overflow-x-auto pb-4 mb-6 scrollbar-none">
-          {[
-            { id: 'all', label: 'Barchasi' },
-            { id: 'general', label: 'Umumiy' },
-            { id: 'courses', label: 'Kurslar' },
-            { id: 'payments', label: 'To‘lovlar' },
-            { id: 'lessons', label: 'Dars jarayoni' },
-            { id: 'branches', label: 'Filiallar' },
-          ].map((cat) => (
-            <button
-              key={cat.id}
-              type="button"
-              onClick={() => setFaqCategory(cat.id)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer select-none whitespace-nowrap ${
-                faqCategory === cat.id
-                  ? 'bg-[#D9A93A] text-[#080607]'
-                  : 'bg-[#16090D] border border-[#D9A93A]/25 text-[#A9A3A0] hover:text-[#F7F4EE]'
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Accordion Questions */}
-        <div className="space-y-4 text-left">
-          {filteredFaq.map((item, idx) => {
+        {/* Accordion list */}
+        <div className="space-y-3">
+          {filteredFaq.map((faq, idx) => {
             const isOpen = openFaqIndex === idx;
             return (
               <div
                 key={idx}
-                className="rounded-2xl bg-[#16090D]/90 border border-[#D9A93A]/25 overflow-hidden transition-all duration-300"
+                className={`rounded-2xl transition-all border ${
+                  isOpen
+                    ? 'bg-[#18080D] border-[#D9A93A]/60 shadow-[0_8px_25px_rgba(0,0,0,0.7)]'
+                    : 'bg-[#100608] border-[#D9A93A]/20 hover:border-[#D9A93A]/40'
+                }`}
               >
                 <button
                   type="button"
                   onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
-                  className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 cursor-pointer"
+                  className="w-full text-left px-6 py-4 flex items-center justify-between gap-4 cursor-pointer"
                 >
-                  <span className="text-sm sm:text-base font-bold text-[#F7F4EE]">
-                    {item.q}
+                  <span className={`text-sm sm:text-base font-bold transition-colors ${isOpen ? 'text-[#F3D276]' : 'text-[#F7F4EE]'}`}>
+                    {faq.q}
                   </span>
-                  <div
-                    className={`flex h-7 w-7 items-center justify-center rounded-full bg-[#080607] border border-[#D9A93A]/30 text-[#D9A93A] shrink-0 transition-transform duration-200 ${
-                      isOpen ? 'rotate-180 bg-[#D9A93A] text-[#080607]' : ''
-                    }`}
-                  >
+                  <div className={`flex h-7 w-7 items-center justify-center rounded-full border transition-all ${
+                    isOpen
+                      ? 'border-[#D9A93A] bg-[#D9A93A] text-[#080607] rotate-180'
+                      : 'border-[#D9A93A]/30 text-[#A9A3A0]'
+                  }`}>
                     <ChevronDown className="h-4 w-4" />
                   </div>
                 </button>
 
                 {isOpen && (
-                  <div className="px-5 sm:px-6 pb-6 pt-1 text-xs sm:text-sm text-[#A9A3A0] leading-relaxed border-t border-white/5 animate-in fade-in duration-200">
-                    {item.a}
+                  <div className="px-6 pb-5 pt-1 text-xs sm:text-sm text-[#D4C8BE] leading-relaxed border-t border-[#D9A93A]/10 animate-in fade-in duration-200">
+                    {faq.a}
                   </div>
                 )}
               </div>
             );
           })}
-
-          {filteredFaq.length === 0 && (
-            <div className="text-center py-8 text-xs text-[#A9A3A0]">
-              Mos keluvchi savollar topilmadi.
-            </div>
-          )}
         </div>
       </section>
 
       {/* -------------------------------------------------------------------------
-          11. FINAL POWERFUL CALL-TO-ACTION SECTION (Golden Glow)
+          10. LUXURY CALL TO ACTION BANNER
           ------------------------------------------------------------------------- */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-20">
-        <div className="relative rounded-[36px] p-10 sm:p-16 text-center bg-gradient-to-b from-[#1C0A10] via-[#1C0A10] to-[#080607] border-2 border-[#D9A93A]/40 shadow-[0_20px_80px_rgba(0,0,0,0.9)] overflow-hidden">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[350px] bg-[#D9A93A]/15 blur-[120px] rounded-full pointer-events-none" />
-
-          <div className="relative z-10 max-w-3xl mx-auto space-y-6">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#080607] border border-[#D9A93A]/40 text-xs font-bold text-[#F3D276]">
-              <Sparkles className="h-3.5 w-3.5 text-[#D9A93A]" />
-              <span>YANGI O‘QUV MAVSUMIGA QABUL DAVOM ETMOQDA</span>
-            </div>
-
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE] leading-tight">
-              Kelajagingiz uchun birinchi qadamni bugun tashlang.
+      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-10">
+        <div className="p-8 sm:p-14 rounded-[42px] bg-gradient-to-r from-[#200A11] via-[#14060A] to-[#0A0406] border border-[#D9A93A]/40 shadow-[0_25px_80px_rgba(0,0,0,0.9)] flex flex-col lg:flex-row items-center justify-between gap-8 text-center lg:text-left">
+          <div className="space-y-3 max-w-2xl">
+            <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#D9A93A]/15 text-[#F3D276] border border-[#D9A93A]/30">
+              Kafolatlangan Ta’lim
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-luxury-serif font-black text-[#F7F4EE]">
+              Orzuingizdagi natijaga erishish vaqt keldi!
             </h2>
-
-            <p className="text-sm sm:text-base text-[#D4C8BE] max-w-2xl mx-auto leading-relaxed">
-              Lumos bilan bilim, rivojlanish va natija sari harakat qiling. Hoziroq ro‘yxatdan o‘ting va birinchi bepul sinov darsimizga taklifnoma oling!
+            <p className="text-xs sm:text-sm text-[#A9A3A0] leading-relaxed">
+              Hoziroq ro‘yxatdan o‘ting va bepul sinov darsimizda qatnashib, o‘z bilimingizni professional darajaga ko‘taring.
             </p>
+          </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-              <a
-                href="#courses"
-                className="w-full sm:w-auto gold-gradient-btn px-9 py-4 rounded-full text-sm font-black shadow-xl shadow-[#D9A93A]/30 flex items-center justify-center gap-2"
-              >
-                <span>Kurslarni ko‘rish</span>
-                <ArrowRight className="h-4 w-4" />
-              </a>
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={() => setIsDiagnosticModalOpen(true)}
+              className="w-full sm:w-auto px-6 py-3.5 rounded-full border border-[#D9A93A]/40 text-[#F7F4EE] hover:text-[#F3D276] text-xs font-bold transition-all cursor-pointer"
+            >
+              Darajani aniqlash
+            </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setRegisterCourse('');
-                  setRegisterBranch('');
-                  setIsRegisterModalOpen(true);
-                }}
-                className="w-full sm:w-auto px-8 py-4 rounded-full text-sm font-bold text-[#F7F4EE] hover:text-[#F3D276] bg-[#080607] border border-[#D9A93A]/40 hover:border-[#D9A93A] transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <span>Ro‘yxatdan o‘tish</span>
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setRegisterCourse('');
+                setRegisterBranch('');
+                setIsRegisterModalOpen(true);
+              }}
+              className="w-full sm:w-auto px-7 py-3.5 rounded-full text-xs font-bold text-[#080607] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] hover:brightness-110 shadow-lg shadow-[#D9A93A]/30 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>Ro‘yxatdan o‘tish</span>
+              <ArrowRight className="h-4 w-4" />
+            </button>
           </div>
         </div>
       </section>
 
       {/* -------------------------------------------------------------------------
-          12. LUXURY FOOTER (Newsletter + Comprehensive Directory)
+          11. LUXURY FOOTER
           ------------------------------------------------------------------------- */}
-      <footer className="bg-[#050304] border-t border-[#D9A93A]/20 pt-16 pb-12 px-4 sm:px-6 lg:px-8 relative z-20 text-xs text-[#A9A3A0]">
-        <div className="max-w-[1380px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-white/5 text-left">
-          {/* Col 1: Brand & Newsletter */}
-          <div className="lg:col-span-2 space-y-4">
-            <LumosLogo size="lg" />
-            <p className="text-xs text-[#A9A3A0] leading-relaxed max-w-sm pt-2">
-              Lumos — zamonaviy metodika, tajribali ustozlar va yuqori natijadorlikni birlashtirgan yetakchi raqamli ta’lim platformasi.
+      <footer className="border-t border-[#D9A93A]/20 bg-[#080607] py-16 px-4 sm:px-6 lg:px-8 text-[#A9A3A0] text-xs relative z-10">
+        <div className="max-w-[1380px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
+          {/* Col 1: Brand */}
+          <div className="lg:col-span-4 space-y-4">
+            <a href="#hero" onClick={handleHomeClick} className="inline-block">
+              <LumosLogo size="md" />
+            </a>
+            <p className="text-xs text-[#A9A3A0] leading-relaxed max-w-sm">
+              Lumos — zamonaviy ta’lim, kuchli ustozlar va real natijalar uchun yaratilgan innovatsion ta’lim markazi.
             </p>
+            <div className="text-[11px] text-[#A9A3A0]/60">
+              Litsenziya: № AA-2024-8971 | O‘zbekiston Respublikasi
+            </div>
+          </div>
 
-            {/* Newsletter Subscription */}
-            <div className="pt-2 space-y-2 max-w-sm">
-              <span className="text-[11px] font-bold uppercase text-[#D9A93A] tracking-wider block">
-                Oylik ilmiy yangiliklarga obuna bo‘ling
-              </span>
-              <form onSubmit={handleNewsletterSubmit} className="flex gap-2">
+          {/* Col 2: Navigation */}
+          <div className="lg:col-span-2 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#F7F4EE]">Menyu</h4>
+            <div className="flex flex-col gap-2">
+              <a href="#hero" onClick={handleHomeClick} className="hover:text-[#F3D276] transition-colors">Bosh sahifa</a>
+              <a href="#courses" className="hover:text-[#F3D276] transition-colors">Kurslar</a>
+              <a href="#benefits" className="hover:text-[#F3D276] transition-colors">Afzalliklar</a>
+              <a href="#results" className="hover:text-[#F3D276] transition-colors">Natijalar</a>
+              <a href="#teachers" className="hover:text-[#F3D276] transition-colors">Ustozlar</a>
+              <a href="#about" className="hover:text-[#F3D276] transition-colors">Biz haqimizda</a>
+              <a href="#branches" className="hover:text-[#F3D276] transition-colors">Filiallar</a>
+              <a href="#faq" className="hover:text-[#F3D276] transition-colors">FAQ</a>
+            </div>
+          </div>
+
+          {/* Col 3: Filiallar */}
+          <div className="lg:col-span-3 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#F7F4EE]">Markaziy Filiallar</h4>
+            <div className="space-y-2">
+              {INITIAL_BRANCHES.map((b) => (
+                <div key={b.id} className="leading-snug">
+                  <span className="font-bold text-[#F7F4EE] block">{b.name}</span>
+                  <span className="text-[11px] text-[#A9A3A0] block">{b.address}</span>
+                  <span className="text-[11px] text-[#D9A93A] block">{b.phone}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Col 4: Newsletter */}
+          <div className="lg:col-span-3 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#F7F4EE]">Yangiliklar & Chegirmalar</h4>
+            <p className="text-xs text-[#A9A3A0] leading-relaxed">
+              Yangi guruhlar ochilishi va maxsus chegirmalardan birinchilardan bo‘lib xabardor bo‘ling:
+            </p>
+            <form onSubmit={handleNewsletterSubmit} className="space-y-2">
+              <div className="flex items-center rounded-full bg-[#14080B] border border-[#D9A93A]/30 p-1">
                 <input
                   type="email"
-                  required
                   value={newsletterEmail}
                   onChange={(e) => setNewsletterEmail(e.target.value)}
-                  placeholder="Email manzilingiz..."
-                  className="flex-1 px-4 py-2 rounded-full bg-[#16090D] border border-[#D9A93A]/30 text-xs text-[#F7F4EE] placeholder-[#A9A3A0]/50 focus:border-[#D9A93A] outline-none"
+                  placeholder="Email manzilingiz"
+                  required
+                  className="w-full bg-transparent px-3 text-xs text-[#F7F4EE] placeholder-[#A9A3A0]/60 outline-none"
                 />
                 <button
                   type="submit"
-                  className="gold-gradient-btn px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider shrink-0"
+                  className="p-2 rounded-full bg-[#D9A93A] text-[#080607] hover:bg-[#F3D276] transition-colors"
                 >
-                  Obuna
+                  <Send className="h-3.5 w-3.5" />
                 </button>
-              </form>
+              </div>
               {newsletterSuccess && (
-                <p className="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
-                  <CheckCircle className="h-3 w-3" /> Rahmat! Siz muvaffaqiyatli obuna bo‘ldingiz.
+                <p className="text-[11px] text-emerald-400 font-bold animate-in fade-in">
+                  Obuna bo‘lganingiz uchun tashakkur!
                 </p>
               )}
-            </div>
-
-            {/* Social Links */}
-            <div className="flex items-center gap-3 pt-2">
-              <a
-                href="https://t.me/lumos_edu"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-[#16090D] border border-[#D9A93A]/35 text-[#D9A93A] hover:bg-[#D9A93A] hover:text-[#080607] transition-colors"
-                title="Telegram"
-              >
-                <Send className="h-4 w-4" />
-              </a>
-              <a
-                href="https://instagram.com/lumos_edu"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-[#16090D] border border-[#D9A93A]/35 text-[#D9A93A] hover:bg-[#D9A93A] hover:text-[#080607] transition-colors"
-                title="Instagram"
-              >
-                <Star className="h-4 w-4" />
-              </a>
-            </div>
-          </div>
-
-          {/* Col 2: Navigatsiya */}
-          <div className="space-y-3">
-            <h5 className="font-luxury-serif font-bold text-sm text-[#F7F4EE] uppercase tracking-wider">
-              Navigatsiya
-            </h5>
-            <ul className="space-y-2">
-              <li><a href="#" className="hover:text-[#F3D276] transition-colors">Bosh sahifa</a></li>
-              <li><a href="#courses" className="hover:text-[#F3D276] transition-colors">Kurslarimiz</a></li>
-              <li><a href="#why-us" className="hover:text-[#F3D276] transition-colors">Nega Lumos?</a></li>
-              <li><a href="#results" className="hover:text-[#F3D276] transition-colors">Natijalar</a></li>
-              <li><a href="#teachers" className="hover:text-[#F3D276] transition-colors">O‘qituvchilar</a></li>
-              <li><a href="#about" className="hover:text-[#F3D276] transition-colors">Biz haqimizda</a></li>
-            </ul>
-          </div>
-
-          {/* Col 3: Kurslar */}
-          <div className="space-y-3">
-            <h5 className="font-luxury-serif font-bold text-sm text-[#F7F4EE] uppercase tracking-wider">
-              Kurslar
-            </h5>
-            <ul className="space-y-2">
-              <li><a href="#courses" className="hover:text-[#F3D276] transition-colors">Matematika & DTM</a></li>
-              <li><a href="#courses" className="hover:text-[#F3D276] transition-colors">IELTS Intensive 8.0+</a></li>
-              <li><a href="#courses" className="hover:text-[#F3D276] transition-colors">General English</a></li>
-              <li><a href="#courses" className="hover:text-[#F3D276] transition-colors">Frontend & IT Asoslari</a></li>
-              <li><a href="#courses" className="hover:text-[#F3D276] transition-colors">Prezident Maktabiga Tayyorlov</a></li>
-            </ul>
-          </div>
-
-          {/* Col 4: Bog‘lanish */}
-          <div className="space-y-3">
-            <h5 className="font-luxury-serif font-bold text-sm text-[#F7F4EE] uppercase tracking-wider">
-              Bog‘lanish
-            </h5>
-            <p className="text-xs text-[#A9A3A0]">
-              Toshkent sh., Amir Temur shox ko‘chasi, 108
-            </p>
-            <p className="text-xs font-mono font-bold text-[#F3D276]">
-              +998 (71) 200-00-25
-            </p>
-            <p className="text-xs text-[#A9A3A0]">
-              Dush - Shan: 08:00 - 20:00
-            </p>
+            </form>
           </div>
         </div>
 
-        <div className="max-w-[1380px] mx-auto pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#A9A3A0]">
+        <div className="max-w-[1380px] mx-auto mt-12 pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px]">
           <p>© {new Date().getFullYear()} LUMOS Ta’lim Markazi. Barcha huquqlar himoyalangan.</p>
           <div className="flex items-center gap-4">
-            <a href="#/login" className="hover:text-[#D9A93A] transition-colors font-semibold">Tizimga Kirish</a>
+            <a href="#/login" className="hover:text-[#D9A93A] transition-colors font-semibold">Tizimga kirish</a>
             <span>•</span>
             <a href="#/admin" className="hover:text-[#D9A93A] transition-colors font-semibold">Boshqaruv Paneli</a>
           </div>
@@ -1414,26 +1338,8 @@ export const LandingPage: React.FC = () => {
       </footer>
 
       {/* -------------------------------------------------------------------------
-          13. MODALS INTEGRATION (Search Overlay, Multi-Step Register, Diagnostic, etc.)
+          12. MODALS INTEGRATION (Multi-Step Register, Diagnostic, Teacher, Course)
           ------------------------------------------------------------------------- */}
-      <WebsiteSearchOverlay
-        isOpen={isSearchOpen}
-        onClose={() => setIsSearchOpen(false)}
-        courses={INITIAL_COURSES}
-        teachers={INITIAL_TEACHERS}
-        branches={INITIAL_BRANCHES}
-        faqList={rawFaqList}
-        onSelectCourse={(c) => setSelectedCourseForDetails(c)}
-        onSelectTeacher={(name) => {
-          const matched = teacherProfiles.find((tp) => tp.name.includes(name) || name.includes(tp.name));
-          if (matched) setSelectedTeacherForModal(matched);
-        }}
-        onSelectBranch={(name) => {
-          const el = document.getElementById('branches');
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }}
-      />
-
       <PublicTeacherModal
         isOpen={!!selectedTeacherForModal}
         onClose={() => setSelectedTeacherForModal(null)}
