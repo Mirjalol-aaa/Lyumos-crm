@@ -54,7 +54,7 @@ import { Course } from '../../types/admin';
 import { fireCelebrationConfetti } from '../../services/paymentGatewayService';
 import { sendTelegramMessage, formatLeadApplicationMessage } from '../../services/telegramService';
 import { sendEskizSms } from '../../services/eskizSmsService';
-import heroStudentImg from '../../assets/lumos_hero_student_hd.jpg';
+import { Hero3DScene } from '../../components/hero/Hero3DScene';
 import aboutAcademyImg from '../../assets/lumos_about_academy.jpg';
 
 export const LandingPage: React.FC = () => {
@@ -509,13 +509,17 @@ export const LandingPage: React.FC = () => {
       </header>
 
       {/* =========================================================================
-          2. HERO SECTION (Exact Match: Typography, Student Visual, 2 Glass Cards)
+          2. HERO SECTION (Professional 3D Premium Experience)
           ========================================================================= */}
       <section
         id="home"
-        className="relative pt-32 sm:pt-36 lg:pt-40 pb-28 lg:pb-36 px-4 sm:px-6 lg:px-8 max-w-[1360px] mx-auto min-h-[92vh] flex flex-col justify-center"
+        className="relative pt-32 sm:pt-36 lg:pt-40 pb-28 lg:pb-36 px-4 sm:px-6 lg:px-8 max-w-[1360px] mx-auto min-h-[92vh] flex flex-col justify-center overflow-visible"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+        {/* Deep luxury burgundy & gold ambient light auras */}
+        <div className="absolute top-1/2 -translate-y-1/2 right-[-6%] w-[680px] h-[680px] bg-gradient-to-br from-[#831843]/20 via-[#D9A83F]/10 to-transparent blur-[140px] rounded-full pointer-events-none z-0" />
+        <div className="absolute top-1/3 left-[-4%] w-[500px] h-[500px] bg-gradient-to-tr from-[#3B0B12]/30 via-transparent to-transparent blur-[120px] rounded-full pointer-events-none z-0" />
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center relative z-10">
           {/* Left Side: Badge, Title, Subtitle, Buttons & 4 Feature Icons */}
           <div className="lg:col-span-6 space-y-6 text-left z-10">
             {/* Top Badge: "⭐ Bilim — eng katta kuch!" */}
@@ -586,43 +590,9 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Side: The Exact Student with Giant Golden Sundial Ring & 2 Floating Glass Cards */}
-          <div className="lg:col-span-6 relative flex justify-center lg:justify-end mt-4 lg:mt-0">
-            <div className="relative w-full max-w-[540px]">
-              {/* Golden Ambient Glow behind image */}
-              <div className="absolute -inset-4 rounded-full bg-gradient-to-tr from-[#D9A83F]/25 via-[#F4D27A]/15 to-transparent blur-3xl opacity-80 pointer-events-none" />
-
-              {/* Main Student Frame */}
-              <div className="relative rounded-[36px] overflow-hidden border-2 border-[#D9A83F]/35 shadow-[0_20px_70px_rgba(0,0,0,0.85)] bg-[#17100F] aspect-square">
-                <img
-                  src={heroStudentImg}
-                  alt="LUMOS Iqtidorli O‘quvchisi"
-                  className="w-full h-full object-cover object-center transform hover:scale-[1.03] transition-transform duration-700"
-                />
-                {/* Subtle dark vignette blend */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0B0808]/70 via-transparent to-transparent pointer-events-none" />
-              </div>
-
-              {/* Floating Glass Card 1 (Left): "O‘rzularingizga yetish uchun biz bilan!" */}
-              <div className="absolute top-[38%] -left-6 sm:-left-10 p-3.5 rounded-2xl bg-[#1C1412]/85 backdrop-blur-xl border border-[#D9A83F]/40 shadow-2xl max-w-[215px] flex items-center gap-3 animate-pulse duration-[5000ms] select-none">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#D9A83F]/20 text-[#D9A83F] shrink-0">
-                  <GraduationCap className="h-5 w-5" />
-                </div>
-                <p className="text-xs font-bold text-[#F8F5EF] leading-snug">
-                  O‘rzularingizga yetish uchun biz bilan!
-                </p>
-              </div>
-
-              {/* Floating Glass Card 2 (Top Right): "Bilim bilan chegaralar yo‘q!" */}
-              <div className="absolute top-4 -right-4 sm:-right-8 p-3.5 rounded-2xl bg-[#1C1412]/85 backdrop-blur-xl border border-[#D9A83F]/40 shadow-2xl max-w-[210px] flex items-center gap-3 select-none">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#D9A83F]/20 text-[#D9A83F] shrink-0">
-                  <TrendingUp className="h-5 w-5" />
-                </div>
-                <p className="text-xs font-bold text-[#F8F5EF] leading-snug">
-                  Bilim bilan chegaralar yo‘q!
-                </p>
-              </div>
-            </div>
+          {/* Right Side: Professional 3D Educational Scene with Parallax, Laptop LMS, Books, Cap, & Floating Cards */}
+          <div className="lg:col-span-6 relative flex justify-center lg:justify-end mt-4 lg:mt-0 z-10">
+            <Hero3DScene />
           </div>
         </div>
 
