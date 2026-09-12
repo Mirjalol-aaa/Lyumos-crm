@@ -29,6 +29,7 @@ import {
 import { LumosLogo } from '../../components/ui/LumosLogo';
 import { Hero3DScene } from '../../components/hero/Hero3DScene';
 import { LumosAmbient3D } from '../../components/common/LumosAmbient3D';
+import { PublicHeader } from '../../components/layout/PublicHeader';
 import { PublicTeacherModal } from '../../components/modals/PublicTeacherModal';
 import { MultiStepRegisterModal } from '../../components/modals/MultiStepRegisterModal';
 import { DiagnosticTestModal } from '../../components/modals/DiagnosticTestModal';
@@ -53,11 +54,7 @@ export const LandingPage: React.FC = () => {
   // "Bosh sahifa" transition effect state
   const [isHomeTransitioning, setIsHomeTransitioning] = useState(false);
 
-  // UI States & Modals
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
-  const langDropdownRef = useRef<HTMLDivElement>(null);
-
+  // Modals
   const [isDiagnosticModalOpen, setIsDiagnosticModalOpen] = useState(false);
   const [selectedCourseForDetails, setSelectedCourseForDetails] = useState<Course | null>(null);
 
@@ -139,28 +136,7 @@ export const LandingPage: React.FC = () => {
     };
   }, []);
 
-  // 3. Close language dropdown on outside click or ESC
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (langDropdownRef.current && !langDropdownRef.current.contains(e.target as Node)) {
-        setIsLangDropdownOpen(false);
-      }
-    };
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setIsLangDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
-
-  // 4. "Bosh sahifa" click transition handler
+  // 3. "Bosh sahifa" click transition handler
   const handleHomeClick = (e: React.MouseEvent) => {
     e.preventDefault();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -168,16 +144,6 @@ export const LandingPage: React.FC = () => {
     setIsHomeTransitioning(true);
     setTimeout(() => setIsHomeTransitioning(false), 650);
   };
-
-  // Nav menu items (Strictly 6 core items, no FAQ, no Filiallar)
-  const navMenuItems = [
-    { id: 'hero', label: 'Bosh sahifa', href: '#hero', onClick: handleHomeClick },
-    { id: 'courses', label: 'Kurslar', href: '#courses' },
-    { id: 'benefits', label: 'Afzalliklar', href: '#benefits' },
-    { id: 'results', label: 'Natijalar', href: '#results' },
-    { id: 'teachers', label: 'Ustozlar', href: '#teachers' },
-    { id: 'about', label: 'Biz haqimizda', href: '#about' },
-  ];
 
   // Filtered courses
   const filteredCourses = useMemo(() => {
@@ -279,191 +245,19 @@ export const LandingPage: React.FC = () => {
       <LumosAmbient3D activeSection={activeSection} />
 
       {/* -------------------------------------------------------------------------
-          1. HEADER / MINIMAL FLOATING GLASS NAVBAR (6 Items + Smooth Slide Indicator)
+          1. HEADER / 3D CINEMATIC LUXURY NAVBAR (Perspective, Particles, Theme & Language)
           ------------------------------------------------------------------------- */}
-      <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled
-            ? 'bg-[#080607]/92 backdrop-blur-xl border-b border-[#D9A93A]/20 shadow-[0_12px_40px_rgba(0,0,0,0.85)] py-2.5'
-            : 'bg-gradient-to-b from-[#080607]/85 to-transparent py-4 border-b border-transparent'
-        }`}
-      >
-        <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          {/* Logo on Left */}
-          <a
-            href="#hero"
-            onClick={handleHomeClick}
-            className="flex items-center gap-2 group focus:outline-none select-none"
-          >
-            <LumosLogo size="md" />
-          </a>
-
-          {/* Centered Navigation Links with Sliding Active Indicator */}
-          <nav className="hidden xl:flex items-center gap-7 text-xs font-semibold uppercase tracking-wider text-[#A9A3A0]">
-            {navMenuItems.map((item) => {
-              const isActive = activeSection === item.id;
-              return (
-                <a
-                  key={item.id}
-                  href={item.href}
-                  onClick={item.onClick}
-                  className={`relative py-2 px-1 transition-all duration-300 ${
-                    isActive
-                      ? 'text-[#F3D276] font-bold drop-shadow-[0_0_8px_rgba(243,210,118,0.4)]'
-                      : 'hover:text-[#F7F4EE]'
-                  }`}
-                >
-                  <span>{item.label}</span>
-                  {isActive && (
-                    <span className="absolute bottom-0 inset-x-0 h-[2px] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] rounded-full shadow-[0_0_10px_#D9A93A] transition-all duration-300 animate-in fade-in" />
-                  )}
-                </a>
-              );
-            })}
-          </nav>
-
-          {/* Action Tools on Right: Language, Kirish, Ro‘yxatdan o‘tish */}
-          <div className="hidden sm:flex items-center gap-3">
-            {/* Language Selector Dropdown */}
-            <div className="relative" ref={langDropdownRef}>
-              <button
-                type="button"
-                onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#D9A93A]/30 bg-[#16090D] text-xs font-semibold text-[#F7F4EE] hover:border-[#D9A93A] transition-all cursor-pointer"
-                aria-expanded={isLangDropdownOpen}
-              >
-                <Globe className="h-3.5 w-3.5 text-[#D9A93A]" />
-                <span>{language === 'uz' ? 'O‘zbekcha' : language === 'ru' ? 'Русский' : 'English'}</span>
-                <ChevronDown className="h-3 w-3 text-[#A9A3A0]" />
-              </button>
-
-              {isLangDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-36 rounded-2xl bg-[#16090D] border border-[#D9A93A]/40 p-1.5 shadow-2xl z-50 text-xs backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150">
-                  {[
-                    { code: 'uz', label: 'O‘zbekcha' },
-                    { code: 'ru', label: 'Русский' },
-                    { code: 'en', label: 'English' },
-                  ].map((lng) => (
-                    <button
-                      key={lng.code}
-                      type="button"
-                      onClick={() => {
-                        setLanguage(lng.code as any);
-                        setIsLangDropdownOpen(false);
-                      }}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-colors ${
-                        language === lng.code
-                          ? 'bg-[#D9A93A] text-[#080607] font-bold shadow-sm'
-                          : 'text-[#F7F4EE] hover:bg-white/5'
-                      }`}
-                    >
-                      <span>{lng.label}</span>
-                      {language === lng.code && <Check className="h-3.5 w-3.5 stroke-[2.5]" />}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Compact Glass Login Button */}
-            <a
-              href="#/login"
-              className="px-4 py-1.5 rounded-full border border-[#D9A93A]/35 bg-[#16090D]/80 text-xs font-bold text-[#F7F4EE] hover:text-[#F3D276] hover:border-[#D9A93A] hover:bg-[#200A11] transition-all"
-            >
-              Kirish
-            </a>
-
-            {/* Medium-size, Compact Gold Registration CTA */}
-            <button
-              type="button"
-              onClick={() => {
-                setRegisterCourse('');
-                setIsRegisterModalOpen(true);
-              }}
-              className="px-4 py-1.5 rounded-full text-xs font-bold text-[#080607] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] hover:brightness-110 shadow-sm shadow-[#D9A93A]/30 flex items-center gap-1.5 transition-all cursor-pointer"
-            >
-              <span>Ro‘yxatdan o‘tish</span>
-              <ArrowRight className="h-3 w-3" />
-            </button>
-          </div>
-
-          {/* Mobile Menu Trigger */}
-          <div className="flex items-center gap-2 xl:hidden">
-            <button
-              type="button"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-xl border border-[#D9A93A]/30 text-[#F7F4EE] hover:border-[#D9A93A]"
-              aria-label="Menyu"
-            >
-              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Page Top Scroll Progress Indicator */}
-        <div
-          className="absolute bottom-0 left-0 h-[1.5px] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] transition-all duration-100"
-          style={{ width: `${scrollProgress}%` }}
-        />
-
-        {/* Mobile Dropdown Menu */}
-        {isMobileMenuOpen && (
-          <div className="xl:hidden bg-[#120609]/98 backdrop-blur-2xl border-b border-[#D9A93A]/30 px-6 py-5 space-y-4 shadow-2xl animate-in slide-in-from-top-2">
-            <div className="flex flex-col gap-2.5">
-              {navMenuItems.map((link) => (
-                <a
-                  key={link.id}
-                  href={link.href}
-                  onClick={(e) => {
-                    if (link.onClick) link.onClick(e);
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className={`text-sm font-semibold py-1.5 border-b border-white/5 flex items-center justify-between ${
-                    activeSection === link.id ? 'text-[#F3D276] font-bold' : 'text-[#A9A3A0]'
-                  }`}
-                >
-                  <span>{link.label}</span>
-                  <ChevronRight className="h-4 w-4 text-[#D9A93A]/60" />
-                </a>
-              ))}
-            </div>
-
-            <div className="pt-2 flex flex-col gap-2.5">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  setIsDiagnosticModalOpen(true);
-                }}
-                className="w-full py-2.5 rounded-full border border-[#D9A93A]/40 text-[#D9A93A] text-xs font-bold flex items-center justify-center gap-2 bg-[#080607]"
-              >
-                <BookOpen className="h-4 w-4" />
-                <span>Darajani aniqlash</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  setRegisterCourse('');
-                  setIsRegisterModalOpen(true);
-                }}
-                className="w-full py-2.5 rounded-full text-xs font-bold text-[#080607] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] flex items-center justify-center gap-1.5"
-              >
-                <span>Ro‘yxatdan o‘tish</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </button>
-
-              <a
-                href="#/login"
-                className="w-full py-2 text-center text-xs font-bold text-[#A9A3A0] hover:text-[#F7F4EE]"
-              >
-                Kirish (Login)
-              </a>
-            </div>
-          </div>
-        )}
-      </header>
+      <PublicHeader
+        activeSection={activeSection}
+        onHomeClick={handleHomeClick}
+        onOpenRegister={(courseTitle) => {
+          setRegisterCourse(courseTitle || '');
+          setIsRegisterModalOpen(true);
+        }}
+        onOpenDiagnostic={() => setIsDiagnosticModalOpen(true)}
+        isScrolled={isScrolled}
+        scrollProgress={scrollProgress}
+      />
 
       {/* -------------------------------------------------------------------------
           2. HERO SECTION (Living 3D Mathematical Universe + Cinematic 3D Scene)
@@ -1052,7 +846,7 @@ export const LandingPage: React.FC = () => {
       {/* -------------------------------------------------------------------------
           9. LUXURY FOOTER (Statement: "Bilim bilan chegaralar yo‘q")
           ------------------------------------------------------------------------- */}
-      <footer className="border-t border-[#D9A93A]/20 bg-[#080607] py-16 px-4 sm:px-6 lg:px-8 text-[#A9A3A0] text-xs relative z-10">
+      <footer id="contact" className="border-t border-[#D9A93A]/20 bg-[#080607] py-16 px-4 sm:px-6 lg:px-8 text-[#A9A3A0] text-xs relative z-10">
         <div className="max-w-[1380px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
           {/* Col 1: Brand & Big Statement */}
           <div className="lg:col-span-5 space-y-4">
