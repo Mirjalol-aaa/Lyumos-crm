@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 import { LumosLogo } from '../../components/ui/LumosLogo';
 import { Hero3DScene } from '../../components/hero/Hero3DScene';
-import { MathematicalUniverse3D } from '../../components/hero/MathematicalUniverse3D';
+import { LumosAmbient3D } from '../../components/common/LumosAmbient3D';
 import { PublicTeacherModal } from '../../components/modals/PublicTeacherModal';
 import { MultiStepRegisterModal } from '../../components/modals/MultiStepRegisterModal';
 import { DiagnosticTestModal } from '../../components/modals/DiagnosticTestModal';
@@ -274,6 +274,11 @@ export const LandingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#080607] text-[#F7F4EE] antialiased selection:bg-[#D9A93A] selection:text-[#080607] relative overflow-x-hidden font-sans">
       {/* -------------------------------------------------------------------------
+          GLOBAL 3D FLOATING UNIVERSE (Single high-performance canvas across entire site)
+          ------------------------------------------------------------------------- */}
+      <LumosAmbient3D activeSection={activeSection} />
+
+      {/* -------------------------------------------------------------------------
           1. HEADER / MINIMAL FLOATING GLASS NAVBAR (6 Items + Smooth Slide Indicator)
           ------------------------------------------------------------------------- */}
       <header
@@ -467,9 +472,6 @@ export const LandingPage: React.FC = () => {
         id="hero"
         className="relative pt-32 sm:pt-36 lg:pt-40 pb-24 lg:pb-32 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto min-h-[92vh] flex flex-col justify-center overflow-visible"
       >
-        {/* Living Mathematical 3D Universe Canvas Background */}
-        <MathematicalUniverse3D isHomeTransitioning={isHomeTransitioning} />
-
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center relative z-10">
           {/* Left Side: Badge, Headline, Subtitle, CTAs & 4 Benefits */}
           <div

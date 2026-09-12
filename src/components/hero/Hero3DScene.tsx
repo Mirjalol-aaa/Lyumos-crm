@@ -16,7 +16,6 @@ import {
 
 export const Hero3DScene: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Parallax tracking refs (ZERO React re-renders!)
   const mouseTargetRef = useRef({ x: 0, y: 0 });
@@ -25,7 +24,7 @@ export const Hero3DScene: React.FC = () => {
   // Floating ambient time counter
   const timeRef = useRef(0);
 
-  // 1. Mouse & Touch Parallax Tracking via GPU CSS Variables
+  // 1. Mouse & Touch Parallax Tracking via GPU CSS Variables with Smooth Lerp
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -49,25 +48,27 @@ export const Hero3DScene: React.FC = () => {
 
     let animationFrameId: number;
     const updatePhysics = () => {
+      // Calm, smooth 0.04 lerp for luxurious Apple-like inertia
       mouseCurrentRef.current.x +=
-        (mouseTargetRef.current.x - mouseCurrentRef.current.x) * 0.05;
+        (mouseTargetRef.current.x - mouseCurrentRef.current.x) * 0.04;
       mouseCurrentRef.current.y +=
-        (mouseTargetRef.current.y - mouseCurrentRef.current.y) * 0.05;
+        (mouseTargetRef.current.y - mouseCurrentRef.current.y) * 0.04;
 
       timeRef.current += 0.016;
 
       if (containerRef.current) {
         const mx = mouseCurrentRef.current.x;
         const my = mouseCurrentRef.current.y;
-        const rotX = -my * 12 + Math.sin(timeRef.current * 0.7) * 1.5;
-        const rotY = mx * 15 + Math.cos(timeRef.current * 0.6) * 1.6;
-        const floatY = Math.sin(timeRef.current * 0.9) * 8;
-        const ringRotation = (timeRef.current * 3.5) % 360;
+        // Subtle, calm motion: no aggressive tilts or fast rotation
+        const rotX = -my * 7 + Math.sin(timeRef.current * 0.45) * 0.9;
+        const rotY = mx * 9 + Math.cos(timeRef.current * 0.4) * 1.1;
+        const floatY = Math.sin(timeRef.current * 0.55) * 5;
+        const ringRotation = (timeRef.current * 1.8) % 360;
 
         containerRef.current.style.setProperty('--rot-x', `${rotX.toFixed(2)}deg`);
         containerRef.current.style.setProperty('--rot-y', `${rotY.toFixed(2)}deg`);
-        containerRef.current.style.setProperty('--stage-rot-x', `${(rotX * 0.38).toFixed(2)}deg`);
-        containerRef.current.style.setProperty('--stage-rot-y', `${(rotY * 0.38).toFixed(2)}deg`);
+        containerRef.current.style.setProperty('--stage-rot-x', `${(rotX * 0.32).toFixed(2)}deg`);
+        containerRef.current.style.setProperty('--stage-rot-y', `${(rotY * 0.32).toFixed(2)}deg`);
         containerRef.current.style.setProperty('--float-y', `${floatY.toFixed(2)}px`);
         containerRef.current.style.setProperty('--ring-rot', `${ringRotation.toFixed(2)}deg`);
         containerRef.current.style.setProperty('--mouse-x', `${mx.toFixed(3)}`);
@@ -86,77 +87,6 @@ export const Hero3DScene: React.FC = () => {
     };
   }, []);
 
-  // 2. Interactive Golden Dust & Embers Particles Engine (Canvas)
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let width = (canvas.width = canvas.offsetWidth || 560);
-    let height = (canvas.height = canvas.offsetHeight || 560);
-
-    const handleResize = () => {
-      if (!canvas) return;
-      width = canvas.width = canvas.offsetWidth || 560;
-      height = canvas.height = canvas.offsetHeight || 560;
-    };
-    window.addEventListener('resize', handleResize);
-
-    // Particle pool with differing depths and velocities
-    const particleCount = 55;
-    const particles = Array.from({ length: particleCount }, () => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      size: Math.random() * 2.2 + 0.6,
-      speedX: (Math.random() - 0.5) * 0.4,
-      speedY: -Math.random() * 0.5 - 0.15,
-      opacity: Math.random() * 0.7 + 0.2,
-      pulseSpeed: Math.random() * 0.03 + 0.015,
-      angle: Math.random() * Math.PI * 2,
-    }));
-
-    let animId: number;
-    const renderParticles = () => {
-      ctx.clearRect(0, 0, width, height);
-
-      particles.forEach((p) => {
-        p.x += p.speedX;
-        p.y += p.speedY;
-        p.angle += p.pulseSpeed;
-
-        // Wrap around borders
-        if (p.y < -10) {
-          p.y = height + 10;
-          p.x = Math.random() * width;
-        }
-        if (p.x < -10) p.x = width + 10;
-        if (p.x > width + 10) p.x = -10;
-
-        const currentOpacity =
-          p.opacity * (0.6 + 0.4 * Math.sin(p.angle));
-
-        // Draw soft glowing gold ember
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(244, 210, 122, ${currentOpacity})`;
-        ctx.shadowBlur = 9;
-        ctx.shadowColor = '#D9A83F';
-        ctx.fill();
-      });
-
-      animId = requestAnimationFrame(renderParticles);
-    };
-
-    animId = requestAnimationFrame(renderParticles);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      cancelAnimationFrame(animId);
-    };
-  }, []);
-
-  // Compute 3D rotations based on mouse parallax (counter-motion) & continuous wave
   return (
     <div
       ref={containerRef}
@@ -165,21 +95,14 @@ export const Hero3DScene: React.FC = () => {
         perspective: '1400px',
       }}
     >
-      {/* 1. Volumetric Golden & Deep Burgundy Ambient Glow in Background */}
+      {/* 1. Optimized Pure CSS Radial Ambient Halo in Background (0% CPU blur) */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-[88%] h-[88%] rounded-full bg-gradient-to-tr from-[#D9A83F]/22 via-[#831843]/20 to-transparent blur-[90px] animate-pulse duration-[8000ms]" />
-        <div className="absolute w-[65%] h-[65%] rounded-full bg-gradient-to-b from-[#D9A83F]/15 via-[#2A0B12]/40 to-transparent blur-[70px]" />
+        <div className="w-[82%] h-[82%] rounded-full bg-gradient-to-tr from-[#D9A83F]/14 via-[#520E1F]/15 to-transparent pointer-events-none" />
       </div>
 
-      {/* 2. Interactive Golden Canvas Dust Layer */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full pointer-events-none z-10"
-      />
-
-      {/* 3. Outer Glassmorphic 3D Stage Capsule */}
+      {/* 2. Outer Glassmorphic 3D Stage Capsule (High-performance gradient, NO heavy backdrop-blur) */}
       <div
-        className="relative w-full h-full rounded-[42px] border border-[#D9A83F]/35 bg-gradient-to-br from-[#1B0A0E]/85 via-[#13070A]/90 to-[#090405]/95 backdrop-blur-2xl shadow-[0_25px_80px_rgba(0,0,0,0.92),0_0_60px_rgba(217,168,63,0.18)] overflow-hidden flex items-center justify-center"
+        className="relative w-full h-full rounded-[42px] border border-[#D9A83F]/35 bg-gradient-to-br from-[#180A0E] via-[#110609] to-[#080405] shadow-[0_20px_60px_rgba(0,0,0,0.9),0_0_40px_rgba(217,168,63,0.12)] overflow-hidden flex items-center justify-center"
         style={{
           transformStyle: 'preserve-3d',
           transform: 'rotateX(var(--stage-rot-x, 0deg)) rotateY(var(--stage-rot-y, 0deg))',
