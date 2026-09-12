@@ -17,17 +17,14 @@ import {
   TrendingUp,
   ShieldCheck,
   Calendar,
-  Layers,
-  HeartHandshake,
-  MessageCircle,
   Menu,
   X,
   Check,
   Package,
   ClipboardCheck,
   ExternalLink,
-  HelpCircle,
   Mail,
+  Sparkles,
 } from 'lucide-react';
 import { LumosLogo } from '../../components/ui/LumosLogo';
 import { Hero3DScene } from '../../components/hero/Hero3DScene';
@@ -39,8 +36,6 @@ import { CourseDetailsModal } from '../../components/modals/CourseDetailsModal';
 import { useI18n } from '../../lib/i18n';
 import { useCRM } from '../../context/CRMContext';
 import { INITIAL_COURSES } from '../../data/coursesData';
-import { INITIAL_TEACHERS } from '../../data/initialData';
-import { INITIAL_BRANCHES } from '../../data/branchesData';
 import { Course } from '../../types/admin';
 import aboutAcademyImg from '../../assets/lumos_about_academy.jpg';
 
@@ -69,7 +64,6 @@ export const LandingPage: React.FC = () => {
   // Registration Flow Modal States
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [registerCourse, setRegisterCourse] = useState<string>('');
-  const [registerBranch, setRegisterBranch] = useState<string>('');
 
   // Public Teacher Modal State
   const [selectedTeacherForModal, setSelectedTeacherForModal] = useState<{
@@ -87,9 +81,6 @@ export const LandingPage: React.FC = () => {
     gradient: string;
   } | null>(null);
 
-  // Selected branch in branches section
-  const [selectedBranchId, setSelectedBranchId] = useState<string>(INITIAL_BRANCHES[0]?.id || '');
-
   // Course category filtering
   const [selectedCategoryKey, setSelectedCategoryKey] = useState<string>('all');
   const categoryFilters = [
@@ -98,11 +89,6 @@ export const LandingPage: React.FC = () => {
     { key: 'it', label: 'IT & Dasturlash' },
     { key: 'aniq', label: 'Aniq fanlar & DTM' },
   ];
-
-  // FAQ state
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
-  const [faqCategory, setFaqCategory] = useState<string>('all');
-  const [faqSearch, setFaqSearch] = useState<string>('');
 
   // Newsletter
   const [newsletterEmail, setNewsletterEmail] = useState('');
@@ -124,9 +110,9 @@ export const LandingPage: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // 2. Active Section Detection (IntersectionObserver)
+  // 2. Active Section Detection (IntersectionObserver) for 6 core sections
   useEffect(() => {
-    const sectionIds = ['hero', 'courses', 'benefits', 'results', 'teachers', 'about', 'branches', 'faq'];
+    const sectionIds = ['hero', 'courses', 'benefits', 'results', 'teachers', 'about'];
     const observers: IntersectionObserver[] = [];
 
     sectionIds.forEach((id) => {
@@ -183,7 +169,7 @@ export const LandingPage: React.FC = () => {
     setTimeout(() => setIsHomeTransitioning(false), 650);
   };
 
-  // Nav menu items
+  // Nav menu items (Strictly 6 core items, no FAQ, no Filiallar)
   const navMenuItems = [
     { id: 'hero', label: 'Bosh sahifa', href: '#hero', onClick: handleHomeClick },
     { id: 'courses', label: 'Kurslar', href: '#courses' },
@@ -191,8 +177,6 @@ export const LandingPage: React.FC = () => {
     { id: 'results', label: 'Natijalar', href: '#results' },
     { id: 'teachers', label: 'Ustozlar', href: '#teachers' },
     { id: 'about', label: 'Biz haqimizda', href: '#about' },
-    { id: 'branches', label: 'Filiallar', href: '#branches' },
-    { id: 'faq', label: 'FAQ', href: '#faq' },
   ];
 
   // Filtered courses
@@ -268,58 +252,8 @@ export const LandingPage: React.FC = () => {
     },
   ];
 
-  // FAQ Raw Data
-  const rawFaqList = [
-    {
-      category: 'general',
-      q: 'Birinchi sinov darsi haqiqatan ham bepulmi?',
-      a: 'Ha, 100% bepul! Kursga yozilishdan oldin istalgan fan bo‘yicha sinov darsimizda qatnashib, ustozning o‘qitish uslubi, dars formati va markazimiz muhiti bilan hech qanday to‘lovsiz tanishishingiz mumkin.',
-    },
-    {
-      category: 'lessons',
-      q: 'Farzandimning davomati va o‘zlashtirishini qanday kuzatib boraman?',
-      a: 'LUMOS tizimida maxsus avtomatlashtirilgan Telegram bot va shaxsiy ota-onalar kabineti ishlaydi. Har bir dars yakunlangach, ota-onaga farzandining darsga kelganligi, uyga vazifa bahosi va ustozning fikri bir zumda yuboriladi.',
-    },
-    {
-      category: 'payments',
-      q: 'O‘quv to‘lovlari qancha va qanday to‘lov usullari mavjud?',
-      a: 'Kurslarimiz oylik to‘lovi yo‘nalishga qarab 250 000 so‘mdan 380 000 so‘mgacha. To‘lovlarni Payme, Click ilovalari, Uzcard/Humo bank kartalari yoki markazimiz filiallarida naqd shaklda amalga oshirishingiz mumkin.',
-    },
-    {
-      category: 'courses',
-      q: 'Natijaga qanday kafolat beriladi?',
-      a: 'Biz o‘quvchini qabul qilishda dastlabki diagnostik test olamiz, har 2 haftada oraliq nazorat sinovlarini o‘tkazamiz va mavzuni tushunmagan o‘quvchilarga bepul qo‘shimcha konsultatsiya ajratamiz. Bitiruvchilarimizning 95% i o‘z maqsadiga erishadi.',
-    },
-    {
-      category: 'courses',
-      q: 'Kursni muvaffaqiyatli tamomlagach qanday hujjat beriladi?',
-      a: 'Kursni to‘liq tugatib, yakuniy imtihonni muvaffaqiyatli topshirgan o‘quvchilarga haqiqiyligini onlayn tekshirish imkonini beruvchi QR-kodli rasmiy ikki tilli LUMOS Academy sertifikati topshiriladi.',
-    },
-    {
-      category: 'branches',
-      q: 'Filiallar qaysi manzillarda joylashgan va qachon ishlaydi?',
-      a: 'Filiallarimiz Toshkent shahrining Yunusobod, Chilonzor, Mirzo Ulug‘bek va Yashnobod tumanlarida markaziy metro bekatlariga yaqin joylashgan. Dushanbadan shanbagacha soat 08:00 dan 20:00 gacha faoliyat ko‘rsatamiz.',
-    },
-  ];
-
-  const filteredFaq = useMemo(() => {
-    return rawFaqList.filter((item) => {
-      const matchCat = faqCategory === 'all' || item.category === faqCategory;
-      const matchSearch =
-        faqSearch.trim() === '' ||
-        item.q.toLowerCase().includes(faqSearch.toLowerCase()) ||
-        item.a.toLowerCase().includes(faqSearch.toLowerCase());
-      return matchCat && matchSearch;
-    });
-  }, [faqCategory, faqSearch]);
-
   const handleOpenRegisterWithCourse = (courseTitle: string) => {
     setRegisterCourse(courseTitle);
-    setIsRegisterModalOpen(true);
-  };
-
-  const handleOpenRegisterWithBranch = (branchName: string) => {
-    setRegisterBranch(branchName);
     setIsRegisterModalOpen(true);
   };
 
@@ -332,16 +266,21 @@ export const LandingPage: React.FC = () => {
     }
   };
 
+  // Center location and contact info
+  const centerAddress = settings.address || 'Urganch shahri, Al-Xorazmiy shoh ko‘chasi, 42';
+  const centerPhone = settings.phone || '+998 (71) 200-00-25';
+  const centerWorkingHours = '08:00 - 20:00 (Dushanba - Shanba)';
+
   return (
     <div className="min-h-screen bg-[#080607] text-[#F7F4EE] antialiased selection:bg-[#D9A93A] selection:text-[#080607] relative overflow-x-hidden font-sans">
       {/* -------------------------------------------------------------------------
-          1. HEADER / MINIMAL FLOATING GLASS NAVBAR (Active Indicator + Scroll Progress)
+          1. HEADER / MINIMAL FLOATING GLASS NAVBAR (6 Items + Smooth Slide Indicator)
           ------------------------------------------------------------------------- */}
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled
-            ? 'bg-[#080607]/90 backdrop-blur-xl border-b border-[#D9A93A]/20 shadow-[0_12px_40px_rgba(0,0,0,0.85)] py-2.5'
-            : 'bg-gradient-to-b from-[#080607]/80 to-transparent py-4 border-b border-transparent'
+            ? 'bg-[#080607]/92 backdrop-blur-xl border-b border-[#D9A93A]/20 shadow-[0_12px_40px_rgba(0,0,0,0.85)] py-2.5'
+            : 'bg-gradient-to-b from-[#080607]/85 to-transparent py-4 border-b border-transparent'
         }`}
       >
         <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
@@ -354,8 +293,8 @@ export const LandingPage: React.FC = () => {
             <LumosLogo size="md" />
           </a>
 
-          {/* Centered Navigation Links with Active Indicator */}
-          <nav className="hidden xl:flex items-center gap-6 text-xs font-semibold uppercase tracking-wider text-[#A9A3A0]">
+          {/* Centered Navigation Links with Sliding Active Indicator */}
+          <nav className="hidden xl:flex items-center gap-7 text-xs font-semibold uppercase tracking-wider text-[#A9A3A0]">
             {navMenuItems.map((item) => {
               const isActive = activeSection === item.id;
               return (
@@ -370,7 +309,6 @@ export const LandingPage: React.FC = () => {
                   }`}
                 >
                   <span>{item.label}</span>
-                  {/* Active animated gold underline */}
                   {isActive && (
                     <span className="absolute bottom-0 inset-x-0 h-[2px] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] rounded-full shadow-[0_0_10px_#D9A93A] transition-all duration-300 animate-in fade-in" />
                   )}
@@ -435,7 +373,6 @@ export const LandingPage: React.FC = () => {
               type="button"
               onClick={() => {
                 setRegisterCourse('');
-                setRegisterBranch('');
                 setIsRegisterModalOpen(true);
               }}
               className="px-4 py-1.5 rounded-full text-xs font-bold text-[#080607] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] hover:brightness-110 shadow-sm shadow-[#D9A93A]/30 flex items-center gap-1.5 transition-all cursor-pointer"
@@ -504,7 +441,6 @@ export const LandingPage: React.FC = () => {
                 onClick={() => {
                   setIsMobileMenuOpen(false);
                   setRegisterCourse('');
-                  setRegisterBranch('');
                   setIsRegisterModalOpen(true);
                 }}
                 className="w-full py-2.5 rounded-full text-xs font-bold text-[#080607] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] flex items-center justify-center gap-1.5"
@@ -535,7 +471,7 @@ export const LandingPage: React.FC = () => {
         <MathematicalUniverse3D isHomeTransitioning={isHomeTransitioning} />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center relative z-10">
-          {/* Left Side: Badge, Headline, Subtitle, CTAs & 4 Advantages */}
+          {/* Left Side: Badge, Headline, Subtitle, CTAs & 4 Benefits */}
           <div
             className={`lg:col-span-6 space-y-6 text-left z-10 transition-all duration-500 ${
               isHomeTransitioning ? 'opacity-90 -translate-y-1' : 'opacity-100 translate-y-0'
@@ -617,80 +553,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* -------------------------------------------------------------------------
-          3. AFZALLIKLAR / BENEFITS SECTION (#benefits)
-          ------------------------------------------------------------------------- */}
-      <section id="benefits" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-10">
-        <div className="text-center max-w-3xl mx-auto space-y-3 mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#16090D] border border-[#D9A93A]/30 text-[11px] font-bold uppercase tracking-widest text-[#D9A93A]">
-            <Award className="h-3.5 w-3.5" />
-            <span>Nega aynan LUMOS?</span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE]">
-            Bizning asosiy <span className="text-[#D9A93A]">afzalliklarimiz</span>
-          </h2>
-          <p className="text-xs sm:text-sm text-[#A9A3A0] leading-relaxed">
-            Har bir talabaning individual salohiyatini kashf etish va xalqaro marralarni zabt etish uchun yaratilgan mukammal ekotizim.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
-            {
-              num: '01',
-              title: 'Sifatli ta’lim',
-              desc: 'Xalqaro Cambridge, CEFR va milliy DTM standartlariga to‘liq javob beruvchi sinovdan o‘tgan o‘quv dasturlari.',
-              icon: Package,
-            },
-            {
-              num: '02',
-              title: 'Kuchli ustozlar',
-              desc: 'IELTS 8.5+, xalqaro ilmiy darajaga ega va ko‘p yillik amaliy tajribaga ega yetakchi pedagoglar jamoasi.',
-              icon: GraduationCap,
-            },
-            {
-              num: '03',
-              title: 'Zamonaviy metodika',
-              desc: 'Raqamli LMS tizimi, 24/7 o‘quv platformasi, avtomatlashtirilgan Telegram bot va sun’iy intellekt tahlillari.',
-              icon: ClipboardCheck,
-            },
-            {
-              num: '04',
-              title: 'Real natijalar',
-              desc: 'Bitiruvchilarimizning 95% dan ortig‘i xalqaro sertifikatlar va nufuzli OTMlarning grant o‘rinlarini qo‘lga kiritgan.',
-              icon: TrendingUp,
-            },
-          ].map((item, idx) => {
-            const Icon = item.icon;
-            return (
-              <div
-                key={idx}
-                className="group relative p-8 rounded-[32px] bg-gradient-to-b from-[#14080B] to-[#0A0406] border border-[#D9A93A]/20 hover:border-[#D9A93A]/60 transition-all duration-300 shadow-[0_15px_40px_rgba(0,0,0,0.8)] hover:-translate-y-1.5 flex flex-col justify-between"
-              >
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-3xl font-luxury-serif font-black text-[#D9A93A]/40 group-hover:text-[#D9A93A] transition-colors">
-                      {item.num}
-                    </span>
-                    <div className="h-10 w-10 rounded-2xl bg-[#D9A93A]/10 border border-[#D9A93A]/30 flex items-center justify-center text-[#D9A93A] group-hover:scale-110 transition-transform">
-                      <Icon className="h-5 w-5" />
-                    </div>
-                  </div>
-                  <div className="w-8 h-[2px] bg-[#D9A93A]/30 group-hover:w-16 group-hover:bg-[#D9A93A] transition-all duration-300" />
-                  <h3 className="text-xl font-bold text-[#F7F4EE] group-hover:text-[#F3D276] transition-colors">
-                    {item.title}
-                  </h3>
-                  <p className="text-xs text-[#A9A3A0] leading-relaxed">
-                    {item.desc}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* -------------------------------------------------------------------------
-          4. KURSLAR / COURSES SECTION (#courses)
+          3. KURSLAR / COURSES SECTION (#courses)
           ------------------------------------------------------------------------- */}
       <section id="courses" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
@@ -794,6 +657,79 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* -------------------------------------------------------------------------
+          4. AFZALLIKLAR / BENEFITS SECTION (#benefits)
+          ------------------------------------------------------------------------- */}
+      <section id="benefits" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-10">
+        <div className="text-center max-w-3xl mx-auto space-y-3 mb-16">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#16090D] border border-[#D9A93A]/30 text-[11px] font-bold uppercase tracking-widest text-[#D9A93A]">
+            <Award className="h-3.5 w-3.5" />
+            <span>Nega aynan LUMOS?</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE]">
+            Bizning asosiy <span className="text-[#D9A93A]">afzalliklarimiz</span>
+          </h2>
+          <p className="text-xs sm:text-sm text-[#A9A3A0] leading-relaxed">
+            Har bir talabaning individual salohiyatini kashf etish va xalqaro marralarni zabt etish uchun yaratilgan mukammal ekotizim.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            {
+              num: '01',
+              title: 'Sifatli ta’lim',
+              desc: 'Xalqaro Cambridge, CEFR va milliy DTM standartlariga to‘liq javob beruvchi sinovdan o‘tgan o‘quv dasturlari.',
+              icon: Package,
+            },
+            {
+              num: '02',
+              title: 'Kuchli ustozlar',
+              desc: 'IELTS 8.5+, xalqaro ilmiy darajaga ega va ko‘p yillik amaliy tajribaga ega yetakchi pedagoglar jamoasi.',
+              icon: GraduationCap,
+            },
+            {
+              num: '03',
+              title: 'Zamonaviy metodika',
+              desc: 'Raqamli LMS tizimi, 24/7 o‘quv platformasi, avtomatlashtirilgan Telegram bot va sun’iy intellekt tahlillari.',
+              icon: ClipboardCheck,
+            },
+            {
+              num: '04',
+              title: 'Real natijalar',
+              desc: 'Bitiruvchilarimizning 95% dan ortig‘i xalqaro sertifikatlar va nufuzli OTMlarning grant o‘rinlarini qo‘lga kiritgan.',
+              icon: TrendingUp,
+            },
+          ].map((item, idx) => {
+            const Icon = item.icon;
+            return (
+              <div
+                key={idx}
+                className="group relative p-8 rounded-[32px] bg-gradient-to-b from-[#14080B] to-[#0A0406] border border-[#D9A93A]/20 hover:border-[#D9A93A]/60 transition-all duration-300 shadow-[0_15px_40px_rgba(0,0,0,0.8)] hover:-translate-y-1.5 flex flex-col justify-between"
+              >
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-3xl font-luxury-serif font-black text-[#D9A93A]/40 group-hover:text-[#D9A93A] transition-colors">
+                      {item.num}
+                    </span>
+                    <div className="h-10 w-10 rounded-2xl bg-[#D9A93A]/10 border border-[#D9A93A]/30 flex items-center justify-center text-[#D9A93A] group-hover:scale-110 transition-transform">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                  </div>
+                  <div className="w-8 h-[2px] bg-[#D9A93A]/30 group-hover:w-16 group-hover:bg-[#D9A93A] transition-all duration-300" />
+                  <h3 className="text-xl font-bold text-[#F7F4EE] group-hover:text-[#F3D276] transition-colors">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs text-[#A9A3A0] leading-relaxed">
+                    {item.desc}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
 
@@ -994,7 +930,7 @@ export const LandingPage: React.FC = () => {
               <div className="space-y-3 relative pl-6 border-l-2 border-[#D9A93A]/30">
                 {[
                   { year: '2014', title: 'Akademiya tashkil etilishi', desc: 'Dastlabki 120 nafar iqtidorli talabalar bilan boshlangan yo‘l.' },
-                  { year: '2018', title: 'Filiallar tarmog‘i kengayishi', desc: 'Toshkentning 4 ta markaziy tumanida zamonaviy o‘quv kampuslari ochildi.' },
+                  { year: '2018', title: 'Markaziy Kampus Kengayishi', desc: 'Zamonaviy texnologiyalar va kengaytirilgan auditoriyalar bazasi yaratildi.' },
                   { year: '2022', title: 'Raqamli LMS & CRM Ekotizimi', desc: 'Ota-onalar va talabalar uchun avtomatlashtirilgan yagona monitoring tizimi joriy etildi.' },
                   { year: '2026', title: 'Xalqaro AI & Cambridge Standartlari', desc: 'Sun’iy intellekt asosidagi diagnostik testlar va xalqaro akkreditatsiyalangan metodika.' },
                 ].map((item, idx) => (
@@ -1030,234 +966,100 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* -------------------------------------------------------------------------
-          8. FILIALLAR / BRANCHES SECTION (#branches)
-          ------------------------------------------------------------------------- */}
-      <section id="branches" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-10">
-        <div className="text-center max-w-3xl mx-auto space-y-3 mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#16090D] border border-[#D9A93A]/30 text-[11px] font-bold uppercase tracking-widest text-[#D9A93A]">
-            <MapPin className="h-3.5 w-3.5" />
-            <span>Markazlarimiz</span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE]">
-            Sizga eng yaqin <span className="text-[#D9A93A]">LUMOS filiali</span>
-          </h2>
-          <p className="text-xs sm:text-sm text-[#A9A3A0]">
-            Metro va jamoat transportiga yaqin, qulay lokatsiyalarda joylashgan filiallarimiz.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {INITIAL_BRANCHES.map((branch) => {
-            const isSelected = selectedBranchId === branch.id;
-            return (
-              <div
-                key={branch.id}
-                onClick={() => setSelectedBranchId(branch.id)}
-                className={`p-7 rounded-[32px] transition-all duration-300 cursor-pointer flex flex-col justify-between ${
-                  isSelected
-                    ? 'bg-gradient-to-b from-[#1E0B11] to-[#120609] border-2 border-[#D9A93A] shadow-[0_20px_60px_rgba(217,169,58,0.25)] -translate-y-1'
-                    : 'bg-[#14080B] border border-[#D9A93A]/25 hover:border-[#D9A93A]/60'
-                }`}
-              >
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#D9A93A]/15 text-[#F3D276] border border-[#D9A93A]/30">
-                      {branch.city}
-                    </span>
-                    <MapPin className="h-5 w-5 text-[#D9A93A]" />
-                  </div>
-
-                  <h3 className="text-xl font-bold text-[#F7F4EE]">{branch.name}</h3>
-
-                  <div className="space-y-2 text-xs text-[#A9A3A0]">
-                    <div className="flex items-start gap-2">
-                      <MapPin className="h-4 w-4 text-[#D9A93A] shrink-0 mt-0.5" />
-                      <span>{branch.address}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-[#D9A93A] shrink-0" />
-                      <span>{branch.phone}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-[#D9A93A] shrink-0" />
-                      <span>08:00 - 20:00 (Dush - Shan)</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-6 mt-6 border-t border-[#D9A93A]/20 flex items-center gap-3">
-                  <a
-                    href="https://maps.google.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex-1 py-2 rounded-full border border-[#D9A93A]/30 hover:border-[#D9A93A] text-xs font-bold text-center text-[#F7F4EE] flex items-center justify-center gap-1.5 transition-colors"
-                  >
-                    <span>Xaritada ochish</span>
-                    <ExternalLink className="h-3.5 w-3.5" />
-                  </a>
-
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleOpenRegisterWithBranch(branch.name);
-                    }}
-                    className="flex-1 py-2 rounded-full bg-[#D9A93A] hover:bg-[#F3D276] text-[#080607] text-xs font-bold text-center transition-colors cursor-pointer"
-                  >
-                    Tanlash
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* -------------------------------------------------------------------------
-          9. FAQ SECTION (#faq)
-          ------------------------------------------------------------------------- */}
-      <section id="faq" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1000px] mx-auto relative z-10">
-        <div className="text-center space-y-3 mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#16090D] border border-[#D9A93A]/30 text-[11px] font-bold uppercase tracking-widest text-[#D9A93A]">
-            <HelpCircle className="h-3.5 w-3.5" />
-            <span>Ko‘p Beriladigan Savollar</span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE]">
-            Barcha savollaringizga <span className="text-[#D9A93A]">aniq javoblar</span>
-          </h2>
-        </div>
-
-        {/* Live Search & Category Tabs */}
-        <div className="space-y-4 mb-8">
-          <div className="relative">
-            <input
-              type="text"
-              value={faqSearch}
-              onChange={(e) => setFaqSearch(e.target.value)}
-              placeholder="Savolingiz bo‘yicha qidiring (masalan: sinov darsi, to‘lov, sertifikat)..."
-              className="w-full px-5 py-3.5 rounded-full bg-[#14080B] border border-[#D9A93A]/30 text-xs text-[#F7F4EE] placeholder-[#A9A3A0] focus:border-[#D9A93A] outline-none transition-colors"
-            />
-          </div>
-
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            {[
-              { key: 'all', label: 'Barchasi' },
-              { key: 'general', label: 'Umumiy' },
-              { key: 'lessons', label: 'Darslar' },
-              { key: 'courses', label: 'Sifat & Natija' },
-              { key: 'payments', label: 'To‘lovlar' },
-              { key: 'branches', label: 'Filiallar' },
-            ].map((cat) => (
-              <button
-                key={cat.key}
-                type="button"
-                onClick={() => setFaqCategory(cat.key)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                  faqCategory === cat.key
-                    ? 'bg-[#D9A93A] text-[#080607]'
-                    : 'bg-[#14080B] border border-[#D9A93A]/25 text-[#A9A3A0] hover:text-[#F7F4EE]'
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Accordion list */}
-        <div className="space-y-3">
-          {filteredFaq.map((faq, idx) => {
-            const isOpen = openFaqIndex === idx;
-            return (
-              <div
-                key={idx}
-                className={`rounded-2xl transition-all border ${
-                  isOpen
-                    ? 'bg-[#18080D] border-[#D9A93A]/60 shadow-[0_8px_25px_rgba(0,0,0,0.7)]'
-                    : 'bg-[#100608] border-[#D9A93A]/20 hover:border-[#D9A93A]/40'
-                }`}
-              >
-                <button
-                  type="button"
-                  onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
-                  className="w-full text-left px-6 py-4 flex items-center justify-between gap-4 cursor-pointer"
-                >
-                  <span className={`text-sm sm:text-base font-bold transition-colors ${isOpen ? 'text-[#F3D276]' : 'text-[#F7F4EE]'}`}>
-                    {faq.q}
-                  </span>
-                  <div className={`flex h-7 w-7 items-center justify-center rounded-full border transition-all ${
-                    isOpen
-                      ? 'border-[#D9A93A] bg-[#D9A93A] text-[#080607] rotate-180'
-                      : 'border-[#D9A93A]/30 text-[#A9A3A0]'
-                  }`}>
-                    <ChevronDown className="h-4 w-4" />
-                  </div>
-                </button>
-
-                {isOpen && (
-                  <div className="px-6 pb-5 pt-1 text-xs sm:text-sm text-[#D4C8BE] leading-relaxed border-t border-[#D9A93A]/10 animate-in fade-in duration-200">
-                    {faq.a}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* -------------------------------------------------------------------------
-          10. LUXURY CALL TO ACTION BANNER
+          8. BIZNI TOPING & REGISTRATION CTA AREA (Single Real Campus Showcase)
           ------------------------------------------------------------------------- */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-10">
-        <div className="p-8 sm:p-14 rounded-[42px] bg-gradient-to-r from-[#200A11] via-[#14060A] to-[#0A0406] border border-[#D9A93A]/40 shadow-[0_25px_80px_rgba(0,0,0,0.9)] flex flex-col lg:flex-row items-center justify-between gap-8 text-center lg:text-left">
-          <div className="space-y-3 max-w-2xl">
-            <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#D9A93A]/15 text-[#F3D276] border border-[#D9A93A]/30">
-              Kafolatlangan Ta’lim
+        <div className="p-8 sm:p-14 rounded-[42px] bg-gradient-to-br from-[#200A11] via-[#14060A] to-[#0A0406] border border-[#D9A93A]/40 shadow-[0_25px_80px_rgba(0,0,0,0.9)] grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          {/* Left CTA Info */}
+          <div className="lg:col-span-7 space-y-4 text-left">
+            <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#D9A93A]/15 text-[#F3D276] border border-[#D9A93A]/30 inline-block">
+              Kafolatlangan Ta’lim & Qulay Joylashuv
             </span>
-            <h2 className="text-3xl sm:text-4xl font-luxury-serif font-black text-[#F7F4EE]">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE]">
               Orzuingizdagi natijaga erishish vaqt keldi!
             </h2>
-            <p className="text-xs sm:text-sm text-[#A9A3A0] leading-relaxed">
-              Hoziroq ro‘yxatdan o‘ting va bepul sinov darsimizda qatnashib, o‘z bilimingizni professional darajaga ko‘taring.
+            <p className="text-xs sm:text-sm text-[#A9A3A0] leading-relaxed max-w-xl">
+              Hoziroq ro‘yxatdan o‘ting va birinchi bepul sinov darsimizda qatnashib, o‘z bilimingizni professional darajaga ko‘taring.
             </p>
+
+            <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setIsDiagnosticModalOpen(true)}
+                className="w-full sm:w-auto px-6 py-3.5 rounded-full border border-[#D9A93A]/40 text-[#F7F4EE] hover:text-[#F3D276] text-xs font-bold transition-all cursor-pointer"
+              >
+                Darajani aniqlash
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setRegisterCourse('');
+                  setIsRegisterModalOpen(true);
+                }}
+                className="w-full sm:w-auto px-7 py-3.5 rounded-full text-xs font-bold text-[#080607] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] hover:brightness-110 shadow-lg shadow-[#D9A93A]/30 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>Bepul darsga yozilish</span>
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-            <button
-              type="button"
-              onClick={() => setIsDiagnosticModalOpen(true)}
-              className="w-full sm:w-auto px-6 py-3.5 rounded-full border border-[#D9A93A]/40 text-[#F7F4EE] hover:text-[#F3D276] text-xs font-bold transition-all cursor-pointer"
-            >
-              Darajani aniqlash
-            </button>
+          {/* Right Single Branch Details: "Bizni toping" */}
+          <div className="lg:col-span-5 p-6 rounded-3xl bg-[#0E0507]/90 border border-[#D9A93A]/30 space-y-4 text-left shadow-xl">
+            <div className="flex items-center justify-between border-b border-[#D9A93A]/20 pb-3">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-[#D9A93A]" />
+                <span className="text-sm font-bold text-[#F7F4EE]">Bizni toping</span>
+              </div>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                Markaziy Kampus
+              </span>
+            </div>
 
-            <button
-              type="button"
-              onClick={() => {
-                setRegisterCourse('');
-                setRegisterBranch('');
-                setIsRegisterModalOpen(true);
-              }}
-              className="w-full sm:w-auto px-7 py-3.5 rounded-full text-xs font-bold text-[#080607] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] hover:brightness-110 shadow-lg shadow-[#D9A93A]/30 flex items-center justify-center gap-2 cursor-pointer"
+            <div className="space-y-3 text-xs">
+              <div className="space-y-0.5">
+                <span className="text-[10px] uppercase font-bold text-[#A9A3A0] block">Manzil:</span>
+                <span className="text-[#F7F4EE] font-semibold block">{centerAddress}</span>
+              </div>
+
+              <div className="space-y-0.5">
+                <span className="text-[10px] uppercase font-bold text-[#A9A3A0] block">Telefon:</span>
+                <span className="text-[#D9A93A] font-bold block">{centerPhone}</span>
+              </div>
+
+              <div className="space-y-0.5">
+                <span className="text-[10px] uppercase font-bold text-[#A9A3A0] block">Ish vaqti:</span>
+                <span className="text-[#A9A3A0] block">{centerWorkingHours}</span>
+              </div>
+            </div>
+
+            <a
+              href="https://maps.google.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-2.5 rounded-2xl border border-[#D9A93A]/40 hover:border-[#D9A93A] bg-[#16090D] text-xs font-bold text-[#F7F4EE] hover:text-[#F3D276] flex items-center justify-center gap-2 transition-all block text-center"
             >
-              <span>Ro‘yxatdan o‘tish</span>
-              <ArrowRight className="h-4 w-4" />
-            </button>
+              <span>Xaritada ko‘rish</span>
+              <ExternalLink className="h-3.5 w-3.5 text-[#D9A93A]" />
+            </a>
           </div>
         </div>
       </section>
 
       {/* -------------------------------------------------------------------------
-          11. LUXURY FOOTER
+          9. LUXURY FOOTER (Statement: "Bilim bilan chegaralar yo‘q")
           ------------------------------------------------------------------------- */}
       <footer className="border-t border-[#D9A93A]/20 bg-[#080607] py-16 px-4 sm:px-6 lg:px-8 text-[#A9A3A0] text-xs relative z-10">
         <div className="max-w-[1380px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
-          {/* Col 1: Brand */}
-          <div className="lg:col-span-4 space-y-4">
+          {/* Col 1: Brand & Big Statement */}
+          <div className="lg:col-span-5 space-y-4">
             <a href="#hero" onClick={handleHomeClick} className="inline-block">
               <LumosLogo size="md" />
             </a>
+            <h3 className="text-xl font-luxury-serif font-black text-[#F3D276]">
+              "Bilim bilan chegaralar yo‘q."
+            </h3>
             <p className="text-xs text-[#A9A3A0] leading-relaxed max-w-sm">
               Lumos — zamonaviy ta’lim, kuchli ustozlar va real natijalar uchun yaratilgan innovatsion ta’lim markazi.
             </p>
@@ -1266,8 +1068,8 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Col 2: Navigation */}
-          <div className="lg:col-span-2 space-y-3">
+          {/* Col 2: Navigation Links (6 core links, no FAQ, no Filiallar) */}
+          <div className="lg:col-span-3 space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-[#F7F4EE]">Menyu</h4>
             <div className="flex flex-col gap-2">
               <a href="#hero" onClick={handleHomeClick} className="hover:text-[#F3D276] transition-colors">Bosh sahifa</a>
@@ -1276,32 +1078,32 @@ export const LandingPage: React.FC = () => {
               <a href="#results" className="hover:text-[#F3D276] transition-colors">Natijalar</a>
               <a href="#teachers" className="hover:text-[#F3D276] transition-colors">Ustozlar</a>
               <a href="#about" className="hover:text-[#F3D276] transition-colors">Biz haqimizda</a>
-              <a href="#branches" className="hover:text-[#F3D276] transition-colors">Filiallar</a>
-              <a href="#faq" className="hover:text-[#F3D276] transition-colors">FAQ</a>
             </div>
           </div>
 
-          {/* Col 3: Filiallar */}
-          <div className="lg:col-span-3 space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[#F7F4EE]">Markaziy Filiallar</h4>
-            <div className="space-y-2">
-              {INITIAL_BRANCHES.map((b) => (
-                <div key={b.id} className="leading-snug">
-                  <span className="font-bold text-[#F7F4EE] block">{b.name}</span>
-                  <span className="text-[11px] text-[#A9A3A0] block">{b.address}</span>
-                  <span className="text-[11px] text-[#D9A93A] block">{b.phone}</span>
-                </div>
-              ))}
+          {/* Col 3: Contact & Location (Single branch) */}
+          <div className="lg:col-span-4 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#F7F4EE]">Bog‘lanish</h4>
+            <div className="space-y-2 text-xs">
+              <div className="flex items-start gap-2">
+                <MapPin className="h-4 w-4 text-[#D9A93A] shrink-0 mt-0.5" />
+                <span>{centerAddress}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-[#D9A93A] shrink-0" />
+                <span>{centerPhone}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-[#D9A93A] shrink-0" />
+                <span>{settings.email || 'admin@lumos.uz'}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-[#D9A93A] shrink-0" />
+                <span>{centerWorkingHours}</span>
+              </div>
             </div>
-          </div>
 
-          {/* Col 4: Newsletter */}
-          <div className="lg:col-span-3 space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[#F7F4EE]">Yangiliklar & Chegirmalar</h4>
-            <p className="text-xs text-[#A9A3A0] leading-relaxed">
-              Yangi guruhlar ochilishi va maxsus chegirmalardan birinchilardan bo‘lib xabardor bo‘ling:
-            </p>
-            <form onSubmit={handleNewsletterSubmit} className="space-y-2">
+            <form onSubmit={handleNewsletterSubmit} className="pt-2 space-y-2">
               <div className="flex items-center rounded-full bg-[#14080B] border border-[#D9A93A]/30 p-1">
                 <input
                   type="email"
@@ -1313,7 +1115,7 @@ export const LandingPage: React.FC = () => {
                 />
                 <button
                   type="submit"
-                  className="p-2 rounded-full bg-[#D9A93A] text-[#080607] hover:bg-[#F3D276] transition-colors"
+                  className="p-2 rounded-full bg-[#D9A93A] text-[#080607] hover:bg-[#F3D276] transition-colors cursor-pointer"
                 >
                   <Send className="h-3.5 w-3.5" />
                 </button>
@@ -1338,7 +1140,7 @@ export const LandingPage: React.FC = () => {
       </footer>
 
       {/* -------------------------------------------------------------------------
-          12. MODALS INTEGRATION (Multi-Step Register, Diagnostic, Teacher, Course)
+          10. MODALS INTEGRATION (Multi-Step Register, Diagnostic, Teacher, Course)
           ------------------------------------------------------------------------- */}
       <PublicTeacherModal
         isOpen={!!selectedTeacherForModal}
@@ -1351,9 +1153,7 @@ export const LandingPage: React.FC = () => {
         isOpen={isRegisterModalOpen}
         onClose={() => setIsRegisterModalOpen(false)}
         courses={INITIAL_COURSES}
-        branches={INITIAL_BRANCHES}
         initialCourseTitle={registerCourse}
-        initialBranchName={registerBranch}
       />
 
       <DiagnosticTestModal

@@ -24,18 +24,14 @@ interface MultiStepRegisterModalProps {
   isOpen: boolean;
   onClose: () => void;
   courses: Course[];
-  branches: Array<{ id: string; name: string; city: string; address: string; phone: string }>;
   initialCourseTitle?: string;
-  initialBranchName?: string;
 }
 
 export const MultiStepRegisterModal: React.FC<MultiStepRegisterModalProps> = ({
   isOpen,
   onClose,
   courses,
-  branches,
   initialCourseTitle,
-  initialBranchName,
 }) => {
   const { addStudent, settings } = useCRM();
   const { formatMoney } = useI18n();
@@ -43,8 +39,7 @@ export const MultiStepRegisterModal: React.FC<MultiStepRegisterModalProps> = ({
   const [currentStep, setCurrentStep] = useState(1);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('+998 (');
-  const [selectedCourse, setSelectedCourse] = useState<string>(initialCourseTitle || (courses[0]?.title || ''));
-  const [selectedBranch, setSelectedBranch] = useState<string>(initialBranchName || (branches[0]?.name || ''));
+  const [selectedCourse, setSelectedCourse] = useState<string>(initialCourseTitle || (courses[0]?.title || 'Matematika'));
   const [selectedSchedule, setSelectedSchedule] = useState('Ertalabki (09:00 - 11:00)');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -86,7 +81,7 @@ export const MultiStepRegisterModal: React.FC<MultiStepRegisterModalProps> = ({
         monthlyFee: 320000,
         status: 'Active',
         joinedDate: new Date().toISOString().split('T')[0],
-        notes: `Veb-sayt arizasi. Kurs: ${selectedCourse}. Filial: ${selectedBranch}. Vaqt: ${selectedSchedule}.`,
+        notes: `Veb-sayt arizasi. Kurs: ${selectedCourse}. Vaqt: ${selectedSchedule}. Manzil: ${settings.address || 'Lumos Markaziy Kampus'}.`,
       });
 
       fireCelebrationConfetti();
@@ -95,7 +90,7 @@ export const MultiStepRegisterModal: React.FC<MultiStepRegisterModalProps> = ({
         const telegramMsg = formatLeadApplicationMessage({
           fullName: name.trim(),
           phone: phone.trim(),
-          subject: `${selectedCourse} (${selectedBranch}, ${selectedSchedule})`,
+          subject: `${selectedCourse} (${selectedSchedule})`,
           source: 'LUMOS Onlayn Ro‘yxatdan O‘tish',
           centerName: settings.centerName,
         });
@@ -107,7 +102,7 @@ export const MultiStepRegisterModal: React.FC<MultiStepRegisterModalProps> = ({
       if (settings.eskizToken || settings.eskizEmail) {
         sendEskizSms({
           phone: phone.trim(),
-          message: `${settings.centerName || 'LUMOS'}: Hurmatli ${name.trim()}, sizning arizangiz qabul qilindi! Tez orada mutaxassisimiz bog'lanadi. Tel: ${settings.phone || '+998 71 200-00-00'}`,
+          message: `${settings.centerName || 'LUMOS'}: Hurmatli ${name.trim()}, sizning arizangiz qabul qilindi! Tez orada mutaxassisimiz bog'lanadi. Tel: ${settings.phone || '+998 71 200-00-25'}`,
           token: settings.eskizToken,
           email: settings.eskizEmail,
           password: settings.eskizPassword,
@@ -139,20 +134,28 @@ export const MultiStepRegisterModal: React.FC<MultiStepRegisterModalProps> = ({
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-xl font-luxury-serif font-black text-[#F7F4EE]">
-                {isSuccess ? 'Muvaffaqiyatli!' : "Guruhga Ro'yxatdan O'tish"}
+              <h3 className="text-lg font-luxury-serif font-black text-[#F7F4EE]">
+                LUMOS Akademiyasiga Ro‘yxatdan O‘tish
               </h3>
-              {!isSuccess && (
-                <span className="text-[10px] text-[#A9A3A0] uppercase tracking-wider font-bold">
-                  Bosqich {currentStep} / 5
-                </span>
-              )}
+              <p className="text-[11px] text-[#A9A3A0]">
+                {isSuccess
+                  ? 'Ariza muvaffaqiyatli qabul qilindi'
+                  : `Bosqich ${currentStep} / 4 — ${
+                      currentStep === 1
+                        ? 'Shaxsiy ma’lumotlar'
+                        : currentStep === 2
+                        ? 'Kursni tanlash'
+                        : currentStep === 3
+                        ? 'Qulay dars vaqti'
+                        : 'Tasdiqlash va yuborish'
+                    }`}
+              </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full text-[#A9A3A0] hover:text-[#F7F4EE] hover:bg-[#1C0D11] transition-colors"
+            className="rounded-full p-2 text-[#A9A3A0] hover:bg-white/10 hover:text-[#F7F4EE] transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
@@ -162,7 +165,7 @@ export const MultiStepRegisterModal: React.FC<MultiStepRegisterModalProps> = ({
           <div className="w-full bg-[#200F14] h-1.5 rounded-full overflow-hidden flex">
             <div
               className="h-full bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] transition-all duration-300 rounded-full"
-              style={{ width: `${(currentStep / 5) * 100}%` }}
+              style={{ width: `${(currentStep / 4) * 100}%` }}
             />
           </div>
         )}
@@ -177,7 +180,7 @@ export const MultiStepRegisterModal: React.FC<MultiStepRegisterModalProps> = ({
                 Arizangiz muvaffaqiyatli qabul qilindi!
               </h4>
               <p className="text-xs text-[#A9A3A0] max-w-sm mx-auto leading-relaxed">
-                Hurmatli <span className="text-[#F3D276] font-bold">{name}</span>, administratorimiz 15 daqiqa ichida siz bilan bog‘lanib, bepul sinov darsi vaqtini tasdiqlaydi.
+                Hurmatli <span className="text-[#F3D276] font-bold">{name}</span>, administratorimiz tez orada siz bilan bog‘lanib, bepul sinov darsi vaqtini tasdiqlaydi.
               </p>
             </div>
 
@@ -187,25 +190,25 @@ export const MultiStepRegisterModal: React.FC<MultiStepRegisterModalProps> = ({
                 <span className="font-bold text-[#F7F4EE]">{selectedCourse}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#A9A3A0]">Filial:</span>
-                <span className="font-bold text-[#F7F4EE]">{selectedBranch}</span>
+                <span className="text-[#A9A3A0]">Dars vaqti:</span>
+                <span className="font-bold text-[#F7F4EE]">{selectedSchedule}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#A9A3A0]">Qulay vaqt:</span>
-                <span className="font-bold text-[#F7F4EE]">{selectedSchedule}</span>
+                <span className="text-[#A9A3A0]">Markaz manzili:</span>
+                <span className="font-bold text-[#D9A93A]">{settings.address || 'Lumos Markaziy Kampus'}</span>
               </div>
             </div>
 
             <button
               type="button"
               onClick={onClose}
-              className="gold-gradient-btn px-8 py-3 rounded-full text-xs font-black uppercase tracking-wider cursor-pointer"
+              className="w-full py-3 rounded-full text-xs font-bold text-[#080607] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] hover:brightness-110 shadow-lg shadow-[#D9A93A]/25 transition-all cursor-pointer"
             >
-              Yopish
+              Tushundim, rahmat!
             </button>
           </div>
         ) : (
-          <div>
+          <div className="space-y-6">
             {currentStep === 1 && (
               <div className="space-y-4 animate-in fade-in">
                 <div>
@@ -285,41 +288,6 @@ export const MultiStepRegisterModal: React.FC<MultiStepRegisterModalProps> = ({
             )}
 
             {currentStep === 3 && (
-              <div className="space-y-3 animate-in fade-in max-h-64 overflow-y-auto pr-1 scrollbar-thin">
-                <span className="text-xs font-bold text-[#A9A3A0] block">
-                  Sizga eng yaqin bo‘lgan filialni tanlang:
-                </span>
-                <div className="grid grid-cols-1 gap-2">
-                  {branches.map((b) => {
-                    const isSelected = selectedBranch === b.name;
-                    return (
-                      <div
-                        key={b.id}
-                        onClick={() => setSelectedBranch(b.name)}
-                        className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
-                          isSelected
-                            ? 'bg-[#2A1118] border-[#D9A93A] shadow-md shadow-[#D9A93A]/15'
-                            : 'bg-[#1C0D11]/80 border-[#D9A93A]/20 hover:border-[#D9A93A]/50'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={`h-8 w-8 rounded-xl flex items-center justify-center text-xs font-black ${isSelected ? 'bg-[#D9A93A] text-[#080607]' : 'bg-[#080607] text-[#D9A93A]'}`}>
-                            <MapPin className="h-4 w-4" />
-                          </div>
-                          <div>
-                            <h4 className="text-xs font-bold text-[#F7F4EE]">{b.name}</h4>
-                            <span className="text-[10px] text-[#A9A3A0]">{b.city} • {b.address}</span>
-                          </div>
-                        </div>
-                        <span className="text-[10px] font-bold text-emerald-400">Faol</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {currentStep === 4 && (
               <div className="space-y-3 animate-in fade-in">
                 <span className="text-xs font-bold text-[#A9A3A0] block">
                   Darslarga qatnashish uchun qulay vaqt oralig‘ini belgilang:
@@ -354,7 +322,7 @@ export const MultiStepRegisterModal: React.FC<MultiStepRegisterModalProps> = ({
               </div>
             )}
 
-            {currentStep === 5 && (
+            {currentStep === 4 && (
               <div className="space-y-4 animate-in fade-in">
                 <div className="p-4 rounded-2xl bg-[#1C0D11] border border-[#D9A93A]/35 space-y-3 text-xs">
                   <span className="text-[11px] font-black uppercase text-[#F3D276] block border-b border-white/5 pb-2">
@@ -369,57 +337,68 @@ export const MultiStepRegisterModal: React.FC<MultiStepRegisterModalProps> = ({
                     <span className="font-bold text-[#F7F4EE] font-mono">{phone}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[#A9A3A0]">Kurs:</span>
+                    <span className="text-[#A9A3A0]">Tanlangan kurs:</span>
                     <span className="font-bold text-[#F3D276]">{selectedCourse}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#A9A3A0]">Filial:</span>
-                    <span className="font-bold text-[#F7F4EE]">{selectedBranch}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#A9A3A0]">Dars vaqti:</span>
                     <span className="font-bold text-[#F7F4EE]">{selectedSchedule}</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#A9A3A0]">Markaz manzili:</span>
+                    <span className="font-bold text-[#D9A93A]">{settings.address || 'Lumos Markaziy Kampus'}</span>
+                  </div>
                 </div>
 
-                <div className="p-3 rounded-2xl bg-[#080607] border border-emerald-500/30 flex items-center gap-2.5 text-[11px] text-emerald-300">
-                  <Award className="h-4 w-4 text-emerald-400 shrink-0" />
-                  <span>Birinchi sinov darsi va daraja aniqlash testi 100% bepul!</span>
+                <div className="p-3 rounded-2xl bg-[#D9A93A]/10 border border-[#D9A93A]/25 flex items-center gap-2.5 text-xs text-[#F3D276]">
+                  <Award className="h-4 w-4 shrink-0" />
+                  <span>Birinchi dars 100% BEPUL sinov darsi hisoblanadi.</span>
                 </div>
               </div>
             )}
 
-            <div className="pt-4 flex items-center gap-3">
-              {currentStep > 1 && (
+            <div className="flex items-center justify-between pt-2 border-t border-[#D9A93A]/15">
+              {currentStep > 1 ? (
                 <button
                   type="button"
-                  onClick={() => setCurrentStep(currentStep - 1)}
-                  className="px-5 py-3 rounded-full border border-[#D9A93A]/30 text-xs font-bold text-[#F7F4EE] hover:bg-[#1C0D11] transition-colors flex items-center gap-1.5 cursor-pointer"
+                  onClick={() => setCurrentStep((prev) => Math.max(1, prev - 1))}
+                  className="px-4 py-2.5 rounded-full border border-[#D9A93A]/30 text-xs font-bold text-[#A9A3A0] hover:text-[#F7F4EE] hover:border-[#D9A93A] transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
                   <ArrowLeft className="h-3.5 w-3.5" />
-                  Orqaga
+                  <span>Orqaga</span>
                 </button>
+              ) : (
+                <div />
               )}
 
-              {currentStep < 5 ? (
+              {currentStep < 4 ? (
                 <button
                   type="button"
                   disabled={currentStep === 1 && !isStep1Valid}
-                  onClick={() => setCurrentStep(currentStep + 1)}
-                  className="flex-1 gold-gradient-btn py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-[#D9A93A]/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  onClick={() => setCurrentStep((prev) => Math.min(4, prev + 1))}
+                  className="px-6 py-2.5 rounded-full text-xs font-bold text-[#080607] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] hover:brightness-110 shadow-md shadow-[#D9A93A]/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1.5 cursor-pointer"
                 >
-                  <span>Keyingisi</span>
-                  <ArrowRight className="h-4 w-4" />
+                  <span>Davom etish</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               ) : (
                 <button
                   type="button"
                   disabled={isSubmitting}
                   onClick={handleSubmitFinal}
-                  className="flex-1 gold-gradient-btn py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-[#D9A93A]/25 disabled:opacity-50 cursor-pointer"
+                  className="px-7 py-2.5 rounded-full text-xs font-bold text-[#080607] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] hover:brightness-110 shadow-lg shadow-[#D9A93A]/30 transition-all flex items-center gap-2 cursor-pointer"
                 >
-                  <span>{isSubmitting ? 'Yuborilmoqda...' : 'Tasdiqlash va Yuborish'}</span>
-                  <ArrowRight className="h-4 w-4" />
+                  {isSubmitting ? (
+                    <>
+                      <div className="h-3.5 w-3.5 rounded-full border-2 border-black border-t-transparent animate-spin" />
+                      <span>Yuborilmoqda...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Arizani yuborish</span>
+                      <Sparkles className="h-3.5 w-3.5" />
+                    </>
+                  )}
                 </button>
               )}
             </div>
