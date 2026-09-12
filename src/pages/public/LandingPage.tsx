@@ -24,24 +24,23 @@ import {
   Compass,
   Menu,
   X,
-  LogIn,
-  ExternalLink,
-  HelpCircle,
   Search,
   Check,
   Package,
   ClipboardCheck,
   Sun,
   Moon,
-  Laptop,
+  ExternalLink,
+  HelpCircle,
+  Mail,
+  CheckCircle,
 } from 'lucide-react';
-import { Button } from '../../components/ui/Button';
-import { Badge } from '../../components/ui/Badge';
-import { Modal } from '../../components/ui/Modal';
-import { Input } from '../../components/ui/Input';
-import { Select } from '../../components/ui/Select';
-import { ThemeToggle } from '../../components/ui/ThemeToggle';
 import { LumosLogo } from '../../components/ui/LumosLogo';
+import { Hero3DScene } from '../../components/hero/Hero3DScene';
+import { Ambient3D } from '../../components/common/Ambient3D';
+import { WebsiteSearchOverlay } from '../../components/common/WebsiteSearchOverlay';
+import { PublicTeacherModal } from '../../components/modals/PublicTeacherModal';
+import { MultiStepRegisterModal } from '../../components/modals/MultiStepRegisterModal';
 import { DiagnosticTestModal } from '../../components/modals/DiagnosticTestModal';
 import { CourseDetailsModal } from '../../components/modals/CourseDetailsModal';
 import { useI18n } from '../../lib/i18n';
@@ -51,396 +50,354 @@ import { INITIAL_COURSES } from '../../data/coursesData';
 import { INITIAL_TEACHERS } from '../../data/initialData';
 import { INITIAL_BRANCHES } from '../../data/branchesData';
 import { Course } from '../../types/admin';
-import { fireCelebrationConfetti } from '../../services/paymentGatewayService';
-import { sendTelegramMessage, formatLeadApplicationMessage } from '../../services/telegramService';
-import { sendEskizSms } from '../../services/eskizSmsService';
-import { Hero3DScene } from '../../components/hero/Hero3DScene';
 import aboutAcademyImg from '../../assets/lumos_about_academy.jpg';
 
 export const LandingPage: React.FC = () => {
   const { t, language, setLanguage, formatMoney } = useI18n();
-  const { settings, addStudent, updateSettings } = useCRM();
-  const { currentUser, currentRole } = useLMS();
+  const { settings, updateSettings } = useCRM();
 
-  // Scroll detection for sticky elevated glass navbar
+  // Scroll detection for compact floating navbar
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState('home');
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 40);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-  // Modals state
-  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  // UI States & Modals
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isDiagnosticModalOpen, setIsDiagnosticModalOpen] = useState(false);
   const [selectedCourseForDetails, setSelectedCourseForDetails] = useState<Course | null>(null);
 
-  // Course Filter state
+  // Registration Flow Modal States
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [registerCourse, setRegisterCourse] = useState<string>('');
+  const [registerBranch, setRegisterBranch] = useState<string>('');
+
+  // Public Teacher Modal State
+  const [selectedTeacherForModal, setSelectedTeacherForModal] = useState<{
+    name: string;
+    role: string;
+    specialization: string;
+    experience: string;
+    rating: string;
+    badge: string;
+    bio: string;
+    achievements: string[];
+    scheduleDays: string;
+    scheduleTime: string;
+    symbol: string;
+    gradient: string;
+  } | null>(null);
+
+  // Selected branch in branches section
+  const [selectedBranchId, setSelectedBranchId] = useState<string>(INITIAL_BRANCHES[0]?.id || '');
+
+  // Newsletter subscription
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterSuccess, setNewsletterSuccess] = useState(false);
+
+  // Course category filtering
   const [selectedCategoryKey, setSelectedCategoryKey] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-
-  // Language Dropdown open state in Header
-  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
-
-  // Interactive FAQ Accordion state
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
-
-  // Quick Application Form state
-  const [selectedCourseName, setSelectedCourseName] = useState('Matematika (Hadicha ustoz)');
-  const [applicantName, setApplicantName] = useState('');
-  const [applicantPhone, setApplicantPhone] = useState('');
-  const [applicantBranch, setApplicantBranch] = useState(INITIAL_BRANCHES[0].name);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Animated counters
-  const [counterStudents, setCounterStudents] = useState(450);
-  const [counterRate, setCounterRate] = useState(88);
-
-  useEffect(() => {
-    document.title =
-      language === 'ru'
-        ? 'LUMOS Ta’lim Markazi — K kelajakka bilim bilan!'
-        : language === 'en'
-        ? 'LUMOS Academy — Toward a Brighter Future with Knowledge!'
-        : 'LUMOS Ta’lim Markazi — Bilim Bilan Yorqin Kelajakka!';
-
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 25);
-
-      const sections = ['home', 'courses', 'why-us', 'results', 'teachers', 'about', 'branches', 'faq'];
-      const scrollPos = window.scrollY + 140;
-      for (const s of sections) {
-        const el = document.getElementById(s);
-        if (el) {
-          const top = el.offsetTop;
-          const height = el.offsetHeight;
-          if (scrollPos >= top && scrollPos < top + height) {
-            setActiveSection(s);
-            break;
-          }
-        }
-      }
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-
-    const timer = setInterval(() => {
-      setCounterStudents((prev) => (prev < 520 ? prev + 5 : 520));
-      setCounterRate((prev) => (prev < 95 ? prev + 1 : 95));
-    }, 40);
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      clearInterval(timer);
-    };
-  }, [language]);
-
-  // Category filter items (matching the exact mockup pills)
   const categoryFilters = [
     { key: 'all', label: 'Barchasi' },
-    { key: 'math', label: 'Matematika' },
-    { key: 'english', label: 'Ingliz tili' },
-    { key: 'it', label: 'IT' },
-    { key: 'ielts', label: 'IELTS' },
-    { key: 'school', label: 'Maktab fanlari' },
-    { key: 'abiturient', label: 'Abituriyent' },
-    { key: 'kids', label: 'Bolalar uchun' },
+    { key: 'til', label: 'Til kurslari' },
+    { key: 'it', label: 'IT & Dasturlash' },
+    { key: 'aniq', label: 'Aniq fanlar & DTM' },
   ];
 
-  // Filtered courses
   const filteredCourses = useMemo(() => {
-    return INITIAL_COURSES.filter((course) => {
-      let matchesCategory = true;
-      if (selectedCategoryKey === 'math') matchesCategory = course.category.toLowerCase().includes('matematika');
-      else if (selectedCategoryKey === 'english') matchesCategory = course.category.toLowerCase().includes('ingliz') || course.category.toLowerCase().includes('english');
-      else if (selectedCategoryKey === 'ielts') matchesCategory = course.category.toLowerCase().includes('ielts');
-      else if (selectedCategoryKey === 'it') matchesCategory = course.category.toLowerCase().includes('it') || course.category.toLowerCase().includes('dasturlash');
-      else if (selectedCategoryKey === 'school') matchesCategory = course.category.toLowerCase().includes('maktab') || course.category.toLowerCase().includes('prezident');
-      else if (selectedCategoryKey === 'abiturient') matchesCategory = course.category.toLowerCase().includes('abituriyent') || course.level.toLowerCase().includes('abituriyent');
-      else if (selectedCategoryKey === 'kids') matchesCategory = course.title.toLowerCase().includes('maktab') || course.level.toLowerCase().includes('4-5');
-
-      let matchesSearch = true;
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase();
-        matchesSearch =
-          course.title.toLowerCase().includes(query) ||
-          course.description.toLowerCase().includes(query) ||
-          (course.instructor && course.instructor.toLowerCase().includes(query)) ||
-          course.category.toLowerCase().includes(query);
-      }
-
-      return matchesCategory && matchesSearch;
-    });
-  }, [selectedCategoryKey, searchQuery]);
-
-  // Phone input mask
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = e.target.value.replace(/\D/g, '');
-    if (!val.startsWith('998')) {
-      val = '998' + val;
+    if (selectedCategoryKey === 'all') return INITIAL_COURSES;
+    if (selectedCategoryKey === 'til') {
+      return INITIAL_COURSES.filter((c) =>
+        c.category.toLowerCase().includes('til') ||
+        c.title.toLowerCase().includes('english') ||
+        c.title.toLowerCase().includes('ielts') ||
+        c.title.toLowerCase().includes('rus')
+      );
     }
-    val = val.slice(0, 12);
-
-    let formatted = '+998';
-    if (val.length > 3) formatted += ' (' + val.substring(3, 5);
-    if (val.length >= 5) formatted += ') ' + val.substring(5, 8);
-    if (val.length >= 8) formatted += '-' + val.substring(8, 10);
-    if (val.length >= 10) formatted += '-' + val.substring(10, 12);
-
-    setApplicantPhone(formatted);
-  };
-
-  // Lead submission
-  const handleApplicationSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!applicantName.trim() || applicantPhone.length < 18) return;
-
-    setIsSubmitting(true);
-
-    try {
-      addStudent({
-        fullName: applicantName.trim(),
-        avatar: '',
-        birthDate: '2008-01-01',
-        gender: 'Male',
-        phone: applicantPhone.trim(),
-        email: `${applicantName.toLowerCase().replace(/\s+/g, '.')}@lumos.uz`,
-        parentName: applicantName.trim(),
-        parentPhone: applicantPhone.trim(),
-        groupId: selectedCourseName.includes('Matematika') ? 'GRP-01' : 'GRP-02',
-        groupName: selectedCourseName,
-        teacherId: selectedCourseName.includes('Matematika') ? 'TCH-01' : 'TCH-02',
-        teacherName: selectedCourseName.includes('Matematika') ? 'Hadicha ustoz' : 'Hasanboy ustoz',
-        monthlyFee: 250000,
-        status: 'Active',
-        joinedDate: new Date().toISOString().split('T')[0],
-        notes: `LUMOS Luxury Sayt arizasi. Tanlangan filial: ${applicantBranch}`,
-      });
-
-      if (settings.telegramBotToken && settings.telegramChatId) {
-        const leadMsg = formatLeadApplicationMessage({
-          fullName: applicantName.trim(),
-          phone: applicantPhone.trim(),
-          subject: selectedCourseName,
-          source: `LUMOS Sayt (${applicantBranch})`,
-          centerName: settings.centerName,
-        });
-        sendTelegramMessage(settings.telegramBotToken, settings.telegramChatId, leadMsg).catch((err) =>
-          console.warn('Telegram lead error:', err)
-        );
-      }
-
-      if (settings.eskizToken || settings.eskizEmail) {
-        sendEskizSms({
-          phone: applicantPhone.trim(),
-          message: `${settings.centerName}: Hurmatli ${applicantName.trim()}! Sizning arizangiz muvaffaqiyatli qabul qilindi. Tez orada mutaxassis siz bilan bog'lanadi. Tel: ${settings.phone}`,
-          token: settings.eskizToken,
-          email: settings.eskizEmail,
-          password: settings.eskizPassword,
-          from: settings.eskizFrom,
-        }).catch((err) => console.warn('SMS error:', err));
-      }
-
-      fireCelebrationConfetti();
-      setIsSubmitted(true);
-      setTimeout(() => {
-        setIsSubmitted(false);
-        setIsApplyModalOpen(false);
-        setApplicantName('');
-        setApplicantPhone('');
-      }, 3500);
-    } catch (err) {
-      console.error('Lead application error:', err);
-    } finally {
-      setIsSubmitting(false);
+    if (selectedCategoryKey === 'it') {
+      return INITIAL_COURSES.filter((c) =>
+        c.category.toLowerCase().includes('it') ||
+        c.title.toLowerCase().includes('frontend') ||
+        c.title.toLowerCase().includes('dasturlash') ||
+        c.title.toLowerCase().includes('savodxonlik')
+      );
     }
-  };
+    if (selectedCategoryKey === 'aniq') {
+      return INITIAL_COURSES.filter((c) =>
+        c.category.toLowerCase().includes('aniq') ||
+        c.category.toLowerCase().includes('maktab') ||
+        c.title.toLowerCase().includes('matematika') ||
+        c.title.toLowerCase().includes('fizika') ||
+        c.title.toLowerCase().includes('prezident')
+      );
+    }
+    return INITIAL_COURSES;
+  }, [selectedCategoryKey]);
 
-  const handleOpenEnrollModal = (courseName: string) => {
-    setSelectedCourseName(courseName);
-    setIsApplyModalOpen(true);
-  };
-
-  // 6 FAQ questions
-  const faqList = [
+  // Teachers data with rich presentation
+  const teacherProfiles = [
     {
-      q: 'Darslar qanday tartibda va necha kishilik guruhlarda o‘tiladi?',
-      a: 'Darslar haftada 3 kun, 2 soatdan tashkil etiladi. Har bir guruhda qat’iy ravishda maksimum 10-12 nafar o‘quvchi o‘qiydi. Bu ustozga har bir o‘quvchi bilan individual shug‘ullanish va barcha mavzularni to‘liq mustahkamlash imkonini beradi.',
+      name: 'Hadicha ustoz',
+      role: 'Matematika, Mantiq & DTM Bo‘yicha Bosh Murabbiy',
+      specialization: 'Oliy Matematika, Mental Arifmetika, DTM Testlari',
+      experience: '8 yillik pedagogik staj',
+      rating: '5.0 ★ (480+ o‘quvchi)',
+      badge: 'Oliy Toifali Mutaxassis',
+      bio: 'O‘quvchilarni olimpiadalar va nufuzli davlat oliygohlariga tayyorlash bo‘yicha 8 yillik boy tajribaga ega. Murakkab tenglamalar va geometriyani eng oson mantiqiy usullar bilan tushuntiradi. Shogirdlarining 95% dan ortig‘i grant asosida talaba bo‘lgan.',
+      achievements: [
+        'DTM imtihonlarida 189.0 maksimal natija ko‘rsatgan 40+ shogird',
+        'Al-Xorazmiy olimpiadasi g‘oliblari ustozi',
+        'Prezident maktabiga kirish imtihonlari bo‘yicha maxsus mualliflik dasturi',
+      ],
+      scheduleDays: 'Dush - Chor - Juma',
+      scheduleTime: '14:00 - 16:00',
+      symbol: '∑',
+      gradient: 'bg-gradient-to-tr from-[#D9A93A] to-[#F3D276]',
     },
     {
-      q: 'Birinchi sinov darsi rostdan ham bepulmi?',
+      name: 'Hasanboy ustoz',
+      role: 'IELTS Band 8.5 & General English Bosh Murabbiyi',
+      specialization: 'IELTS Intensive, Academic Writing, Speaking Club',
+      experience: '7 yillik xalqaro tajriba',
+      rating: '4.9 ★ (620+ o‘quvchi)',
+      badge: 'IELTS Band 8.5 Expert',
+      bio: 'Xalqaro sertifikat egasi, speaking to‘siqlarini yengish va akademik yozish (Writing) bo‘yicha maxsus tezkor metodika asoschisi. O‘quvchilari xalqaro universitetlar va xorijiy grantlar sohibiga aylangan.',
+      achievements: [
+        'IELTS umumiy balli 7.5 va 8.0 bo‘lgan 150+ bitiruvchi',
+        'Xalqaro nufuzli grant dasturlari g‘oliblari murabbiyi',
+        'Britaniya kengashi (British Council) tomonidan akkreditatsiyalangan metodist',
+      ],
+      scheduleDays: 'Sesh - Pay - Shan',
+      scheduleTime: '15:30 - 17:30',
+      symbol: 'EN',
+      gradient: 'bg-gradient-to-tr from-[#3B82F6] to-[#60A5FA]',
+    },
+  ];
+
+  // FAQ list with category and live search
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  const [faqCategory, setFaqCategory] = useState<string>('all');
+  const [faqSearch, setFaqSearch] = useState<string>('');
+
+  const rawFaqList = [
+    {
+      category: 'general',
+      q: 'Birinchi sinov darsi haqiqatan ham bepulmi?',
       a: 'Ha, 100% bepul! Kursga yozilishdan oldin istalgan fan bo‘yicha sinov darsimizda qatnashib, ustozning o‘qitish uslubi, dars formati va markazimiz muhiti bilan hech qanday to‘lovsiz tanishishingiz mumkin.',
     },
     {
+      category: 'lessons',
       q: 'Farzandimning davomati va o‘zlashtirishini qanday kuzatib boraman?',
-      a: 'LUMOS tizimida maxsus avtomatlashtirilgan Telegram bot ishlaydi. Har bir dars yakunlangach, ota-onaga farzandining darsga kelganligi, uyga vazifa bahosi va ustozning fikri bir zumda yuboriladi.',
+      a: 'LUMOS tizimida maxsus avtomatlashtirilgan Telegram bot va shaxsiy ota-onalar kabineti ishlaydi. Har bir dars yakunlangach, ota-onaga farzandining darsga kelganligi, uyga vazifa bahosi va ustozning fikri bir zumda yuboriladi.',
     },
     {
+      category: 'payments',
       q: 'O‘quv to‘lovlari qancha va qanday to‘lov usullari mavjud?',
       a: 'Kurslarimiz oylik to‘lovi yo‘nalishga qarab 250 000 so‘mdan 380 000 so‘mgacha. To‘lovlarni Payme, Click ilovalari, Uzcard/Humo bank kartalari yoki markazimiz filiallarida naqd shaklda amalga oshirishingiz mumkin.',
     },
     {
+      category: 'courses',
       q: 'Natijaga qanday kafolat beriladi?',
       a: 'Biz o‘quvchini qabul qilishda dastlabki diagnostik test olamiz, har 2 haftada oraliq nazorat sinovlarini o‘tkazamiz va mavzuni tushunmagan o‘quvchilarga bepul qo‘shimcha konsultatsiya ajratamiz. Bitiruvchilarimizning 95% i o‘z maqsadiga erishadi.',
     },
     {
+      category: 'courses',
       q: 'Kursni muvaffaqiyatli tamomlagach qanday hujjat beriladi?',
       a: 'Kursni to‘liq tugatib, yakuniy imtihonni muvaffaqiyatli topshirgan o‘quvchilarga haqiqiyligini onlayn tekshirish imkonini beruvchi QR-kodli rasmiy ikki tilli LUMOS Academy sertifikati topshiriladi.',
     },
+    {
+      category: 'branches',
+      q: 'Filiallar qaysi manzillarda joylashgan va qachon ishlaydi?',
+      a: 'Filiallarimiz Toshkent shahrining Yunusobod, Chilonzor, Mirzo Ulug‘bek va Yashnobod tumanlarida markaziy metro bekatlariga yaqin joylashgan. Dushanbadan shanbagacha soat 08:00 dan 20:00 gacha faoliyat ko‘rsatamiz.',
+    },
   ];
 
-  return (
-    <div className="min-h-screen bg-[#0B0808] text-[#F8F5EF] antialiased selection:bg-[#D9A83F] selection:text-[#0B0808] relative overflow-x-hidden font-sans">
-      {/* Background warm golden ambient lighting */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-[-5%] left-1/4 w-[850px] h-[550px] bg-gradient-to-b from-[#D9A83F]/14 via-[#1C1310]/40 to-transparent blur-[140px] rounded-full" />
-        <div className="absolute top-[25%] right-[-10%] w-[700px] h-[700px] bg-[#D9A83F]/9 blur-[160px] rounded-full" />
-        <div className="absolute top-[60%] left-[-15%] w-[650px] h-[650px] bg-[#D9A83F]/7 blur-[160px] rounded-full" />
-      </div>
+  const filteredFaq = useMemo(() => {
+    return rawFaqList.filter((item) => {
+      const matchCat = faqCategory === 'all' || item.category === faqCategory;
+      const matchSearch =
+        faqSearch.trim() === '' ||
+        item.q.toLowerCase().includes(faqSearch.toLowerCase()) ||
+        item.a.toLowerCase().includes(faqSearch.toLowerCase());
+      return matchCat && matchSearch;
+    });
+  }, [faqCategory, faqSearch]);
 
-      {/* =========================================================================
-          1. HEADER / NAVBAR (Exact Match to Reference Mockup)
-          ========================================================================= */}
+  const handleOpenRegisterWithCourse = (courseTitle: string) => {
+    setRegisterCourse(courseTitle);
+    setIsRegisterModalOpen(true);
+  };
+
+  const handleOpenRegisterWithBranch = (branchName: string) => {
+    setRegisterBranch(branchName);
+    setIsRegisterModalOpen(true);
+  };
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newsletterEmail.includes('@')) {
+      setNewsletterSuccess(true);
+      setTimeout(() => setNewsletterSuccess(false), 5000);
+      setNewsletterEmail('');
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#080607] text-[#F7F4EE] antialiased selection:bg-[#D9A93A] selection:text-[#080607] relative overflow-x-hidden font-sans">
+      {/* -------------------------------------------------------------------------
+          0. AMBIENT 3D BACKGROUND SYSTEM
+          ------------------------------------------------------------------------- */}
+      <Ambient3D />
+
+      {/* -------------------------------------------------------------------------
+          1. HEADER / FLOATING GLASS NAVBAR (Single Theme Toggle + Spotlight Search)
+          ------------------------------------------------------------------------- */}
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled
-            ? 'bg-[#0B0808]/92 backdrop-blur-xl border-b border-[#D9A83F]/20 shadow-[0_12px_36px_rgba(0,0,0,0.85)] py-3'
+            ? 'bg-[#080607]/88 backdrop-blur-xl border-b border-[#D9A93A]/20 shadow-[0_12px_40px_rgba(0,0,0,0.85)] py-3'
             : 'bg-transparent py-4 border-b border-transparent'
         }`}
       >
-        <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          {/* Logo on the left */}
+        <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+          {/* Logo on Left */}
           <a href="#" className="flex items-center group focus:outline-none select-none">
             <LumosLogo size="md" />
           </a>
 
-          {/* Navigation Links in Center */}
-          <nav className="hidden lg:flex items-center gap-7 text-sm font-medium">
+          {/* Centered Navigation Links */}
+          <nav className="hidden xl:flex items-center gap-7 text-xs font-semibold uppercase tracking-wider text-[#A9A3A0]">
             {[
               { id: 'home', label: 'Bosh sahifa', href: '#' },
               { id: 'courses', label: 'Kurslar', href: '#courses' },
+              { id: 'why-us', label: 'Afzalliklar', href: '#why-us' },
               { id: 'results', label: 'Natijalar', href: '#results' },
-              { id: 'teachers', label: 'O‘qituvchilar', href: '#teachers' },
+              { id: 'teachers', label: 'Ustozlar', href: '#teachers' },
               { id: 'about', label: 'Biz haqimizda', href: '#about' },
               { id: 'branches', label: 'Filiallar', href: '#branches' },
-            ].map((item) => {
-              const isActive = activeSection === item.id;
-              return (
-                <a
-                  key={item.id}
-                  href={item.href}
-                  className={`transition-all relative py-1 ${
-                    isActive
-                      ? 'text-[#F4D27A] font-bold'
-                      : 'text-[#C7BCB1] hover:text-[#F8F5EF]'
-                  }`}
-                >
-                  {item.label}
-                  {isActive && (
-                    <span className="absolute -bottom-1 left-0 right-0 h-[2px] bg-gradient-to-r from-[#D9A83F] via-[#F4D27A] to-[#D9A83F] rounded-full shadow-[0_0_8px_#D9A83F]" />
-                  )}
-                </a>
-              );
-            })}
+              { id: 'faq', label: 'FAQ', href: '#faq' },
+            ].map((item) => (
+              <a
+                key={item.id}
+                href={item.href}
+                className="hover:text-[#F3D276] transition-colors relative py-1"
+              >
+                {item.label}
+              </a>
+            ))}
           </nav>
 
           {/* Action Tools on Right */}
           <div className="hidden sm:flex items-center gap-3">
-            {/* Search Icon */}
+            {/* Spotlight Search Icon */}
             <button
               type="button"
-              onClick={() => {
-                const el = document.getElementById('courses');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="p-2 rounded-full text-[#C7BCB1] hover:text-[#D9A83F] hover:bg-[#1C1412] transition-colors cursor-pointer"
-              title="Qidirish"
-              aria-label="Qidirish"
+              onClick={() => setIsSearchOpen(true)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#D9A93A]/30 bg-[#16090D]/80 hover:border-[#D9A93A] text-xs font-semibold text-[#A9A3A0] hover:text-[#F7F4EE] transition-all cursor-pointer"
+              title="Qidirish (Ctrl+K)"
             >
-              <Search className="h-4 w-4" />
+              <Search className="h-3.5 w-3.5 text-[#D9A93A]" />
+              <span className="text-[11px]">Qidirish</span>
+              <span className="hidden md:inline text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#080607] border border-[#D9A93A]/20 text-[#D9A93A]">
+                ⌘K
+              </span>
             </button>
 
-            {/* Theme Toggle Button (Sun/Moon pill matching mockup) */}
+            {/* SINGLE Theme Toggle Button (Dark <-> Light) */}
             <button
               type="button"
               onClick={() => {
                 const next = settings.theme === 'dark' ? 'light' : 'dark';
                 updateSettings({ theme: next });
               }}
-              className="flex items-center justify-center h-8 w-8 rounded-full border border-[#D9A83F]/30 bg-[#1C1412] text-[#D9A83F] hover:border-[#D9A83F] transition-all cursor-pointer"
-              title="Mavzu"
+              className="flex items-center justify-center h-8 w-8 rounded-full border border-[#D9A93A]/35 bg-[#16090D] text-[#D9A93A] hover:border-[#D9A93A] hover:bg-[#2A0D14] transition-all cursor-pointer"
+              title={settings.theme === 'dark' ? 'Yorug‘ rejimga o‘tish' : 'Qorong‘i rejimga o‘tish'}
             >
-              <Sun className="h-3.5 w-3.5" />
+              {settings.theme === 'dark' ? (
+                <Sun className="h-3.5 w-3.5" />
+              ) : (
+                <Moon className="h-3.5 w-3.5" />
+              )}
             </button>
 
-            {/* Language Selector Pill (Globe + O‘zbekcha + chevron) */}
+            {/* Language Selector Dropdown */}
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#D9A83F]/30 bg-[#1C1412] text-xs font-semibold text-[#F8F5EF] hover:border-[#D9A83F] transition-all cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#D9A93A]/30 bg-[#16090D] text-xs font-semibold text-[#F7F4EE] hover:border-[#D9A93A] transition-all cursor-pointer"
               >
-                <Globe className="h-3.5 w-3.5 text-[#D9A83F]" />
+                <Globe className="h-3.5 w-3.5 text-[#D9A93A]" />
                 <span>{language === 'uz' ? 'O‘zbekcha' : language === 'ru' ? 'Русский' : 'English'}</span>
-                <ChevronDown className="h-3 w-3 text-[#C7BCB1]" />
+                <ChevronDown className="h-3 w-3 text-[#A9A3A0]" />
               </button>
 
               {isLangDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-32 rounded-2xl bg-[#1C1412] border border-[#D9A83F]/30 p-1.5 shadow-2xl z-50 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => { setLanguage('uz'); setIsLangDropdownOpen(false); }}
-                    className={`w-full text-left px-3 py-1.5 rounded-xl transition-colors ${language === 'uz' ? 'bg-[#D9A83F] text-[#0B0808] font-bold' : 'text-[#F8F5EF] hover:bg-white/5'}`}
-                  >
-                    O‘zbekcha
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setLanguage('ru'); setIsLangDropdownOpen(false); }}
-                    className={`w-full text-left px-3 py-1.5 rounded-xl transition-colors ${language === 'ru' ? 'bg-[#D9A83F] text-[#0B0808] font-bold' : 'text-[#F8F5EF] hover:bg-white/5'}`}
-                  >
-                    Русский
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setLanguage('en'); setIsLangDropdownOpen(false); }}
-                    className={`w-full text-left px-3 py-1.5 rounded-xl transition-colors ${language === 'en' ? 'bg-[#D9A83F] text-[#0B0808] font-bold' : 'text-[#F8F5EF] hover:bg-white/5'}`}
-                  >
-                    English
-                  </button>
+                <div className="absolute right-0 mt-2 w-32 rounded-2xl bg-[#16090D] border border-[#D9A93A]/35 p-1.5 shadow-2xl z-50 text-xs">
+                  {['uz', 'ru', 'en'].map((lng) => (
+                    <button
+                      key={lng}
+                      type="button"
+                      onClick={() => {
+                        setLanguage(lng as any);
+                        setIsLangDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-1.5 rounded-xl transition-colors ${
+                        language === lng
+                          ? 'bg-[#D9A93A] text-[#080607] font-bold'
+                          : 'text-[#F7F4EE] hover:bg-white/5'
+                      }`}
+                    >
+                      {lng === 'uz' ? 'O‘zbekcha' : lng === 'ru' ? 'Русский' : 'English'}
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
 
-            {/* Kirish Pill */}
+            {/* Glass Login Button */}
             <a
               href="#/login"
-              className="px-4 py-1.5 rounded-full border border-[#D9A83F]/35 bg-[#1C1412] text-xs font-bold text-[#F8F5EF] hover:text-[#D9A83F] hover:border-[#D9A83F] transition-all"
+              className="px-4 py-1.5 rounded-full border border-[#D9A93A]/35 bg-[#16090D]/80 text-xs font-bold text-[#F7F4EE] hover:text-[#F3D276] hover:border-[#D9A93A] transition-all"
             >
               Kirish
             </a>
 
-            {/* Ro‘yxatdan o‘tish (Warm Golden Pill Button) */}
+            {/* Premium Gold Registration CTA */}
             <button
               type="button"
-              onClick={() => setIsApplyModalOpen(true)}
-              className="gold-gradient-btn px-5 py-2 rounded-full text-xs font-black tracking-wide cursor-pointer shadow-md shadow-[#D9A83F]/25 hover:scale-[1.02] transition-transform"
+              onClick={() => {
+                setRegisterCourse('');
+                setRegisterBranch('');
+                setIsRegisterModalOpen(true);
+              }}
+              className="gold-gradient-btn px-5 py-2 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md shadow-[#D9A93A]/20 cursor-pointer"
             >
-              Ro‘yxatdan o‘tish
+              <span>Ro‘yxatdan o‘tish</span>
+              <ArrowRight className="h-3.5 w-3.5" />
             </button>
           </div>
 
-          {/* Mobile Menu Icon */}
-          <div className="flex items-center gap-2 lg:hidden">
+          {/* Mobile Menu Trigger */}
+          <div className="flex items-center gap-2 xl:hidden">
             <button
               type="button"
-              onClick={() => setLanguage(language === 'uz' ? 'ru' : language === 'ru' ? 'en' : 'uz')}
-              className="px-2.5 py-1 rounded-full bg-[#1C1412] border border-[#D9A83F]/30 text-xs font-mono font-bold text-[#D9A83F] uppercase"
+              onClick={() => setIsSearchOpen(true)}
+              className="p-2 rounded-xl bg-[#16090D] border border-[#D9A93A]/30 text-[#D9A93A]"
+              title="Qidirish"
             >
-              {language}
+              <Search className="h-4 w-4" />
             </button>
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-xl bg-[#1C1412] border border-[#D9A83F]/30 text-[#F8F5EF]"
+              className="p-2 rounded-xl bg-[#16090D] border border-[#D9A93A]/30 text-[#F7F4EE]"
               aria-label="Menyu"
             >
               {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -450,24 +407,26 @@ export const LandingPage: React.FC = () => {
 
         {/* Mobile Navigation Drawer */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden bg-[#1C1412] border-b border-[#D9A83F]/25 px-5 py-6 space-y-4 animate-in slide-in-from-top-4 duration-300 shadow-2xl">
+          <div className="xl:hidden bg-[#14080B] border-b border-[#D9A93A]/25 px-5 py-6 space-y-4 animate-in slide-in-from-top-4 duration-300 shadow-2xl">
             <div className="flex flex-col space-y-3">
               {[
                 { id: 'home', label: 'Bosh sahifa', href: '#' },
                 { id: 'courses', label: 'Kurslar', href: '#courses' },
+                { id: 'why-us', label: 'Afzalliklar', href: '#why-us' },
                 { id: 'results', label: 'Natijalar', href: '#results' },
-                { id: 'teachers', label: 'O‘qituvchilar', href: '#teachers' },
+                { id: 'teachers', label: 'Ustozlar', href: '#teachers' },
                 { id: 'about', label: 'Biz haqimizda', href: '#about' },
                 { id: 'branches', label: 'Filiallar', href: '#branches' },
+                { id: 'faq', label: 'FAQ', href: '#faq' },
               ].map((link) => (
                 <a
                   key={link.id}
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-sm font-semibold text-[#C7BCB1] hover:text-[#D9A83F] py-1 border-b border-white/5 flex items-center justify-between"
+                  className="text-sm font-semibold text-[#A9A3A0] hover:text-[#F3D276] py-1 border-b border-white/5 flex items-center justify-between"
                 >
                   <span>{link.label}</span>
-                  <ChevronRight className="h-4 w-4 text-[#D9A83F]/60" />
+                  <ChevronRight className="h-4 w-4 text-[#D9A93A]/60" />
                 </a>
               ))}
             </div>
@@ -479,7 +438,7 @@ export const LandingPage: React.FC = () => {
                   setIsMobileMenuOpen(false);
                   setIsDiagnosticModalOpen(true);
                 }}
-                className="w-full py-2.5 rounded-full border border-[#D9A83F]/40 text-[#D9A83F] text-xs font-bold flex items-center justify-center gap-2 bg-[#0B0808]"
+                className="w-full py-2.5 rounded-full border border-[#D9A93A]/40 text-[#D9A93A] text-xs font-bold flex items-center justify-center gap-2 bg-[#080607]"
               >
                 <BookOpen className="h-4 w-4" />
                 <span>Darajani aniqlash</span>
@@ -489,7 +448,9 @@ export const LandingPage: React.FC = () => {
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
-                  setIsApplyModalOpen(true);
+                  setRegisterCourse('');
+                  setRegisterBranch('');
+                  setIsRegisterModalOpen(true);
                 }}
                 className="w-full gold-gradient-btn py-3 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2"
               >
@@ -499,7 +460,7 @@ export const LandingPage: React.FC = () => {
 
               <a
                 href="#/login"
-                className="w-full py-2 text-center text-xs font-bold text-[#C7BCB1] hover:text-[#F8F5EF]"
+                className="w-full py-2 text-center text-xs font-bold text-[#A9A3A0] hover:text-[#F7F4EE]"
               >
                 Kirish (Login)
               </a>
@@ -508,214 +469,151 @@ export const LandingPage: React.FC = () => {
         )}
       </header>
 
-      {/* =========================================================================
+      {/* -------------------------------------------------------------------------
           2. HERO SECTION (Cinematic Pro 3D Multi-Layer Experience)
-          ========================================================================= */}
+          ------------------------------------------------------------------------- */}
       <section
         id="home"
         className="relative pt-32 sm:pt-36 lg:pt-40 pb-28 lg:pb-36 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto min-h-[92vh] flex flex-col justify-center overflow-visible"
       >
-        {/* -------------------------------------------------------------
-            A. DEEP BACKGROUND: Volumetric Luxury Light & Atmospheric Auras
-            ------------------------------------------------------------- */}
-        {/* Giant Dark Burgundy Glow */}
-        <div className="absolute top-1/2 -translate-y-1/2 right-[-10%] w-[780px] h-[780px] bg-gradient-to-br from-[#731224]/28 via-[#9D174D]/14 to-transparent blur-[160px] rounded-full pointer-events-none z-0" />
-        {/* Lumos Gold Ambient Lighting Pool */}
-        <div className="absolute top-1/4 right-[15%] w-[580px] h-[580px] bg-gradient-to-tr from-[#D9A83F]/14 via-[#F4D27A]/08 to-transparent blur-[140px] rounded-full pointer-events-none z-0" />
-        {/* Subtle Warm Leather Brown Shadow under left side */}
-        <div className="absolute top-1/3 left-[-8%] w-[600px] h-[600px] bg-gradient-to-tr from-[#3B0B14]/35 via-[#1E0F0D]/25 to-transparent blur-[130px] rounded-full pointer-events-none z-0" />
-        {/* Center Bottom Vignette Shadow */}
-        <div className="absolute bottom-[-10%] left-1/4 w-[600px] h-[300px] bg-[#D9A83F]/06 blur-[120px] rounded-full pointer-events-none z-0" />
-
-        {/* -------------------------------------------------------------
-            B. MIDGROUND: Subtle 3D Educational & Mathematical Network Nodes
-            (Delicate, low opacity ~0.10-0.18, zero obstruction to text)
-            ------------------------------------------------------------- */}
-        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none">
-          {/* Thin Architectural Concentric Golden Rings in Midground */}
-          <div className="absolute top-12 left-1/3 w-72 h-72 rounded-full border border-[#D9A83F]/12 pointer-events-none opacity-40 animate-pulse duration-[12000ms]" />
-          <div className="absolute top-20 left-[35%] w-56 h-56 rounded-full border border-dashed border-[#D9A83F]/10 pointer-events-none opacity-30" />
-
-          {/* Mathematical & Science Formulae Nodes */}
-          {/* Summation Formula Node */}
-          <div className="absolute top-28 left-[18%] text-[#D9A83F]/15 font-serif text-lg tracking-widest pointer-events-none hidden sm:block">
-            ∑<sub className="text-xs">k=1</sub><sup className="text-xs">n</sup> a<sub className="text-xs">k</sub>
-          </div>
-
-          {/* Calculus Integral Node */}
-          <div className="absolute bottom-36 left-[8%] text-[#FFE7A3]/14 font-serif text-base tracking-widest pointer-events-none hidden md:block">
-            ∫ <span className="text-xs">e<sup className="text-[10px]">x</sup> dx = e<sup className="text-[10px]">x</sup> + C</span>
-          </div>
-
-          {/* Infinity / Euler Identity Node */}
-          <div className="absolute top-36 right-[44%] text-[#D9A83F]/16 font-mono text-xs tracking-wider pointer-events-none hidden lg:block">
-            e<sup className="text-[9px]">iπ</sup> + 1 = 0
-          </div>
-
-          {/* AI Neural Network Sub-Constellation (SVG Connections) */}
-          <svg className="absolute top-20 right-[42%] w-48 h-48 opacity-[0.14] hidden xl:block" viewBox="0 0 200 200">
-            <line x1="30" y1="50" x2="100" y2="30" stroke="#D9A83F" strokeWidth="1" strokeDasharray="3 3" />
-            <line x1="100" y1="30" x2="170" y2="70" stroke="#D9A83F" strokeWidth="1" />
-            <line x1="100" y1="30" x2="110" y2="140" stroke="#D9A83F" strokeWidth="1" />
-            <line x1="30" y1="50" x2="110" y2="140" stroke="#D9A83F" strokeWidth="1" strokeDasharray="2 4" />
-            <circle cx="30" cy="50" r="3" fill="#FFE7A3" />
-            <circle cx="100" cy="30" r="4" fill="#D9A83F" />
-            <circle cx="170" cy="70" r="3" fill="#FFE7A3" />
-            <circle cx="110" cy="140" r="3.5" fill="#D9A83F" />
-          </svg>
-
-          {/* Subtle Silhouette: Academic Cap floating far left */}
-          <div className="absolute bottom-48 left-[28%] opacity-[0.12] hidden md:block">
-            <GraduationCap className="h-10 w-10 text-[#D9A83F]" />
-          </div>
-
-          {/* Subtle Silhouette: Open Codex Book floating far right */}
-          <div className="absolute top-24 right-[12%] opacity-[0.12] hidden lg:block">
-            <BookOpen className="h-8 w-8 text-[#FFE7A3]" />
-          </div>
-        </div>
-
-        {/* -------------------------------------------------------------
-            C. FOREGROUND: Clean Grid (Text + CTAs & 3D Centerpiece)
-            ------------------------------------------------------------- */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center relative z-10">
-          {/* Left Side: Badge, Title, Subtitle, Buttons & 4 Feature Icons */}
+          {/* Left Side: Badge, Headline, Subtitle, CTAs & 4 Advantages */}
           <div className="lg:col-span-6 space-y-6 text-left z-10">
-            {/* Top Badge: "⭐ Bilim — eng katta kuch!" */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1C0D11]/90 backdrop-blur-md border border-[#D9A83F]/40 shadow-lg shadow-[#D9A83F]/10 hover:border-[#D9A83F]/70 transition-all duration-300">
-              <Star className="h-3.5 w-3.5 fill-[#D9A83F] text-[#D9A83F]" />
-              <span className="text-xs font-bold text-[#F4D27A] tracking-wide">
+            {/* Top Badge: ⭐ Bilim — eng katta kuch! */}
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#16090D]/90 backdrop-blur-md border border-[#D9A93A]/40 shadow-lg shadow-[#D9A93A]/10 hover:border-[#D9A93A]/70 transition-all duration-300">
+              <Star className="h-3.5 w-3.5 fill-[#D9A93A] text-[#D9A93A]" />
+              <span className="text-xs font-bold text-[#F3D276] tracking-wide">
                 Bilim — eng katta kuch!
               </span>
             </div>
 
-            {/* Main Headline (Playfair Display / Serif with Drop Shadows) */}
+            {/* Main Headline (Playfair Editorial Serif) */}
             <div className="space-y-1">
-              <h1 className="text-4xl sm:text-5xl md:text-6xl xl:text-[4.2rem] font-luxury-serif font-black leading-[1.08] tracking-tight">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl xl:text-[4.3rem] font-luxury-serif font-black leading-[1.08] tracking-tight">
                 <span className="text-[#FFFFFF] block drop-shadow-md">
                   Kelajagingizni
                 </span>
-                <span className="text-[#D9A83F] block mt-1 drop-shadow-lg font-luxury-serif">
+                <span className="text-[#D9A93A] block mt-1 drop-shadow-lg font-luxury-serif">
                   bugundan boshlang!
                 </span>
               </h1>
             </div>
 
-            {/* Subtitle */}
+            {/* Description */}
             <p className="text-sm sm:text-base text-[#D4C8BE] max-w-xl font-normal leading-relaxed">
-              Lumos — zamonaviy ta’lim, kuchli ustozlar va real natijalar uchun yaratilgan ta’lim markazi.
+              Lumos — zamonaviy ta’lim, kuchli ustozlar va real natijalar uchun yaratilgan innovatsion ta’lim markazi.
             </p>
 
-            {/* 2 Action Buttons with Apple / Pro 3D Micro-Interactions */}
+            {/* 2 CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-1">
-              {/* Primary: Kurslarni ko‘rish → */}
+              {/* Primary: Kurslarni ko‘rish */}
               <a
                 href="#courses"
-                className="w-full sm:w-auto group relative px-8 py-3.5 rounded-full text-sm font-black text-[#0B0808] bg-gradient-to-r from-[#D9A83F] via-[#F4D27A] to-[#D9A83F] bg-[length:200%_auto] hover:bg-right transition-all duration-500 shadow-[0_10px_30px_rgba(217,168,63,0.35),0_0_15px_rgba(217,168,63,0.2)] hover:shadow-[0_15px_40px_rgba(217,168,63,0.5),0_0_25px_rgba(217,168,63,0.3)] hover:-translate-y-1 cursor-pointer flex items-center justify-center gap-2 border border-[#FFE7A3]/60 active:translate-y-0"
+                className="w-full sm:w-auto group relative px-8 py-3.5 rounded-full text-sm font-black text-[#080607] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] bg-[length:200%_auto] hover:bg-right transition-all duration-500 shadow-[0_10px_30px_rgba(217,169,58,0.35)] hover:shadow-[0_15px_40px_rgba(217,169,58,0.5)] hover:-translate-y-1 cursor-pointer flex items-center justify-center gap-2 border border-[#F7F4EE]/40 active:translate-y-0"
               >
                 <span>Kurslarni ko‘rish</span>
                 <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
               </a>
 
-              {/* Secondary: [icon] Darajani aniqlash */}
+              {/* Secondary: Darajani aniqlash */}
               <button
                 type="button"
                 onClick={() => setIsDiagnosticModalOpen(true)}
-                className="w-full sm:w-auto px-7 py-3.5 rounded-full text-sm font-bold text-[#F8F5EF] hover:text-[#D9A83F] bg-[#1A0B0E]/80 hover:bg-[#250E13] backdrop-blur-xl border border-[#D9A83F]/40 hover:border-[#D9A83F] shadow-[0_8px_25px_rgba(0,0,0,0.7)] hover:shadow-[0_0_25px_rgba(217,168,63,0.25)] hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer active:translate-y-0"
+                className="w-full sm:w-auto px-7 py-3.5 rounded-full text-sm font-bold text-[#F7F4EE] hover:text-[#F3D276] bg-[#16090D]/80 hover:bg-[#2A0D14] backdrop-blur-xl border border-[#D9A93A]/40 hover:border-[#D9A93A] shadow-[0_8px_25px_rgba(0,0,0,0.7)] hover:shadow-[0_0_25px_rgba(217,169,58,0.25)] hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer active:translate-y-0"
               >
-                <BookOpen className="h-4 w-4 text-[#D9A83F]" />
+                <BookOpen className="h-4 w-4 text-[#D9A93A]" />
                 <span>Darajani aniqlash</span>
               </button>
             </div>
 
             {/* 4 Feature Icons Underneath Buttons */}
-            <div className="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-semibold text-[#F8F5EF]">
+            <div className="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-semibold text-[#F7F4EE]">
               <div className="flex items-center gap-2">
-                <Package className="h-4 w-4 text-[#D9A83F] shrink-0" />
+                <Package className="h-4 w-4 text-[#D9A93A] shrink-0" />
                 <span>Sifatli ta’lim</span>
               </div>
               <div className="flex items-center gap-2">
-                <GraduationCap className="h-4 w-4 text-[#D9A83F] shrink-0" />
+                <GraduationCap className="h-4 w-4 text-[#D9A93A] shrink-0" />
                 <span>Kuchli ustozlar</span>
               </div>
               <div className="flex items-center gap-2">
-                <ClipboardCheck className="h-4 w-4 text-[#D9A83F] shrink-0" />
+                <ClipboardCheck className="h-4 w-4 text-[#D9A93A] shrink-0" />
                 <span>Zamonaviy metodika</span>
               </div>
               <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-[#D9A83F] shrink-0" />
+                <TrendingUp className="h-4 w-4 text-[#D9A93A] shrink-0" />
                 <span>Real natijalar</span>
               </div>
             </div>
           </div>
 
-          {/* Right Side: Professional 3D Educational Scene with Parallax, Laptop LMS, Books, Cap, & Floating Cards */}
+          {/* Right Side: Pro 3D Educational Scene */}
           <div className="lg:col-span-6 relative flex justify-center lg:justify-end mt-4 lg:mt-0 z-10">
             <Hero3DScene />
           </div>
         </div>
 
-      {/* =========================================================================
-            3. FLOATING STATISTICS BAR CAPSULE (Overlapping Transition)
-            ========================================================================= */}
+        {/* ---------------------------------------------------------------------
+            3. TRUST / PROVEN SOCIAL PROOF CAPSULE (5000+ Students, 95% Result)
+            --------------------------------------------------------------------- */}
         <div className="mt-16 lg:mt-24 relative z-30">
-          <div className="max-w-4xl mx-auto rounded-full bg-gradient-to-r from-[#201715]/95 via-[#2A1D1A]/95 to-[#201715]/95 backdrop-blur-2xl border border-[#D9A83F]/40 shadow-[0_20px_50px_rgba(0,0,0,0.7)] px-6 sm:px-10 py-5 grid grid-cols-2 md:grid-cols-4 gap-4 items-center">
-            {/* Stat 1: 500+ O‘quvchi */}
-            <div className="flex items-center justify-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#D9A83F]/20 border border-[#D9A83F]/40 text-[#D9A83F] shrink-0">
+          <div className="max-w-5xl mx-auto rounded-3xl bg-gradient-to-r from-[#14080B]/95 via-[#220B12]/95 to-[#14080B]/95 backdrop-blur-2xl border border-[#D9A93A]/40 shadow-[0_20px_60px_rgba(0,0,0,0.85)] px-6 sm:px-10 py-6 grid grid-cols-2 md:grid-cols-4 gap-6 items-center">
+            {/* Stat 1 */}
+            <div className="flex items-center justify-center gap-3.5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#D9A93A]/20 border border-[#D9A93A]/45 text-[#D9A93A] shrink-0">
                 <Users className="h-5 w-5" />
               </div>
               <div className="text-left">
-                <span className="text-xl sm:text-2xl font-luxury-display font-black text-[#FFFFFF] block leading-none">
-                  500+
+                <span className="text-2xl sm:text-3xl font-luxury-serif font-black text-[#FFFFFF] block leading-none">
+                  5000+
                 </span>
-                <span className="text-xs text-[#C7BCB1] font-semibold mt-1 block">
-                  O‘quvchi
-                </span>
-              </div>
-            </div>
-
-            {/* Stat 2: 20+ O‘qituvchi */}
-            <div className="flex items-center justify-center gap-3 md:border-l border-[#D9A83F]/15 md:pl-6">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#D9A83F]/20 border border-[#D9A83F]/40 text-[#D9A83F] shrink-0">
-                <GraduationCap className="h-5 w-5" />
-              </div>
-              <div className="text-left">
-                <span className="text-xl sm:text-2xl font-luxury-display font-black text-[#FFFFFF] block leading-none">
-                  20+
-                </span>
-                <span className="text-xs text-[#C7BCB1] font-semibold mt-1 block">
-                  O‘qituvchi
+                <span className="text-xs text-[#A9A3A0] font-semibold mt-1 block">
+                  O‘quvchilar
                 </span>
               </div>
             </div>
 
-            {/* Stat 3: 10+ Yo‘nalish */}
-            <div className="flex items-center justify-center gap-3 md:border-l border-[#D9A83F]/15 md:pl-6">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#D9A83F]/20 border border-[#D9A83F]/40 text-[#D9A83F] shrink-0">
-                <BookOpen className="h-5 w-5" />
-              </div>
-              <div className="text-left">
-                <span className="text-xl sm:text-2xl font-luxury-display font-black text-[#FFFFFF] block leading-none">
-                  10+
-                </span>
-                <span className="text-xs text-[#C7BCB1] font-semibold mt-1 block">
-                  Yo‘nalish
-                </span>
-              </div>
-            </div>
-
-            {/* Stat 4: 95% Natija */}
-            <div className="flex items-center justify-center gap-3 md:border-l border-[#D9A83F]/15 md:pl-6">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#D9A83F]/20 border border-[#D9A83F]/40 text-[#D9A83F] shrink-0">
+            {/* Stat 2 */}
+            <div className="flex items-center justify-center gap-3.5 md:border-l border-[#D9A93A]/20 md:pl-6">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#D9A93A]/20 border border-[#D9A93A]/45 text-[#D9A93A] shrink-0">
                 <TrendingUp className="h-5 w-5" />
               </div>
               <div className="text-left">
-                <span className="text-xl sm:text-2xl font-luxury-display font-black text-[#FFFFFF] block leading-none">
+                <span className="text-2xl sm:text-3xl font-luxury-serif font-black text-[#FFFFFF] block leading-none">
                   95%
                 </span>
-                <span className="text-xs text-[#C7BCB1] font-semibold mt-1 block">
-                  Natija
+                <span className="text-xs text-[#A9A3A0] font-semibold mt-1 block">
+                  Natija ko‘rsatkichi
+                </span>
+              </div>
+            </div>
+
+            {/* Stat 3 */}
+            <div className="flex items-center justify-center gap-3.5 md:border-l border-[#D9A93A]/20 md:pl-6">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#D9A93A]/20 border border-[#D9A93A]/45 text-[#D9A93A] shrink-0">
+                <GraduationCap className="h-5 w-5" />
+              </div>
+              <div className="text-left">
+                <span className="text-2xl sm:text-3xl font-luxury-serif font-black text-[#FFFFFF] block leading-none">
+                  50+
+                </span>
+                <span className="text-xs text-[#A9A3A0] font-semibold mt-1 block">
+                  Professional ustoz
+                </span>
+              </div>
+            </div>
+
+            {/* Stat 4 */}
+            <div className="flex items-center justify-center gap-3.5 md:border-l border-[#D9A93A]/20 md:pl-6">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#D9A93A]/20 border border-[#D9A93A]/45 text-[#D9A93A] shrink-0">
+                <Award className="h-5 w-5" />
+              </div>
+              <div className="text-left">
+                <span className="text-2xl sm:text-3xl font-luxury-serif font-black text-[#FFFFFF] block leading-none">
+                  10+
+                </span>
+                <span className="text-xs text-[#A9A3A0] font-semibold mt-1 block">
+                  Yillik tajriba
                 </span>
               </div>
             </div>
@@ -723,143 +621,139 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* =========================================================================
-          4. COURSES SECTION (Luxury Warm Ivory Background Matching Mockup!)
-          ========================================================================= */}
+      {/* -------------------------------------------------------------------------
+          4. COURSES SECTION (Premium 3D Interactive Cards + Filters)
+          ------------------------------------------------------------------------- */}
       <section
         id="courses"
-        className="pt-16 pb-24 px-4 sm:px-6 lg:px-8 bg-[#F9F6F0] text-[#1C1514] relative z-20 transition-colors"
+        className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-20"
       >
-        <div className="max-w-[1360px] mx-auto">
-          {/* Header of Courses Section */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
-            <div className="space-y-2 text-left">
-              {/* ⭐ Kurslar Pill */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#F0E9DC] border border-[#D9A83F]/35 text-xs font-bold text-[#8B6B23]">
-                <Star className="h-3 w-3 fill-[#8B6B23]" />
-                <span>Kurslar</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#1C1514] tracking-tight">
-                Mashhur yo‘nalishlar
-              </h2>
-              <p className="text-xs sm:text-sm text-[#6E645F] font-normal">
-                O‘zingizga mos kursni tanlang va kelajagingizni qurishni boshlang.
-              </p>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          <div className="space-y-3 text-left">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#16090D] border border-[#D9A93A]/35 text-xs font-bold text-[#F3D276]">
+              <BookOpen className="h-3.5 w-3.5 text-[#D9A93A]" />
+              <span>O‘QUV DASTURLARI</span>
             </div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE] tracking-tight">
+              Mashhur yo‘nalishlar
+            </h2>
+            <p className="text-xs sm:text-sm text-[#A9A3A0] font-normal max-w-lg">
+              O‘zingizga mos kursni tanlang va eng kuchli mentorlar rahbarligida o‘qishni boshlang.
+            </p>
+          </div>
 
-            {/* Category Filter Pills (Exact Style to Mockup) */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-              {categoryFilters.map((cat) => {
-                const isSelected = selectedCategoryKey === cat.key;
-                return (
+          {/* Category Filter Pills */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+            {categoryFilters.map((cat) => {
+              const isSelected = selectedCategoryKey === cat.key;
+              return (
+                <button
+                  key={cat.key}
+                  type="button"
+                  onClick={() => setSelectedCategoryKey(cat.key)}
+                  className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer select-none ${
+                    isSelected
+                      ? 'gold-gradient-btn shadow-md shadow-[#D9A93A]/30 text-[#080607]'
+                      : 'bg-[#14080B] border border-[#D9A93A]/25 text-[#A9A3A0] hover:border-[#D9A93A] hover:text-[#F7F4EE]'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Courses Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredCourses.map((course) => (
+            <div
+              key={course.id}
+              className="rounded-3xl p-6 bg-gradient-to-b from-[#16090D]/90 to-[#0F0608]/90 border border-[#D9A93A]/25 hover:border-[#D9A93A]/60 shadow-xl hover:shadow-2xl hover:shadow-[#D9A93A]/10 hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group text-left"
+            >
+              <div className="space-y-4">
+                {/* Category & Level */}
+                <div className="flex items-center justify-between">
+                  <span className="px-3 py-1 rounded-full bg-[#D9A93A]/15 border border-[#D9A93A]/30 text-[11px] font-black text-[#F3D276] uppercase tracking-wider">
+                    {course.category}
+                  </span>
+                  <span className="text-xs font-semibold text-[#A9A3A0]">
+                    {course.level}
+                  </span>
+                </div>
+
+                {/* Course Title */}
+                <div>
+                  <h3 className="text-xl font-luxury-serif font-black text-[#F7F4EE] group-hover:text-[#F3D276] transition-colors leading-snug">
+                    {course.title}
+                  </h3>
+                  <p className="text-xs text-[#A9A3A0] line-clamp-3 mt-2 leading-relaxed">
+                    {course.description}
+                  </p>
+                </div>
+
+                {/* Duration & Mentor */}
+                <div className="grid grid-cols-2 gap-2 pt-3 border-t border-white/5 text-xs">
+                  <div className="flex items-center gap-1.5 text-[#A9A3A0]">
+                    <Clock className="h-3.5 w-3.5 text-[#D9A93A]" />
+                    <span>{course.durationMonths} oy</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[#A9A3A0]">
+                    <Users className="h-3.5 w-3.5 text-[#D9A93A]" />
+                    <span className="truncate">{course.instructor || 'Yetakchi ustoz'}</span>
+                  </div>
+                </div>
+
+                {/* Schedule */}
+                {course.schedule && (
+                  <div className="p-2.5 rounded-2xl bg-[#080607]/80 border border-[#D9A93A]/20 text-[11px] text-[#A9A3A0] flex items-center gap-2">
+                    <Calendar className="h-3.5 w-3.5 text-[#D9A93A] shrink-0" />
+                    <span className="truncate">{course.schedule}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Price and Action Buttons */}
+              <div className="pt-6 mt-4 border-t border-white/5 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] text-[#A9A3A0] uppercase font-bold block">Oylik to‘lov</span>
+                  <span className="text-lg font-black text-[#F3D276] font-mono">
+                    {formatMoney(course.pricePerMonth, 'UZS')}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
                   <button
-                    key={cat.key}
                     type="button"
-                    onClick={() => setSelectedCategoryKey(cat.key)}
-                    className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer select-none ${
-                      isSelected
-                        ? 'gold-gradient-btn shadow-md shadow-[#D9A83F]/30 text-[#0B0808]'
-                        : 'bg-white border border-[#E6DCCF] text-[#4A3E39] hover:border-[#D9A83F] hover:text-[#0B0808]'
-                    }`}
+                    onClick={() => setSelectedCourseForDetails(course)}
+                    className="px-3.5 py-2 rounded-full text-xs font-bold text-[#F7F4EE] hover:text-[#F3D276] hover:bg-white/5 transition-colors cursor-pointer"
                   >
-                    {cat.label}
+                    Batafsil →
                   </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Courses Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCourses.map((course) => (
-              <div
-                key={course.id}
-                className="rounded-3xl p-6 bg-white border border-[#EADFCF] shadow-sm hover:shadow-xl hover:border-[#D9A83F]/50 transition-all flex flex-col justify-between group"
-              >
-                <div className="space-y-4 text-left">
-                  {/* Category & Level */}
-                  <div className="flex items-center justify-between">
-                    <span className="px-3 py-1 rounded-full bg-[#F5EFE4] border border-[#D9A83F]/30 text-[11px] font-black text-[#8B6B23] uppercase">
-                      {course.category}
-                    </span>
-                    <span className="text-xs font-medium text-[#7D736D]">
-                      {course.level}
-                    </span>
-                  </div>
-
-                  {/* Course Title */}
-                  <div>
-                    <h3 className="text-xl font-luxury-serif font-black text-[#1C1514] group-hover:text-[#997322] transition-colors leading-snug">
-                      {course.title}
-                    </h3>
-                    <p className="text-xs text-[#6E645F] line-clamp-3 mt-2 leading-relaxed">
-                      {course.description}
-                    </p>
-                  </div>
-
-                  {/* Duration & Teacher */}
-                  <div className="grid grid-cols-2 gap-2 pt-3 border-t border-[#F0E8DC] text-xs">
-                    <div className="flex items-center gap-1.5 text-[#5C524C]">
-                      <Clock className="h-3.5 w-3.5 text-[#D9A83F]" />
-                      <span>{course.durationMonths} oy</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[#5C524C]">
-                      <Users className="h-3.5 w-3.5 text-[#D9A83F]" />
-                      <span className="truncate">{course.instructor || 'Yetakchi ustoz'}</span>
-                    </div>
-                  </div>
-
-                  {/* Schedule */}
-                  {course.schedule && (
-                    <div className="p-2.5 rounded-2xl bg-[#FAF6EE] border border-[#EDE3D4] text-[11px] text-[#6E645F] flex items-center gap-2">
-                      <Calendar className="h-3.5 w-3.5 text-[#D9A83F] shrink-0" />
-                      <span className="truncate">{course.schedule}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Price and CTA Actions */}
-                <div className="pt-6 mt-4 border-t border-[#F0E8DC] flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] text-[#7D736D] uppercase font-bold block">Oylik to‘lov</span>
-                    <span className="text-lg font-black text-[#8B6B23] font-mono">
-                      {formatMoney(course.pricePerMonth, 'UZS')}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedCourseForDetails(course)}
-                      className="px-3.5 py-2 rounded-full text-xs font-bold text-[#1C1514] hover:text-[#8B6B23] hover:bg-[#FAF6EE] transition-colors cursor-pointer"
-                    >
-                      Batafsil →
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleOpenEnrollModal(course.title)}
-                      className="gold-gradient-btn px-4 py-2 rounded-full text-xs font-extrabold cursor-pointer shadow-md shadow-[#D9A83F]/20"
-                    >
-                      Yozilish
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleOpenRegisterWithCourse(course.title)}
+                    className="gold-gradient-btn px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider cursor-pointer shadow-md shadow-[#D9A93A]/20"
+                  >
+                    Yozilish
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* =========================================================================
-          5. WHY LUMOS SECTION ("Nega aynan Lumos?")
-          ========================================================================= */}
-      <section id="why-us" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1360px] mx-auto relative z-20">
+      {/* -------------------------------------------------------------------------
+          5. WHY LUMOS SECTION (AFZALLIKLARIMIZ)
+          ------------------------------------------------------------------------- */}
+      <section id="why-us" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-20">
         <div className="text-center space-y-3 mb-14">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1C1412] border border-[#D9A83F]/35 text-xs font-bold text-[#F4D27A]">
-            <ShieldCheck className="h-4 w-4 text-[#D9A83F]" />
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#16090D] border border-[#D9A93A]/35 text-xs font-bold text-[#F3D276]">
+            <ShieldCheck className="h-4 w-4 text-[#D9A93A]" />
             <span>AFZALLIKLARIMIZ</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F8F5EF]">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE]">
             Nega aynan Lumos?
           </h2>
           <p className="text-sm sm:text-base text-[#D4C8BE] max-w-2xl mx-auto">
@@ -902,14 +796,17 @@ export const LandingPage: React.FC = () => {
           ].map((item, idx) => {
             const Icon = item.icon;
             return (
-              <div key={idx} className="gold-card rounded-3xl p-7 space-y-4 group text-left">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#D9A83F]/15 border border-[#D9A83F]/35 text-[#D9A83F] group-hover:scale-110 group-hover:bg-[#D9A83F] group-hover:text-[#0B0808] transition-all">
+              <div
+                key={idx}
+                className="rounded-3xl p-7 bg-[#16090D]/80 hover:bg-[#220B12]/90 border border-[#D9A93A]/25 hover:border-[#D9A93A]/60 shadow-lg hover:shadow-2xl transition-all duration-300 space-y-4 group text-left"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#D9A93A]/15 border border-[#D9A93A]/35 text-[#D9A93A] group-hover:scale-110 group-hover:bg-[#D9A93A] group-hover:text-[#080607] transition-all">
                   <Icon className="h-6 w-6" />
                 </div>
-                <h4 className="text-xl font-luxury-serif font-black text-[#F8F5EF] group-hover:text-[#F4D27A] transition-colors">
+                <h4 className="text-xl font-luxury-serif font-black text-[#F7F4EE] group-hover:text-[#F3D276] transition-colors">
                   {item.title}
                 </h4>
-                <p className="text-xs sm:text-sm text-[#C7BCB1] leading-relaxed">
+                <p className="text-xs sm:text-sm text-[#A9A3A0] leading-relaxed">
                   {item.desc}
                 </p>
               </div>
@@ -918,19 +815,19 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* =========================================================================
-          6. RESULTS / ACHIEVEMENTS SECTION ("Natijalar")
-          ========================================================================= */}
-      <section id="results" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1360px] mx-auto relative z-20">
-        <div className="p-8 sm:p-12 rounded-[36px] bg-gradient-to-b from-[#1C1412] to-[#0B0808] border border-[#D9A83F]/35 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-[#D9A83F]/10 blur-3xl pointer-events-none rounded-full" />
+      {/* -------------------------------------------------------------------------
+          6. RESULTS / ACHIEVEMENTS SECTION (Interactive Student Success Stories)
+          ------------------------------------------------------------------------- */}
+      <section id="results" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-20">
+        <div className="p-8 sm:p-12 rounded-[36px] bg-gradient-to-b from-[#1C0A10] to-[#080607] border border-[#D9A93A]/35 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-[#D9A93A]/10 blur-[120px] pointer-events-none rounded-full" />
 
           <div className="text-center space-y-3 mb-12 relative z-10">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0B0808] border border-[#D9A83F]/30 text-xs font-bold text-[#F4D27A]">
-              <Award className="h-4 w-4 text-[#D9A83F]" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#080607] border border-[#D9A93A]/30 text-xs font-bold text-[#F3D276]">
+              <Award className="h-4 w-4 text-[#D9A93A]" />
               <span>ISBOTLANGAN NATIJALAR</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F8F5EF]">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE]">
               Bizning Faxrli Natijalarimiz
             </h2>
             <p className="text-sm sm:text-base text-[#D4C8BE] max-w-2xl mx-auto">
@@ -938,7 +835,7 @@ export const LandingPage: React.FC = () => {
             </p>
           </div>
 
-          {/* 4 Featured Achievements Cards */}
+          {/* 4 Featured Achievements Cards with Before / After */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 relative z-10">
             {[
               {
@@ -946,6 +843,7 @@ export const LandingPage: React.FC = () => {
                 student: 'Bekzod Rahmonov',
                 achievement: 'Toshkent Davlat Yuridik Universiteti',
                 detail: '100% Davlat Granti',
+                beforeAfter: 'Boshlang‘ich: 72 ball → Yakuniy: 189.0 ball',
                 teacher: 'Hadicha ustoz shogirdi',
                 color: 'from-amber-500/20 to-yellow-500/10 border-amber-500/40',
               },
@@ -954,6 +852,7 @@ export const LandingPage: React.FC = () => {
                 student: 'Madina Karimova',
                 achievement: 'Listening 8.5, Reading 8.5',
                 detail: 'Xalqaro Grant Sohibasi',
+                beforeAfter: 'Boshlang‘ich: 4.5 Band → Yakuniy: 8.0 Band',
                 teacher: 'Hasanboy ustoz shogirdi',
                 color: 'from-blue-500/20 to-cyan-500/10 border-blue-500/40',
               },
@@ -962,6 +861,7 @@ export const LandingPage: React.FC = () => {
                 student: 'Jasur Shokirov',
                 achievement: 'Al-Xorazmiy Olimpiadasi',
                 detail: 'Oltin Medal Sohibi',
+                beforeAfter: 'Tuman bosqichi → Respublika Absolyut G‘olibi',
                 teacher: 'Hadicha ustoz shogirdi',
                 color: 'from-emerald-500/20 to-teal-500/10 border-emerald-500/40',
               },
@@ -970,23 +870,27 @@ export const LandingPage: React.FC = () => {
                 student: 'Fotima Zokirova',
                 achievement: '96 Ball bilan Qabul',
                 detail: 'Eng Yuqori Ko‘rsatkich',
+                beforeAfter: 'Diagnostika: 48 ball → Imtihon: 96 ball',
                 teacher: 'Lumos Murabbiylar Guruhi',
                 color: 'from-purple-500/20 to-indigo-500/10 border-purple-500/40',
               },
             ].map((card, idx) => (
               <div
                 key={idx}
-                className={`p-6 rounded-3xl bg-[#0B0808]/85 border ${card.color} space-y-3 relative group hover:-translate-y-1.5 transition-transform text-left`}
+                className={`p-6 rounded-3xl bg-[#080607]/85 border ${card.color} space-y-3 relative group hover:-translate-y-1.5 transition-transform text-left`}
               >
-                <div className="inline-block px-3 py-1 rounded-full bg-[#D9A83F]/20 text-[10px] font-black text-[#F4D27A] tracking-wider uppercase">
+                <div className="inline-block px-3 py-1 rounded-full bg-[#D9A93A]/20 text-[10px] font-black text-[#F3D276] tracking-wider uppercase">
                   {card.badge}
                 </div>
                 <div>
-                  <h4 className="text-base font-black text-[#F8F5EF]">{card.student}</h4>
-                  <p className="text-xs text-[#D9A83F] font-semibold mt-0.5">{card.achievement}</p>
-                  <p className="text-[11px] text-[#C7BCB1] mt-1">{card.detail}</p>
+                  <h4 className="text-base font-black text-[#F7F4EE]">{card.student}</h4>
+                  <p className="text-xs text-[#D9A93A] font-semibold mt-0.5">{card.achievement}</p>
+                  <p className="text-[11px] text-[#A9A3A0] mt-1">{card.detail}</p>
                 </div>
-                <div className="pt-2 border-t border-white/5 text-[10px] font-semibold text-[#C7BCB1]">
+                <div className="p-2 rounded-xl bg-white/5 text-[10px] text-[#F3D276] font-mono">
+                  {card.beforeAfter}
+                </div>
+                <div className="pt-2 border-t border-white/5 text-[10px] font-semibold text-[#A9A3A0]">
                   {card.teacher}
                 </div>
               </div>
@@ -995,16 +899,16 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* =========================================================================
-          7. TEACHERS SECTION ("Bizning ustozlar")
-          ========================================================================= */}
-      <section id="teachers" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1360px] mx-auto relative z-20">
+      {/* -------------------------------------------------------------------------
+          7. TEACHERS SECTION (Profile Cards + Modal Trigger)
+          ------------------------------------------------------------------------- */}
+      <section id="teachers" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-20">
         <div className="text-center space-y-3 mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1C1412] border border-[#D9A83F]/35 text-xs font-bold text-[#F4D27A]">
-            <Users className="h-4 w-4 text-[#D9A83F]" />
-            <span>YETAKCHI MUTAXASSISLAR</span>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#16090D] border border-[#D9A93A]/35 text-xs font-bold text-[#F3D276]">
+            <Users className="h-4 w-4 text-[#D9A93A]" />
+            <span>YETAKCHI PEDAGOGLAR</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F8F5EF]">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE]">
             Bizning ustozlar
           </h2>
           <p className="text-sm sm:text-base text-[#D4C8BE] max-w-2xl mx-auto">
@@ -1013,179 +917,142 @@ export const LandingPage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {/* Hadicha Ustoz Card */}
-          <div className="gold-card rounded-3xl p-8 space-y-6 group text-left">
-            <div className="flex items-center gap-5">
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#D9A83F] to-[#F4D27A] text-[#0B0808] font-luxury-serif font-black text-3xl shadow-xl shadow-[#D9A83F]/20 group-hover:scale-105 transition-transform">
-                ∑
-              </div>
-              <div>
-                <span className="px-2.5 py-0.5 rounded-full bg-[#D9A83F]/15 border border-[#D9A83F]/30 text-[10px] font-black text-[#F4D27A] uppercase">
-                  Oliy Toifali Mutaxassis
-                </span>
-                <h3 className="text-2xl font-luxury-serif font-black text-[#F8F5EF] mt-1">
-                  Hadicha ustoz
-                </h3>
-                <p className="text-xs text-[#D9A83F] font-semibold">
-                  Matematika, Mantiq & DTM Bo‘yicha Bosh Murabbiy
-                </p>
-              </div>
-            </div>
-
-            <p className="text-xs sm:text-sm text-[#C7BCB1] leading-relaxed">
-              O‘quvchilarni olimpiadalar va nufuzli oliygohlarga tayyorlash bo‘yicha 8 yillik tajribaga ega.
-              Murakkab tenglamalar va geometriyani eng oson mantiqiy formulalar bilan tushuntiradi.
-            </p>
-
-            <div className="grid grid-cols-2 gap-3 pt-3 border-t border-[#D9A83F]/15 text-xs">
-              <div>
-                <span className="text-[10px] text-[#C7BCB1] uppercase block">Dars kunlari:</span>
-                <span className="font-bold text-[#F8F5EF]">Dush - Chor - Juma</span>
-              </div>
-              <div>
-                <span className="text-[10px] text-[#C7BCB1] uppercase block">Dars vaqti:</span>
-                <span className="font-bold text-[#F8F5EF]">14:00 - 16:00</span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => handleOpenEnrollModal('Matematika (Hadicha ustoz)')}
-              className="w-full gold-gradient-btn py-3.5 rounded-full text-xs font-black uppercase tracking-wider cursor-pointer shadow-md shadow-[#D9A83F]/20 flex items-center justify-center gap-2"
+          {teacherProfiles.map((tp, idx) => (
+            <div
+              key={idx}
+              className="rounded-3xl p-8 bg-[#16090D]/85 hover:bg-[#220B12]/95 border border-[#D9A93A]/30 hover:border-[#D9A93A]/70 shadow-2xl space-y-6 group text-left transition-all duration-300"
             >
-              <span>Hadicha ustoz guruhiga yozilish</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </button>
-          </div>
-
-          {/* Hasanboy Ustoz Card */}
-          <div className="gold-card rounded-3xl p-8 space-y-6 group text-left">
-            <div className="flex items-center gap-5">
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#3B82F6] to-[#60A5FA] text-white font-luxury-serif font-black text-3xl shadow-xl shadow-blue-500/20 group-hover:scale-105 transition-transform">
-                EN
+              <div className="flex items-center gap-5">
+                <div className={`flex h-20 w-20 items-center justify-center rounded-2xl ${tp.gradient} text-[#080607] font-luxury-serif font-black text-3xl shadow-xl shadow-[#D9A93A]/20 group-hover:scale-105 transition-transform`}>
+                  {tp.symbol}
+                </div>
+                <div>
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#D9A93A]/15 border border-[#D9A93A]/30 text-[10px] font-black text-[#F3D276] uppercase">
+                    {tp.badge}
+                  </span>
+                  <h3 className="text-2xl font-luxury-serif font-black text-[#F7F4EE] mt-1">
+                    {tp.name}
+                  </h3>
+                  <p className="text-xs text-[#D9A93A] font-semibold">
+                    {tp.role}
+                  </p>
+                </div>
               </div>
-              <div>
-                <span className="px-2.5 py-0.5 rounded-full bg-blue-500/15 border border-blue-500/30 text-[10px] font-black text-blue-400 uppercase">
-                  IELTS Band 8.0 Expert
-                </span>
-                <h3 className="text-2xl font-luxury-serif font-black text-[#F8F5EF] mt-1">
-                  Hasanboy ustoz
-                </h3>
-                <p className="text-xs text-blue-400 font-semibold">
-                  IELTS & General English Bo‘yicha Yetakchi Mutaxassis
-                </p>
+
+              <p className="text-xs sm:text-sm text-[#A9A3A0] leading-relaxed line-clamp-3">
+                {tp.bio}
+              </p>
+
+              <div className="grid grid-cols-2 gap-3 pt-3 border-t border-[#D9A93A]/15 text-xs">
+                <div>
+                  <span className="text-[10px] text-[#A9A3A0] uppercase block">Dars kunlari:</span>
+                  <span className="font-bold text-[#F7F4EE]">{tp.scheduleDays}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-[#A9A3A0] uppercase block">Dars vaqti:</span>
+                  <span className="font-bold text-[#F7F4EE]">{tp.scheduleTime}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedTeacherForModal(tp)}
+                  className="px-4 py-3 rounded-full border border-[#D9A93A]/35 text-xs font-bold text-[#F7F4EE] hover:bg-white/5 transition-colors cursor-pointer"
+                >
+                  Batafsil ma’lumot
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOpenRegisterWithCourse(tp.name)}
+                  className="flex-1 gold-gradient-btn py-3 rounded-full text-xs font-black uppercase tracking-wider cursor-pointer shadow-md shadow-[#D9A93A]/20 flex items-center justify-center gap-2"
+                >
+                  <span>Guruhga yozilish</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </button>
               </div>
             </div>
-
-            <p className="text-xs sm:text-sm text-[#C7BCB1] leading-relaxed">
-              Xalqaro sertifikat egasi, speaking to‘siqlarini yengish va akademik yozish (Writing) bo‘yicha mualliflik metodikasi asoschisi.
-              Shogirdlarining 90% dan ortig‘i 7.0+ ball to‘plagan.
-            </p>
-
-            <div className="grid grid-cols-2 gap-3 pt-3 border-t border-[#D9A83F]/15 text-xs">
-              <div>
-                <span className="text-[10px] text-[#C7BCB1] uppercase block">Dars kunlari:</span>
-                <span className="font-bold text-[#F8F5EF]">Sesh - Pay - Shan</span>
-              </div>
-              <div>
-                <span className="text-[10px] text-[#C7BCB1] uppercase block">Dars vaqti:</span>
-                <span className="font-bold text-[#F8F5EF]">15:30 - 17:30</span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => handleOpenEnrollModal('Ingliz Tili (Hasanboy ustoz)')}
-              className="w-full gold-gradient-btn py-3.5 rounded-full text-xs font-black uppercase tracking-wider cursor-pointer shadow-md shadow-[#D9A83F]/20 flex items-center justify-center gap-2"
-            >
-              <span>Hasanboy ustoz guruhiga yozilish</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </button>
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* =========================================================================
-          8. ABOUT LUMOS ("Biz haqimizda" — 2-Column Layout)
-          ========================================================================= */}
-      <section id="about" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1360px] mx-auto relative z-20">
+      {/* -------------------------------------------------------------------------
+          8. ABOUT LUMOS SECTION (Story, Mission & 3D Golden Timeline)
+          ------------------------------------------------------------------------- */}
+      <section id="about" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          {/* Left: Luxury Image Visual */}
+          {/* Left Column: Academy Visual & Experience Badge */}
           <div className="lg:col-span-6 relative">
-            <div className="relative rounded-3xl overflow-hidden border-2 border-[#D9A83F]/40 shadow-2xl bg-[#17100F]">
+            <div className="relative rounded-3xl overflow-hidden border-2 border-[#D9A93A]/40 shadow-2xl bg-[#14080B]">
               <img
                 src={aboutAcademyImg}
                 alt="Lumos Ta’lim Zali"
                 className="w-full h-[380px] sm:h-[460px] object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0B0808] via-transparent to-black/30" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#080607] via-transparent to-black/40" />
             </div>
 
             {/* Floating Experience Badge */}
-            <div className="absolute -bottom-5 right-6 p-4 rounded-2xl bg-[#1C1412]/90 backdrop-blur-xl border border-[#D9A83F]/50 shadow-2xl flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#D9A83F] text-[#0B0808] font-black text-lg">
+            <div className="absolute -bottom-5 right-6 p-4 rounded-2xl bg-[#16090D]/95 backdrop-blur-xl border border-[#D9A93A]/50 shadow-2xl flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#D9A93A] text-[#080607] font-black text-lg">
                 ★
               </div>
               <div>
-                <span className="text-sm font-black text-[#F8F5EF] block">10 Yillik Tajriba</span>
-                <span className="text-[11px] text-[#C7BCB1]">Ilmiy va pedagogik yondashuv</span>
+                <span className="text-sm font-black text-[#F7F4EE] block">10 Yillik Tajriba</span>
+                <span className="text-[11px] text-[#A9A3A0]">Ilmiy va pedagogik yondashuv</span>
               </div>
             </div>
           </div>
 
-          {/* Right: Story, Mission & Values */}
+          {/* Right Column: Mission, Vision & 3D Timeline */}
           <div className="lg:col-span-6 space-y-6 text-left">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1C1412] border border-[#D9A83F]/35 text-xs font-bold text-[#F4D27A]">
-              <Compass className="h-4 w-4 text-[#D9A83F]" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#16090D] border border-[#D9A93A]/35 text-xs font-bold text-[#F3D276]">
+              <Compass className="h-4 w-4 text-[#D9A93A]" />
               <span>BIZNING MISSIYA</span>
             </div>
 
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F8F5EF] leading-tight">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE] leading-tight">
               Lumos — Maqsad sari ishonchli ta’lim makoni
             </h2>
 
             <p className="text-sm sm:text-base text-[#D4C8BE] leading-relaxed">
-              LUMOS ta’lim markazi yoshlarni faqatgina imtihonlarga tayyorlash bilan cheklanmaydi.
-              Biz har bir o‘quvchida mustaqil fikrlash, muammolarga yechim topish va o‘z kuchiga ishonch hissini shakllantiramiz.
+              LUMOS ta’lim markazi yoshlarni faqatgina imtihonlarga tayyorlash bilan cheklanmaydi. Biz har bir o‘quvchida mustaqil fikrlash, muammolarga yechim topish va o‘z kuchiga ishonch hissini shakllantiramiz.
             </p>
 
-            <div className="space-y-3 pt-2">
-              <div className="flex items-start gap-3">
-                <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#D9A83F]/20 text-[#D9A83F] shrink-0 mt-0.5">
-                  <Check className="h-4 w-4 stroke-[3]" />
+            {/* 3D Golden Timeline */}
+            <div className="space-y-4 pt-2 border-t border-white/5">
+              <span className="text-xs font-black uppercase text-[#D9A93A] tracking-wider block">
+                Rivojlanish Bosqichlari (Timeline)
+              </span>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="p-3 rounded-2xl bg-[#16090D] border border-[#D9A93A]/20">
+                  <span className="text-[#F3D276] font-mono font-bold block">2014-yil</span>
+                  <p className="text-[11px] text-[#A9A3A0] mt-0.5">Lumos akademiyasi tashkil topishi va birinchi 50 nafar o‘quvchi</p>
                 </div>
-                <div>
-                  <h4 className="text-sm font-bold text-[#F8F5EF]">Halollik va Ochiqlik</h4>
-                  <p className="text-xs text-[#C7BCB1]">Har bir o‘quvchi natijasi va ota-onalar hisoboti 100% shaffof olib boriladi.</p>
+                <div className="p-3 rounded-2xl bg-[#16090D] border border-[#D9A93A]/20">
+                  <span className="text-[#F3D276] font-mono font-bold block">2018-yil</span>
+                  <p className="text-[11px] text-[#A9A3A0] mt-0.5">Xalqaro IELTS metodikasi va bosh murabbiylar jamoasi shakllanishi</p>
                 </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#D9A83F]/20 text-[#D9A83F] shrink-0 mt-0.5">
-                  <Check className="h-4 w-4 stroke-[3]" />
+                <div className="p-3 rounded-2xl bg-[#16090D] border border-[#D9A93A]/20">
+                  <span className="text-[#F3D276] font-mono font-bold block">2022-yil</span>
+                  <p className="text-[11px] text-[#A9A3A0] mt-0.5">DTM va Prezident maktabiga tayyorlovda 95% grant ko‘rsatkichi</p>
                 </div>
-                <div>
-                  <h4 className="text-sm font-bold text-[#F8F5EF]">Zamonaviy Ilmiy Standartlar</h4>
-                  <p className="text-xs text-[#C7BCB1]">Eng so‘nggi darsliklar, interaktiv texnologiyalar va amaliy keyslar.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#D9A83F]/20 text-[#D9A83F] shrink-0 mt-0.5">
-                  <Check className="h-4 w-4 stroke-[3]" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-[#F8F5EF]">Kafolatlangan Natijaviylik</h4>
-                  <p className="text-xs text-[#C7BCB1]">Har bir talaba darslarni o‘z vaqtida bajarsa, belgilangan marraga kafolat bilan erishadi.</p>
+                <div className="p-3 rounded-2xl bg-[#16090D] border border-[#D9A93A]/20">
+                  <span className="text-[#F3D276] font-mono font-bold block">2026-yil</span>
+                  <p className="text-[11px] text-[#A9A3A0] mt-0.5">AI-quvvatlangan yangi avlod raqamli ta’lim platformasi</p>
                 </div>
               </div>
             </div>
 
-            <div className="pt-4">
+            <div className="pt-2">
               <button
                 type="button"
-                onClick={() => setIsApplyModalOpen(true)}
-                className="gold-gradient-btn px-8 py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-[#D9A83F]/20 cursor-pointer"
+                onClick={() => {
+                  setRegisterCourse('');
+                  setRegisterBranch('');
+                  setIsRegisterModalOpen(true);
+                }}
+                className="gold-gradient-btn px-8 py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-[#D9A93A]/20 cursor-pointer"
               >
                 <span>Markaz bilan tanishish →</span>
               </button>
@@ -1194,16 +1061,16 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* =========================================================================
-          9. BRANCHES SECTION ("Filiallarimiz")
-          ========================================================================= */}
-      <section id="branches" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1360px] mx-auto relative z-20">
+      {/* -------------------------------------------------------------------------
+          9. BRANCHES SECTION (Interactive Selector & Map Link)
+          ------------------------------------------------------------------------- */}
+      <section id="branches" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-20">
         <div className="text-center space-y-3 mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1C1412] border border-[#D9A83F]/35 text-xs font-bold text-[#F4D27A]">
-            <MapPin className="h-4 w-4 text-[#D9A83F]" />
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#16090D] border border-[#D9A93A]/35 text-xs font-bold text-[#F3D276]">
+            <MapPin className="h-4 w-4 text-[#D9A93A]" />
             <span>KAMPUSLAR VA FILIALLAR</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F8F5EF]">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE]">
             Filiallarimiz
           </h2>
           <p className="text-sm sm:text-base text-[#D4C8BE] max-w-2xl mx-auto">
@@ -1212,71 +1079,88 @@ export const LandingPage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {INITIAL_BRANCHES.map((b) => (
-            <div key={b.id} className="gold-card rounded-3xl p-6 flex flex-col justify-between group text-left">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="px-3 py-1 rounded-full bg-[#D9A83F]/15 border border-[#D9A83F]/30 text-[10px] font-black text-[#F4D27A] uppercase">
-                    {b.city}
-                  </span>
-                  <span className="text-[10px] font-bold text-[#10B981] flex items-center gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#10B981]" />
-                    Faol
-                  </span>
+          {INITIAL_BRANCHES.map((b) => {
+            const isSelected = selectedBranchId === b.id;
+            return (
+              <div
+                key={b.id}
+                onClick={() => setSelectedBranchId(b.id)}
+                className={`rounded-3xl p-6 flex flex-col justify-between group text-left cursor-pointer transition-all duration-300 ${
+                  isSelected
+                    ? 'bg-[#220B12] border-2 border-[#D9A93A] shadow-xl shadow-[#D9A93A]/20 scale-[1.02]'
+                    : 'bg-[#16090D]/85 border border-[#D9A93A]/25 hover:border-[#D9A93A]/50 shadow-md'
+                }`}
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="px-3 py-1 rounded-full bg-[#D9A93A]/15 border border-[#D9A93A]/30 text-[10px] font-black text-[#F3D276] uppercase">
+                      {b.city}
+                    </span>
+                    <span className="text-[10px] font-bold text-[#10B981] flex items-center gap-1">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#10B981]" />
+                      Faol
+                    </span>
+                  </div>
+
+                  <h3 className="text-lg font-luxury-serif font-black text-[#F7F4EE] group-hover:text-[#F3D276] transition-colors leading-snug">
+                    {b.name}
+                  </h3>
+
+                  <p className="text-xs text-[#A9A3A0] flex items-start gap-2 pt-1">
+                    <MapPin className="h-4 w-4 text-[#D9A93A] shrink-0 mt-0.5" />
+                    <span>{b.address}</span>
+                  </p>
+
+                  <p className="text-xs text-[#A9A3A0] flex items-center gap-2">
+                    <Phone className="h-3.5 w-3.5 text-[#D9A93A] shrink-0" />
+                    <span className="font-mono">{b.phone}</span>
+                  </p>
+
+                  <p className="text-[11px] text-[#A9A3A0] flex items-center gap-1.5">
+                    <Clock className="h-3 w-3 text-[#D9A93A] shrink-0" />
+                    <span>Dush - Shan: 08:00 - 20:00</span>
+                  </p>
                 </div>
 
-                <h3 className="text-lg font-luxury-serif font-black text-[#F8F5EF] group-hover:text-[#F4D27A] transition-colors leading-snug">
-                  {b.name}
-                </h3>
+                <div className="pt-5 mt-4 border-t border-white/5 flex items-center justify-between">
+                  <a
+                    href={`https://maps.google.com/?q=${encodeURIComponent(b.address + ' ' + b.city)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-xs font-bold text-[#F3D276] hover:underline flex items-center gap-1"
+                  >
+                    <span>Xaritada ko‘rish</span>
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
 
-                <p className="text-xs text-[#C7BCB1] flex items-start gap-2 pt-1">
-                  <MapPin className="h-4 w-4 text-[#D9A83F] shrink-0 mt-0.5" />
-                  <span>{b.address}</span>
-                </p>
-
-                <p className="text-xs text-[#C7BCB1] flex items-center gap-2">
-                  <Phone className="h-3.5 w-3.5 text-[#D9A83F] shrink-0" />
-                  <span className="font-mono">{b.phone}</span>
-                </p>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenRegisterWithBranch(b.name);
+                    }}
+                    className="px-3.5 py-1.5 rounded-full bg-[#080607] border border-[#D9A93A]/35 text-[11px] font-bold text-[#F7F4EE] hover:border-[#D9A93A] hover:text-[#F3D276] transition-colors cursor-pointer"
+                  >
+                    Tanlash
+                  </button>
+                </div>
               </div>
-
-              <div className="pt-5 mt-4 border-t border-[#D9A83F]/15 flex items-center justify-between">
-                <a
-                  href={`https://maps.google.com/?q=${encodeURIComponent(b.address + ' ' + b.city)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs font-bold text-[#F4D27A] hover:underline flex items-center gap-1"
-                >
-                  <span>Xaritada ko‘rish</span>
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setApplicantBranch(b.name);
-                    setIsApplyModalOpen(true);
-                  }}
-                  className="px-3.5 py-1.5 rounded-full bg-[#0B0808] border border-[#D9A83F]/35 text-[11px] font-bold text-[#F8F5EF] hover:border-[#D9A83F] transition-colors cursor-pointer"
-                >
-                  Tanlash
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
-      {/* =========================================================================
-          10. FAQ ACCORDION SECTION ("Ko‘p beriladigan savollar")
-          ========================================================================= */}
+      {/* -------------------------------------------------------------------------
+          10. FAQ ACCORDION SECTION (Category Filter + Live Search)
+          ------------------------------------------------------------------------- */}
       <section id="faq" className="py-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto relative z-20">
-        <div className="text-center space-y-3 mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1C1412] border border-[#D9A83F]/35 text-xs font-bold text-[#F4D27A]">
-            <HelpCircle className="h-4 w-4 text-[#D9A83F]" />
+        <div className="text-center space-y-3 mb-10">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#16090D] border border-[#D9A93A]/35 text-xs font-bold text-[#F3D276]">
+            <HelpCircle className="h-4 w-4 text-[#D9A93A]" />
             <span>SAVOLLAR VA JAVOBLAR</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F8F5EF]">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE]">
             Ko‘p beriladigan savollar
           </h2>
           <p className="text-sm sm:text-base text-[#D4C8BE]">
@@ -1284,52 +1168,100 @@ export const LandingPage: React.FC = () => {
           </p>
         </div>
 
+        {/* FAQ Search Box */}
+        <div className="mb-6 relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#D9A93A]" />
+          <input
+            type="text"
+            value={faqSearch}
+            onChange={(e) => setFaqSearch(e.target.value)}
+            placeholder="Savolingiz bo‘yicha qidiring..."
+            className="w-full pl-11 pr-4 py-3 rounded-2xl bg-[#16090D] border border-[#D9A93A]/30 text-xs text-[#F7F4EE] placeholder-[#A9A3A0]/60 focus:border-[#D9A93A] outline-none"
+          />
+        </div>
+
+        {/* FAQ Category Pills */}
+        <div className="flex items-center justify-center gap-2 overflow-x-auto pb-4 mb-6 scrollbar-none">
+          {[
+            { id: 'all', label: 'Barchasi' },
+            { id: 'general', label: 'Umumiy' },
+            { id: 'courses', label: 'Kurslar' },
+            { id: 'payments', label: 'To‘lovlar' },
+            { id: 'lessons', label: 'Dars jarayoni' },
+            { id: 'branches', label: 'Filiallar' },
+          ].map((cat) => (
+            <button
+              key={cat.id}
+              type="button"
+              onClick={() => setFaqCategory(cat.id)}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer select-none whitespace-nowrap ${
+                faqCategory === cat.id
+                  ? 'bg-[#D9A93A] text-[#080607]'
+                  : 'bg-[#16090D] border border-[#D9A93A]/25 text-[#A9A3A0] hover:text-[#F7F4EE]'
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Accordion Questions */}
         <div className="space-y-4 text-left">
-          {faqList.map((item, idx) => {
+          {filteredFaq.map((item, idx) => {
             const isOpen = openFaqIndex === idx;
             return (
               <div
                 key={idx}
-                className="gold-card rounded-2xl overflow-hidden transition-all"
+                className="rounded-2xl bg-[#16090D]/90 border border-[#D9A93A]/25 overflow-hidden transition-all duration-300"
               >
                 <button
                   type="button"
                   onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
                   className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 cursor-pointer"
                 >
-                  <span className="text-base font-bold text-[#F8F5EF]">
+                  <span className="text-sm sm:text-base font-bold text-[#F7F4EE]">
                     {item.q}
                   </span>
-                  <div className={`flex h-7 w-7 items-center justify-center rounded-full bg-[#0B0808] border border-[#D9A83F]/30 text-[#D9A83F] shrink-0 transition-transform ${isOpen ? 'rotate-180 bg-[#D9A83F] text-[#0B0808]' : ''}`}>
+                  <div
+                    className={`flex h-7 w-7 items-center justify-center rounded-full bg-[#080607] border border-[#D9A93A]/30 text-[#D9A93A] shrink-0 transition-transform duration-200 ${
+                      isOpen ? 'rotate-180 bg-[#D9A93A] text-[#080607]' : ''
+                    }`}
+                  >
                     <ChevronDown className="h-4 w-4" />
                   </div>
                 </button>
 
                 {isOpen && (
-                  <div className="px-5 sm:px-6 pb-6 pt-1 text-xs sm:text-sm text-[#C7BCB1] leading-relaxed border-t border-[#D9A83F]/15 animate-in fade-in duration-200">
+                  <div className="px-5 sm:px-6 pb-6 pt-1 text-xs sm:text-sm text-[#A9A3A0] leading-relaxed border-t border-white/5 animate-in fade-in duration-200">
                     {item.a}
                   </div>
                 )}
               </div>
             );
           })}
+
+          {filteredFaq.length === 0 && (
+            <div className="text-center py-8 text-xs text-[#A9A3A0]">
+              Mos keluvchi savollar topilmadi.
+            </div>
+          )}
         </div>
       </section>
 
-      {/* =========================================================================
-          11. FINAL POWERFUL CTA SECTION (Golden Glow)
-          ========================================================================= */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1360px] mx-auto relative z-20">
-        <div className="relative rounded-[36px] p-10 sm:p-16 text-center bg-gradient-to-b from-[#1C1412] via-[#1C1412] to-[#0B0808] border-2 border-[#D9A83F]/40 shadow-[0_20px_80px_rgba(0,0,0,0.9)] overflow-hidden">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[350px] bg-[#D9A83F]/15 blur-[120px] rounded-full pointer-events-none" />
+      {/* -------------------------------------------------------------------------
+          11. FINAL POWERFUL CALL-TO-ACTION SECTION (Golden Glow)
+          ------------------------------------------------------------------------- */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-20">
+        <div className="relative rounded-[36px] p-10 sm:p-16 text-center bg-gradient-to-b from-[#1C0A10] via-[#1C0A10] to-[#080607] border-2 border-[#D9A93A]/40 shadow-[0_20px_80px_rgba(0,0,0,0.9)] overflow-hidden">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[350px] bg-[#D9A93A]/15 blur-[120px] rounded-full pointer-events-none" />
 
           <div className="relative z-10 max-w-3xl mx-auto space-y-6">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0B0808] border border-[#D9A83F]/40 text-xs font-bold text-[#F4D27A]">
-              <Sparkles className="h-3.5 w-3.5 text-[#D9A83F]" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#080607] border border-[#D9A93A]/40 text-xs font-bold text-[#F3D276]">
+              <Sparkles className="h-3.5 w-3.5 text-[#D9A93A]" />
               <span>YANGI O‘QUV MAVSUMIGA QABUL DAVOM ETMOQDA</span>
             </div>
 
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F8F5EF] leading-tight">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE] leading-tight">
               Kelajagingiz uchun birinchi qadamni bugun tashlang.
             </h2>
 
@@ -1340,7 +1272,7 @@ export const LandingPage: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <a
                 href="#courses"
-                className="w-full sm:w-auto gold-gradient-btn px-9 py-4 rounded-full text-sm font-black shadow-xl shadow-[#D9A83F]/30 flex items-center justify-center gap-2"
+                className="w-full sm:w-auto gold-gradient-btn px-9 py-4 rounded-full text-sm font-black shadow-xl shadow-[#D9A93A]/30 flex items-center justify-center gap-2"
               >
                 <span>Kurslarni ko‘rish</span>
                 <ArrowRight className="h-4 w-4" />
@@ -1348,8 +1280,12 @@ export const LandingPage: React.FC = () => {
 
               <button
                 type="button"
-                onClick={() => setIsApplyModalOpen(true)}
-                className="w-full sm:w-auto px-8 py-4 rounded-full text-sm font-bold text-[#F8F5EF] hover:text-[#D9A83F] bg-[#0B0808] border border-[#D9A83F]/40 hover:border-[#D9A83F] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                onClick={() => {
+                  setRegisterCourse('');
+                  setRegisterBranch('');
+                  setIsRegisterModalOpen(true);
+                }}
+                className="w-full sm:w-auto px-8 py-4 rounded-full text-sm font-bold text-[#F7F4EE] hover:text-[#F3D276] bg-[#080607] border border-[#D9A93A]/40 hover:border-[#D9A93A] transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>Ro‘yxatdan o‘tish</span>
               </button>
@@ -1358,23 +1294,53 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* =========================================================================
-          12. LUXURY FOOTER
-          ========================================================================= */}
-      <footer className="bg-[#080505] border-t border-[#D9A83F]/20 pt-16 pb-12 px-4 sm:px-6 lg:px-8 relative z-20 text-xs text-[#C7BCB1]">
-        <div className="max-w-[1360px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-[#D9A83F]/15 text-left">
-          {/* Col 1: Brand */}
+      {/* -------------------------------------------------------------------------
+          12. LUXURY FOOTER (Newsletter + Comprehensive Directory)
+          ------------------------------------------------------------------------- */}
+      <footer className="bg-[#050304] border-t border-[#D9A93A]/20 pt-16 pb-12 px-4 sm:px-6 lg:px-8 relative z-20 text-xs text-[#A9A3A0]">
+        <div className="max-w-[1380px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-white/5 text-left">
+          {/* Col 1: Brand & Newsletter */}
           <div className="lg:col-span-2 space-y-4">
             <LumosLogo size="lg" />
-            <p className="text-xs text-[#C7BCB1] leading-relaxed max-w-sm pt-2">
-              Lumos — zamonaviy metodika, tajribali ustozlar va yuqori natijadorlikni birlashtirgan yetakchi ta’lim markazi.
+            <p className="text-xs text-[#A9A3A0] leading-relaxed max-w-sm pt-2">
+              Lumos — zamonaviy metodika, tajribali ustozlar va yuqori natijadorlikni birlashtirgan yetakchi raqamli ta’lim platformasi.
             </p>
+
+            {/* Newsletter Subscription */}
+            <div className="pt-2 space-y-2 max-w-sm">
+              <span className="text-[11px] font-bold uppercase text-[#D9A93A] tracking-wider block">
+                Oylik ilmiy yangiliklarga obuna bo‘ling
+              </span>
+              <form onSubmit={handleNewsletterSubmit} className="flex gap-2">
+                <input
+                  type="email"
+                  required
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
+                  placeholder="Email manzilingiz..."
+                  className="flex-1 px-4 py-2 rounded-full bg-[#16090D] border border-[#D9A93A]/30 text-xs text-[#F7F4EE] placeholder-[#A9A3A0]/50 focus:border-[#D9A93A] outline-none"
+                />
+                <button
+                  type="submit"
+                  className="gold-gradient-btn px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider shrink-0"
+                >
+                  Obuna
+                </button>
+              </form>
+              {newsletterSuccess && (
+                <p className="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
+                  <CheckCircle className="h-3 w-3" /> Rahmat! Siz muvaffaqiyatli obuna bo‘ldingiz.
+                </p>
+              )}
+            </div>
+
+            {/* Social Links */}
             <div className="flex items-center gap-3 pt-2">
               <a
                 href="https://t.me/lumos_edu"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1C1412] border border-[#D9A83F]/35 text-[#D9A83F] hover:bg-[#D9A83F] hover:text-[#0B0808] transition-colors"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-[#16090D] border border-[#D9A93A]/35 text-[#D9A93A] hover:bg-[#D9A93A] hover:text-[#080607] transition-colors"
                 title="Telegram"
               >
                 <Send className="h-4 w-4" />
@@ -1383,7 +1349,7 @@ export const LandingPage: React.FC = () => {
                 href="https://instagram.com/lumos_edu"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1C1412] border border-[#D9A83F]/35 text-[#D9A83F] hover:bg-[#D9A83F] hover:text-[#0B0808] transition-colors"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-[#16090D] border border-[#D9A93A]/35 text-[#D9A93A] hover:bg-[#D9A93A] hover:text-[#080607] transition-colors"
                 title="Instagram"
               >
                 <Star className="h-4 w-4" />
@@ -1393,63 +1359,97 @@ export const LandingPage: React.FC = () => {
 
           {/* Col 2: Navigatsiya */}
           <div className="space-y-3">
-            <h5 className="font-luxury-serif font-bold text-sm text-[#F8F5EF] uppercase tracking-wider">
+            <h5 className="font-luxury-serif font-bold text-sm text-[#F7F4EE] uppercase tracking-wider">
               Navigatsiya
             </h5>
             <ul className="space-y-2">
-              <li><a href="#" className="hover:text-[#F4D27A] transition-colors">Bosh sahifa</a></li>
-              <li><a href="#courses" className="hover:text-[#F4D27A] transition-colors">Kurslarimiz</a></li>
-              <li><a href="#why-us" className="hover:text-[#F4D27A] transition-colors">Nega Lumos?</a></li>
-              <li><a href="#results" className="hover:text-[#F4D27A] transition-colors">Natijalar</a></li>
-              <li><a href="#teachers" className="hover:text-[#F4D27A] transition-colors">O‘qituvchilar</a></li>
-              <li><a href="#about" className="hover:text-[#F4D27A] transition-colors">Biz haqimizda</a></li>
+              <li><a href="#" className="hover:text-[#F3D276] transition-colors">Bosh sahifa</a></li>
+              <li><a href="#courses" className="hover:text-[#F3D276] transition-colors">Kurslarimiz</a></li>
+              <li><a href="#why-us" className="hover:text-[#F3D276] transition-colors">Nega Lumos?</a></li>
+              <li><a href="#results" className="hover:text-[#F3D276] transition-colors">Natijalar</a></li>
+              <li><a href="#teachers" className="hover:text-[#F3D276] transition-colors">O‘qituvchilar</a></li>
+              <li><a href="#about" className="hover:text-[#F3D276] transition-colors">Biz haqimizda</a></li>
             </ul>
           </div>
 
           {/* Col 3: Kurslar */}
           <div className="space-y-3">
-            <h5 className="font-luxury-serif font-bold text-sm text-[#F8F5EF] uppercase tracking-wider">
+            <h5 className="font-luxury-serif font-bold text-sm text-[#F7F4EE] uppercase tracking-wider">
               Kurslar
             </h5>
             <ul className="space-y-2">
-              <li><a href="#courses" className="hover:text-[#F4D27A] transition-colors">Matematika & DTM</a></li>
-              <li><a href="#courses" className="hover:text-[#F4D27A] transition-colors">IELTS Intensive 7.5+</a></li>
-              <li><a href="#courses" className="hover:text-[#F4D27A] transition-colors">General English</a></li>
-              <li><a href="#courses" className="hover:text-[#F4D27A] transition-colors">Frontend & IT Asoslari</a></li>
-              <li><a href="#courses" className="hover:text-[#F4D27A] transition-colors">Prezident Maktabiga Tayyorlov</a></li>
+              <li><a href="#courses" className="hover:text-[#F3D276] transition-colors">Matematika & DTM</a></li>
+              <li><a href="#courses" className="hover:text-[#F3D276] transition-colors">IELTS Intensive 8.0+</a></li>
+              <li><a href="#courses" className="hover:text-[#F3D276] transition-colors">General English</a></li>
+              <li><a href="#courses" className="hover:text-[#F3D276] transition-colors">Frontend & IT Asoslari</a></li>
+              <li><a href="#courses" className="hover:text-[#F3D276] transition-colors">Prezident Maktabiga Tayyorlov</a></li>
             </ul>
           </div>
 
           {/* Col 4: Bog‘lanish */}
           <div className="space-y-3">
-            <h5 className="font-luxury-serif font-bold text-sm text-[#F8F5EF] uppercase tracking-wider">
+            <h5 className="font-luxury-serif font-bold text-sm text-[#F7F4EE] uppercase tracking-wider">
               Bog‘lanish
             </h5>
-            <p className="text-xs text-[#C7BCB1]">
+            <p className="text-xs text-[#A9A3A0]">
               Toshkent sh., Amir Temur shox ko‘chasi, 108
             </p>
-            <p className="text-xs font-mono font-bold text-[#F4D27A]">
+            <p className="text-xs font-mono font-bold text-[#F3D276]">
               +998 (71) 200-00-25
             </p>
-            <p className="text-xs text-[#C7BCB1]">
+            <p className="text-xs text-[#A9A3A0]">
               Dush - Shan: 08:00 - 20:00
             </p>
           </div>
         </div>
 
-        <div className="max-w-[1360px] mx-auto pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#C7BCB1]">
+        <div className="max-w-[1380px] mx-auto pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#A9A3A0]">
           <p>© {new Date().getFullYear()} LUMOS Ta’lim Markazi. Barcha huquqlar himoyalangan.</p>
           <div className="flex items-center gap-4">
-            <a href="#/login" className="hover:text-[#D9A83F] transition-colors font-semibold">Tizimga Kirish</a>
+            <a href="#/login" className="hover:text-[#D9A93A] transition-colors font-semibold">Tizimga Kirish</a>
             <span>•</span>
-            <a href="#/admin" className="hover:text-[#D9A83F] transition-colors font-semibold">Boshqaruv Paneli</a>
+            <a href="#/admin" className="hover:text-[#D9A93A] transition-colors font-semibold">Boshqaruv Paneli</a>
           </div>
         </div>
       </footer>
 
-      {/* =========================================================================
-          MODALS INTEGRATION (Diagnostic Quiz, Course Syllabus, Quick Application)
-          ========================================================================= */}
+      {/* -------------------------------------------------------------------------
+          13. MODALS INTEGRATION (Search Overlay, Multi-Step Register, Diagnostic, etc.)
+          ------------------------------------------------------------------------- */}
+      <WebsiteSearchOverlay
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        courses={INITIAL_COURSES}
+        teachers={INITIAL_TEACHERS}
+        branches={INITIAL_BRANCHES}
+        faqList={rawFaqList}
+        onSelectCourse={(c) => setSelectedCourseForDetails(c)}
+        onSelectTeacher={(name) => {
+          const matched = teacherProfiles.find((tp) => tp.name.includes(name) || name.includes(tp.name));
+          if (matched) setSelectedTeacherForModal(matched);
+        }}
+        onSelectBranch={(name) => {
+          const el = document.getElementById('branches');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }}
+      />
+
+      <PublicTeacherModal
+        isOpen={!!selectedTeacherForModal}
+        onClose={() => setSelectedTeacherForModal(null)}
+        teacher={selectedTeacherForModal}
+        onEnroll={(teacherName) => handleOpenRegisterWithCourse(teacherName)}
+      />
+
+      <MultiStepRegisterModal
+        isOpen={isRegisterModalOpen}
+        onClose={() => setIsRegisterModalOpen(false)}
+        courses={INITIAL_COURSES}
+        branches={INITIAL_BRANCHES}
+        initialCourseTitle={registerCourse}
+        initialBranchName={registerBranch}
+      />
+
       <DiagnosticTestModal
         isOpen={isDiagnosticModalOpen}
         onClose={() => setIsDiagnosticModalOpen(false)}
@@ -1459,124 +1459,8 @@ export const LandingPage: React.FC = () => {
         course={selectedCourseForDetails}
         isOpen={!!selectedCourseForDetails}
         onClose={() => setSelectedCourseForDetails(null)}
-        onEnroll={(title) => handleOpenEnrollModal(title)}
+        onEnroll={(title) => handleOpenRegisterWithCourse(title)}
       />
-
-      {/* Quick Application Modal */}
-      {isApplyModalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div className="relative w-full max-w-md rounded-[32px] bg-[#1C1412] border border-[#D9A83F]/40 shadow-2xl p-6 sm:p-8 space-y-6 text-left">
-            <div className="flex items-center justify-between border-b border-[#D9A83F]/15 pb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#D9A83F]/20 text-[#D9A83F]">
-                  <Sparkles className="h-5 w-5" />
-                </div>
-                <h3 className="text-xl font-luxury-serif font-black text-[#F8F5EF]">
-                  Guruhga Yozilish
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsApplyModalOpen(false)}
-                className="p-1.5 rounded-full text-[#C7BCB1] hover:text-[#F8F5EF] hover:bg-[#0B0808] transition-colors cursor-pointer"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            {isSubmitted ? (
-              <div className="text-center py-6 space-y-3">
-                <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#10B981]/20 text-[#10B981] border border-[#10B981]/30">
-                  <CheckCircle2 className="h-8 w-8" />
-                </div>
-                <h4 className="text-xl font-bold text-[#F8F5EF]">Arizangiz qabul qilindi!</h4>
-                <p className="text-xs text-[#C7BCB1]">
-                  15 daqiqa ichida administratorimiz siz bilan bog‘lanadi va birinchi bepul sinov darsi vaqtini tasdiqlaydi.
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleApplicationSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-[#C7BCB1] mb-1.5">
-                    Ism va Familiyangiz *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={applicantName}
-                    onChange={(e) => setApplicantName(e.target.value)}
-                    placeholder="Masalan: Jasur Olimov"
-                    className="w-full px-4 py-2.5 rounded-full bg-[#0B0808] border border-[#D9A83F]/30 text-xs text-[#F8F5EF] placeholder-[#C7BCB1]/50 focus:border-[#D9A83F] outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-[#C7BCB1] mb-1.5">
-                    Telefon raqamingiz *
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    value={applicantPhone}
-                    onChange={handlePhoneChange}
-                    placeholder="+998 (90) 123-45-67"
-                    className="w-full px-4 py-2.5 rounded-full bg-[#0B0808] border border-[#D9A83F]/30 text-xs text-[#F8F5EF] font-mono placeholder-[#C7BCB1]/50 focus:border-[#D9A83F] outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-[#C7BCB1] mb-1.5">
-                    Tanlangan Kurs
-                  </label>
-                  <select
-                    value={selectedCourseName}
-                    onChange={(e) => setSelectedCourseName(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-full bg-[#0B0808] border border-[#D9A83F]/30 text-xs text-[#F8F5EF] focus:border-[#D9A83F] outline-none cursor-pointer"
-                  >
-                    {INITIAL_COURSES.map((c) => (
-                      <option key={c.id} value={c.title}>
-                        {c.title} ({formatMoney(c.pricePerMonth, 'UZS')})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-[#C7BCB1] mb-1.5">
-                    Qulay Filial
-                  </label>
-                  <select
-                    value={applicantBranch}
-                    onChange={(e) => setApplicantBranch(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-full bg-[#0B0808] border border-[#D9A83F]/30 text-xs text-[#F8F5EF] focus:border-[#D9A83F] outline-none cursor-pointer"
-                  >
-                    {INITIAL_BRANCHES.map((b) => (
-                      <option key={b.id} value={b.name}>
-                        {b.name} ({b.address})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="pt-2">
-                  <button
-                    type="submit"
-                    disabled={isSubmitting || !applicantName.trim() || applicantPhone.length < 18}
-                    className="w-full gold-gradient-btn py-3.5 rounded-full text-xs font-black uppercase tracking-wider shadow-lg shadow-[#D9A83F]/25 flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <span>{isSubmitting ? 'Yuborilmoqda...' : 'Bepul Sinov Darsiga Yozilish'}</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
