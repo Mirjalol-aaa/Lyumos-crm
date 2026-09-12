@@ -509,28 +509,87 @@ export const LandingPage: React.FC = () => {
       </header>
 
       {/* =========================================================================
-          2. HERO SECTION (Professional 3D Premium Experience)
+          2. HERO SECTION (Cinematic Pro 3D Multi-Layer Experience)
           ========================================================================= */}
       <section
         id="home"
-        className="relative pt-32 sm:pt-36 lg:pt-40 pb-28 lg:pb-36 px-4 sm:px-6 lg:px-8 max-w-[1360px] mx-auto min-h-[92vh] flex flex-col justify-center overflow-visible"
+        className="relative pt-32 sm:pt-36 lg:pt-40 pb-28 lg:pb-36 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto min-h-[92vh] flex flex-col justify-center overflow-visible"
       >
-        {/* Deep luxury burgundy & gold ambient light auras */}
-        <div className="absolute top-1/2 -translate-y-1/2 right-[-6%] w-[680px] h-[680px] bg-gradient-to-br from-[#831843]/20 via-[#D9A83F]/10 to-transparent blur-[140px] rounded-full pointer-events-none z-0" />
-        <div className="absolute top-1/3 left-[-4%] w-[500px] h-[500px] bg-gradient-to-tr from-[#3B0B12]/30 via-transparent to-transparent blur-[120px] rounded-full pointer-events-none z-0" />
+        {/* -------------------------------------------------------------
+            A. DEEP BACKGROUND: Volumetric Luxury Light & Atmospheric Auras
+            ------------------------------------------------------------- */}
+        {/* Giant Dark Burgundy Glow */}
+        <div className="absolute top-1/2 -translate-y-1/2 right-[-10%] w-[780px] h-[780px] bg-gradient-to-br from-[#731224]/28 via-[#9D174D]/14 to-transparent blur-[160px] rounded-full pointer-events-none z-0" />
+        {/* Lumos Gold Ambient Lighting Pool */}
+        <div className="absolute top-1/4 right-[15%] w-[580px] h-[580px] bg-gradient-to-tr from-[#D9A83F]/14 via-[#F4D27A]/08 to-transparent blur-[140px] rounded-full pointer-events-none z-0" />
+        {/* Subtle Warm Leather Brown Shadow under left side */}
+        <div className="absolute top-1/3 left-[-8%] w-[600px] h-[600px] bg-gradient-to-tr from-[#3B0B14]/35 via-[#1E0F0D]/25 to-transparent blur-[130px] rounded-full pointer-events-none z-0" />
+        {/* Center Bottom Vignette Shadow */}
+        <div className="absolute bottom-[-10%] left-1/4 w-[600px] h-[300px] bg-[#D9A83F]/06 blur-[120px] rounded-full pointer-events-none z-0" />
 
+        {/* -------------------------------------------------------------
+            B. MIDGROUND: Subtle 3D Educational & Mathematical Network Nodes
+            (Delicate, low opacity ~0.10-0.18, zero obstruction to text)
+            ------------------------------------------------------------- */}
+        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none">
+          {/* Thin Architectural Concentric Golden Rings in Midground */}
+          <div className="absolute top-12 left-1/3 w-72 h-72 rounded-full border border-[#D9A83F]/12 pointer-events-none opacity-40 animate-pulse duration-[12000ms]" />
+          <div className="absolute top-20 left-[35%] w-56 h-56 rounded-full border border-dashed border-[#D9A83F]/10 pointer-events-none opacity-30" />
+
+          {/* Mathematical & Science Formulae Nodes */}
+          {/* Summation Formula Node */}
+          <div className="absolute top-28 left-[18%] text-[#D9A83F]/15 font-serif text-lg tracking-widest pointer-events-none hidden sm:block">
+            ∑<sub className="text-xs">k=1</sub><sup className="text-xs">n</sup> a<sub className="text-xs">k</sub>
+          </div>
+
+          {/* Calculus Integral Node */}
+          <div className="absolute bottom-36 left-[8%] text-[#FFE7A3]/14 font-serif text-base tracking-widest pointer-events-none hidden md:block">
+            ∫ <span className="text-xs">e<sup className="text-[10px]">x</sup> dx = e<sup className="text-[10px]">x</sup> + C</span>
+          </div>
+
+          {/* Infinity / Euler Identity Node */}
+          <div className="absolute top-36 right-[44%] text-[#D9A83F]/16 font-mono text-xs tracking-wider pointer-events-none hidden lg:block">
+            e<sup className="text-[9px]">iπ</sup> + 1 = 0
+          </div>
+
+          {/* AI Neural Network Sub-Constellation (SVG Connections) */}
+          <svg className="absolute top-20 right-[42%] w-48 h-48 opacity-[0.14] hidden xl:block" viewBox="0 0 200 200">
+            <line x1="30" y1="50" x2="100" y2="30" stroke="#D9A83F" strokeWidth="1" strokeDasharray="3 3" />
+            <line x1="100" y1="30" x2="170" y2="70" stroke="#D9A83F" strokeWidth="1" />
+            <line x1="100" y1="30" x2="110" y2="140" stroke="#D9A83F" strokeWidth="1" />
+            <line x1="30" y1="50" x2="110" y2="140" stroke="#D9A83F" strokeWidth="1" strokeDasharray="2 4" />
+            <circle cx="30" cy="50" r="3" fill="#FFE7A3" />
+            <circle cx="100" cy="30" r="4" fill="#D9A83F" />
+            <circle cx="170" cy="70" r="3" fill="#FFE7A3" />
+            <circle cx="110" cy="140" r="3.5" fill="#D9A83F" />
+          </svg>
+
+          {/* Subtle Silhouette: Academic Cap floating far left */}
+          <div className="absolute bottom-48 left-[28%] opacity-[0.12] hidden md:block">
+            <GraduationCap className="h-10 w-10 text-[#D9A83F]" />
+          </div>
+
+          {/* Subtle Silhouette: Open Codex Book floating far right */}
+          <div className="absolute top-24 right-[12%] opacity-[0.12] hidden lg:block">
+            <BookOpen className="h-8 w-8 text-[#FFE7A3]" />
+          </div>
+        </div>
+
+        {/* -------------------------------------------------------------
+            C. FOREGROUND: Clean Grid (Text + CTAs & 3D Centerpiece)
+            ------------------------------------------------------------- */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center relative z-10">
           {/* Left Side: Badge, Title, Subtitle, Buttons & 4 Feature Icons */}
           <div className="lg:col-span-6 space-y-6 text-left z-10">
             {/* Top Badge: "⭐ Bilim — eng katta kuch!" */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1C1412]/85 border border-[#D9A83F]/35 shadow-lg shadow-[#D9A83F]/10">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1C0D11]/90 backdrop-blur-md border border-[#D9A83F]/40 shadow-lg shadow-[#D9A83F]/10 hover:border-[#D9A83F]/70 transition-all duration-300">
               <Star className="h-3.5 w-3.5 fill-[#D9A83F] text-[#D9A83F]" />
               <span className="text-xs font-bold text-[#F4D27A] tracking-wide">
                 Bilim — eng katta kuch!
               </span>
             </div>
 
-            {/* Main Headline (Exact Typography Match: Playfair Display / Serif) */}
+            {/* Main Headline (Playfair Display / Serif with Drop Shadows) */}
             <div className="space-y-1">
               <h1 className="text-4xl sm:text-5xl md:text-6xl xl:text-[4.2rem] font-luxury-serif font-black leading-[1.08] tracking-tight">
                 <span className="text-[#FFFFFF] block drop-shadow-md">
@@ -547,29 +606,29 @@ export const LandingPage: React.FC = () => {
               Lumos — zamonaviy ta’lim, kuchli ustozlar va real natijalar uchun yaratilgan ta’lim markazi.
             </p>
 
-            {/* 2 Action Buttons */}
+            {/* 2 Action Buttons with Apple / Pro 3D Micro-Interactions */}
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-1">
               {/* Primary: Kurslarni ko‘rish → */}
               <a
                 href="#courses"
-                className="w-full sm:w-auto gold-gradient-btn px-8 py-3.5 rounded-full text-sm font-bold flex items-center justify-center gap-2 shadow-xl shadow-[#D9A83F]/25 hover:brightness-105 cursor-pointer"
+                className="w-full sm:w-auto group relative px-8 py-3.5 rounded-full text-sm font-black text-[#0B0808] bg-gradient-to-r from-[#D9A83F] via-[#F4D27A] to-[#D9A83F] bg-[length:200%_auto] hover:bg-right transition-all duration-500 shadow-[0_10px_30px_rgba(217,168,63,0.35),0_0_15px_rgba(217,168,63,0.2)] hover:shadow-[0_15px_40px_rgba(217,168,63,0.5),0_0_25px_rgba(217,168,63,0.3)] hover:-translate-y-1 cursor-pointer flex items-center justify-center gap-2 border border-[#FFE7A3]/60 active:translate-y-0"
               >
                 <span>Kurslarni ko‘rish</span>
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
               </a>
 
               {/* Secondary: [icon] Darajani aniqlash */}
               <button
                 type="button"
                 onClick={() => setIsDiagnosticModalOpen(true)}
-                className="w-full sm:w-auto px-7 py-3.5 rounded-full text-sm font-bold text-[#F8F5EF] hover:text-[#D9A83F] bg-[#1C1412]/80 border border-[#D9A83F]/35 hover:border-[#D9A83F] transition-all flex items-center justify-center gap-2.5 shadow-md cursor-pointer"
+                className="w-full sm:w-auto px-7 py-3.5 rounded-full text-sm font-bold text-[#F8F5EF] hover:text-[#D9A83F] bg-[#1A0B0E]/80 hover:bg-[#250E13] backdrop-blur-xl border border-[#D9A83F]/40 hover:border-[#D9A83F] shadow-[0_8px_25px_rgba(0,0,0,0.7)] hover:shadow-[0_0_25px_rgba(217,168,63,0.25)] hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer active:translate-y-0"
               >
                 <BookOpen className="h-4 w-4 text-[#D9A83F]" />
                 <span>Darajani aniqlash</span>
               </button>
             </div>
 
-            {/* 4 Feature Icons Underneath Buttons (Exact Match to Mockup) */}
+            {/* 4 Feature Icons Underneath Buttons */}
             <div className="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-semibold text-[#F8F5EF]">
               <div className="flex items-center gap-2">
                 <Package className="h-4 w-4 text-[#D9A83F] shrink-0" />
@@ -596,7 +655,7 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* =========================================================================
+      {/* =========================================================================
             3. FLOATING STATISTICS BAR CAPSULE (Overlapping Transition)
             ========================================================================= */}
         <div className="mt-16 lg:mt-24 relative z-30">
