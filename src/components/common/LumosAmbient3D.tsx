@@ -8,43 +8,36 @@ interface LumosAmbient3DProps {
 interface Particle {
   x: number;
   y: number;
-  z: number; // 0 (far) to 1 (near)
+  z: number;
   vx: number;
   vy: number;
   alpha: number;
   phase: number;
   pulseSpeed: number;
-  tier: number; // 0: dust (70%), 1: spark (20%), 2: glow mote (8%), 3: warm orb (2%)
+  tier: number; // 0: dust (70%), 1: small dot (20%), 2: medium orb (8%), 3: large light (2%)
 }
 
-interface FloatingMathFormula {
+type MovementPattern = 'horizontal' | 'diagonal_up' | 'diagonal_down' | 'orbital' | 'depth_wave' | 'sinusoidal';
+
+interface FloatingObject {
+  type: 'math' | 'english';
   text: string;
   x: number;
   y: number;
   z: number;
   vx: number;
   vy: number;
+  pattern: MovementPattern;
   baseSize: number;
-  opacity: number;
-  wavePhase: number;
-  waveSpeed: number;
-  waveAmp: number;
-}
-
-interface FloatingEnglishWord {
-  text: string;
-  x: number;
-  y: number;
-  z: number;
-  vx: number;
-  vy: number;
-  fontSize: number;
-  opacity: number;
+  baseOpacity: number;
   angle: number;
   rotSpeed: number;
   wavePhase: number;
   waveSpeed: number;
   waveAmp: number;
+  orbitCenter?: { xRatio: number; yRatio: number };
+  orbitRadius?: { rx: number; ry: number };
+  orbitSpeed?: number;
 }
 
 interface Point3D {
@@ -92,8 +85,8 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
     const handleMouseMove = (e: MouseEvent) => {
       const halfW = window.innerWidth / 2;
       const halfH = window.innerHeight / 2;
-      mouseRef.current.targetX = (e.clientX - halfW) / halfW; // -1 to 1
-      mouseRef.current.targetY = (e.clientY - halfH) / halfH; // -1 to 1
+      mouseRef.current.targetX = (e.clientX - halfW) / halfW;
+      mouseRef.current.targetY = (e.clientY - halfH) / halfH;
     };
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
 
@@ -104,7 +97,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     // -------------------------------------------------------------------------
-    // 1. PRE-RENDERED GLOW SPRITES (Zero CPU shadowBlur bottleneck!)
+    // 1. PRE-RENDERED GPU SPRITES (Zero CPU shadowBlur bottleneck!)
     // -------------------------------------------------------------------------
     const createGlowSprite = (size: number, innerR: number, colorStart: string, colorMid: string) => {
       const offCanvas = document.createElement('canvas');
@@ -127,17 +120,17 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       return offCanvas;
     };
 
-    // 4 Sprites: Tier 0 (dust), Tier 1 (spark), Tier 2 (glow mote), Tier 3 (warm orb)
-    const spriteDust = createGlowSprite(14, 2, 'rgba(255, 235, 185, 0.9)', 'rgba(217, 169, 58, 0.35)');
-    const spriteSpark = createGlowSprite(24, 3, 'rgba(255, 245, 210, 0.95)', 'rgba(243, 210, 118, 0.5)');
-    const spriteMote = createGlowSprite(38, 5, 'rgba(243, 210, 118, 0.85)', 'rgba(217, 169, 58, 0.35)');
-    const spriteOrb = createGlowSprite(72, 8, 'rgba(255, 230, 160, 0.75)', 'rgba(217, 169, 58, 0.2)');
-    const sprites = [spriteDust, spriteSpark, spriteMote, spriteOrb];
+    // 4 Sprites: Tier 0 (dust), Tier 1 (small dot), Tier 2 (medium orb), Tier 3 (large light)
+    const spriteDust = createGlowSprite(14, 2, 'rgba(255, 238, 195, 0.9)', 'rgba(217, 169, 58, 0.35)');
+    const spriteDot = createGlowSprite(24, 3, 'rgba(255, 245, 215, 0.95)', 'rgba(243, 210, 118, 0.5)');
+    const spriteOrb = createGlowSprite(40, 6, 'rgba(243, 210, 118, 0.85)', 'rgba(217, 169, 58, 0.35)');
+    const spriteLarge = createGlowSprite(80, 12, 'rgba(255, 235, 170, 0.75)', 'rgba(217, 169, 58, 0.22)');
+    const sprites = [spriteDust, spriteDot, spriteOrb, spriteLarge];
 
     // -------------------------------------------------------------------------
-    // 2. MULTI-TIER PARTICLE SYSTEM (70% dust, 20% spark, 8% mote, 2% warm orb)
+    // 2. MULTI-TIER PARTICLE SYSTEM (70% dust, 20% dots, 8% orbs, 2% large lights)
     // -------------------------------------------------------------------------
-    let maxParticles = isMobile ? 45 : 95;
+    let maxParticles = isMobile ? 40 : 85;
     const particles: Particle[] = Array.from({ length: maxParticles }, () => {
       const rand = Math.random();
       let tier = 0;
@@ -151,101 +144,131 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         x: Math.random() * width,
         y: Math.random() * height,
         z,
-        vx: (Math.random() - 0.5) * (0.12 + z * 0.18),
-        vy: -(0.15 + Math.random() * 0.3 + z * 0.25),
-        alpha: tier === 3 ? 0.35 : 0.2 + z * 0.6,
+        vx: (Math.random() - 0.5) * (0.1 + z * 0.16),
+        vy: -(0.12 + Math.random() * 0.28 + z * 0.22),
+        alpha: tier === 3 ? 0.32 : 0.18 + z * 0.58,
         phase: Math.random() * Math.PI * 2,
-        pulseSpeed: 0.008 + Math.random() * 0.018,
+        pulseSpeed: 0.008 + Math.random() * 0.016,
         tier,
       };
     });
 
     // -------------------------------------------------------------------------
-    // 3. CONTINUOUS AUTONOMOUS MATHEMATICAL FORMULAS (Matematika)
+    // 3. SPATIALLY DISTRIBUTED FLOATING ELEMENTS (Mathematics & English)
+    // Grid-partitioned to guarantee zero initial clustering & maximum breathing room
     // -------------------------------------------------------------------------
-    const mathFormulasList = [
-      'π',
-      '∑',
-      '√x',
-      'a² + b² = c²',
-      'x²',
-      '∫ f(x)dx',
-      'dy/dx',
-      '∞',
-      'f(x)',
-      'lim x→∞',
-      'A = πr²',
-      'x³',
+    const mathList = [
+      'π', '∑', '√x', 'a² + b² = c²', 'x²', '∫ f(x)dx', 'dy/dx',
+      '∞', 'f(x)', 'x + y = z', '△', '○', '□', 'lim x→∞'
     ];
 
-    const mathFormulas: FloatingMathFormula[] = mathFormulasList.map((formula, i) => {
-      const z = 0.25 + Math.random() * 0.65;
-      return {
-        text: formula,
-        x: (width * (0.05 + (i * 0.85) / mathFormulasList.length + Math.random() * 0.06)) % width,
-        y: (height * (0.1 + (i * 0.78) / mathFormulasList.length + Math.random() * 0.12)) % height,
-        z,
-        vx: (Math.random() > 0.5 ? 1 : -1) * (0.08 + Math.random() * 0.12),
-        vy: -(0.06 + Math.random() * 0.12),
-        baseSize: Math.floor(13 + z * 10),
-        opacity: 0.12 + z * 0.12,
-        wavePhase: Math.random() * Math.PI * 2,
-        waveSpeed: 0.0008 + Math.random() * 0.0008,
-        waveAmp: 8 + Math.random() * 12,
-      };
-    });
-
-    // -------------------------------------------------------------------------
-    // 4. CONTINUOUS AUTONOMOUS ENGLISH VOCABULARY (Ingliz Tili)
-    // -------------------------------------------------------------------------
-    const englishWordList = [
-      'LEARN',
-      'VOCABULARY',
-      'GRAMMAR',
-      'SPEAK',
-      'FUTURE',
-      'KNOWLEDGE',
-      'EDUCATION',
-      'PROGRESS',
-      'SUCCESS',
-      'PRACTICE',
-      'ENGLISH',
-      'Aa',
-      'ABC',
+    const englishList = [
+      'LEARN', 'VOCABULARY', 'GRAMMAR', 'SPEAK', 'FUTURE', 'KNOWLEDGE',
+      'PROGRESS', 'SUCCESS', 'PRACTICE', 'ENGLISH', 'Aa', 'ABC'
     ];
 
-    const englishWords: FloatingEnglishWord[] = englishWordList.map((word, i) => {
-      const z = 0.2 + Math.random() * 0.6;
-      return {
-        text: word,
-        x: (width * (0.08 + (i * 0.82) / englishWordList.length + Math.random() * 0.05)) % width,
-        y: (height * (0.08 + (i * 0.8) / englishWordList.length + Math.random() * 0.08)) % height,
+    const totalElements = mathList.length + englishList.length; // 26 elements
+    const cols = 6;
+    const rows = 5;
+
+    const patterns: MovementPattern[] = [
+      'horizontal', 'diagonal_up', 'diagonal_down',
+      'orbital', 'depth_wave', 'sinusoidal'
+    ];
+
+    const floatingObjects: FloatingObject[] = [];
+
+    // Interleave math and english across distinct spatial sectors
+    let mIdx = 0;
+    let eIdx = 0;
+
+    for (let i = 0; i < totalElements; i++) {
+      const isMath = i % 2 === 0 ? (mIdx < mathList.length) : (eIdx >= englishList.length);
+      const text = isMath ? mathList[mIdx++] : englishList[eIdx++];
+
+      // Assign to distinct grid sector with generous jitter
+      const c = i % cols;
+      const r = Math.floor(i / cols) % rows;
+
+      const sectorX = (c + 0.2 + Math.random() * 0.6) / cols;
+      const sectorY = (r + 0.15 + Math.random() * 0.7) / rows;
+
+      // Depth distribution: 30% far, 45% mid, 25% near
+      const depthRand = Math.random();
+      let z = 0.5;
+      if (depthRand < 0.30) {
+        z = 0.15 + Math.random() * 0.20; // FAR
+      } else if (depthRand < 0.75) {
+        z = 0.38 + Math.random() * 0.30; // MID
+      } else {
+        z = 0.72 + Math.random() * 0.24; // NEAR
+      }
+
+      const pattern = patterns[i % patterns.length];
+
+      // Base sizes and opacities strictly scaled by depth
+      const baseSize = isMath
+        ? Math.floor(11 + z * 9) // 12px to 20px
+        : Math.floor(9 + z * 6);  // 10px to 15px
+
+      const baseOpacity = isMath
+        ? 0.08 + z * 0.14        // 0.09 to 0.22
+        : 0.07 + z * 0.11;       // 0.08 to 0.18
+
+      // Movement velocities
+      let vx = 0;
+      let vy = 0;
+
+      if (pattern === 'horizontal') {
+        vx = (i % 2 === 0 ? 1 : -1) * (0.08 + Math.random() * 0.10);
+        vy = (Math.random() - 0.5) * 0.04;
+      } else if (pattern === 'diagonal_up') {
+        vx = (i % 2 === 0 ? 1 : -1) * (0.07 + Math.random() * 0.08);
+        vy = -(0.06 + Math.random() * 0.08);
+      } else if (pattern === 'diagonal_down') {
+        vx = (i % 2 === 0 ? 1 : -1) * (0.07 + Math.random() * 0.08);
+        vy = 0.05 + Math.random() * 0.07;
+      } else if (pattern === 'orbital') {
+        vx = 0;
+        vy = 0;
+      } else if (pattern === 'depth_wave') {
+        vx = (i % 2 === 0 ? 1 : -1) * (0.05 + Math.random() * 0.06);
+        vy = -(0.04 + Math.random() * 0.05);
+      } else { // sinusoidal
+        vx = (i % 2 === 0 ? 1 : -1) * (0.08 + Math.random() * 0.09);
+        vy = -(0.05 + Math.random() * 0.06);
+      }
+
+      floatingObjects.push({
+        type: isMath ? 'math' : 'english',
+        text,
+        x: sectorX * width,
+        y: sectorY * height,
         z,
-        vx: (Math.random() > 0.5 ? 1 : -1) * (0.06 + Math.random() * 0.1),
-        vy: -(0.05 + Math.random() * 0.1),
-        fontSize: Math.floor(10 + z * 6),
-        opacity: 0.1 + z * 0.09,
-        angle: (Math.random() - 0.5) * 0.12,
+        vx,
+        vy,
+        pattern,
+        baseSize,
+        baseOpacity,
+        angle: (Math.random() - 0.5) * 0.14,
         rotSpeed: (Math.random() - 0.5) * 0.0003,
         wavePhase: Math.random() * Math.PI * 2,
-        waveSpeed: 0.0006 + Math.random() * 0.0008,
-        waveAmp: 6 + Math.random() * 10,
-      };
-    });
+        waveSpeed: 0.0007 + Math.random() * 0.0008,
+        waveAmp: 7 + Math.random() * 11,
+        orbitCenter: { xRatio: sectorX, yRatio: sectorY },
+        orbitRadius: { rx: 25 + Math.random() * 35, ry: 15 + Math.random() * 20 },
+        orbitSpeed: (i % 2 === 0 ? 1 : -1) * (0.0008 + Math.random() * 0.0006),
+      });
+    }
 
     // -------------------------------------------------------------------------
-    // 5. 3D WIREFRAME GEOMETRY (Cube & Octahedron in 3D projection)
+    // 4. 3D WIREFRAME GEOMETRY (Spacious outer placement)
     // -------------------------------------------------------------------------
-    // Cube vertices
     const cubeVertices: Point3D[] = [
-      { x: -1, y: -1, z: -1 },
-      { x: 1, y: -1, z: -1 },
-      { x: 1, y: 1, z: -1 },
-      { x: -1, y: 1, z: -1 },
-      { x: -1, y: -1, z: 1 },
-      { x: 1, y: -1, z: 1 },
-      { x: 1, y: 1, z: 1 },
-      { x: -1, y: 1, z: 1 },
+      { x: -1, y: -1, z: -1 }, { x: 1, y: -1, z: -1 },
+      { x: 1, y: 1, z: -1 }, { x: -1, y: 1, z: -1 },
+      { x: -1, y: -1, z: 1 }, { x: 1, y: -1, z: 1 },
+      { x: 1, y: 1, z: 1 }, { x: -1, y: 1, z: 1 },
     ];
     const cubeEdges: [number, number][] = [
       [0, 1], [1, 2], [2, 3], [3, 0],
@@ -253,14 +276,10 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       [0, 4], [1, 5], [2, 6], [3, 7],
     ];
 
-    // Octahedron vertices
     const octaVertices: Point3D[] = [
-      { x: 0, y: -1.3, z: 0 },
-      { x: 0, y: 1.3, z: 0 },
-      { x: -1, y: 0, z: 0 },
-      { x: 1, y: 0, z: 0 },
-      { x: 0, y: 0, z: -1 },
-      { x: 0, y: 0, z: 1 },
+      { x: 0, y: -1.3, z: 0 }, { x: 0, y: 1.3, z: 0 },
+      { x: -1, y: 0, z: 0 }, { x: 1, y: 0, z: 0 },
+      { x: 0, y: 0, z: -1 }, { x: 0, y: 0, z: 1 },
     ];
     const octaEdges: [number, number][] = [
       [0, 2], [0, 3], [0, 4], [0, 5],
@@ -277,25 +296,21 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       centerX: number,
       centerY: number
     ) => {
-      // Rotation Y
       const cosY = Math.cos(rotY);
       const sinY = Math.sin(rotY);
       const x1 = p.x * cosY + p.z * sinY;
       const z1 = -p.x * sinY + p.z * cosY;
 
-      // Rotation X
       const cosX = Math.cos(rotX);
       const sinX = Math.sin(rotX);
       const y2 = p.y * cosX - z1 * sinX;
       const z2 = p.y * sinX + z1 * cosX;
 
-      // Rotation Z
       const cosZ = Math.cos(rotZ);
       const sinZ = Math.sin(rotZ);
       const x3 = x1 * cosZ - y2 * sinZ;
       const y3 = x1 * sinZ + y2 * cosZ;
 
-      // Perspective projection
       const fov = 350;
       const distance = 400 + z2 * scale;
       const proj = fov / Math.max(distance, 100);
@@ -304,6 +319,54 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         x: centerX + x3 * scale * proj,
         y: centerY + y3 * scale * proj,
       };
+    };
+
+    // -------------------------------------------------------------------------
+    // 5. INVISIBLE SAFE ZONES: Dynamic Alpha Attenuation for Readability
+    // -------------------------------------------------------------------------
+    // Calculates opacity reduction factor when an element drifts over primary content
+    const computeSafeZoneFactor = (objX: number, objY: number, viewW: number, viewH: number): number => {
+      // Safe Zone 1, 2, 3: Hero Headline, Description, CTAs (Left Column)
+      const textLeft = viewW * 0.05;
+      const textRight = viewW * 0.49;
+      const textTop = viewH * 0.14;
+      const textBottom = viewH * 0.62;
+
+      // Safe Zone 4: Main 3D Laptop UI & Books (Right Column)
+      const laptopLeft = viewW * 0.52;
+      const laptopRight = viewW * 0.95;
+      const laptopTop = viewH * 0.18;
+      const laptopBottom = viewH * 0.78;
+
+      const margin = 50; // smooth fade margin
+
+      // Inside hero text area
+      if (
+        objX >= textLeft - margin &&
+        objX <= textRight + margin &&
+        objY >= textTop - margin &&
+        objY <= textBottom + margin
+      ) {
+        const dx = Math.max(0, Math.min(objX - textLeft, textRight - objX));
+        const dy = Math.max(0, Math.min(objY - textTop, textBottom - objY));
+        const depth = Math.min(dx, dy);
+        return Math.max(0.04, 1.0 - (depth / margin) * 0.95);
+      }
+
+      // Inside laptop area
+      if (
+        objX >= laptopLeft - margin &&
+        objX <= laptopRight + margin &&
+        objY >= laptopTop - margin &&
+        objY <= laptopBottom + margin
+      ) {
+        const dx = Math.max(0, Math.min(objX - laptopLeft, laptopRight - objX));
+        const dy = Math.max(0, Math.min(objY - laptopTop, laptopBottom - objY));
+        const depth = Math.min(dx, dy);
+        return Math.max(0.04, 1.0 - (depth / margin) * 0.95);
+      }
+
+      return 1.0;
     };
 
     // -------------------------------------------------------------------------
@@ -336,42 +399,42 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
 
       ctx.clearRect(0, 0, width, height);
 
-      // Smooth Lerp for Mouse Parallax
-      const mouseFactor = prefersReducedMotion ? 0 : 0.045;
+      // Smooth Lerp for Subtle Depth Parallax (Never overtakes autonomous motion)
+      const mouseFactor = prefersReducedMotion ? 0 : 0.04;
       mouseRef.current.currentX +=
         (mouseRef.current.targetX - mouseRef.current.currentX) * mouseFactor;
       mouseRef.current.currentY +=
         (mouseRef.current.targetY - mouseRef.current.currentY) * mouseFactor;
 
-      const parallaxX = mouseRef.current.currentX * 16;
-      const parallaxY = mouseRef.current.currentY * 12;
+      const parallaxX = mouseRef.current.currentX * 14;
+      const parallaxY = mouseRef.current.currentY * 10;
 
       // Smooth Lerp for Scroll Parallax
       scrollRef.current.currentY +=
         (scrollRef.current.targetY - scrollRef.current.currentY) * 0.05;
-      const scrollShift = (scrollRef.current.currentY * 0.08) % height;
+      const scrollShift = (scrollRef.current.currentY * 0.07) % height;
 
       // -----------------------------------------------------------------------
       // A. FLOWING GOLD LIGHT TRAILS / RIBBONS (Subtle, breathing wave curves)
       // -----------------------------------------------------------------------
       if (!isLowPerformance) {
-        const ribbonY = height * 0.38 + Math.sin(time * 0.35) * 25 + parallaxY * 0.2;
+        const ribbonY = height * 0.38 + Math.sin(time * 0.3) * 20 + parallaxY * 0.2;
         ctx.save();
         ctx.beginPath();
         ctx.moveTo(0, ribbonY);
-        for (let x = 0; x <= width; x += 40) {
+        for (let x = 0; x <= width; x += 45) {
           const wave =
-            Math.sin(x * 0.0025 + time * 0.6) * 35 +
-            Math.cos(x * 0.004 - time * 0.4) * 20;
+            Math.sin(x * 0.0022 + time * 0.5) * 30 +
+            Math.cos(x * 0.0035 - time * 0.35) * 18;
           ctx.lineTo(x, ribbonY + wave);
         }
-        const grad = ctx.createLinearGradient(0, ribbonY - 30, width, ribbonY + 30);
+        const grad = ctx.createLinearGradient(0, ribbonY - 25, width, ribbonY + 25);
         grad.addColorStop(0, 'rgba(217, 169, 58, 0)');
-        grad.addColorStop(0.3, 'rgba(217, 169, 58, 0.045)');
-        grad.addColorStop(0.7, 'rgba(243, 210, 118, 0.06)');
+        grad.addColorStop(0.3, 'rgba(217, 169, 58, 0.04)');
+        grad.addColorStop(0.7, 'rgba(243, 210, 118, 0.055)');
         grad.addColorStop(1, 'rgba(217, 169, 58, 0)');
         ctx.strokeStyle = grad;
-        ctx.lineWidth = 1.2;
+        ctx.lineWidth = 1.1;
         ctx.setLineDash([8, 14]);
         ctx.stroke();
         ctx.setLineDash([]);
@@ -379,22 +442,22 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       }
 
       // -----------------------------------------------------------------------
-      // B. 3D ROTATING WIREFRAME GEOMETRY (Cube & Octahedron)
+      // B. 3D ROTATING WIREFRAME GEOMETRY (Positioned in spacious negative margins)
       // -----------------------------------------------------------------------
       if (!isLowPerformance) {
-        // 1. 3D Cube in mid-left zone
+        // 1. 3D Cube in far-left negative space
         const cubeCenter = {
-          x: width * 0.14 + parallaxX * 0.4,
-          y: height * 0.35 + Math.sin(time * 0.4) * 15 + parallaxY * 0.4,
+          x: width * 0.06 + parallaxX * 0.35,
+          y: height * 0.32 + Math.sin(time * 0.35) * 12 + parallaxY * 0.35,
         };
-        const rotCube = prefersReducedMotion ? 0.4 : time * 0.18;
+        const rotCube = prefersReducedMotion ? 0.3 : time * 0.16;
         const projectedCube = cubeVertices.map((v) =>
-          project3D(v, rotCube * 0.8, rotCube, rotCube * 0.5, 42, cubeCenter.x, cubeCenter.y)
+          project3D(v, rotCube * 0.8, rotCube, rotCube * 0.5, 36, cubeCenter.x, cubeCenter.y)
         );
 
         ctx.save();
-        ctx.strokeStyle = 'rgba(217, 169, 58, 0.14)';
-        ctx.lineWidth = 0.9;
+        ctx.strokeStyle = 'rgba(217, 169, 58, 0.12)';
+        ctx.lineWidth = 0.85;
         ctx.setLineDash([3, 5]);
         cubeEdges.forEach(([i, j]) => {
           ctx.beginPath();
@@ -405,19 +468,19 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         ctx.setLineDash([]);
         ctx.restore();
 
-        // 2. 3D Octahedron in mid-right zone
+        // 2. 3D Octahedron in far-right negative space
         const octaCenter = {
-          x: width * 0.86 + parallaxX * 0.45,
-          y: height * 0.62 + Math.cos(time * 0.45) * 16 + parallaxY * 0.45,
+          x: width * 0.94 + parallaxX * 0.4,
+          y: height * 0.65 + Math.cos(time * 0.4) * 14 + parallaxY * 0.4,
         };
-        const rotOcta = prefersReducedMotion ? 0.3 : time * 0.22;
+        const rotOcta = prefersReducedMotion ? 0.25 : time * 0.18;
         const projectedOcta = octaVertices.map((v) =>
-          project3D(v, rotOcta * 0.6, -rotOcta * 0.9, rotOcta * 0.3, 38, octaCenter.x, octaCenter.y)
+          project3D(v, rotOcta * 0.6, -rotOcta * 0.85, rotOcta * 0.3, 34, octaCenter.x, octaCenter.y)
         );
 
         ctx.save();
-        ctx.strokeStyle = 'rgba(243, 210, 118, 0.13)';
-        ctx.lineWidth = 0.9;
+        ctx.strokeStyle = 'rgba(243, 210, 118, 0.12)';
+        ctx.lineWidth = 0.85;
         ctx.setLineDash([4, 6]);
         octaEdges.forEach(([i, j]) => {
           ctx.beginPath();
@@ -430,75 +493,81 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       }
 
       // -----------------------------------------------------------------------
-      // C. CONTINUOUS AUTONOMOUS MATHEMATICAL FORMULAS (Matematika)
+      // C. SPATIALLY DISTRIBUTED FLOATING ELEMENTS (Math & English)
+      // Autonomous continuous movement across diverse patterns + Safe Zone protection
       // -----------------------------------------------------------------------
-      mathFormulas.forEach((m) => {
+      floatingObjects.forEach((obj) => {
         if (!prefersReducedMotion) {
-          m.x += m.vx;
-          m.y += m.vy;
-          m.wavePhase += m.waveSpeed;
+          if (obj.pattern === 'orbital' && obj.orbitCenter && obj.orbitRadius && obj.orbitSpeed) {
+            obj.wavePhase += obj.orbitSpeed;
+            obj.x = width * obj.orbitCenter.xRatio + Math.cos(obj.wavePhase) * obj.orbitRadius.rx;
+            obj.y = height * obj.orbitCenter.yRatio + Math.sin(obj.wavePhase) * obj.orbitRadius.ry;
+          } else {
+            obj.x += obj.vx;
+            obj.y += obj.vy;
+            obj.wavePhase += obj.waveSpeed;
+            obj.angle += obj.rotSpeed;
+
+            if (obj.pattern === 'depth_wave') {
+              obj.z = 0.25 + 0.35 * (1 + Math.sin(obj.wavePhase * 0.7));
+            }
+          }
         }
 
         // Seamless wrap-around edges
-        if (m.y < -50) m.y = height + 40;
-        if (m.y > height + 50) m.y = -40;
-        if (m.x < -80) m.x = width + 70;
-        if (m.x > width + 80) m.x = -70;
+        if (obj.y < -50) obj.y = height + 40;
+        if (obj.y > height + 50) obj.y = -40;
+        if (obj.x < -80) obj.x = width + 70;
+        if (obj.x > width + 80) obj.x = -70;
 
-        const edgeFadeX = Math.min(1, Math.min(m.x, width - m.x) / 90);
-        const edgeFadeY = Math.min(1, Math.min(m.y, height - m.y) / 90);
+        // Dynamic Safe Zone Attenuation (keeps hero headline & laptop 100% readable!)
+        const safeFactor = computeSafeZoneFactor(obj.x, obj.y, width, height);
+
+        // Smooth boundary fade
+        const edgeFadeX = Math.min(1, Math.min(obj.x, width - obj.x) / 80);
+        const edgeFadeY = Math.min(1, Math.min(obj.y, height - obj.y) / 80);
         const edgeAlpha = Math.max(0, edgeFadeX * edgeFadeY);
 
-        const floatWave = Math.sin(m.wavePhase) * m.waveAmp;
-        const depthFactor = 0.35 + m.z * 0.65;
-        const mx = m.x + parallaxX * depthFactor;
-        const my = m.y + floatWave + parallaxY * depthFactor;
+        const finalAlpha = obj.baseOpacity * edgeAlpha * safeFactor;
+
+        // Skip rendering if practically invisible
+        if (finalAlpha < 0.02) return;
+
+        const floatWave = Math.sin(obj.wavePhase) * obj.waveAmp;
+        const depthFactor = 0.35 + obj.z * 0.65;
+        const finalX = obj.x + parallaxX * depthFactor;
+        const finalY = obj.y + floatWave + parallaxY * depthFactor;
 
         ctx.save();
-        ctx.font = `italic 600 ${m.baseSize}px "Playfair Display", Georgia, serif`;
-        ctx.fillStyle = `rgba(243, 210, 118, ${m.opacity * edgeAlpha})`;
-        ctx.fillText(m.text, mx, my);
+        ctx.translate(finalX, finalY);
+        ctx.rotate(obj.angle);
+
+        // True Depth Color & Glow:
+        // Distant (z < 0.35): bronze-gold
+        // Mid (0.35 - 0.70): classic Lumos gold
+        // Near (z > 0.70): radiant bright gold
+        let colorStr = `rgba(225, 180, 75, ${finalAlpha})`;
+        if (obj.z > 0.70) {
+          colorStr = `rgba(255, 238, 180, ${finalAlpha})`;
+        } else if (obj.z < 0.35) {
+          colorStr = `rgba(195, 150, 60, ${finalAlpha})`;
+        }
+
+        if (obj.type === 'math') {
+          ctx.font = `italic 600 ${obj.baseSize}px "Playfair Display", Georgia, serif`;
+          ctx.fillStyle = colorStr;
+          ctx.fillText(obj.text, 0, 0);
+        } else {
+          ctx.font = `600 ${obj.baseSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+          ctx.fillStyle = colorStr;
+          ctx.letterSpacing = '1.8px';
+          ctx.fillText(obj.text, 0, 0);
+        }
         ctx.restore();
       });
 
       // -----------------------------------------------------------------------
-      // D. CONTINUOUS AUTONOMOUS ENGLISH VOCABULARY (Ingliz Tili)
-      // -----------------------------------------------------------------------
-      englishWords.forEach((w) => {
-        if (!prefersReducedMotion) {
-          w.x += w.vx;
-          w.y += w.vy;
-          w.angle += w.rotSpeed;
-          w.wavePhase += w.waveSpeed;
-        }
-
-        // Seamless wrap-around edges
-        if (w.y < -50) w.y = height + 40;
-        if (w.y > height + 50) w.y = -40;
-        if (w.x < -100) w.x = width + 90;
-        if (w.x > width + 100) w.x = -90;
-
-        const edgeFadeX = Math.min(1, Math.min(w.x, width - w.x) / 90);
-        const edgeFadeY = Math.min(1, Math.min(w.y, height - w.y) / 90);
-        const edgeAlpha = Math.max(0, edgeFadeX * edgeFadeY);
-
-        const floatWave = Math.sin(w.wavePhase) * w.waveAmp;
-        const depthFactor = 0.35 + w.z * 0.65;
-        const wx = w.x + parallaxX * depthFactor;
-        const wy = w.y + floatWave + parallaxY * depthFactor;
-
-        ctx.save();
-        ctx.translate(wx, wy);
-        ctx.rotate(w.angle);
-        ctx.font = `600 ${w.fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-        ctx.fillStyle = `rgba(243, 210, 118, ${w.opacity * edgeAlpha})`;
-        ctx.letterSpacing = '1.8px';
-        ctx.fillText(w.text, 0, 0);
-        ctx.restore();
-      });
-
-      // -----------------------------------------------------------------------
-      // E. MULTI-TIER PRE-RENDERED GLOW PARTICLES (GPU Blitting)
+      // D. MULTI-TIER PRE-RENDERED GLOW PARTICLES (GPU Blitting)
       // -----------------------------------------------------------------------
       particles.forEach((p) => {
         if (!prefersReducedMotion) {
@@ -549,10 +618,13 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       className={`fixed inset-0 pointer-events-none overflow-hidden z-0 ${className}`}
       aria-hidden="true"
     >
-      {/* Pure CSS Atmospheric Radial Background Gradients */}
+      {/* 
+        Two Large Rare Ambient Light Anchors in Deep Background
+        Pure CSS Radial Gradients with GPU blur (zero per-frame CPU computation)
+      */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#080607] via-[#120609] to-[#080607] opacity-95" />
-      <div className="absolute top-0 right-0 w-[55vw] h-[55vw] rounded-full bg-radial from-[#520E1F]/22 via-[#22070D]/10 to-transparent blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 left-0 w-[45vw] h-[45vw] rounded-full bg-radial from-[#D9A93A]/06 via-[#22070D]/08 to-transparent blur-3xl pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[55vw] h-[55vw] rounded-full bg-radial from-[#520E1F]/20 via-[#22070D]/08 to-transparent blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 left-0 w-[45vw] h-[45vw] rounded-full bg-radial from-[#D9A93A]/05 via-[#22070D]/07 to-transparent blur-3xl pointer-events-none" />
 
       {/* Global High-Performance 60FPS Canvas */}
       <canvas

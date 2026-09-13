@@ -299,27 +299,27 @@ export const LandingPage: React.FC = () => {
             })}
           </nav>
 
-          {/* Action Tools on Right: Kirish & Ro‘yxatdan o‘tish (No language or theme clutter) */}
-          <div className="hidden sm:flex items-center gap-3.5 shrink-0">
-            {/* Compact Glass Login Button */}
+          {/* Action Tools on Right: Kirish & Ro‘yxatdan o‘tish (Harmonious Button Pair) */}
+          <div className="hidden sm:flex items-center gap-3 shrink-0">
+            {/* Secondary CTA: Compact Luxury Glass Login Button */}
             <a
               href="#/login"
-              className="px-5 py-2 rounded-full border border-[#D9A93A]/40 bg-[#16090D]/85 hover:bg-[#D9A93A]/10 hover:border-[#D9A93A] text-xs font-bold text-[#F7F4EE] hover:text-[#F3D276] whitespace-nowrap transition-all shadow-sm"
+              className="h-10 px-5 rounded-full border border-[#D9A83F]/40 bg-[#16090D]/80 hover:bg-[#D9A83F]/15 hover:border-[#F4D27A] hover:shadow-[0_0_15px_rgba(217,168,63,0.3)] hover:-translate-y-[1px] active:translate-y-0 text-xs font-bold text-[#F8F5EF] hover:text-[#FFE7A3] whitespace-nowrap transition-all duration-300 flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.08)] cursor-pointer select-none"
             >
               Kirish
             </a>
 
-            {/* Medium-size, Compact Gold Registration CTA */}
+            {/* Primary CTA: High-End Gold Registration Button (Guaranteed 1 line) */}
             <button
               type="button"
               onClick={() => {
                 setRegisterCourse('');
                 setIsRegisterModalOpen(true);
               }}
-              className="px-5 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs font-black text-[#080607] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] hover:brightness-110 shadow-[0_4px_18px_rgba(217,169,58,0.35)] flex items-center gap-2 whitespace-nowrap shrink-0 transition-all cursor-pointer group active:translate-y-0.5"
+              className="h-10 px-6 rounded-full text-xs font-black text-[#0B0808] bg-gradient-to-r from-[#D9A83F] via-[#F4D27A] to-[#D9A83F] hover:brightness-110 shadow-[0_4px_18px_rgba(217,168,63,0.38)] hover:shadow-[0_6px_25px_rgba(217,168,63,0.55)] hover:-translate-y-[1px] active:translate-y-0 flex items-center gap-2 whitespace-nowrap shrink-0 transition-all duration-300 cursor-pointer group select-none border border-[#FFF2C6]/40"
             >
-              <span className="whitespace-nowrap">Ro‘yxatdan o‘tish</span>
-              <ArrowRight className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
+              <span className="whitespace-nowrap font-bold tracking-wide">Ro‘yxatdan o‘tish</span>
+              <ArrowRight className="h-3.5 w-3.5 shrink-0 transition-transform duration-300 group-hover:translate-x-1" />
             </button>
           </div>
 

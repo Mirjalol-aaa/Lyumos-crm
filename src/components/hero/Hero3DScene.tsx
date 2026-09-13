@@ -227,92 +227,37 @@ export const Hero3DScene: React.FC = () => {
           </div>
 
           {/* =========================================================
-              LAYER B: 5-8 FLOATING 3D GEOMETRIC & EDUCATIONAL ELEMENTS
-              (Z: -20px to +60px) - Pure Vector / CSS 3D (No Emojis)
+              LAYER B: SPACIOUS DISTANT SATELLITE ACCENTS
+              Carefully positioned outward to keep the Laptop as the true focal point
               ========================================================= */}
 
-          {/* 1. 3D Open Book / Codex (Top Left, Z: +35px) */}
+          {/* 1. Mathematical Geometry Orbit Ring (Upper Outer Right, Z: +40px) */}
           <div
-            className="absolute top-12 left-6 pointer-events-none transition-transform duration-200"
+            className="absolute -top-6 -right-6 pointer-events-none transition-transform duration-300 hidden sm:block"
             style={{
-              transform: 'translateZ(35px) rotateX(calc(15deg + var(--mouse-y, 0) * 8deg)) rotateY(calc(-20deg + var(--mouse-x, 0) * 10deg)) rotateZ(-10deg)',
+              transform: 'translateZ(40px) rotateX(calc(var(--mouse-y, 0) * 10deg)) rotateY(calc(var(--ring-rot, 0deg) * 2))',
             }}
           >
-            <div className="relative w-14 h-10 rounded-sm bg-gradient-to-r from-[#5B131E] via-[#851C2C] to-[#400B14] p-1 border border-[#FFE7A3]/50 shadow-[0_10px_25px_rgba(0,0,0,0.8),0_0_15px_rgba(217,168,63,0.3)] flex items-center justify-center">
-              {/* Spine Line */}
-              <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-[#FFE7A3]/80 -translate-x-1/2" />
-              {/* Paper Leaves */}
-              <div className="w-full h-full flex gap-1 px-1 py-0.5">
-                <div className="flex-1 bg-[#F5EDE2] rounded-[1px] border-r border-amber-900/30 flex flex-col justify-around py-0.5 px-0.5">
-                  <div className="h-[1px] w-full bg-slate-400/50" />
-                  <div className="h-[1px] w-3/4 bg-slate-400/50" />
-                  <div className="h-[1px] w-5/6 bg-slate-400/50" />
-                </div>
-                <div className="flex-1 bg-[#FAF5ED] rounded-[1px] border-l border-amber-900/30 flex flex-col justify-around py-0.5 px-0.5">
-                  <div className="h-[1px] w-full bg-slate-400/50" />
-                  <div className="h-[1px] w-4/5 bg-slate-400/50" />
-                  <div className="h-[1px] w-2/3 bg-slate-400/50" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 2. Mathematical Geometry Orbit Ring & Sphere (Top Center-Right, Z: +45px) */}
-          <div
-            className="absolute top-8 right-24 pointer-events-none"
-            style={{
-              transform: 'translateZ(45px) rotateX(calc(var(--mouse-y, 0) * 12deg)) rotateY(calc(var(--ring-rot, 0deg) * 2.5))',
-            }}
-          >
-            <div className="relative w-12 h-12 flex items-center justify-center">
-              {/* Orbit Rings */}
-              <div className="absolute inset-0 rounded-full border border-[#D9A83F]/60 animate-spin duration-[15000ms]" />
-              <div className="absolute inset-1.5 rounded-full border border-[#FFE7A3]/40 animate-ping duration-[6000ms]" />
-              {/* Core Luminous Golden Geometry Node */}
-              <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-[#D9A83F] to-[#FFE7A3] shadow-[0_0_20px_#D9A83F] flex items-center justify-center font-serif font-black text-[#0B0808] text-xs">
+            <div className="relative w-14 h-14 flex items-center justify-center">
+              {/* Subtle Gold Orbit Ring */}
+              <div className="absolute inset-0 rounded-full border border-[#D9A83F]/35 animate-spin duration-[20000ms]" />
+              {/* Luminous Golden Geometry Node */}
+              <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#D9A83F] via-[#F4D27A] to-[#FFE7A3] shadow-[0_0_20px_rgba(217,168,63,0.5)] flex items-center justify-center font-serif font-black text-[#0B0808] text-xs">
                 π
               </div>
-              {/* Satellite Geometry Nodes */}
-              <div className="absolute top-0 left-1 w-1.5 h-1.5 rounded-full bg-[#FFE7A3] shadow-[0_0_8px_#FFE7A3]" />
-              <div className="absolute bottom-1 right-0 w-2 h-2 rounded-full bg-[#D9A83F] shadow-[0_0_8px_#D9A83F]" />
-              <div className="absolute top-2 right-1 w-1 h-1 rounded-full bg-white shadow-[0_0_6px_#FFFFFF]" />
+              {/* Orbiting Satellite Dot */}
+              <div className="absolute top-0 left-2 w-1.5 h-1.5 rounded-full bg-[#FFE7A3] shadow-[0_0_8px_#FFE7A3]" />
             </div>
           </div>
 
-          {/* 3. Mathematical Formula Glass Token (Upper Right, Z: +55px) */}
+          {/* 2. English Vocabulary Tablet (Lower Outer Left, Z: +35px) */}
           <div
-            className="absolute top-20 right-6 pointer-events-none"
+            className="absolute -bottom-8 -left-6 pointer-events-none transition-transform duration-300 hidden sm:block"
             style={{
-              transform: 'translateZ(55px) rotateX(calc(var(--mouse-y, 0) * -10deg)) rotateY(calc(var(--mouse-x, 0) * -12deg))',
+              transform: 'translateZ(35px) rotateX(calc(15deg - var(--mouse-y, 0) * 6deg)) rotateY(calc(18deg + var(--mouse-x, 0) * 8deg))',
             }}
           >
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#241216]/90 to-[#100709]/90 border border-[#D9A83F]/50 backdrop-blur-md shadow-[0_10px_20px_rgba(0,0,0,0.8),0_0_15px_rgba(217,168,63,0.25)] flex items-center justify-center text-[#F4D27A] font-serif font-black text-sm">
-              <span>∑</span>
-            </div>
-          </div>
-
-          {/* 4. 3D Faceted Gold Polyhedron / Cube (Left Center, Z: +30px) */}
-          <div
-            className="absolute top-1/2 -translate-y-1/2 left-3 pointer-events-none"
-            style={{
-              transform: `translateZ(30px) rotateX(${timeRef.current * 20}deg) rotateY(${timeRef.current * 35}deg)`,
-            }}
-          >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#8A5A12] via-[#F4D27A] to-[#FFE7A3] p-[1.5px] shadow-[0_0_22px_rgba(217,168,63,0.55)] rotate-45">
-              <div className="w-full h-full rounded-lg bg-gradient-to-br from-[#2A0E14] via-[#1A070A] to-[#0A0405] flex items-center justify-center">
-                <div className="w-2.5 h-2.5 rounded-sm bg-[#D9A83F] opacity-75" />
-              </div>
-            </div>
-          </div>
-
-          {/* 5. English Vocabulary & Alphabet Tablet (Lower Left, Z: +40px) */}
-          <div
-            className="absolute bottom-20 left-6 pointer-events-none"
-            style={{
-              transform: 'translateZ(40px) rotateX(calc(25deg - var(--mouse-y, 0) * 8deg)) rotateY(calc(20deg + var(--mouse-x, 0) * 10deg))',
-            }}
-          >
-            <div className="w-12 h-14 rounded-lg bg-gradient-to-b from-[#1E1114] to-[#0D0709] border border-[#D9A83F]/40 p-1.5 shadow-[0_12px_24px_rgba(0,0,0,0.85)] flex flex-col justify-between">
+            <div className="w-12 h-14 rounded-lg bg-gradient-to-b from-[#1C0D10]/90 to-[#0A0406]/95 border border-[#D9A83F]/40 p-1.5 shadow-[0_12px_24px_rgba(0,0,0,0.85)] flex flex-col justify-between backdrop-blur-md">
               <div className="flex justify-between items-center px-0.5">
                 <span className="text-[9px] font-black text-[#FFE7A3] tracking-widest font-sans">ABC</span>
                 <span className="text-[8px] font-serif font-bold text-[#D9A83F]">Aa</span>
@@ -324,44 +269,6 @@ export const Hero3DScene: React.FC = () => {
               <div className="text-[7.5px] font-bold text-center text-[#F4D27A] uppercase tracking-wider">
                 English
               </div>
-            </div>
-          </div>
-
-          {/* 6. 3D Graduation Cap Silhouette (Floating Node, Upper Mid, Z: +20px) */}
-          <div
-            className="absolute top-28 left-20 pointer-events-none opacity-80"
-            style={{
-              transform: `translateZ(20px) rotateZ(${Math.sin(timeRef.current) * 8}deg)`,
-            }}
-          >
-            <div className="w-7 h-7 rounded-full bg-[#D9A83F]/15 border border-[#D9A83F]/40 flex items-center justify-center">
-              <GraduationCap className="h-3.5 w-3.5 text-[#F4D27A]" />
-            </div>
-          </div>
-
-          {/* 7. Radiant Gold Energy Orb (Bottom Right, Z: +50px) */}
-          <div
-            className="absolute bottom-16 right-8 pointer-events-none"
-            style={{
-              transform: `translateZ(50px) scale(${1 + Math.sin(timeRef.current * 2) * 0.08})`,
-            }}
-          >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#D9A83F] via-[#FFE7A3] to-white p-[1px] shadow-[0_0_28px_rgba(217,168,63,0.7)] flex items-center justify-center">
-              <div className="w-full h-full rounded-full bg-[#1C0D10]/80 flex items-center justify-center">
-                <Sparkles className="h-4 w-4 text-[#FFE7A3]" />
-              </div>
-            </div>
-          </div>
-
-          {/* 8. Mathematical Formula Node "π" (Bottom Center, Z: +30px) */}
-          <div
-            className="absolute bottom-6 left-28 pointer-events-none opacity-75"
-            style={{
-              transform: 'translateZ(30px)',
-            }}
-          >
-            <div className="px-2 py-0.5 rounded-full bg-[#1C0F12]/80 border border-[#D9A83F]/35 text-[11px] font-serif font-black text-[#D9A83F] shadow-md">
-              π ≈ 3.14159
             </div>
           </div>
 
