@@ -55,9 +55,6 @@ export const LandingPage: React.FC = () => {
 
   // UI States & Modals
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
-  const langDropdownRef = useRef<HTMLDivElement>(null);
-
   const [isDiagnosticModalOpen, setIsDiagnosticModalOpen] = useState(false);
   const [selectedCourseForDetails, setSelectedCourseForDetails] = useState<Course | null>(null);
 
@@ -139,26 +136,6 @@ export const LandingPage: React.FC = () => {
     };
   }, []);
 
-  // 3. Close language dropdown on outside click or ESC
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (langDropdownRef.current && !langDropdownRef.current.contains(e.target as Node)) {
-        setIsLangDropdownOpen(false);
-      }
-    };
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setIsLangDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
 
   // 4. "Bosh sahifa" click transition handler
   const handleHomeClick = (e: React.MouseEvent) => {
@@ -299,7 +276,7 @@ export const LandingPage: React.FC = () => {
           </a>
 
           {/* Centered Navigation Links with Sliding Active Indicator */}
-          <nav className="hidden xl:flex items-center gap-7 text-xs font-semibold uppercase tracking-wider text-[#A9A3A0]">
+          <nav className="hidden xl:flex items-center gap-7 text-xs font-bold uppercase tracking-wider text-[#A9A3A0]">
             {navMenuItems.map((item) => {
               const isActive = activeSection === item.id;
               return (
@@ -307,7 +284,7 @@ export const LandingPage: React.FC = () => {
                   key={item.id}
                   href={item.href}
                   onClick={item.onClick}
-                  className={`relative py-2 px-1 transition-all duration-300 ${
+                  className={`relative py-2 px-1 whitespace-nowrap transition-all duration-300 ${
                     isActive
                       ? 'text-[#F3D276] font-bold drop-shadow-[0_0_8px_rgba(243,210,118,0.4)]'
                       : 'hover:text-[#F7F4EE]'
@@ -315,60 +292,19 @@ export const LandingPage: React.FC = () => {
                 >
                   <span>{item.label}</span>
                   {isActive && (
-                    <span className="absolute bottom-0 inset-x-0 h-[2px] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] rounded-full shadow-[0_0_10px_#D9A93A] transition-all duration-300 animate-in fade-in" />
+                    <span className="absolute bottom-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] rounded-full shadow-[0_0_10px_#D9A93A] transition-all duration-300 animate-in fade-in" />
                   )}
                 </a>
               );
             })}
           </nav>
 
-          {/* Action Tools on Right: Language, Kirish, Ro‘yxatdan o‘tish */}
-          <div className="hidden sm:flex items-center gap-3">
-            {/* Language Selector Dropdown */}
-            <div className="relative" ref={langDropdownRef}>
-              <button
-                type="button"
-                onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#D9A93A]/30 bg-[#16090D] text-xs font-semibold text-[#F7F4EE] hover:border-[#D9A93A] transition-all cursor-pointer"
-                aria-expanded={isLangDropdownOpen}
-              >
-                <Globe className="h-3.5 w-3.5 text-[#D9A93A]" />
-                <span>{language === 'uz' ? 'O‘zbekcha' : language === 'ru' ? 'Русский' : 'English'}</span>
-                <ChevronDown className="h-3 w-3 text-[#A9A3A0]" />
-              </button>
-
-              {isLangDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-36 rounded-2xl bg-[#16090D] border border-[#D9A93A]/40 p-1.5 shadow-2xl z-50 text-xs backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150">
-                  {[
-                    { code: 'uz', label: 'O‘zbekcha' },
-                    { code: 'ru', label: 'Русский' },
-                    { code: 'en', label: 'English' },
-                  ].map((lng) => (
-                    <button
-                      key={lng.code}
-                      type="button"
-                      onClick={() => {
-                        setLanguage(lng.code as any);
-                        setIsLangDropdownOpen(false);
-                      }}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-colors ${
-                        language === lng.code
-                          ? 'bg-[#D9A93A] text-[#080607] font-bold shadow-sm'
-                          : 'text-[#F7F4EE] hover:bg-white/5'
-                      }`}
-                    >
-                      <span>{lng.label}</span>
-                      {language === lng.code && <Check className="h-3.5 w-3.5 stroke-[2.5]" />}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
+          {/* Action Tools on Right: Kirish & Ro‘yxatdan o‘tish (No language or theme clutter) */}
+          <div className="hidden sm:flex items-center gap-3.5 shrink-0">
             {/* Compact Glass Login Button */}
             <a
               href="#/login"
-              className="px-4 py-1.5 rounded-full border border-[#D9A93A]/35 bg-[#16090D]/80 text-xs font-bold text-[#F7F4EE] hover:text-[#F3D276] hover:border-[#D9A93A] hover:bg-[#200A11] transition-all"
+              className="px-5 py-2 rounded-full border border-[#D9A93A]/40 bg-[#16090D]/85 hover:bg-[#D9A93A]/10 hover:border-[#D9A93A] text-xs font-bold text-[#F7F4EE] hover:text-[#F3D276] whitespace-nowrap transition-all shadow-sm"
             >
               Kirish
             </a>
@@ -380,10 +316,10 @@ export const LandingPage: React.FC = () => {
                 setRegisterCourse('');
                 setIsRegisterModalOpen(true);
               }}
-              className="px-4 py-1.5 rounded-full text-xs font-bold text-[#080607] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] hover:brightness-110 shadow-sm shadow-[#D9A93A]/30 flex items-center gap-1.5 transition-all cursor-pointer"
+              className="px-5 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs font-black text-[#080607] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] hover:brightness-110 shadow-[0_4px_18px_rgba(217,169,58,0.35)] flex items-center gap-2 whitespace-nowrap shrink-0 transition-all cursor-pointer group active:translate-y-0.5"
             >
-              <span>Ro‘yxatdan o‘tish</span>
-              <ArrowRight className="h-3 w-3" />
+              <span className="whitespace-nowrap">Ro‘yxatdan o‘tish</span>
+              <ArrowRight className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
             </button>
           </div>
 
@@ -410,7 +346,7 @@ export const LandingPage: React.FC = () => {
         {isMobileMenuOpen && (
           <div className="xl:hidden bg-[#120609]/98 backdrop-blur-2xl border-b border-[#D9A93A]/30 px-6 py-5 space-y-4 shadow-2xl animate-in slide-in-from-top-2">
             <div className="flex flex-col gap-2.5">
-              {navMenuItems.map((link) => (
+              {[...navMenuItems, { id: 'contact', label: 'Aloqa', href: '#contact' }].map((link) => (
                 <a
                   key={link.id}
                   href={link.href}
@@ -1052,7 +988,7 @@ export const LandingPage: React.FC = () => {
       {/* -------------------------------------------------------------------------
           9. LUXURY FOOTER (Statement: "Bilim bilan chegaralar yo‘q")
           ------------------------------------------------------------------------- */}
-      <footer className="border-t border-[#D9A93A]/20 bg-[#080607] py-16 px-4 sm:px-6 lg:px-8 text-[#A9A3A0] text-xs relative z-10">
+      <footer id="contact" className="border-t border-[#D9A93A]/20 bg-[#080607] py-16 px-4 sm:px-6 lg:px-8 text-[#A9A3A0] text-xs relative z-10">
         <div className="max-w-[1380px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
           {/* Col 1: Brand & Big Statement */}
           <div className="lg:col-span-5 space-y-4">

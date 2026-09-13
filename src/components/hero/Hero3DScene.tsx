@@ -257,7 +257,7 @@ export const Hero3DScene: React.FC = () => {
             </div>
           </div>
 
-          {/* 2. AI Neural Network Sphere (Top Center-Right, Z: +45px) */}
+          {/* 2. Mathematical Geometry Orbit Ring & Sphere (Top Center-Right, Z: +45px) */}
           <div
             className="absolute top-8 right-24 pointer-events-none"
             style={{
@@ -268,11 +268,11 @@ export const Hero3DScene: React.FC = () => {
               {/* Orbit Rings */}
               <div className="absolute inset-0 rounded-full border border-[#D9A83F]/60 animate-spin duration-[15000ms]" />
               <div className="absolute inset-1.5 rounded-full border border-[#FFE7A3]/40 animate-ping duration-[6000ms]" />
-              {/* Core Luminous Node */}
-              <div className="w-4 h-4 rounded-full bg-gradient-to-tr from-[#D9A83F] to-[#FFE7A3] shadow-[0_0_20px_#D9A83F] flex items-center justify-center">
-                <Cpu className="h-2.5 w-2.5 text-[#0B0808]" />
+              {/* Core Luminous Golden Geometry Node */}
+              <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-[#D9A83F] to-[#FFE7A3] shadow-[0_0_20px_#D9A83F] flex items-center justify-center font-serif font-black text-[#0B0808] text-xs">
+                π
               </div>
-              {/* Satellite Node Dots */}
+              {/* Satellite Geometry Nodes */}
               <div className="absolute top-0 left-1 w-1.5 h-1.5 rounded-full bg-[#FFE7A3] shadow-[0_0_8px_#FFE7A3]" />
               <div className="absolute bottom-1 right-0 w-2 h-2 rounded-full bg-[#D9A83F] shadow-[0_0_8px_#D9A83F]" />
               <div className="absolute top-2 right-1 w-1 h-1 rounded-full bg-white shadow-[0_0_6px_#FFFFFF]" />
@@ -305,23 +305,25 @@ export const Hero3DScene: React.FC = () => {
             </div>
           </div>
 
-          {/* 5. Floating Tech Slate / Tablet (Lower Left, Z: +40px) */}
+          {/* 5. English Vocabulary & Alphabet Tablet (Lower Left, Z: +40px) */}
           <div
             className="absolute bottom-20 left-6 pointer-events-none"
             style={{
               transform: 'translateZ(40px) rotateX(calc(25deg - var(--mouse-y, 0) * 8deg)) rotateY(calc(20deg + var(--mouse-x, 0) * 10deg))',
             }}
           >
-            <div className="w-12 h-14 rounded-lg bg-gradient-to-b from-[#1E1114] to-[#0D0709] border border-[#D9A83F]/40 p-1 shadow-[0_12px_24px_rgba(0,0,0,0.85)] flex flex-col justify-between">
+            <div className="w-12 h-14 rounded-lg bg-gradient-to-b from-[#1E1114] to-[#0D0709] border border-[#D9A83F]/40 p-1.5 shadow-[0_12px_24px_rgba(0,0,0,0.85)] flex flex-col justify-between">
               <div className="flex justify-between items-center px-0.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400/80" />
-                <Binary className="h-2 w-2 text-[#D9A83F]" />
+                <span className="text-[9px] font-black text-[#FFE7A3] tracking-widest font-sans">ABC</span>
+                <span className="text-[8px] font-serif font-bold text-[#D9A83F]">Aa</span>
               </div>
               <div className="space-y-0.5 px-0.5">
                 <div className="h-1 w-full bg-[#D9A83F]/30 rounded-xs" />
                 <div className="h-1 w-2/3 bg-[#FFE7A3]/30 rounded-xs" />
               </div>
-              <div className="h-1 w-full bg-gradient-to-r from-[#D9A83F] to-emerald-400 rounded-full" />
+              <div className="text-[7.5px] font-bold text-center text-[#F4D27A] uppercase tracking-wider">
+                English
+              </div>
             </div>
           </div>
 
@@ -428,30 +430,28 @@ export const Hero3DScene: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* UI Metrics Grid inside Screen */}
-                  <div className="grid grid-cols-3 gap-2">
+                  {/* UI Metrics Grid inside Screen: Strictly Matematika and Ingliz tili */}
+                  <div className="grid grid-cols-2 gap-2">
                     <div className="p-2 rounded-lg bg-[#220E13]/85 border border-[#D9A83F]/25 text-center shadow-inner">
-                      <span className="text-[8px] text-[#C7BCB1] uppercase block font-bold">O‘zlashtirish</span>
-                      <span className="text-sm font-black text-[#F4D27A] font-mono">95%</span>
+                      <span className="text-[8px] text-[#FFE7A3] uppercase block font-bold tracking-wider">Matematika</span>
+                      <span className="text-sm font-black text-emerald-400 font-mono">189.0 DTM</span>
+                      <span className="text-[7.5px] text-[#C7BCB1] block font-medium">98% O‘zlashtirish</span>
                     </div>
                     <div className="p-2 rounded-lg bg-[#220E13]/85 border border-[#D9A83F]/25 text-center shadow-inner">
-                      <span className="text-[8px] text-[#C7BCB1] uppercase block font-bold">IELTS Guruhi</span>
-                      <span className="text-sm font-black text-blue-400 font-mono">Band 8.0</span>
-                    </div>
-                    <div className="p-2 rounded-lg bg-[#220E13]/85 border border-[#D9A83F]/25 text-center shadow-inner">
-                      <span className="text-[8px] text-[#C7BCB1] uppercase block font-bold">DTM Natijasi</span>
-                      <span className="text-sm font-black text-emerald-400 font-mono">189.0</span>
+                      <span className="text-[8px] text-[#FFE7A3] uppercase block font-bold tracking-wider">Ingliz tili</span>
+                      <span className="text-sm font-black text-[#F4D27A] font-mono">Band 8.0</span>
+                      <span className="text-[7.5px] text-[#C7BCB1] block font-medium">IELTS & C1 CEFR</span>
                     </div>
                   </div>
 
                   {/* Simulated Progress Chart Bar in Screen */}
                   <div className="p-2.5 rounded-lg bg-[#0F0507]/90 border border-white/5 space-y-1.5">
                     <div className="flex justify-between text-[9px] font-bold">
-                      <span className="text-[#C7BCB1]">Haftalik nazorat imtihoni</span>
-                      <span className="text-[#F4D27A]">1-o‘rin (A’lo)</span>
+                      <span className="text-[#C7BCB1]">Matematika & Ingliz tili</span>
+                      <span className="text-[#F4D27A]">100% Natija</span>
                     </div>
                     <div className="h-2 w-full rounded-full bg-slate-900 overflow-hidden flex">
-                      <div className="h-full bg-gradient-to-r from-[#D9A83F] via-[#F4D27A] to-emerald-400 w-[95%] rounded-full shadow-[0_0_12px_#D9A83F]" />
+                      <div className="h-full bg-gradient-to-r from-[#D9A83F] via-[#F4D27A] to-emerald-400 w-[96%] rounded-full shadow-[0_0_12px_#D9A83F]" />
                     </div>
                   </div>
                 </div>
@@ -472,7 +472,7 @@ export const Hero3DScene: React.FC = () => {
             </div>
 
             {/* ---------------- 3D TEXTBOOK STACK & GRADUATION CAP ---------------- */}
-            {/* Positioned on the lower right in front of the laptop */}
+            {/* Positioned on the lower right in front of the laptop with independent 3D wave float */}
             <div
               className="absolute -bottom-8 -right-6 sm:-right-10 pointer-events-none"
               style={{
@@ -480,30 +480,32 @@ export const Hero3DScene: React.FC = () => {
                 transform: 'translateZ(65px) rotateX(15deg) rotateY(-22deg)',
               }}
             >
-              {/* Stack of 3 Hardcover Luxury Books */}
-              <div className="relative space-y-[-10px]">
-                {/* Book 1 (Bottom): Deep Burgundy & Gold Foil */}
-                <div className="w-44 h-8 rounded-lg bg-gradient-to-r from-[#4A0E17] via-[#6B1422] to-[#3B0B12] border-t border-l border-[#FFE7A3]/60 border-r border-b border-[#1E0509] shadow-xl flex items-center justify-between px-3">
+              {/* Stack of 2 Hardcover Luxury Books: MATEMATIKA & INGLIZ TILI */}
+              <div className="relative space-y-[-8px]">
+                {/* Book 1 (Matematika): Deep Burgundy & Gold Foil */}
+                <div 
+                  className="w-44 h-8 rounded-lg bg-gradient-to-r from-[#4A0E17] via-[#6B1422] to-[#3B0B12] border-t border-l border-[#FFE7A3]/60 border-r border-b border-[#1E0509] shadow-xl flex items-center justify-between px-3 transition-transform duration-300"
+                  style={{
+                    transform: `translateY(${Math.sin(timeRef.current * 1.5) * 3}px) rotateZ(${Math.sin(timeRef.current * 1.2) * 1.5}deg)`,
+                  }}
+                >
                   <span className="text-[8px] font-luxury-display font-black tracking-widest text-[#F4D27A]">
-                    LUMOS EXCELLENCE
+                    MATEMATIKA
                   </span>
                   <div className="h-4 w-3 rounded-sm bg-[#EADCCB] border-l border-amber-900/40" />
                 </div>
 
-                {/* Book 2 (Middle): Dark Leather Obsidian */}
-                <div className="w-40 h-7 rounded-lg bg-gradient-to-r from-[#171010] via-[#2A1D1C] to-[#140C0B] border-t border-l border-[#D9A83F]/50 border-r border-b border-black shadow-lg flex items-center justify-between px-3">
-                  <span className="text-[7.5px] font-luxury-display font-bold tracking-wider text-[#EADCCB]">
-                    MATEMATIKA & DTM
+                {/* Book 2 (Ingliz tili): Midnight Navy & Sapphire Foil */}
+                <div 
+                  className="w-40 h-7 rounded-lg bg-gradient-to-r from-[#0F1E36] via-[#1A2E4C] to-[#0A1424] border-t border-l border-[#60A5FA]/60 border-r border-b border-black shadow-lg flex items-center justify-between px-3 transition-transform duration-300"
+                  style={{
+                    transform: `translateY(${Math.cos(timeRef.current * 1.8) * 3.5}px) rotateZ(${-1.5 + Math.cos(timeRef.current * 1.4) * 1.8}deg)`,
+                  }}
+                >
+                  <span className="text-[7.5px] font-luxury-display font-bold tracking-wider text-blue-200">
+                    INGLIZ TILI
                   </span>
                   <div className="h-3.5 w-3 rounded-sm bg-[#F4D27A] border-l border-amber-900" />
-                </div>
-
-                {/* Book 3 (Top): Royal Midnight */}
-                <div className="w-36 h-6 rounded-lg bg-gradient-to-r from-[#0F1E36] via-[#1A2E4C] to-[#0A1424] border-t border-l border-[#60A5FA]/60 shadow-md flex items-center justify-between px-2.5">
-                  <span className="text-[7px] font-luxury-display font-bold tracking-wider text-blue-200">
-                    IELTS 8.0 MASTER
-                  </span>
-                  <div className="h-3 w-2.5 rounded-sm bg-[#EADCCB]" />
                 </div>
               </div>
 
