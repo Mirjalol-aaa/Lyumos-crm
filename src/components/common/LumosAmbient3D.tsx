@@ -137,6 +137,7 @@ interface FlyingEntity3D {
   grabProgress: number; // 0 to 1 smooth grab reaction
   // Object-to-object mutual proximity boost
   proxBoost: number;
+  currentIllum: number; // Continuous distance & grab illumination
   // Book specific dimensions
   bookWidth?: number;
   bookHeight?: number;
@@ -746,6 +747,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         hoverProgress: 0,
         grabProgress: 0,
         proxBoost: 0,
+        currentIllum: 0.20,
         bookWidth,
         bookHeight,
         bookThickness,
@@ -770,7 +772,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       flyingEntities.push(ent);
     }
 
-    // Pointer Interaction State (Real Grab, Carry Anywhere & Physical Throw)
+    // Pointer Interaction State (Isolated 3D Interaction, Capture & Selection Shield)
     const pointerRef = {
       x: -9999,
       y: -9999,
@@ -788,7 +790,23 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
 
     const isInteractiveTarget = (target: EventTarget | null): boolean => {
       if (!target || !(target instanceof HTMLElement)) return false;
-      return !!target.closest('button, a, input, textarea, select, [role="button"], nav');
+      return !!target.closest('button, a, input, textarea, select, [role="button"], nav, header');
+    };
+
+    // Helper to safely enable/disable text selection during active 3D grab
+    const setSelectionShield = (active: boolean) => {
+      if (active) {
+        window.getSelection()?.removeAllRanges();
+        document.documentElement.style.userSelect = 'none';
+        document.documentElement.style.webkitUserSelect = 'none';
+        document.body.style.userSelect = 'none';
+        document.body.style.webkitUserSelect = 'none';
+      } else {
+        document.documentElement.style.userSelect = '';
+        document.documentElement.style.webkitUserSelect = '';
+        document.body.style.userSelect = '';
+        document.body.style.webkitUserSelect = '';
+      }
     };
 
     const handlePointerMove = (e: PointerEvent) => {
@@ -811,9 +829,10 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       pointerRef.history.push({ x: clientX, y: clientY, time: now });
       pointerRef.history = pointerRef.history.filter(pt => now - pt.time <= 120);
 
-      // If currently holding an object, keep grabbing cursor and prevent default selection
+      // If currently holding an object:
       if (pointerRef.grabbedEntity) {
         document.body.style.cursor = 'grabbing';
+        // Prevent accidental text selection or mobile pull-to-scroll while carrying
         e.preventDefault();
         return;
       }
@@ -825,7 +844,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         return;
       }
 
-      // Hit-testing against projected 3D objects with generous hit radius
+      // Hit-testing against projected 3D objects with accurate bounds (only 3D object is interactive)
       let foundHover: FlyingEntity3D | null = null;
       let minDistance = 9999;
 
@@ -845,10 +864,10 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         const dy = clientY - proj.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
         const hitRadius = Math.max(
-          52,
-          ent.baseSize * proj.scale * 2.2,
-          (ent.bookWidth || 0) * proj.scale * 1.1,
-          (ent.bookHeight || 0) * proj.scale * 1.1
+          38,
+          ent.baseSize * proj.scale * 1.6,
+          (ent.bookWidth || 0) * proj.scale * 0.8,
+          (ent.bookHeight || 0) * proj.scale * 0.8
         );
 
         if (dist < hitRadius && dist < minDistance) {
@@ -866,7 +885,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
     };
 
     const handlePointerDown = (e: PointerEvent) => {
-      // Only trigger on primary button (left mouse click or touch)
+      // Only trigger on primary button (left click or single touch)
       if (e.button !== 0) return;
       if (isInteractiveTarget(e.target)) return;
 
@@ -876,7 +895,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       pointerRef.y = clientY;
       pointerRef.history = [{ x: clientX, y: clientY, time: performance.now() }];
 
-      // Hit test directly at click position
+      // Hit test specifically against 3D objects
       let targetEntity: FlyingEntity3D | null = null;
       let minDistance = 9999;
 
@@ -896,10 +915,10 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         const dy = clientY - proj.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
         const hitRadius = Math.max(
-          54,
-          ent.baseSize * proj.scale * 2.2,
-          (ent.bookWidth || 0) * proj.scale * 1.1,
-          (ent.bookHeight || 0) * proj.scale * 1.1
+          40,
+          ent.baseSize * proj.scale * 1.6,
+          (ent.bookWidth || 0) * proj.scale * 0.8,
+          (ent.bookHeight || 0) * proj.scale * 0.8
         );
 
         if (dist < hitRadius && dist < minDistance) {
@@ -929,6 +948,16 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         pointerRef.grabOffsetX = clientX - proj.x;
         pointerRef.grabOffsetY = clientY - proj.y;
 
+        // Pointer Capture on canvas
+        if (canvas) {
+          try {
+            canvas.style.pointerEvents = 'auto';
+            canvas.setPointerCapture(e.pointerId);
+          } catch (err) {}
+        }
+
+        // Active selection shield: prevents any website text from selecting
+        setSelectionShield(true);
         document.body.style.cursor = 'grabbing';
         e.preventDefault();
       }
@@ -982,10 +1011,36 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
 
         ent.physicsState = screenSpeed > 0.5 ? 'THROWN' : 'MOMENTUM';
 
+        // Release pointer capture
+        if (canvas && pointerRef.pointerId !== -1) {
+          try {
+            canvas.releasePointerCapture(pointerRef.pointerId);
+          } catch (err) {}
+          canvas.style.pointerEvents = 'none';
+        }
+
+        // Restore normal text selection
+        setSelectionShield(false);
+
         pointerRef.grabbedEntity = null;
         pointerRef.isDown = false;
         pointerRef.pointerId = -1;
         document.body.style.cursor = pointerRef.hoveredEntity ? 'grab' : 'default';
+      }
+    };
+
+    // Shield against native browser drag and text selection while interacting
+    const handleSelectStart = (e: Event) => {
+      if (pointerRef.grabbedEntity || pointerRef.isDown) {
+        e.preventDefault();
+        return false;
+      }
+    };
+
+    const handleDragStart = (e: DragEvent) => {
+      if (pointerRef.grabbedEntity || pointerRef.isDown) {
+        e.preventDefault();
+        return false;
       }
     };
 
@@ -994,6 +1049,8 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
     window.addEventListener('pointerup', handlePointerUp, { passive: true });
     window.addEventListener('pointercancel', handlePointerUp, { passive: true });
     window.addEventListener('blur', () => handlePointerUp());
+    document.addEventListener('selectstart', handleSelectStart, { capture: true });
+    document.addEventListener('dragstart', handleDragStart, { capture: true });
 
     // -------------------------------------------------------------------------
     // 6. ATMOSPHERIC DUST PARTICLES (Light-reactive motes)
@@ -1516,31 +1573,41 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
 
         const { lightBoost, waveBoost } = getIlluminationBoost(obj.x, obj.y, obj.z);
 
-        const totalIllum =
-          lightBoost * 0.35 +
-          waveBoost * 0.45 +
-          obj.proxBoost * 0.40 +
-          obj.grabProgress * 0.30;
+        // Continuous Distance-Based Proximity Lighting System
+        // z ranges from ~100 (near foreground) to ~750 (deep background)
+        const normZ = Math.max(0, Math.min(1, (obj.z - 110) / (720 - 110)));
+        const rawProximity = 1.0 - normZ; // 1.0 near, 0.0 far
+        const smoothProximity = rawProximity * rawProximity * (3 - 2 * rawProximity); // Smoothstep S-curve
+
+        // Far distance: 10-12% light, Near foreground: 100% light
+        const targetDistanceLight = 0.12 + smoothProximity * 0.88;
+        
+        // Continuous smooth interpolation (currentLight += (targetLight - currentLight) * factor)
+        obj.currentIllum += (targetDistanceLight - obj.currentIllum) * 0.08;
+
+        // Grab Light: subtle 15% increase when grabbed (100% -> 115%), never exploding
+        const grabLightMultiplier = 1.0 + obj.grabProgress * 0.15;
+        const effectiveIllum = Math.min(1.15, (obj.currentIllum + lightBoost * 0.25 + waveBoost * 0.35 + obj.proxBoost * 0.25) * grabLightMultiplier);
 
         const finalAlpha =
-          (obj.baseOpacity + totalIllum + obj.hoverProgress * 0.16) *
+          (obj.baseOpacity * (0.4 + smoothProximity * 0.6) + effectiveIllum * 0.22 + obj.hoverProgress * 0.12) *
           edgeAlpha *
           safeFactor *
           revealProgress;
 
-        if (finalAlpha < 0.012) return;
+        if (finalAlpha < 0.010) return;
 
         ctx.save();
         ctx.translate(proj.x, proj.y);
 
         // Interactive Grab Scale (1.0 -> 1.04) & Hover Scale (1.0 -> 1.02)
-        const interactiveScale = 1.0 + obj.hoverProgress * 0.02 + obj.grabProgress * 0.03;
+        const interactiveScale = 1.0 + obj.hoverProgress * 0.02 + obj.grabProgress * 0.04;
         ctx.scale(interactiveScale, interactiveScale);
 
         // Grab Golden Aura Glow
-        if (obj.grabProgress > 0.05) {
-          const grabAuraSize = spriteGrabAura.width * proj.scale * 1.4;
-          ctx.globalAlpha = obj.grabProgress * 0.55 * revealProgress;
+        if (obj.grabProgress > 0.02) {
+          const grabAuraSize = spriteGrabAura.width * proj.scale * 1.3;
+          ctx.globalAlpha = obj.grabProgress * 0.45 * revealProgress;
           ctx.drawImage(
             spriteGrabAura,
             -grabAuraSize / 2,
@@ -1551,16 +1618,36 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           ctx.globalAlpha = 1.0;
         }
 
-        // Dynamic warm gold coloration
-        let goldStroke = `rgba(243, 210, 118, ${(finalAlpha + totalIllum * 0.4) * 0.95})`;
-        let goldFill = `rgba(217, 168, 63, ${finalAlpha * 0.85})`;
-        if (obj.z < 260 || obj.grabProgress > 0.2) {
-          goldStroke = `rgba(255, 235, 170, ${(finalAlpha + totalIllum * 0.5) * 1.0})`;
-          goldFill = `rgba(255, 245, 215, ${finalAlpha * 0.95})`;
-        } else if (obj.z > 500) {
-          goldStroke = `rgba(195, 150, 55, ${finalAlpha * 0.75})`;
-          goldFill = `rgba(185, 140, 50, ${finalAlpha * 0.65})`;
+        // CONTINUOUS COLOR TRANSITION BASED ON DISTANCE & ILLUMINATION:
+        // Far away: dark black / dark burgundy (low contrast, desaturated)
+        // Mid-distance: warm deep burgundy -> subtle amber gold
+        // Near foreground: brilliant warm champagne gold
+        const interpVal = Math.max(0, Math.min(1, effectiveIllum));
+        let colR: number, colG: number, colB: number;
+        if (interpVal < 0.35) {
+          // Far: Dark black/burgundy (38, 12, 18) to warm burgundy (88, 24, 34)
+          const p = interpVal / 0.35;
+          colR = Math.round(38 + (88 - 38) * p);
+          colG = Math.round(12 + (24 - 12) * p);
+          colB = Math.round(18 + (34 - 18) * p);
+        } else if (interpVal < 0.70) {
+          // Mid: Warm burgundy (88, 24, 34) to rich amber gold (195, 140, 56)
+          const p = (interpVal - 0.35) / 0.35;
+          colR = Math.round(88 + (195 - 88) * p);
+          colG = Math.round(24 + (140 - 24) * p);
+          colB = Math.round(34 + (56 - 34) * p);
+        } else {
+          // Near: Rich amber gold (195, 140, 56) to luminous champagne gold (255, 238, 180)
+          const p = Math.min(1, (interpVal - 0.70) / 0.30);
+          colR = Math.round(195 + (255 - 195) * p);
+          colG = Math.round(140 + (238 - 140) * p);
+          colB = Math.round(56 + (180 - 56) * p);
         }
+
+        const strokeAlpha = Math.min(1.0, finalAlpha * (0.6 + effectiveIllum * 0.5));
+        const fillAlpha = Math.min(1.0, finalAlpha * (0.4 + effectiveIllum * 0.45));
+        const goldStroke = `rgba(${colR}, ${colG}, ${colB}, ${strokeAlpha})`;
+        const goldFill = `rgba(${Math.round(colR * 0.9)}, ${Math.round(colG * 0.9)}, ${Math.round(colB * 0.9)}, ${fillAlpha})`;
 
         const rx = obj.rotX;
         const ry = obj.rotY;
@@ -1596,7 +1683,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           ctx.fill();
 
           // Gold Double Hairline Border
-          ctx.strokeStyle = `rgba(255, 235, 170, ${(finalAlpha + totalIllum * 0.5) * 0.9})`;
+          ctx.strokeStyle = `rgba(255, 235, 170, ${(finalAlpha + effectiveIllum * 0.5) * 0.9})`;
           ctx.lineWidth = 1.1 + obj.grabProgress * 0.4;
           ctx.stroke();
 
@@ -2027,7 +2114,9 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       window.removeEventListener('pointerdown', handlePointerDown);
       window.removeEventListener('pointerup', handlePointerUp);
       window.removeEventListener('pointercancel', handlePointerUp);
-      if (animFrameIdRef.current) {
+      document.removeEventListener('selectstart', handleSelectStart, { capture: true } as any);
+      document.removeEventListener('dragstart', handleDragStart, { capture: true } as any);
+      setSelectionShield(false);      if (animFrameIdRef.current) {
         cancelAnimationFrame(animFrameIdRef.current);
       }
     };
@@ -2049,7 +2138,8 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       {/* Global High-Performance 60FPS 3D Universe Canvas */}
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 w-full h-full block"
+        className="absolute inset-0 w-full h-full block select-none pointer-events-none"
+        style={{ touchAction: 'none', userSelect: 'none', WebkitUserSelect: 'none' }}
       />
     </div>
   );
