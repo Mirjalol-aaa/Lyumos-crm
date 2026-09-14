@@ -770,19 +770,30 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       flyingEntities.push(ent);
     }
 
-    // Pointer Interaction State (Drag, Velocity Tracking & Throwing)
+    // Pointer Interaction State (Real Grab, Carry Anywhere & Physical Throw)
     const pointerRef = {
       x: -9999,
       y: -9999,
       isDown: false,
+      pointerId: -1,
+      grabOffsetX: 0,
+      grabOffsetY: 0,
       grabbedEntity: null as FlyingEntity3D | null,
       hoveredEntity: null as FlyingEntity3D | null,
       history: [] as { x: number; y: number; time: number }[],
     };
 
-    const handlePointerMove = (e: MouseEvent | TouchEvent) => {
-      const clientX = 'touches' in e ? e.touches[0].clientX : (e as MouseEvent).clientX;
-      const clientY = 'touches' in e ? e.touches[0].clientY : (e as MouseEvent).clientY;
+    // Shared camera & parallax references for projection inside event handlers
+    const activeCamRef = { camX: 0, camY: 0, camZ: 0, parallaxX: 0, parallaxY: 0 };
+
+    const isInteractiveTarget = (target: EventTarget | null): boolean => {
+      if (!target || !(target instanceof HTMLElement)) return false;
+      return !!target.closest('button, a, input, textarea, select, [role="button"], nav');
+    };
+
+    const handlePointerMove = (e: PointerEvent) => {
+      const clientX = e.clientX;
+      const clientY = e.clientY;
 
       pointerRef.x = clientX;
       pointerRef.y = clientY;
@@ -795,28 +806,26 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       mouseRef.current.screenY = clientY;
       mouseRef.current.isInside = true;
 
-      // Sample pointer history for throw velocity calculation
+      // Sample pointer history for throw velocity calculation (rolling 120ms buffer)
       const now = performance.now();
       pointerRef.history.push({ x: clientX, y: clientY, time: now });
-      if (pointerRef.history.length > 5) {
-        pointerRef.history.shift();
-      }
+      pointerRef.history = pointerRef.history.filter(pt => now - pt.time <= 120);
 
-      // If currently holding an object, update cursor to grabbing
+      // If currently holding an object, keep grabbing cursor and prevent default selection
       if (pointerRef.grabbedEntity) {
         document.body.style.cursor = 'grabbing';
+        e.preventDefault();
         return;
       }
 
       // Check if hovering over website UI controls (buttons, navigation, links)
-      const targetElem = e.target as HTMLElement | null;
-      if (targetElem && targetElem.closest('button, a, input, [role="button"], nav')) {
+      if (isInteractiveTarget(e.target)) {
         pointerRef.hoveredEntity = null;
         document.body.style.cursor = 'default';
         return;
       }
 
-      // Hit-testing against projected 3D objects
+      // Hit-testing against projected 3D objects with generous hit radius
       let foundHover: FlyingEntity3D | null = null;
       let minDistance = 9999;
 
@@ -824,16 +833,23 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         const ent = flyingEntities[i];
         const proj = project(
           { x: ent.x, y: ent.y, z: ent.z },
-          0, 0, 0,
-          mouseRef.current.currentX * 14,
-          mouseRef.current.currentY * 10
+          activeCamRef.camX,
+          activeCamRef.camY,
+          activeCamRef.camZ,
+          activeCamRef.parallaxX,
+          activeCamRef.parallaxY
         );
         if (proj.scale <= 0) continue;
 
         const dx = clientX - proj.x;
         const dy = clientY - proj.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        const hitRadius = Math.max(42, ent.baseSize * proj.scale * 1.5);
+        const hitRadius = Math.max(
+          52,
+          ent.baseSize * proj.scale * 2.2,
+          (ent.bookWidth || 0) * proj.scale * 1.1,
+          (ent.bookHeight || 0) * proj.scale * 1.1
+        );
 
         if (dist < hitRadius && dist < minDistance) {
           minDistance = dist;
@@ -849,69 +865,135 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       }
     };
 
-    const handlePointerDown = (e: MouseEvent | TouchEvent) => {
-      const targetElem = e.target as HTMLElement | null;
-      // Do not grab background objects if clicking on navigation, CTAs or buttons
-      if (targetElem && targetElem.closest('button, a, input, [role="button"], nav')) {
-        return;
+    const handlePointerDown = (e: PointerEvent) => {
+      // Only trigger on primary button (left mouse click or touch)
+      if (e.button !== 0) return;
+      if (isInteractiveTarget(e.target)) return;
+
+      const clientX = e.clientX;
+      const clientY = e.clientY;
+      pointerRef.x = clientX;
+      pointerRef.y = clientY;
+      pointerRef.history = [{ x: clientX, y: clientY, time: performance.now() }];
+
+      // Hit test directly at click position
+      let targetEntity: FlyingEntity3D | null = null;
+      let minDistance = 9999;
+
+      for (let i = flyingEntities.length - 1; i >= 0; i--) {
+        const ent = flyingEntities[i];
+        const proj = project(
+          { x: ent.x, y: ent.y, z: ent.z },
+          activeCamRef.camX,
+          activeCamRef.camY,
+          activeCamRef.camZ,
+          activeCamRef.parallaxX,
+          activeCamRef.parallaxY
+        );
+        if (proj.scale <= 0) continue;
+
+        const dx = clientX - proj.x;
+        const dy = clientY - proj.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const hitRadius = Math.max(
+          54,
+          ent.baseSize * proj.scale * 2.2,
+          (ent.bookWidth || 0) * proj.scale * 1.1,
+          (ent.bookHeight || 0) * proj.scale * 1.1
+        );
+
+        if (dist < hitRadius && dist < minDistance) {
+          minDistance = dist;
+          targetEntity = ent;
+        }
       }
 
-      if (pointerRef.hoveredEntity) {
+      if (targetEntity) {
         pointerRef.isDown = true;
-        pointerRef.grabbedEntity = pointerRef.hoveredEntity;
-        pointerRef.grabbedEntity.physicsState = 'GRABBED';
-        pointerRef.history = [
-          { x: pointerRef.x, y: pointerRef.y, time: performance.now() },
-        ];
+        pointerRef.pointerId = e.pointerId;
+        pointerRef.grabbedEntity = targetEntity;
+        targetEntity.physicsState = 'GRABBED';
+        targetEntity.throwVx = 0;
+        targetEntity.throwVy = 0;
+        targetEntity.throwVz = 0;
+
+        // Calculate exact grab offset between cursor and projected entity center
+        const proj = project(
+          { x: targetEntity.x, y: targetEntity.y, z: targetEntity.z },
+          activeCamRef.camX,
+          activeCamRef.camY,
+          activeCamRef.camZ,
+          activeCamRef.parallaxX,
+          activeCamRef.parallaxY
+        );
+        pointerRef.grabOffsetX = clientX - proj.x;
+        pointerRef.grabOffsetY = clientY - proj.y;
+
         document.body.style.cursor = 'grabbing';
+        e.preventDefault();
       }
     };
 
-    const handlePointerUp = () => {
+    const handlePointerUp = (e?: PointerEvent) => {
       if (pointerRef.grabbedEntity) {
         const ent = pointerRef.grabbedEntity;
         const history = pointerRef.history;
+        const now = performance.now();
         let throwVx = 0;
         let throwVy = 0;
 
-        if (history.length >= 2) {
-          const first = history[0];
-          const last = history[history.length - 1];
+        // Consider pointer motion within the last 100ms before release
+        const recentPoints = history.filter(p => now - p.time <= 100);
+
+        if (recentPoints.length >= 2) {
+          const first = recentPoints[0];
+          const last = recentPoints[recentPoints.length - 1];
           const dt = (last.time - first.time) / 1000;
-          if (dt > 0.01 && dt < 0.40) {
-            // Speed in pixels per frame (~60 FPS)
-            throwVx = (last.x - first.x) / (dt * 60);
-            throwVy = (last.y - first.y) / (dt * 60);
+          // Only apply throw if pointer was moving right up to release (within 60ms)
+          if (dt > 0.012 && (now - last.time) < 60) {
+            const pxPerSecX = (last.x - first.x) / dt;
+            const pxPerSecY = (last.y - first.y) / dt;
+            // Velocity in pixels per 60 FPS frame
+            throwVx = pxPerSecX / 60;
+            throwVy = pxPerSecY / 60;
           }
         }
 
-        // Clamp to safe max throw speed
-        const speed = Math.sqrt(throwVx * throwVx + throwVy * throwVy);
-        const maxSpeed = 16;
-        if (speed > maxSpeed) {
-          throwVx = (throwVx / speed) * maxSpeed;
-          throwVy = (throwVy / speed) * maxSpeed;
+        // Clamp to safe max throw speed (safe maximum: 28 px/frame)
+        const screenSpeed = Math.sqrt(throwVx * throwVx + throwVy * throwVy);
+        const maxSpeed = 28;
+        if (screenSpeed > maxSpeed) {
+          throwVx = (throwVx / screenSpeed) * maxSpeed;
+          throwVy = (throwVy / screenSpeed) * maxSpeed;
         }
 
-        // Apply throw velocity & angular momentum in the exact swipe direction
-        ent.throwVx = throwVx;
-        ent.throwVy = throwVy;
-        ent.throwRotVx = -throwVy * 0.0035;
-        ent.throwRotVy = throwVx * 0.0035;
-        ent.physicsState = speed > 0.6 ? 'THROWN' : 'MOMENTUM';
+        const relZ = Math.max(ent.z + activeCamRef.camZ, 12);
+        const currentScale = fov / (fov + relZ);
+
+        // Convert screen pixel velocity into 3D world velocity
+        ent.throwVx = throwVx / currentScale;
+        ent.throwVy = throwVy / currentScale;
+        ent.throwVz = (Math.random() - 0.5) * 1.5;
+
+        // Angular momentum matching throw direction
+        ent.throwRotVx = -(throwVy) * 0.0035;
+        ent.throwRotVy = (throwVx) * 0.0035;
+        ent.throwRotVz = (throwVx) * 0.0018;
+
+        ent.physicsState = screenSpeed > 0.5 ? 'THROWN' : 'MOMENTUM';
 
         pointerRef.grabbedEntity = null;
         pointerRef.isDown = false;
+        pointerRef.pointerId = -1;
         document.body.style.cursor = pointerRef.hoveredEntity ? 'grab' : 'default';
       }
     };
 
-    window.addEventListener('mousemove', handlePointerMove, { passive: true });
-    window.addEventListener('mousedown', handlePointerDown, { passive: true });
-    window.addEventListener('mouseup', handlePointerUp, { passive: true });
-    window.addEventListener('touchstart', handlePointerMove, { passive: true });
-    window.addEventListener('touchmove', handlePointerMove, { passive: true });
-    window.addEventListener('touchend', handlePointerUp, { passive: true });
+    window.addEventListener('pointermove', handlePointerMove, { passive: false });
+    window.addEventListener('pointerdown', handlePointerDown, { passive: false });
+    window.addEventListener('pointerup', handlePointerUp, { passive: true });
+    window.addEventListener('pointercancel', handlePointerUp, { passive: true });
+    window.addEventListener('blur', () => handlePointerUp());
 
     // -------------------------------------------------------------------------
     // 6. ATMOSPHERIC DUST PARTICLES (Light-reactive motes)
@@ -1223,91 +1305,140 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       // -----------------------------------------------------------------------
       // 3D PHYSICAL MOTION & MOMENTUM INTEGRATION
       // -----------------------------------------------------------------------
+      // Update shared camera refs for projection & hit-testing
+      activeCamRef.camX = camX;
+      activeCamRef.camY = camY;
+      activeCamRef.camZ = camZ + scrollDepthShift;
+      activeCamRef.parallaxX = parallaxX;
+      activeCamRef.parallaxY = parallaxY;
+
       for (let i = flyingEntities.length - 1; i >= 0; i--) {
         const ent = flyingEntities[i];
 
-        // 1. STATE: GRABBED (Following pointer with spring inertia & 3D tilt)
+        // 1. STATE: GRABBED (Physically attached to cursor, carry anywhere)
         if (ent.physicsState === 'GRABBED') {
-          ent.grabProgress += (1.0 - ent.grabProgress) * 0.15;
-          ent.hoverProgress += (1.0 - ent.hoverProgress) * 0.15;
+          ent.grabProgress += (1.0 - ent.grabProgress) * 0.22;
+          ent.hoverProgress += (1.0 - ent.hoverProgress) * 0.22;
 
-          // Convert screen pointer position back into 3D world space at object's depth
-          const relZ = Math.max(ent.z, 12);
+          // Screen target taking into account the exact point where grabbed
+          const targetScreenX = pointerRef.x - pointerRef.grabOffsetX;
+          const targetScreenY = pointerRef.y - pointerRef.grabOffsetY;
+
+          // Bring slightly forward in depth for tactile responsiveness
+          const targetZ = Math.max(120, ent.baseZ - 60);
+          ent.z += (targetZ - ent.z) * 0.15;
+
+          const relZ = Math.max(ent.z + camZ + scrollDepthShift, 12);
           const currentScale = fov / (fov + relZ);
-          const targetWorldX = (pointerRef.x - width / 2) / currentScale + width / 2;
-          const targetWorldY = (pointerRef.y - height / 2) / currentScale + height / 2;
 
-          const deltaX = targetWorldX - ent.x;
-          const deltaY = targetWorldY - ent.y;
+          // Exact 3D inverse projection:
+          // projX = width / 2 + (worldX - width / 2 - camX + parallaxX) * scale
+          // => worldX = width / 2 + (targetScreenX - width / 2) / scale + camX - parallaxX
+          const targetWorldX = width / 2 + (targetScreenX - width / 2) / currentScale + camX - parallaxX;
+          const targetWorldY = height / 2 + (targetScreenY - height / 2) / currentScale + camY - parallaxY;
 
-          // Mass-inertia lag
-          ent.x += deltaX * ent.springFactor;
-          ent.y += deltaY * ent.springFactor;
+          const prevX = ent.x;
+          const prevY = ent.y;
 
-          // Dynamic 3D tilt on drag
-          ent.rotY += deltaX * 0.0025;
-          ent.rotX -= deltaY * 0.0025;
+          // Highly responsive follow (firmly attached, zero sluggish lag)
+          ent.x += (targetWorldX - ent.x) * 0.85;
+          ent.y += (targetWorldY - ent.y) * 0.85;
 
-          // Sync base coordinates so flight continues seamlessly from new position
-          ent.baseX = ent.x;
-          ent.baseY = ent.y;
-          ent.baseZ = ent.z;
+          const moveDeltaX = ent.x - prevX;
+          const moveDeltaY = ent.y - prevY;
+
+          // Natural 3D rotation reflecting hand carry direction & weight
+          ent.rotY += moveDeltaX * 0.0035;
+          ent.rotX -= moveDeltaY * 0.0035;
+          ent.rotZ += moveDeltaX * 0.0018;
+
+          // Gentle spring return towards neutral roll
+          ent.rotZ *= 0.95;
+
+          // Continuously sync autonomous spline anchor so upon release
+          // it NEVER teleports or jumps back to its original origin
+          const harmonicX = Math.sin(ent.age * ent.curveFreqX + ent.curvePhaseX) * ent.curveAmpX;
+          const harmonicY = Math.cos(ent.age * ent.curveFreqY + ent.curvePhaseY) * ent.curveAmpY;
+          const harmonicZ = Math.sin(ent.age * ent.curveFreqZ + ent.curvePhaseZ) * ent.curveAmpZ;
+          ent.baseX = ent.x - harmonicX;
+          ent.baseY = ent.y - harmonicY;
+          ent.baseZ = ent.z - harmonicZ;
         }
 
         // 2. STATE: THROWN / MOMENTUM (Flying with real inertia, damping & bounce)
         else if (ent.physicsState === 'THROWN' || ent.physicsState === 'MOMENTUM') {
-          ent.grabProgress += (0.0 - ent.grabProgress) * 0.08;
-          ent.hoverProgress += (0.0 - ent.hoverProgress) * 0.08;
+          ent.grabProgress += (0.0 - ent.grabProgress) * 0.10;
+          ent.hoverProgress += (0.0 - ent.hoverProgress) * 0.10;
 
+          // Apply throw velocity
           ent.x += ent.throwVx;
           ent.y += ent.throwVy;
           ent.z += ent.throwVz;
 
           ent.rotX += ent.throwRotVx;
           ent.rotY += ent.throwRotVy;
+          ent.rotZ += ent.throwRotVz;
 
-          // Air resistance damping
-          ent.throwVx *= ent.dragFactor;
-          ent.throwVy *= ent.dragFactor;
-          ent.throwVz *= 0.98;
-          ent.throwRotVx *= 0.98;
-          ent.throwRotVy *= 0.98;
+          // Air resistance damping (smooth gradual decay)
+          ent.throwVx *= 0.985;
+          ent.throwVy *= 0.985;
+          ent.throwVz *= 0.985;
+          ent.throwRotVx *= 0.982;
+          ent.throwRotVy *= 0.982;
+          ent.throwRotVz *= 0.982;
 
-          // Soft Screen Edge Bouncing
-          if (ent.x < width * 0.04) {
-            ent.x = width * 0.04;
+          // Soft Viewport Boundary Bouncing (Preserve 75% speed in reverse)
+          const padX = 35;
+          const padY = 35;
+          if (ent.x < padX) {
+            ent.x = padX;
             ent.throwVx = -ent.throwVx * 0.75;
-          } else if (ent.x > width * 0.96) {
-            ent.x = width * 0.96;
+            ent.throwRotVy = -ent.throwRotVy * 0.75 + (Math.random() - 0.5) * 0.02;
+          } else if (ent.x > width - padX) {
+            ent.x = width - padX;
             ent.throwVx = -ent.throwVx * 0.75;
-          }
-          if (ent.y < height * 0.06) {
-            ent.y = height * 0.06;
-            ent.throwVy = -ent.throwVy * 0.75;
-          } else if (ent.y > height * 0.94) {
-            ent.y = height * 0.94;
-            ent.throwVy = -ent.throwVy * 0.75;
+            ent.throwRotVy = -ent.throwRotVy * 0.75 + (Math.random() - 0.5) * 0.02;
           }
 
-          // Depth safe bounds
-          if (ent.z < 140) {
-            ent.z = 140;
-            ent.throwVz = Math.abs(ent.throwVz) + 0.1;
-          } else if (ent.z > 740) {
-            ent.z = 740;
-            ent.throwVz = -Math.abs(ent.throwVz) - 0.1;
+          if (ent.y < padY) {
+            ent.y = padY;
+            ent.throwVy = -ent.throwVy * 0.75;
+            ent.throwRotVx = -ent.throwRotVx * 0.75 + (Math.random() - 0.5) * 0.02;
+          } else if (ent.y > height - padY) {
+            ent.y = height - padY;
+            ent.throwVy = -ent.throwVy * 0.75;
+            ent.throwRotVx = -ent.throwRotVx * 0.75 + (Math.random() - 0.5) * 0.02;
           }
 
-          // Return to autonomous flight once throw momentum decays
+          // Depth bounds
+          if (ent.z < 120) {
+            ent.z = 120;
+            ent.throwVz = Math.abs(ent.throwVz) * 0.75;
+          } else if (ent.z > 720) {
+            ent.z = 720;
+            ent.throwVz = -Math.abs(ent.throwVz) * 0.75;
+          }
+
+          // Continuously anchor autonomous spline origin to current 3D position
+          const harmonicX = Math.sin(ent.age * ent.curveFreqX + ent.curvePhaseX) * ent.curveAmpX;
+          const harmonicY = Math.cos(ent.age * ent.curveFreqY + ent.curvePhaseY) * ent.curveAmpY;
+          const harmonicZ = Math.sin(ent.age * ent.curveFreqZ + ent.curvePhaseZ) * ent.curveAmpZ;
+          ent.baseX = ent.x - harmonicX;
+          ent.baseY = ent.y - harmonicY;
+          ent.baseZ = ent.z - harmonicZ;
+
+          // Seamless transition back to AUTONOMOUS when velocity is gentle
           const currentSpeed = Math.sqrt(ent.throwVx * ent.throwVx + ent.throwVy * ent.throwVy);
-          if (currentSpeed < 0.4) {
+          if (currentSpeed < 0.35) {
             ent.physicsState = 'AUTONOMOUS';
-            ent.baseX = ent.x;
-            ent.baseY = ent.y;
-            ent.baseZ = ent.z;
-            ent.vx = (Math.random() - 0.5) * 0.30;
-            ent.vy = (Math.random() - 0.5) * 0.20;
+            const normVx = currentSpeed > 0.01 ? ent.throwVx / currentSpeed : (Math.random() - 0.5);
+            const normVy = currentSpeed > 0.01 ? ent.throwVy / currentSpeed : (Math.random() - 0.5);
+            ent.vx = normVx * 0.22 + (Math.random() - 0.5) * 0.12;
+            ent.vy = normVy * 0.16 + (Math.random() - 0.5) * 0.10;
             ent.vz = (Math.random() - 0.5) * 0.12;
+            ent.throwVx = 0;
+            ent.throwVy = 0;
+            ent.throwVz = 0;
           }
         }
 
@@ -1315,8 +1446,8 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         else {
           const isTargetHover = pointerRef.hoveredEntity?.id === ent.id;
           const targetH = isTargetHover ? 1.0 : 0.0;
-          ent.hoverProgress += (targetH - ent.hoverProgress) * 0.10;
-          ent.grabProgress += (0.0 - ent.grabProgress) * 0.10;
+          ent.hoverProgress += (targetH - ent.hoverProgress) * 0.12;
+          ent.grabProgress += (0.0 - ent.grabProgress) * 0.12;
 
           if (!prefersReducedMotion) {
             ent.age += dt;
@@ -1333,14 +1464,14 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
             ent.rotZ += ent.rotSpeedZ;
           }
 
-          // Recycle when out of screen bounds after full flight
+          // Recycle ONLY when autonomous and well outside screen bounds
           const isOutOfScreen =
-            ent.x < -width * 0.22 ||
-            ent.x > width * 1.22 ||
-            ent.y < -height * 0.22 ||
-            ent.y > height * 1.22 ||
-            ent.z < 90 ||
-            ent.z > 860;
+            ent.x < -width * 0.25 ||
+            ent.x > width * 1.25 ||
+            ent.y < -height * 0.25 ||
+            ent.y > height * 1.25 ||
+            ent.z < 80 ||
+            ent.z > 880;
 
           if (isOutOfScreen && ent.age > 8) {
             flyingEntities.splice(i, 1);
@@ -1369,12 +1500,18 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
 
         if (proj.scale <= 0) return;
 
-        // Dynamic Safe Zone Attenuation
-        const safeFactor = computeSafeZoneFactor(proj.x, proj.y);
+        // Dynamic Safe Zone Attenuation (Retain 100% visibility when user interacts)
+        const isInteracting =
+          obj.physicsState === 'GRABBED' ||
+          obj.physicsState === 'THROWN' ||
+          obj.physicsState === 'MOMENTUM' ||
+          obj.grabProgress > 0.05;
 
-        // Edge fade
-        const edgeFadeX = Math.min(1, Math.min(proj.x + 80, width + 80 - proj.x) / 100);
-        const edgeFadeY = Math.min(1, Math.min(proj.y + 80, height + 80 - proj.y) / 100);
+        const safeFactor = isInteracting ? 1.0 : computeSafeZoneFactor(proj.x, proj.y);
+
+        // Edge fade (Do not fade out while user is carrying or throwing near edges)
+        const edgeFadeX = isInteracting ? 1.0 : Math.min(1, Math.min(proj.x + 80, width + 80 - proj.x) / 100);
+        const edgeFadeY = isInteracting ? 1.0 : Math.min(1, Math.min(proj.y + 80, height + 80 - proj.y) / 100);
         const edgeAlpha = Math.max(0, Math.min(1, edgeFadeX * edgeFadeY));
 
         const { lightBoost, waveBoost } = getIlluminationBoost(obj.x, obj.y, obj.z);
@@ -1886,12 +2023,10 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
     return () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('mousemove', handlePointerMove);
-      window.removeEventListener('mousedown', handlePointerDown);
-      window.removeEventListener('mouseup', handlePointerUp);
-      window.removeEventListener('touchstart', handlePointerMove);
-      window.removeEventListener('touchmove', handlePointerMove);
-      window.removeEventListener('touchend', handlePointerUp);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerdown', handlePointerDown);
+      window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointercancel', handlePointerUp);
       if (animFrameIdRef.current) {
         cancelAnimationFrame(animFrameIdRef.current);
       }
