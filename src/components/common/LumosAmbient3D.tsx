@@ -60,7 +60,7 @@ interface TravelingLightWave {
   cycleCount: number;
 }
 
-// Complete Archetype Roster for the 3D Floating Education World
+// Complete Archetype Roster for the Full-Screen 3D World
 type ArchetypeType =
   | 'book_math'
   | 'book_english'
@@ -86,14 +86,28 @@ interface FlyingEntity3D {
   title?: string;
   text?: string;
   formula?: string;
-  // 3D Coordinates & Flight Velocity
-  x: number;
-  y: number;
-  z: number;
+  // Base 3D Coordinates & Base Flight Velocity
+  baseX: number;
+  baseY: number;
+  baseZ: number;
   vx: number;
   vy: number;
   vz: number;
-  // 3D Rotations & Angular Velocities
+  // Current 3D Position
+  x: number;
+  y: number;
+  z: number;
+  // 3D Harmonic Curve Trajectory Parameters (Curved Splines)
+  curveAmpX: number;
+  curveAmpY: number;
+  curveAmpZ: number;
+  curveFreqX: number;
+  curveFreqY: number;
+  curveFreqZ: number;
+  curvePhaseX: number;
+  curvePhaseY: number;
+  curvePhaseZ: number;
+  // 3D Rotations & Independent Angular Velocities
   rotX: number;
   rotY: number;
   rotZ: number;
@@ -103,9 +117,9 @@ interface FlyingEntity3D {
   // Sizing & Base Opacity
   baseSize: number;
   baseOpacity: number;
-  // Lifecycle
+  // Independent Asynchronous Lifecycle
   age: number;
-  lifetime: number; // Flight duration (seconds)
+  lifetime: number; // Flight duration across world (seconds)
   hoverProgress: number; // 0 to 1 smooth physical reaction
   // Object-to-object mutual proximity boost
   proxBoost: number;
@@ -450,8 +464,8 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
     };
 
     // -------------------------------------------------------------------------
-    // 5. CONTINUOUS 3D TRAFFIC & FLIGHT ENGINE
-    // Objects continuously fly across the 3D space, enter, traverse, and exit
+    // 5. NEXT-GEN FULL-SCREEN 3D FLIGHT TRAJECTORY ENGINE
+    // Spans across 8 spatial sectors & 3 depth tiers. Zero central clustering.
     // -------------------------------------------------------------------------
     const ARCHETYPES_CATALOG: ArchetypeType[] = [
       'book_math',
@@ -475,71 +489,99 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
 
     let entitySpawnCounter = 0;
 
-    // Helper to spawn a new entity from one of diverse 3D entry portals
+    // 9 Multi-Directional Entry Portals (covering the entire screen perimeter & depth)
     const spawnFlyingEntity = (portalIndex?: number, forcedArchetype?: ArchetypeType): FlyingEntity3D => {
       entitySpawnCounter++;
-      const pIndex = portalIndex !== undefined ? portalIndex : Math.floor(Math.random() * 6);
+      // 9 portals: 0 to 8
+      const pIndex = portalIndex !== undefined ? portalIndex : Math.floor(Math.random() * 9);
       const archetype = forcedArchetype || ARCHETYPES_CATALOG[entitySpawnCounter % ARCHETYPES_CATALOG.length];
 
-      let x = 0, y = 0, z = 300;
+      let baseX = 0, baseY = 0, baseZ = 300;
       let vx = 0, vy = 0, vz = 0;
 
-      // Portal 0: Top-Left -> Diagonal Down-Right & Forward towards camera
+      // Portal 0: Top-Left -> Sweeping Down-Right across Upper & Mid sectors
       if (pIndex === 0) {
-        x = -width * 0.08 - Math.random() * 80;
-        y = height * (0.08 + Math.random() * 0.35);
-        z = 450 + Math.random() * 200;
-        vx = 0.35 + Math.random() * 0.25;
-        vy = 0.15 + Math.random() * 0.15;
-        vz = -(0.15 + Math.random() * 0.18); // Flies forward!
+        baseX = -width * 0.12 - Math.random() * 80;
+        baseY = height * (0.05 + Math.random() * 0.25);
+        baseZ = 450 + Math.random() * 200;
+        vx = 0.32 + Math.random() * 0.20;
+        vy = 0.16 + Math.random() * 0.14;
+        vz = -(0.14 + Math.random() * 0.16); // Comes closer!
       }
-      // Portal 1: Bottom-Right -> Diagonal Up-Left & Receding into depth
+      // Portal 1: Top-Center -> Drifting Downward through Central-Upper space
       else if (pIndex === 1) {
-        x = width * 1.08 + Math.random() * 80;
-        y = height * (0.60 + Math.random() * 0.30);
-        z = 180 + Math.random() * 150;
-        vx = -(0.32 + Math.random() * 0.22);
-        vy = -(0.14 + Math.random() * 0.16);
-        vz = 0.16 + Math.random() * 0.20; // Recedes into depth!
-      }
-      // Portal 2: Deep Background -> Forward toward Camera & Sideways Drift
-      else if (pIndex === 2) {
-        x = width * (0.15 + Math.random() * 0.70);
-        y = height * (0.15 + Math.random() * 0.70);
-        z = 700 + Math.random() * 120;
-        vx = (Math.random() - 0.5) * 0.35;
-        vy = (Math.random() - 0.5) * 0.25;
-        vz = -(0.35 + Math.random() * 0.25); // Fast forward flight!
-      }
-      // Portal 3: Top -> Downward flight with gentle horizontal curve
-      else if (pIndex === 3) {
-        x = width * (0.35 + Math.random() * 0.55);
-        y = -height * 0.10 - Math.random() * 60;
-        z = 260 + Math.random() * 220;
-        vx = -(0.18 + Math.random() * 0.20);
-        vy = 0.30 + Math.random() * 0.25;
+        baseX = width * (0.35 + Math.random() * 0.30);
+        baseY = -height * 0.12 - Math.random() * 60;
+        baseZ = 320 + Math.random() * 220;
+        vx = (Math.random() - 0.5) * 0.22;
+        vy = 0.32 + Math.random() * 0.22;
         vz = (Math.random() - 0.5) * 0.15;
       }
-      // Portal 4: Bottom-Left -> Up-Right sweeping across behind laptop
-      else if (pIndex === 4) {
-        x = width * (0.05 + Math.random() * 0.25);
-        y = height * 1.10 + Math.random() * 60;
-        z = 320 + Math.random() * 160;
-        vx = 0.32 + Math.random() * 0.24;
-        vy = -(0.25 + Math.random() * 0.20);
+      // Portal 2: Top-Right -> Sweeping Down-Left across Upper-Right to Lower-Left
+      else if (pIndex === 2) {
+        baseX = width * 1.12 + Math.random() * 80;
+        baseY = height * (0.05 + Math.random() * 0.25);
+        baseZ = 380 + Math.random() * 180;
+        vx = -(0.32 + Math.random() * 0.20);
+        vy = 0.16 + Math.random() * 0.14;
         vz = -(0.10 + Math.random() * 0.15);
       }
-      // Portal 5: Right -> Westward flight into deep background
+      // Portal 3: Middle-Left -> Flying Eastward across Mid-Left sector
+      else if (pIndex === 3) {
+        baseX = -width * 0.10 - Math.random() * 80;
+        baseY = height * (0.35 + Math.random() * 0.30);
+        baseZ = 240 + Math.random() * 160;
+        vx = 0.36 + Math.random() * 0.22;
+        vy = (Math.random() - 0.5) * 0.14;
+        vz = 0.12 + Math.random() * 0.15; // Recedes
+      }
+      // Portal 4: Middle-Right -> Flying Westward across Mid-Right sector into depth
+      else if (pIndex === 4) {
+        baseX = width * 1.10 + Math.random() * 80;
+        baseY = height * (0.35 + Math.random() * 0.30);
+        baseZ = 220 + Math.random() * 180;
+        vx = -(0.36 + Math.random() * 0.22);
+        vy = (Math.random() - 0.5) * 0.14;
+        vz = 0.14 + Math.random() * 0.16;
+      }
+      // Portal 5: Bottom-Left -> Climbing Up-Right across Lower-Left & Mid
+      else if (pIndex === 5) {
+        baseX = -width * 0.10 - Math.random() * 80;
+        baseY = height * (0.75 + Math.random() * 0.25);
+        baseZ = 300 + Math.random() * 180;
+        vx = 0.34 + Math.random() * 0.20;
+        vy = -(0.24 + Math.random() * 0.18);
+        vz = -(0.12 + Math.random() * 0.14);
+      }
+      // Portal 6: Bottom-Center -> Rising Upward into Lower & Mid space
+      else if (pIndex === 6) {
+        baseX = width * (0.35 + Math.random() * 0.30);
+        baseY = height * 1.12 + Math.random() * 60;
+        baseZ = 360 + Math.random() * 180;
+        vx = (Math.random() - 0.5) * 0.20;
+        vy = -(0.30 + Math.random() * 0.20);
+        vz = (Math.random() - 0.5) * 0.14;
+      }
+      // Portal 7: Bottom-Right -> Sweeping Up-Left across Lower-Right & Center-Right
+      else if (pIndex === 7) {
+        baseX = width * 1.10 + Math.random() * 80;
+        baseY = height * (0.75 + Math.random() * 0.25);
+        baseZ = 260 + Math.random() * 160;
+        vx = -(0.34 + Math.random() * 0.20);
+        vy = -(0.24 + Math.random() * 0.18);
+        vz = 0.12 + Math.random() * 0.16;
+      }
+      // Portal 8: Deep Background -> Flying Forward toward Camera across Full Screen
       else {
-        x = width * 1.10 + Math.random() * 80;
-        y = height * (0.25 + Math.random() * 0.50);
-        z = 240 + Math.random() * 180;
-        vx = -(0.38 + Math.random() * 0.24);
-        vy = (Math.random() - 0.5) * 0.16;
-        vz = 0.18 + Math.random() * 0.22;
+        baseX = width * (0.10 + Math.random() * 0.80);
+        baseY = height * (0.10 + Math.random() * 0.80);
+        baseZ = 740 + Math.random() * 120;
+        vx = (Math.random() - 0.5) * 0.30;
+        vy = (Math.random() - 0.5) * 0.20;
+        vz = -(0.38 + Math.random() * 0.25); // Fast forward flight toward camera!
       }
 
-      // Base sizes and configurations
+      // Archetype sizing & styling
       let baseSize = 34;
       let baseOpacity = 0.28;
       let title: string | undefined = undefined;
@@ -631,12 +673,26 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         title,
         text,
         formula,
-        x,
-        y,
-        z,
+        baseX,
+        baseY,
+        baseZ,
         vx,
         vy,
         vz,
+        x: baseX,
+        y: baseY,
+        z: baseZ,
+        // Harmonic 3D Curved Spline parameters
+        curveAmpX: 25 + Math.random() * 35,
+        curveAmpY: 20 + Math.random() * 30,
+        curveAmpZ: 30 + Math.random() * 45,
+        curveFreqX: 0.15 + Math.random() * 0.25,
+        curveFreqY: 0.18 + Math.random() * 0.25,
+        curveFreqZ: 0.12 + Math.random() * 0.20,
+        curvePhaseX: Math.random() * Math.PI * 2,
+        curvePhaseY: Math.random() * Math.PI * 2,
+        curvePhaseZ: Math.random() * Math.PI * 2,
+        // Rotations
         rotX: Math.random() * Math.PI * 2,
         rotY: Math.random() * Math.PI * 2,
         rotZ: (Math.random() - 0.5) * 0.4,
@@ -646,7 +702,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         baseSize,
         baseOpacity,
         age: 0,
-        lifetime: 22 + Math.random() * 16, // 22 to 38 seconds flight
+        lifetime: 22 + Math.random() * 16,
         hoverProgress: 0,
         proxBoost: 0,
         bookWidth,
@@ -657,19 +713,22 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       };
     };
 
-    // Initialize 11–13 active flying entities distributed across spatial locations
+    // Target 11–13 active flying entities distributed across all 8 sectors
     const targetEntityCount = isMobile ? 6 : isTablet ? 9 : 12;
     const flyingEntities: FlyingEntity3D[] = [];
 
-    // Pre-seed diverse entities so the space is alive on initial render
+    // Pre-seed diverse entities across all 9 portals so the space is alive on first render
     for (let i = 0; i < targetEntityCount; i++) {
-      const ent = spawnFlyingEntity(i % 6);
-      // Advance positions randomly along flight path so they are mid-flight
+      const ent = spawnFlyingEntity(i % 9);
+      // Advance positions smoothly along flight path
       const advanceTime = Math.random() * 16;
-      ent.x += ent.vx * advanceTime * 30;
-      ent.y += ent.vy * advanceTime * 30;
-      ent.z += ent.vz * advanceTime * 30;
       ent.age = advanceTime;
+      ent.baseX += ent.vx * advanceTime * 30;
+      ent.baseY += ent.vy * advanceTime * 30;
+      ent.baseZ += ent.vz * advanceTime * 30;
+      ent.x = ent.baseX + Math.sin(ent.age * ent.curveFreqX + ent.curvePhaseX) * ent.curveAmpX;
+      ent.y = ent.baseY + Math.cos(ent.age * ent.curveFreqY + ent.curvePhaseY) * ent.curveAmpY;
+      ent.z = ent.baseZ + Math.sin(ent.age * ent.curveFreqZ + ent.curvePhaseZ) * ent.curveAmpZ;
       flyingEntities.push(ent);
     }
 
@@ -985,39 +1044,42 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       }
 
       // -----------------------------------------------------------------------
-      // UPDATE, SORT & RENDER 3D FLYING ENTITIES (Continuous Traffic)
+      // UPDATE, SORT & RENDER 3D FLYING ENTITIES (Curved Splines & Inertia)
       // -----------------------------------------------------------------------
-      // Update flight vectors, rotations, and lifecycles
       for (let i = flyingEntities.length - 1; i >= 0; i--) {
         const ent = flyingEntities[i];
 
         if (!prefersReducedMotion) {
-          ent.x += ent.vx;
-          ent.y += ent.vy;
-          ent.z += ent.vz;
+          ent.age += dt;
+          ent.baseX += ent.vx;
+          ent.baseY += ent.vy;
+          ent.baseZ += ent.vz;
+
+          // 3D Curved Spline offsets
+          ent.x = ent.baseX + Math.sin(ent.age * ent.curveFreqX + ent.curvePhaseX) * ent.curveAmpX;
+          ent.y = ent.baseY + Math.cos(ent.age * ent.curveFreqY + ent.curvePhaseY) * ent.curveAmpY;
+          ent.z = ent.baseZ + Math.sin(ent.age * ent.curveFreqZ + ent.curvePhaseZ) * ent.curveAmpZ;
+
           ent.rotX += ent.rotSpeedX;
           ent.rotY += ent.rotSpeedY;
           ent.rotZ += ent.rotSpeedZ;
-          ent.age += dt;
         }
 
-        // Check if entity has exited screen boundaries or depth limits
+        // Boundary check (across full viewport)
         const isOutOfScreen =
-          ent.x < -width * 0.25 ||
-          ent.x > width * 1.25 ||
-          ent.y < -height * 0.25 ||
-          ent.y > height * 1.25 ||
+          ent.x < -width * 0.22 ||
+          ent.x > width * 1.22 ||
+          ent.y < -height * 0.22 ||
+          ent.y > height * 1.22 ||
           ent.z < 90 ||
           ent.z > 860;
 
         if (isOutOfScreen && ent.age > 8) {
-          // Replace with newly spawned entity from an opposing portal
           flyingEntities.splice(i, 1);
           flyingEntities.push(spawnFlyingEntity());
         }
       }
 
-      // Maintain active pool count
       while (flyingEntities.length < targetEntityCount) {
         flyingEntities.push(spawnFlyingEntity());
       }
@@ -1429,10 +1491,8 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           const apexY = -22 * (s / 28);
           const baseY = 16 * (s / 28);
 
-          // Apex point
           const apex = rotate3D({ x: 0, y: apexY, z: 0 }, rx, ry, rz);
 
-          // Base circular loop
           ctx.beginPath();
           for (let a = 0; a <= Math.PI * 2; a += Math.PI / 8) {
             const bx = baseR * Math.cos(a);
@@ -1443,7 +1503,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           }
           ctx.stroke();
 
-          // Generator lines from apex to 4 base points
           for (let a = 0; a < Math.PI * 2; a += Math.PI / 2) {
             const bx = baseR * Math.cos(a);
             const bz = baseR * Math.sin(a);
