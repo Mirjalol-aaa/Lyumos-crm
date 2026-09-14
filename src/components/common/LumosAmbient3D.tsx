@@ -62,24 +62,33 @@ interface TravelingLightWave {
 
 type PhysicsState = 'AUTONOMOUS' | 'HOVER' | 'GRABBED' | 'THROWN' | 'MOMENTUM';
 
+// Comprehensive 23-Archetype Roster (Rich Variety: Geometric, Mathematical & Educational)
 type ArchetypeType =
   | 'book_math'
   | 'book_english'
   | 'parabola'
   | 'sinewave'
-  | 'grid3d'
-  | 'cube'
-  | 'pyramid'
+  | 'cosinewave'
+  | 'sphere'
   | 'torus'
-  | 'spiral'
+  | 'nested_rings'
+  | 'cube'
+  | 'hollow_cube'
+  | 'pyramid'
+  | 'octahedron'
+  | 'cylinder'
   | 'cone'
+  | 'prism'
+  | 'spiral'
+  | 'grid3d'
   | 'math_pi'
+  | 'math_inf'
   | 'math_sqrt'
   | 'math_pyth'
-  | 'math_inf'
   | 'eng_abc'
-  | 'eng_speak'
-  | 'eng_learn';
+  | 'eng_aa';
+
+type PerformanceTier = 'ULTRA_LOW' | 'LOW' | 'MEDIUM' | 'HIGH';
 
 interface FlyingEntity3D {
   id: string;
@@ -234,11 +243,46 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    // -------------------------------------------------------------------------
+    // UNIVERSAL 4-LEVEL DEVICE PERFORMANCE SYSTEM
+    // -------------------------------------------------------------------------
     const isMobile = window.innerWidth < 768;
     const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+    const cores = typeof navigator !== 'undefined' ? navigator.hardwareConcurrency || 4 : 4;
+    const memory = typeof navigator !== 'undefined' && 'deviceMemory' in navigator ? (navigator as any).deviceMemory || 4 : 4;
 
-    // Mobile DPR optimization: strictly capped at 1.15 on phone, 1.6 on desktop
-    let dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1.15 : 1.6);
+    const detectInitialTier = (): PerformanceTier => {
+      if (isMobile) {
+        if (cores <= 4 || memory <= 2) return 'ULTRA_LOW';
+        if (cores <= 6 || memory <= 4) return 'LOW';
+        return 'MEDIUM';
+      }
+      if (isTablet) {
+        if (cores <= 4) return 'LOW';
+        return 'MEDIUM';
+      }
+      if (cores <= 4) return 'MEDIUM';
+      return 'HIGH';
+    };
+
+    let currentTier: PerformanceTier = detectInitialTier();
+
+    // Adaptive DPR per tier
+    const getDprForTier = (tier: PerformanceTier): number => {
+      const devDpr = window.devicePixelRatio || 1;
+      switch (tier) {
+        case 'ULTRA_LOW':
+          return 1.0;
+        case 'LOW':
+          return Math.min(devDpr, 1.15);
+        case 'MEDIUM':
+          return Math.min(devDpr, 1.35);
+        case 'HIGH':
+          return Math.min(devDpr, 1.6);
+      }
+    };
+
+    let dpr = getDprForTier(currentTier);
     let width = window.innerWidth;
     let height = window.innerHeight;
 
@@ -250,8 +294,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       if (!canvas) return;
       width = window.innerWidth;
       height = window.innerHeight;
-      const currentIsMobile = window.innerWidth < 768;
-      dpr = Math.min(window.devicePixelRatio || 1, currentIsMobile ? 1.15 : 1.6);
+      dpr = getDprForTier(currentTier);
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       ctx.scale(dpr, dpr);
@@ -342,7 +385,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
     };
 
     // -------------------------------------------------------------------------
-    // 3. VIRTUAL MOVING LIGHT SOURCES (Optimized: 2 on mobile, 4 on desktop)
+    // 3. VIRTUAL MOVING LIGHT SOURCES
     // -------------------------------------------------------------------------
     const virtualLights: VirtualLight3D[] = [
       {
@@ -404,8 +447,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       },
     ];
 
-    const activeLightCount = isMobile ? 1 : virtualLights.length;
-
     // -------------------------------------------------------------------------
     // 4. TRAVELING LIGHT WAVE
     // -------------------------------------------------------------------------
@@ -461,10 +502,9 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       out.z = uuu * p0.z + 3 * uu * t * p1.z + 3 * u * tt * p2.z + ttt * p3.z;
     };
 
-    // Fast illumination boost calculation
-    const getIlluminationBoost = (x: number, y: number, z: number) => {
+    const getIlluminationBoost = (x: number, y: number, z: number, lightsToUse: number) => {
       let lightBoost = 0;
-      for (let i = 0; i < activeLightCount; i++) {
+      for (let i = 0; i < lightsToUse; i++) {
         const vl = virtualLights[i];
         const dx = x - vl.x;
         const dy = y - vl.y;
@@ -477,7 +517,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       }
 
       let waveBoost = 0;
-      if (waveState.active && !isMobile) {
+      if (waveState.active && currentTier !== 'ULTRA_LOW' && currentTier !== 'LOW') {
         const dx = x - waveState.currentPos.x;
         const dy = y - waveState.currentPos.y;
         const dz = z - waveState.currentPos.z;
@@ -492,43 +532,54 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
     };
 
     // -------------------------------------------------------------------------
-    // 5. OBJECT POOLING & IN-PLACE RECYCLING (Zero GC Spikes)
+    // 5. SHAPE REPETITION CONTROL & OBJECT POOLING
     // -------------------------------------------------------------------------
-    const mobileArchetypes: ArchetypeType[] = [
+    // Strict non-repeating cycle of rich archetypes:
+    // Never consecutive duplicates! A sequence that alternates geometric, mathematical, and educational.
+    const shapeSequence: ArchetypeType[] = [
       'book_math',
-      'book_english',
       'parabola',
-      'sinewave',
-      'cube',
-      'pyramid',
-      'math_inf',
-    ];
-
-    const desktopArchetypes: ArchetypeType[] = [
-      'book_math',
-      'book_english',
-      'parabola',
-      'sinewave',
-      'grid3d',
-      'cube',
-      'pyramid',
       'torus',
+      'cube',
+      'sinewave',
+      'book_english',
+      'sphere',
+      'pyramid',
+      'nested_rings',
+      'octahedron',
       'spiral',
-      'cone',
+      'cylinder',
+      'math_inf',
       'math_pi',
+      'prism',
+      'cosinewave',
+      'hollow_cube',
+      'cone',
       'math_sqrt',
       'math_pyth',
-      'math_inf',
       'eng_abc',
-      'eng_speak',
-      'eng_learn',
+      'eng_aa',
+      'grid3d',
     ];
 
-    const targetArchetypes = isMobile ? mobileArchetypes : desktopArchetypes;
-    const targetEntityCount = isMobile ? 7 : isTablet ? 9 : 12;
+    const getEntityCountForTier = (tier: PerformanceTier): number => {
+      switch (tier) {
+        case 'ULTRA_LOW':
+          return 5;
+        case 'LOW':
+          return 7;
+        case 'MEDIUM':
+          return 10;
+        case 'HIGH':
+          return 14;
+      }
+    };
+
+    let targetEntityCount = getEntityCountForTier(currentTier);
 
     const resetFlyingEntity = (ent: FlyingEntity3D, index: number) => {
-      const archetype = targetArchetypes[index % targetArchetypes.length];
+      // Guaranteed distinct shape via sequence indexing (0 repetition)
+      const archetype = shapeSequence[index % shapeSequence.length];
       ent.archetype = archetype;
 
       const pIndex = index % 8;
@@ -668,28 +719,54 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         ent.formula = 'y = sin(x)';
         ent.baseSize = 34;
         ent.baseOpacity = 0.28;
-      } else if (archetype === 'grid3d') {
-        ent.baseSize = 40;
-        ent.baseOpacity = 0.22;
+      } else if (archetype === 'cosinewave') {
+        ent.formula = 'y = cos(x)';
+        ent.baseSize = 34;
+        ent.baseOpacity = 0.28;
+      } else if (archetype === 'sphere') {
+        ent.baseSize = 30;
+        ent.baseOpacity = 0.26;
+      } else if (archetype === 'torus') {
+        ent.baseSize = 28;
+        ent.baseOpacity = 0.25;
+      } else if (archetype === 'nested_rings') {
+        ent.baseSize = 32;
+        ent.baseOpacity = 0.26;
       } else if (archetype === 'cube') {
-        ent.baseSize = 36;
+        ent.baseSize = 34;
+        ent.baseOpacity = 0.26;
+      } else if (archetype === 'hollow_cube') {
+        ent.baseSize = 34;
         ent.baseOpacity = 0.26;
       } else if (archetype === 'pyramid') {
         ent.baseSize = 32;
         ent.baseOpacity = 0.26;
-      } else if (archetype === 'torus') {
+      } else if (archetype === 'octahedron') {
+        ent.baseSize = 30;
+        ent.baseOpacity = 0.26;
+      } else if (archetype === 'cylinder') {
         ent.baseSize = 28;
+        ent.baseOpacity = 0.24;
+      } else if (archetype === 'cone') {
+        ent.baseSize = 28;
+        ent.baseOpacity = 0.24;
+      } else if (archetype === 'prism') {
+        ent.baseSize = 30;
         ent.baseOpacity = 0.24;
       } else if (archetype === 'spiral') {
         ent.baseSize = 24;
         ent.baseOpacity = 0.22;
-      } else if (archetype === 'cone') {
-        ent.baseSize = 28;
-        ent.baseOpacity = 0.24;
+      } else if (archetype === 'grid3d') {
+        ent.baseSize = 40;
+        ent.baseOpacity = 0.22;
       } else if (archetype === 'math_pi') {
         ent.text = 'π';
         ent.baseSize = 36;
         ent.baseOpacity = 0.18;
+      } else if (archetype === 'math_inf') {
+        ent.text = '∞';
+        ent.baseSize = 22;
+        ent.baseOpacity = 0.22;
       } else if (archetype === 'math_sqrt') {
         ent.text = '√x';
         ent.baseSize = 22;
@@ -698,22 +775,14 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         ent.text = 'a² + b² = c²';
         ent.baseSize = 16;
         ent.baseOpacity = 0.22;
-      } else if (archetype === 'math_inf') {
-        ent.text = '∞';
-        ent.baseSize = 22;
-        ent.baseOpacity = 0.22;
       } else if (archetype === 'eng_abc') {
         ent.text = 'ABC';
         ent.baseSize = 18;
         ent.baseOpacity = 0.24;
-      } else if (archetype === 'eng_speak') {
-        ent.text = 'PRACTICE';
-        ent.baseSize = 13;
-        ent.baseOpacity = 0.20;
-      } else if (archetype === 'eng_learn') {
-        ent.text = 'LEARN';
-        ent.baseSize = 14;
-        ent.baseOpacity = 0.20;
+      } else if (archetype === 'eng_aa') {
+        ent.text = 'Aa';
+        ent.baseSize = 20;
+        ent.baseOpacity = 0.24;
       }
     };
 
@@ -768,12 +837,12 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       projZ: 300,
     });
 
-    // Statically allocated entity pool (Strictly 0 array re-allocations at runtime)
+    // Maximum pool size allocated upfront (Zero array re-allocations at runtime)
+    const MAX_ENTITIES = 14;
     const flyingEntities: FlyingEntity3D[] = [];
-    for (let i = 0; i < targetEntityCount; i++) {
+    for (let i = 0; i < MAX_ENTITIES; i++) {
       const ent = createEmptyFlyingEntity(`entity-${i}`);
       resetFlyingEntity(ent, i);
-      // Pre-advance time to scatter naturally across space
       const advanceTime = Math.random() * 16;
       ent.age = advanceTime;
       ent.baseX += ent.vx * advanceTime * 30;
@@ -841,7 +910,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         pointerRef.history.shift();
       }
 
-      // If currently holding an object:
+      // If holding an object:
       if (pointerRef.grabbedEntity) {
         const moveDist = Math.hypot(clientX - pointerRef.initialDownX, clientY - pointerRef.initialDownY);
         if (moveDist > (isMobile ? 5 : 3)) {
@@ -853,7 +922,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         return;
       }
 
-      // If hovering over UI controls, cancel 3D hover
       if (isInteractiveTarget(e.target)) {
         pointerRef.hoveredEntity = null;
         document.body.style.cursor = 'default';
@@ -864,7 +932,8 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       let foundHover: FlyingEntity3D | null = null;
       let minDistance = 9999;
 
-      for (let i = flyingEntities.length - 1; i >= 0; i--) {
+      const activeCount = Math.min(flyingEntities.length, targetEntityCount);
+      for (let i = activeCount - 1; i >= 0; i--) {
         const ent = flyingEntities[i];
         if (ent.projScale <= 0) continue;
 
@@ -905,11 +974,11 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       pointerRef.isDragConfirmed = false;
       pointerRef.history = [{ x: clientX, y: clientY, time: performance.now() }];
 
-      // Fast hit testing directly against cached projected coordinates
       let targetEntity: FlyingEntity3D | null = null;
       let minDistance = 9999;
 
-      for (let i = flyingEntities.length - 1; i >= 0; i--) {
+      const activeCount = Math.min(flyingEntities.length, targetEntityCount);
+      for (let i = activeCount - 1; i >= 0; i--) {
         const ent = flyingEntities[i];
         if (ent.projScale <= 0) continue;
 
@@ -1043,10 +1112,23 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
     document.addEventListener('dragstart', handleDragStart, { capture: true });
 
     // -------------------------------------------------------------------------
-    // 7. ATMOSPHERIC DUST PARTICLES (Optimized: 10 on mobile, 40 on desktop)
+    // 7. ATMOSPHERIC DUST PARTICLES
     // -------------------------------------------------------------------------
-    let dustCount = isMobile ? 10 : isTablet ? 25 : 45;
-    const dustParticles: DustParticle3D[] = Array.from({ length: dustCount }, () => {
+    const getDustCountForTier = (tier: PerformanceTier) => {
+      switch (tier) {
+        case 'ULTRA_LOW':
+          return 0;
+        case 'LOW':
+          return 8;
+        case 'MEDIUM':
+          return 18;
+        case 'HIGH':
+          return 35;
+      }
+    };
+
+    let dustCount = getDustCountForTier(currentTier);
+    const dustParticles: DustParticle3D[] = Array.from({ length: 40 }, () => {
       const z = Math.random() * 700 + 50;
       return {
         x: Math.random() * (width * 1.2) - width * 0.1,
@@ -1109,16 +1191,15 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       return 1.0;
     };
 
-    // Reusable projection buffer for lights/wave
     const sharedProj = { projX: 0, projY: 0, projScale: 0, projZ: 0 };
 
     // -------------------------------------------------------------------------
-    // 9. MAIN ZERO-LAG 60 FPS RENDER LOOP
+    // 9. ADAPTIVE 60 FPS RENDER LOOP
     // -------------------------------------------------------------------------
     let lastTime = performance.now();
     let frameCount = 0;
     let fpsAccumulator = 0;
-    let isLowPerformance = false;
+    let highFpsCount = 0;
 
     const render = (now: number) => {
       const dt = Math.min((now - lastTime) / 1000, 0.08);
@@ -1129,15 +1210,31 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         ? 1.0
         : Math.min(1.0, Math.pow(elapsed / 2.0, 1.5));
 
-      // Adaptive Performance Monitoring
+      // Realtime Performance Monitoring & Dynamic Tier Adaptation
       frameCount++;
       fpsAccumulator += 1 / (dt || 0.016);
-      if (frameCount >= 40) {
+      if (frameCount >= 45) {
         const avgFps = fpsAccumulator / frameCount;
-        if (avgFps < 38 && !isLowPerformance) {
-          isLowPerformance = true;
-          dustCount = Math.floor(dustCount * 0.5);
-          dustParticles.splice(dustCount);
+        if (avgFps < 36) {
+          // Degrade tier on lag spikes
+          if (currentTier === 'HIGH') currentTier = 'MEDIUM';
+          else if (currentTier === 'MEDIUM') currentTier = 'LOW';
+          else if (currentTier === 'LOW') currentTier = 'ULTRA_LOW';
+
+          targetEntityCount = getEntityCountForTier(currentTier);
+          dustCount = getDustCountForTier(currentTier);
+          highFpsCount = 0;
+        } else if (avgFps > 56) {
+          highFpsCount++;
+          if (highFpsCount > 4) { // Sustained high FPS (~3 seconds)
+            if (currentTier === 'ULTRA_LOW') currentTier = 'LOW';
+            else if (currentTier === 'LOW' && !isMobile) currentTier = 'MEDIUM';
+            else if (currentTier === 'MEDIUM' && !isMobile && !isTablet) currentTier = 'HIGH';
+
+            targetEntityCount = getEntityCountForTier(currentTier);
+            dustCount = getDustCountForTier(currentTier);
+            highFpsCount = 0;
+          }
         }
         frameCount = 0;
         fpsAccumulator = 0;
@@ -1166,9 +1263,9 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       const scrollDepthShift = Math.min(90, scrollRef.current.currentY * 0.06);
 
       // -----------------------------------------------------------------------
-      // TRAVELING GOLDEN LIGHT WAVE (Desktop & Tablet only)
+      // TRAVELING GOLDEN LIGHT WAVE (Medium & High Tiers)
       // -----------------------------------------------------------------------
-      if (!isMobile && !isLowPerformance) {
+      if (currentTier === 'MEDIUM' || currentTier === 'HIGH') {
         const waveCycleTime = (elapsed % waveState.duration) / waveState.duration;
         const currentCycleCount = Math.floor(elapsed / waveState.duration);
         if (currentCycleCount !== waveState.cycleCount) {
@@ -1211,9 +1308,10 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       }
 
       // -----------------------------------------------------------------------
-      // VIRTUAL MOVING LIGHTS
+      // VIRTUAL MOVING LIGHTS (Tier dependent: 1, 2, or 3)
       // -----------------------------------------------------------------------
-      for (let i = 0; i < activeLightCount; i++) {
+      const lightsToRender = currentTier === 'ULTRA_LOW' || currentTier === 'LOW' ? 1 : currentTier === 'MEDIUM' ? 2 : 3;
+      for (let i = 0; i < lightsToRender; i++) {
         const vl = virtualLights[i];
         if (!prefersReducedMotion) {
           vl.phase += vl.speed;
@@ -1249,35 +1347,10 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       ctx.globalAlpha = 1.0;
 
       // -----------------------------------------------------------------------
-      // OBJECT-TO-OBJECT MUTUAL PROXIMITY (Desktop & Tablet only)
+      // 3D PHYSICAL MOTION & MOMENTUM INTEGRATION (Never Paused / Always Alive)
       // -----------------------------------------------------------------------
-      if (!isMobile && !isLowPerformance) {
-        for (let i = 0; i < flyingEntities.length; i++) {
-          flyingEntities[i].proxBoost = 0;
-        }
-        for (let i = 0; i < flyingEntities.length; i++) {
-          const a = flyingEntities[i];
-          for (let j = i + 1; j < flyingEntities.length; j++) {
-            const b = flyingEntities[j];
-            const dx = a.x - b.x;
-            const dy = a.y - b.y;
-            const dz = a.z - b.z;
-            const distSq = dx * dx + dy * dy + dz * dz;
-            const maxDist = 200;
-            if (distSq < maxDist * maxDist) {
-              const dist = Math.sqrt(distSq);
-              const mutualBoost = (1 - dist / maxDist) * 0.30;
-              a.proxBoost = Math.max(a.proxBoost, mutualBoost);
-              b.proxBoost = Math.max(b.proxBoost, mutualBoost);
-            }
-          }
-        }
-      }
-
-      // -----------------------------------------------------------------------
-      // 3D PHYSICAL MOTION & MOMENTUM INTEGRATION (Always Active on Every Object)
-      // -----------------------------------------------------------------------
-      for (let i = 0; i < flyingEntities.length; i++) {
+      const activeCount = Math.min(flyingEntities.length, targetEntityCount);
+      for (let i = 0; i < activeCount; i++) {
         const ent = flyingEntities[i];
 
         // 1. STATE: GRABBED (Firmly attached to cursor/finger, carry anywhere)
@@ -1408,7 +1481,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
             ent.rotZ += ent.rotSpeedZ;
           }
 
-          // In-place object recycling (Zero GC allocations)
+          // In-place recycling (Zero GC allocations)
           const isOutOfScreen =
             ent.x < -width * 0.25 ||
             ent.x > width * 1.25 ||
@@ -1437,10 +1510,10 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       }
 
       // Sort depth indices (furthest to nearest)
-      flyingEntities.sort((a, b) => b.z - a.z);
+      flyingEntities.slice(0, activeCount).sort((a, b) => b.z - a.z);
 
-      // Render all entities
-      for (let i = 0; i < flyingEntities.length; i++) {
+      // Render all active entities
+      for (let i = 0; i < activeCount; i++) {
         const obj = flyingEntities[i];
         if (obj.projScale <= 0) continue;
 
@@ -1456,7 +1529,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         const edgeFadeY = isInteracting ? 1.0 : Math.min(1, Math.min(obj.projY + 80, height + 80 - obj.projY) / 100);
         const edgeAlpha = Math.max(0, Math.min(1, edgeFadeX * edgeFadeY));
 
-        const { lightBoost, waveBoost } = getIlluminationBoost(obj.x, obj.y, obj.z);
+        const { lightBoost, waveBoost } = getIlluminationBoost(obj.x, obj.y, obj.z, lightsToRender);
 
         // Continuous distance proximity
         const normZ = Math.max(0, Math.min(1, (obj.z - 110) / (720 - 110)));
@@ -1509,7 +1582,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         const rz = obj.rotZ;
 
         // ---------------------------------------------------------------------
-        // ARCHETYPE: 3D HARDCOVER BOOKS (MATEMATIKA & ENGLISH)
+        // 1. HARDCOVER BOOKS (MATEMATIKA & ENGLISH)
         // ---------------------------------------------------------------------
         if ((obj.archetype === 'book_math' || obj.archetype === 'book_english') && obj.bookWidth && obj.bookHeight && obj.bookThickness) {
           const bw = obj.bookWidth * obj.projScale;
@@ -1519,8 +1592,8 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           const openAngle = (obj.hoverProgress + obj.grabProgress) * 0.08;
           ctx.rotate(rz + openAngle);
 
-          // Shadow depth
-          if (!isMobile || obj.grabProgress > 0.1) {
+          // Subtle shadow in medium/high tier
+          if (currentTier !== 'ULTRA_LOW' || obj.grabProgress > 0.1) {
             const shadowOffset = 2 + obj.grabProgress * 3;
             ctx.beginPath();
             ctx.roundRect(-bw / 2 + shadowOffset, -bh / 2 + shadowOffset, bw, bh, 3);
@@ -1560,7 +1633,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         }
 
         // ---------------------------------------------------------------------
-        // ARCHETYPE: 3D PARABOLA (y = x²)
+        // 2. PARABOLA (y = x²)
         // ---------------------------------------------------------------------
         else if (obj.archetype === 'parabola') {
           const s = obj.baseSize * obj.projScale;
@@ -1568,7 +1641,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           ctx.lineWidth = 1.15;
           ctx.beginPath();
 
-          const step = isMobile ? 8 : 4;
+          const step = currentTier === 'ULTRA_LOW' || currentTier === 'LOW' ? 8 : 4;
           for (let px = -36; px <= 40; px += step) {
             const py = (0.024 * px * px - 18) * (s / 32);
             rotate3D(px * (s / 32), py, 0, rx, ry, rz);
@@ -1577,7 +1650,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           }
           ctx.stroke();
 
-          if (!isMobile) {
+          if (currentTier !== 'ULTRA_LOW') {
             ctx.strokeStyle = colors.fill;
             ctx.lineWidth = 0.8;
             ctx.beginPath();
@@ -1598,17 +1671,18 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         }
 
         // ---------------------------------------------------------------------
-        // ARCHETYPE: 3D SINE WAVE (y = sin(x))
+        // 3. SINE & COSINE WAVES
         // ---------------------------------------------------------------------
-        else if (obj.archetype === 'sinewave') {
+        else if (obj.archetype === 'sinewave' || obj.archetype === 'cosinewave') {
           const s = obj.baseSize * obj.projScale;
+          const isCos = obj.archetype === 'cosinewave';
           ctx.strokeStyle = colors.stroke;
           ctx.lineWidth = 1.15;
           ctx.beginPath();
 
-          const step = isMobile ? 6 : 3;
+          const step = currentTier === 'ULTRA_LOW' || currentTier === 'LOW' ? 8 : 4;
           for (let px = -44; px <= 44; px += step) {
-            const py = Math.sin(px * 0.10) * 16 * (s / 34);
+            const py = (isCos ? Math.cos(px * 0.10) : Math.sin(px * 0.10)) * 16 * (s / 34);
             rotate3D(px * (s / 34), py, 0, rx, ry, rz);
             if (px === -44) ctx.moveTo(rotBuf.x, rotBuf.y);
             else ctx.lineTo(rotBuf.x, rotBuf.y);
@@ -1617,13 +1691,90 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
 
           ctx.font = `bold ${Math.max(7, Math.floor(9 * obj.projScale))}px monospace`;
           ctx.fillStyle = colors.highlight;
-          ctx.fillText('y = sin(x)', 0, s * 0.7);
+          ctx.fillText(isCos ? 'y = cos(x)' : 'y = sin(x)', 0, s * 0.7);
         }
 
         // ---------------------------------------------------------------------
-        // ARCHETYPE: 3D ISOMETRIC CUBE
+        // 4. 3D SPHERE (Equator & Meridian Rings)
         // ---------------------------------------------------------------------
-        else if (obj.archetype === 'cube') {
+        else if (obj.archetype === 'sphere') {
+          const r = obj.baseSize * obj.projScale * 0.45;
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 1.0;
+
+          // Main silhouette
+          ctx.beginPath();
+          ctx.arc(0, 0, r, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Horizontal equator ellipse
+          ctx.beginPath();
+          rotate3D(0, 0, 0, rx, ry, rz);
+          ctx.ellipse(0, 0, r, r * Math.abs(Math.cos(rx)), rz, 0, Math.PI * 2);
+          ctx.strokeStyle = colors.fill;
+          ctx.stroke();
+
+          // Vertical meridian ellipse
+          if (currentTier !== 'ULTRA_LOW') {
+            ctx.beginPath();
+            ctx.ellipse(0, 0, r * Math.abs(Math.cos(ry)), r, rz, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+        }
+
+        // ---------------------------------------------------------------------
+        // 5. 3D TORUS RING
+        // ---------------------------------------------------------------------
+        else if (obj.archetype === 'torus') {
+          const R = obj.baseSize * obj.projScale * 0.50;
+          const r = R * 0.35;
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 1.1;
+
+          const segments = currentTier === 'ULTRA_LOW' || currentTier === 'LOW' ? 10 : 16;
+          for (let j = 0; j < segments; j += 2) {
+            const u = (j / segments) * Math.PI * 2;
+            const cx = Math.cos(u) * R;
+            const cy = Math.sin(u) * R;
+            ctx.beginPath();
+            for (let k = 0; k <= 8; k++) {
+              const v = (k / 8) * Math.PI * 2;
+              const px = cx + Math.cos(u) * Math.cos(v) * r;
+              const py = cy + Math.sin(u) * Math.cos(v) * r;
+              const pz = Math.sin(v) * r;
+              rotate3D(px, py, pz, rx, ry, rz);
+              if (k === 0) ctx.moveTo(rotBuf.x, rotBuf.y);
+              else ctx.lineTo(rotBuf.x, rotBuf.y);
+            }
+            ctx.stroke();
+          }
+        }
+
+        // ---------------------------------------------------------------------
+        // 6. NESTED ORBITAL RINGS (Gyroscope)
+        // ---------------------------------------------------------------------
+        else if (obj.archetype === 'nested_rings') {
+          const r1 = obj.baseSize * obj.projScale * 0.55;
+          const r2 = r1 * 0.72;
+          ctx.lineWidth = 1.1;
+
+          // Outer ring
+          ctx.strokeStyle = colors.stroke;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, r1, r1 * Math.abs(Math.cos(rx)), rz, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Inner ring at tilted angle
+          ctx.strokeStyle = colors.highlight;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, r2, r2 * Math.abs(Math.sin(ry)), rz + 0.8, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        // ---------------------------------------------------------------------
+        // 7. 3D ISOMETRIC CUBE & HOLLOW CUBE
+        // ---------------------------------------------------------------------
+        else if (obj.archetype === 'cube' || obj.archetype === 'hollow_cube') {
           const s = obj.baseSize * obj.projScale * 0.45;
           const verts = [
             [-s, -s, -s], [s, -s, -s], [s, s, -s], [-s, s, -s],
@@ -1645,10 +1796,30 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
             ctx.lineTo(rotBuf.x, rotBuf.y);
           }
           ctx.stroke();
+
+          // Hollow inner cube
+          if (obj.archetype === 'hollow_cube' && currentTier !== 'ULTRA_LOW') {
+            const si = s * 0.5;
+            const innerVerts = [
+              [-si, -si, -si], [si, -si, -si], [si, si, -si], [-si, si, -si],
+              [-si, -si, si], [si, -si, si], [si, si, si], [-si, si, si],
+            ];
+            ctx.strokeStyle = colors.highlight;
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            for (let e = 0; e < edges.length; e++) {
+              const [v1, v2] = edges[e];
+              rotate3D(innerVerts[v1][0], innerVerts[v1][1], innerVerts[v1][2], rx, ry, rz);
+              ctx.moveTo(rotBuf.x, rotBuf.y);
+              rotate3D(innerVerts[v2][0], innerVerts[v2][1], innerVerts[v2][2], rx, ry, rz);
+              ctx.lineTo(rotBuf.x, rotBuf.y);
+            }
+            ctx.stroke();
+          }
         }
 
         // ---------------------------------------------------------------------
-        // ARCHETYPE: 3D PYRAMID (TETRAHEDRON)
+        // 8. 3D PYRAMID (Tetrahedron)
         // ---------------------------------------------------------------------
         else if (obj.archetype === 'pyramid') {
           const s = obj.baseSize * obj.projScale * 0.55;
@@ -1676,40 +1847,198 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         }
 
         // ---------------------------------------------------------------------
-        // ARCHETYPE: INFINITY (∞)
+        // 9. 3D OCTAHEDRON (Diamond Polyhedron)
         // ---------------------------------------------------------------------
-        else if (obj.archetype === 'math_inf') {
-          const s = obj.baseSize * obj.projScale;
-          ctx.font = `bold ${Math.max(14, Math.floor(s * 1.4))}px -apple-system, sans-serif`;
-          ctx.fillStyle = colors.stroke;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          rotate3D(0, 0, 0, rx, ry, rz);
-          ctx.fillText('∞', rotBuf.x, rotBuf.y);
+        else if (obj.archetype === 'octahedron') {
+          const s = obj.baseSize * obj.projScale * 0.50;
+          const verts = [
+            [0, -s * 1.2, 0], // Top
+            [0, s * 1.2, 0],  // Bottom
+            [-s, 0, -s], [s, 0, -s], [s, 0, s], [-s, 0, s] // Middle 4
+          ];
+          const edges = [
+            [0,2],[0,3],[0,4],[0,5], // Top pyramid
+            [1,2],[1,3],[1,4],[1,5], // Bottom pyramid
+            [2,3],[3,4],[4,5],[5,2]  // Waist
+          ];
+
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          for (let e = 0; e < edges.length; e++) {
+            const [v1, v2] = edges[e];
+            rotate3D(verts[v1][0], verts[v1][1], verts[v1][2], rx, ry, rz);
+            ctx.moveTo(rotBuf.x, rotBuf.y);
+            rotate3D(verts[v2][0], verts[v2][1], verts[v2][2], rx, ry, rz);
+            ctx.lineTo(rotBuf.x, rotBuf.y);
+          }
+          ctx.stroke();
         }
 
         // ---------------------------------------------------------------------
-        // OTHER DESKTOP ARCHETYPES (Rendered on desktop & tablet)
+        // 10. 3D CYLINDER
+        // ---------------------------------------------------------------------
+        else if (obj.archetype === 'cylinder') {
+          const r = obj.baseSize * obj.projScale * 0.35;
+          const h = r * 1.4;
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 1.1;
+
+          // Top ellipse
+          ctx.beginPath();
+          rotate3D(0, -h, 0, rx, ry, rz);
+          ctx.ellipse(rotBuf.x, rotBuf.y, r, r * Math.abs(Math.cos(rx)), rz, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Bottom ellipse
+          ctx.beginPath();
+          rotate3D(0, h, 0, rx, ry, rz);
+          ctx.ellipse(rotBuf.x, rotBuf.y, r, r * Math.abs(Math.cos(rx)), rz, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Vertical side edges
+          ctx.beginPath();
+          rotate3D(-r, -h, 0, rx, ry, rz);
+          ctx.moveTo(rotBuf.x, rotBuf.y);
+          rotate3D(-r, h, 0, rx, ry, rz);
+          ctx.lineTo(rotBuf.x, rotBuf.y);
+
+          rotate3D(r, -h, 0, rx, ry, rz);
+          ctx.moveTo(rotBuf.x, rotBuf.y);
+          rotate3D(r, h, 0, rx, ry, rz);
+          ctx.lineTo(rotBuf.x, rotBuf.y);
+          ctx.stroke();
+        }
+
+        // ---------------------------------------------------------------------
+        // 11. 3D CONE
+        // ---------------------------------------------------------------------
+        else if (obj.archetype === 'cone') {
+          const r = obj.baseSize * obj.projScale * 0.40;
+          const h = r * 1.5;
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 1.1;
+
+          // Base ellipse
+          ctx.beginPath();
+          rotate3D(0, h * 0.5, 0, rx, ry, rz);
+          ctx.ellipse(rotBuf.x, rotBuf.y, r, r * Math.abs(Math.cos(rx)), rz, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Apex to base sides
+          rotate3D(0, -h * 0.8, 0, rx, ry, rz);
+          const apexX = rotBuf.x;
+          const apexY = rotBuf.y;
+
+          ctx.beginPath();
+          rotate3D(-r, h * 0.5, 0, rx, ry, rz);
+          ctx.moveTo(apexX, apexY);
+          ctx.lineTo(rotBuf.x, rotBuf.y);
+
+          rotate3D(r, h * 0.5, 0, rx, ry, rz);
+          ctx.moveTo(apexX, apexY);
+          ctx.lineTo(rotBuf.x, rotBuf.y);
+          ctx.stroke();
+        }
+
+        // ---------------------------------------------------------------------
+        // 12. 3D PRISM (Triangular Prism)
+        // ---------------------------------------------------------------------
+        else if (obj.archetype === 'prism') {
+          const s = obj.baseSize * obj.projScale * 0.45;
+          const h = s * 0.9;
+          const verts = [
+            [-s, -h, -s * 0.6], [s, -h, -s * 0.6], [0, -h, s],
+            [-s, h, -s * 0.6], [s, h, -s * 0.6], [0, h, s],
+          ];
+          const edges = [
+            [0,1],[1,2],[2,0], // Top triangle
+            [3,4],[4,5],[5,3], // Bottom triangle
+            [0,3],[1,4],[2,5]  // Pillars
+          ];
+
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          for (let e = 0; e < edges.length; e++) {
+            const [v1, v2] = edges[e];
+            rotate3D(verts[v1][0], verts[v1][1], verts[v1][2], rx, ry, rz);
+            ctx.moveTo(rotBuf.x, rotBuf.y);
+            rotate3D(verts[v2][0], verts[v2][1], verts[v2][2], rx, ry, rz);
+            ctx.lineTo(rotBuf.x, rotBuf.y);
+          }
+          ctx.stroke();
+        }
+
+        // ---------------------------------------------------------------------
+        // 13. 3D SPIRAL / HELIX
+        // ---------------------------------------------------------------------
+        else if (obj.archetype === 'spiral') {
+          const s = obj.baseSize * obj.projScale;
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+
+          const turns = currentTier === 'ULTRA_LOW' ? 12 : 20;
+          for (let step = 0; step <= turns; step++) {
+            const theta = (step / turns) * Math.PI * 4;
+            const r = (step / turns) * 20 * (s / 24);
+            const px = Math.cos(theta) * r;
+            const py = Math.sin(theta) * r;
+            const pz = ((step / turns) - 0.5) * 24 * (s / 24);
+            rotate3D(px, py, pz, rx, ry, rz);
+            if (step === 0) ctx.moveTo(rotBuf.x, rotBuf.y);
+            else ctx.lineTo(rotBuf.x, rotBuf.y);
+          }
+          ctx.stroke();
+        }
+
+        // ---------------------------------------------------------------------
+        // 14. 3D PERSPECTIVE GRID
+        // ---------------------------------------------------------------------
+        else if (obj.archetype === 'grid3d') {
+          const s = obj.baseSize * obj.projScale * 0.55;
+          ctx.strokeStyle = colors.fill;
+          ctx.lineWidth = 0.8;
+          ctx.beginPath();
+          for (let l = -s; l <= s; l += s / 2) {
+            rotate3D(-s, l, 0, rx, ry, rz);
+            ctx.moveTo(rotBuf.x, rotBuf.y);
+            rotate3D(s, l, 0, rx, ry, rz);
+            ctx.lineTo(rotBuf.x, rotBuf.y);
+
+            rotate3D(l, -s, 0, rx, ry, rz);
+            ctx.moveTo(rotBuf.x, rotBuf.y);
+            rotate3D(l, s, 0, rx, ry, rz);
+            ctx.lineTo(rotBuf.x, rotBuf.y);
+          }
+          ctx.stroke();
+        }
+
+        // ---------------------------------------------------------------------
+        // 15. MATHEMATICAL & EDUCATIONAL SYMBOLS (∞, π, √x, a²+b²=c², ABC, Aa)
         // ---------------------------------------------------------------------
         else if (obj.text || obj.formula) {
           const s = obj.baseSize * obj.projScale;
-          ctx.font = `bold ${Math.max(12, Math.floor(s * 1.1))}px -apple-system, sans-serif`;
+          const displayTxt = obj.text || obj.formula || '';
+          const isSingle = displayTxt.length <= 2;
+          ctx.font = `bold ${Math.max(10, Math.floor(s * (isSingle ? 1.4 : 1.0)))}px -apple-system, sans-serif`;
           ctx.fillStyle = colors.stroke;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           rotate3D(0, 0, 0, rx, ry, rz);
-          ctx.fillText(obj.text || obj.formula || '', rotBuf.x, rotBuf.y);
+          ctx.fillText(displayTxt, rotBuf.x, rotBuf.y);
         }
 
         ctx.restore();
       }
 
       // -----------------------------------------------------------------------
-      // ATMOSPHERIC DUST PARTICLES
+      // ATMOSPHERIC DUST PARTICLES (Tier Optimized)
       // -----------------------------------------------------------------------
-      if (!isLowPerformance) {
+      if (dustCount > 0) {
         ctx.fillStyle = `rgba(255, 238, 195, ${0.45 * revealProgress})`;
-        for (let i = 0; i < dustParticles.length; i++) {
+        for (let i = 0; i < dustCount; i++) {
           const d = dustParticles[i];
           d.x += d.vx;
           d.y += d.vy;
