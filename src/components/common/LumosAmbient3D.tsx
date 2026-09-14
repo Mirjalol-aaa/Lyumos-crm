@@ -60,7 +60,9 @@ interface TravelingLightWave {
   cycleCount: number;
 }
 
-// Complete Archetype Roster for the Full-Screen 3D World
+type PhysicsState = 'AUTONOMOUS' | 'HOVER' | 'GRABBED' | 'THROWN' | 'MOMENTUM';
+
+// Complete Archetype Roster for the Interactive 3D World
 type ArchetypeType =
   | 'book_math'
   | 'book_english'
@@ -86,17 +88,17 @@ interface FlyingEntity3D {
   title?: string;
   text?: string;
   formula?: string;
-  // Base 3D Coordinates & Base Flight Velocity
+  // 3D Position
+  x: number;
+  y: number;
+  z: number;
+  // Base Coordinates for Autonomous Spline Flight
   baseX: number;
   baseY: number;
   baseZ: number;
   vx: number;
   vy: number;
   vz: number;
-  // Current 3D Position
-  x: number;
-  y: number;
-  z: number;
   // 3D Harmonic Curve Trajectory Parameters (Curved Splines)
   curveAmpX: number;
   curveAmpY: number;
@@ -114,13 +116,25 @@ interface FlyingEntity3D {
   rotSpeedX: number;
   rotSpeedY: number;
   rotSpeedZ: number;
+  // Physics State Machine & Mass Properties
+  physicsState: PhysicsState;
+  mass: number;
+  springFactor: number;
+  dragFactor: number;
+  throwVx: number;
+  throwVy: number;
+  throwVz: number;
+  throwRotVx: number;
+  throwRotVy: number;
+  throwRotVz: number;
   // Sizing & Base Opacity
   baseSize: number;
   baseOpacity: number;
-  // Independent Asynchronous Lifecycle
+  // Lifecycle
   age: number;
   lifetime: number; // Flight duration across world (seconds)
   hoverProgress: number; // 0 to 1 smooth physical reaction
+  grabProgress: number; // 0 to 1 smooth grab reaction
   // Object-to-object mutual proximity boost
   proxBoost: number;
   // Book specific dimensions
@@ -180,24 +194,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
     };
     window.addEventListener('resize', handleResize, { passive: true });
 
-    // Smooth Mouse Tracking
-    const handleMouseMove = (e: MouseEvent) => {
-      const halfW = window.innerWidth / 2;
-      const halfH = window.innerHeight / 2;
-      mouseRef.current.targetX = (e.clientX - halfW) / halfW;
-      mouseRef.current.targetY = (e.clientY - halfH) / halfH;
-      mouseRef.current.screenX = e.clientX;
-      mouseRef.current.screenY = e.clientY;
-      mouseRef.current.isInside = true;
-    };
-    const handleMouseLeave = () => {
-      mouseRef.current.isInside = false;
-      mouseRef.current.screenX = -9999;
-      mouseRef.current.screenY = -9999;
-    };
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    window.addEventListener('mouseleave', handleMouseLeave, { passive: true });
-
     // Scroll Tracking
     const handleScroll = () => {
       scrollRef.current.targetY = window.scrollY;
@@ -232,6 +228,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
     const spriteMote = createGlowSprite(26, 3, 'rgba(255, 245, 215, 0.95)', 'rgba(243, 210, 118, 0.5)');
     const spriteLightAura = createGlowSprite(220, 30, 'rgba(255, 235, 170, 0.55)', 'rgba(217, 168, 63, 0.16)');
     const spriteWaveAura = createGlowSprite(380, 50, 'rgba(255, 240, 190, 0.40)', 'rgba(217, 168, 63, 0.12)');
+    const spriteGrabAura = createGlowSprite(260, 35, 'rgba(255, 235, 170, 0.70)', 'rgba(243, 210, 118, 0.28)');
 
     // -------------------------------------------------------------------------
     // 2. 3D CAMERA & PERSPECTIVE PROJECTION
@@ -464,8 +461,8 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
     };
 
     // -------------------------------------------------------------------------
-    // 5. NEXT-GEN FULL-SCREEN 3D FLIGHT TRAJECTORY ENGINE
-    // Spans across 8 spatial sectors & 3 depth tiers. Zero central clustering.
+    // 5. INTERACTIVE 3D PHYSICS & POINTER MANAGER
+    // Real Drag / Rotate / Throw / Inertia / Momentum & Soft Boundary Bouncing
     // -------------------------------------------------------------------------
     const ARCHETYPES_CATALOG: ArchetypeType[] = [
       'book_math',
@@ -489,101 +486,85 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
 
     let entitySpawnCounter = 0;
 
-    // 9 Multi-Directional Entry Portals (covering the entire screen perimeter & depth)
     const spawnFlyingEntity = (portalIndex?: number, forcedArchetype?: ArchetypeType): FlyingEntity3D => {
       entitySpawnCounter++;
-      // 9 portals: 0 to 8
       const pIndex = portalIndex !== undefined ? portalIndex : Math.floor(Math.random() * 9);
       const archetype = forcedArchetype || ARCHETYPES_CATALOG[entitySpawnCounter % ARCHETYPES_CATALOG.length];
 
       let baseX = 0, baseY = 0, baseZ = 300;
       let vx = 0, vy = 0, vz = 0;
 
-      // Portal 0: Top-Left -> Sweeping Down-Right across Upper & Mid sectors
       if (pIndex === 0) {
         baseX = -width * 0.12 - Math.random() * 80;
         baseY = height * (0.05 + Math.random() * 0.25);
         baseZ = 450 + Math.random() * 200;
         vx = 0.32 + Math.random() * 0.20;
         vy = 0.16 + Math.random() * 0.14;
-        vz = -(0.14 + Math.random() * 0.16); // Comes closer!
-      }
-      // Portal 1: Top-Center -> Drifting Downward through Central-Upper space
-      else if (pIndex === 1) {
+        vz = -(0.14 + Math.random() * 0.16);
+      } else if (pIndex === 1) {
         baseX = width * (0.35 + Math.random() * 0.30);
         baseY = -height * 0.12 - Math.random() * 60;
         baseZ = 320 + Math.random() * 220;
         vx = (Math.random() - 0.5) * 0.22;
         vy = 0.32 + Math.random() * 0.22;
         vz = (Math.random() - 0.5) * 0.15;
-      }
-      // Portal 2: Top-Right -> Sweeping Down-Left across Upper-Right to Lower-Left
-      else if (pIndex === 2) {
+      } else if (pIndex === 2) {
         baseX = width * 1.12 + Math.random() * 80;
         baseY = height * (0.05 + Math.random() * 0.25);
         baseZ = 380 + Math.random() * 180;
         vx = -(0.32 + Math.random() * 0.20);
         vy = 0.16 + Math.random() * 0.14;
         vz = -(0.10 + Math.random() * 0.15);
-      }
-      // Portal 3: Middle-Left -> Flying Eastward across Mid-Left sector
-      else if (pIndex === 3) {
+      } else if (pIndex === 3) {
         baseX = -width * 0.10 - Math.random() * 80;
         baseY = height * (0.35 + Math.random() * 0.30);
         baseZ = 240 + Math.random() * 160;
         vx = 0.36 + Math.random() * 0.22;
         vy = (Math.random() - 0.5) * 0.14;
-        vz = 0.12 + Math.random() * 0.15; // Recedes
-      }
-      // Portal 4: Middle-Right -> Flying Westward across Mid-Right sector into depth
-      else if (pIndex === 4) {
+        vz = 0.12 + Math.random() * 0.15;
+      } else if (pIndex === 4) {
         baseX = width * 1.10 + Math.random() * 80;
         baseY = height * (0.35 + Math.random() * 0.30);
         baseZ = 220 + Math.random() * 180;
         vx = -(0.36 + Math.random() * 0.22);
         vy = (Math.random() - 0.5) * 0.14;
         vz = 0.14 + Math.random() * 0.16;
-      }
-      // Portal 5: Bottom-Left -> Climbing Up-Right across Lower-Left & Mid
-      else if (pIndex === 5) {
+      } else if (pIndex === 5) {
         baseX = -width * 0.10 - Math.random() * 80;
         baseY = height * (0.75 + Math.random() * 0.25);
         baseZ = 300 + Math.random() * 180;
         vx = 0.34 + Math.random() * 0.20;
         vy = -(0.24 + Math.random() * 0.18);
         vz = -(0.12 + Math.random() * 0.14);
-      }
-      // Portal 6: Bottom-Center -> Rising Upward into Lower & Mid space
-      else if (pIndex === 6) {
+      } else if (pIndex === 6) {
         baseX = width * (0.35 + Math.random() * 0.30);
         baseY = height * 1.12 + Math.random() * 60;
         baseZ = 360 + Math.random() * 180;
         vx = (Math.random() - 0.5) * 0.20;
         vy = -(0.30 + Math.random() * 0.20);
         vz = (Math.random() - 0.5) * 0.14;
-      }
-      // Portal 7: Bottom-Right -> Sweeping Up-Left across Lower-Right & Center-Right
-      else if (pIndex === 7) {
+      } else if (pIndex === 7) {
         baseX = width * 1.10 + Math.random() * 80;
         baseY = height * (0.75 + Math.random() * 0.25);
         baseZ = 260 + Math.random() * 160;
         vx = -(0.34 + Math.random() * 0.20);
         vy = -(0.24 + Math.random() * 0.18);
         vz = 0.12 + Math.random() * 0.16;
-      }
-      // Portal 8: Deep Background -> Flying Forward toward Camera across Full Screen
-      else {
+      } else {
         baseX = width * (0.10 + Math.random() * 0.80);
         baseY = height * (0.10 + Math.random() * 0.80);
         baseZ = 740 + Math.random() * 120;
         vx = (Math.random() - 0.5) * 0.30;
         vy = (Math.random() - 0.5) * 0.20;
-        vz = -(0.38 + Math.random() * 0.25); // Fast forward flight toward camera!
+        vz = -(0.38 + Math.random() * 0.25);
       }
 
-      // Archetype sizing & styling
       let baseSize = 34;
       let baseOpacity = 0.28;
+      let mass = 1.2;
+      let springFactor = 0.24;
+      let dragFactor = 0.972;
+
       let title: string | undefined = undefined;
       let text: string | undefined = undefined;
       let formula: string | undefined = undefined;
@@ -597,6 +578,9 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         title = 'MATEMATIKA';
         baseSize = 10;
         baseOpacity = 0.32;
+        mass = 1.9;
+        springFactor = 0.18; // heavier feel
+        dragFactor = 0.976;
         bookWidth = 72;
         bookHeight = 94;
         bookThickness = 17;
@@ -606,6 +590,9 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         title = 'ENGLISH';
         baseSize = 10;
         baseOpacity = 0.32;
+        mass = 1.9;
+        springFactor = 0.18;
+        dragFactor = 0.976;
         bookWidth = 70;
         bookHeight = 92;
         bookThickness = 16;
@@ -615,56 +602,101 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         formula = 'y = x²';
         baseSize = 32;
         baseOpacity = 0.30;
+        mass = 1.1;
+        springFactor = 0.26;
+        dragFactor = 0.970;
       } else if (archetype === 'sinewave') {
         formula = 'y = sin(x)';
         baseSize = 36;
         baseOpacity = 0.28;
+        mass = 1.1;
+        springFactor = 0.26;
+        dragFactor = 0.970;
       } else if (archetype === 'grid3d') {
         baseSize = 42;
         baseOpacity = 0.22;
+        mass = 1.4;
+        springFactor = 0.20;
+        dragFactor = 0.973;
       } else if (archetype === 'cube') {
         baseSize = 38;
         baseOpacity = 0.26;
+        mass = 1.3;
+        springFactor = 0.24;
+        dragFactor = 0.972;
       } else if (archetype === 'pyramid') {
         baseSize = 34;
         baseOpacity = 0.26;
+        mass = 1.2;
+        springFactor = 0.25;
+        dragFactor = 0.971;
       } else if (archetype === 'torus') {
         baseSize = 30;
         baseOpacity = 0.24;
+        mass = 1.2;
+        springFactor = 0.25;
+        dragFactor = 0.971;
       } else if (archetype === 'spiral') {
         baseSize = 24;
         baseOpacity = 0.22;
+        mass = 1.0;
+        springFactor = 0.28;
+        dragFactor = 0.968;
       } else if (archetype === 'cone') {
         baseSize = 28;
         baseOpacity = 0.24;
+        mass = 1.1;
+        springFactor = 0.26;
+        dragFactor = 0.970;
       } else if (archetype === 'math_pi') {
         text = 'π';
         baseSize = 38;
         baseOpacity = 0.18;
+        mass = 0.8;
+        springFactor = 0.32;
+        dragFactor = 0.965;
       } else if (archetype === 'math_sqrt') {
         text = '√x';
         baseSize = 22;
         baseOpacity = 0.24;
+        mass = 0.9;
+        springFactor = 0.30;
+        dragFactor = 0.966;
       } else if (archetype === 'math_pyth') {
         text = 'a² + b² = c²';
         baseSize = 16;
         baseOpacity = 0.22;
+        mass = 0.8;
+        springFactor = 0.32;
+        dragFactor = 0.965;
       } else if (archetype === 'math_inf') {
         text = '∞';
         baseSize = 22;
         baseOpacity = 0.20;
+        mass = 0.8;
+        springFactor = 0.32;
+        dragFactor = 0.965;
       } else if (archetype === 'eng_abc') {
         text = 'ABC';
         baseSize = 18;
         baseOpacity = 0.24;
+        mass = 1.0;
+        springFactor = 0.28;
+        dragFactor = 0.968;
       } else if (archetype === 'eng_speak') {
         text = 'PRACTICE';
         baseSize = 13;
         baseOpacity = 0.20;
+        mass = 0.8;
+        springFactor = 0.32;
+        dragFactor = 0.965;
       } else if (archetype === 'eng_learn') {
         text = 'LEARN';
         baseSize = 14;
         baseOpacity = 0.20;
+        mass = 0.8;
+        springFactor = 0.32;
+        dragFactor = 0.965;
       }
 
       return {
@@ -682,7 +714,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         x: baseX,
         y: baseY,
         z: baseZ,
-        // Harmonic 3D Curved Spline parameters
         curveAmpX: 25 + Math.random() * 35,
         curveAmpY: 20 + Math.random() * 30,
         curveAmpZ: 30 + Math.random() * 45,
@@ -692,18 +723,28 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         curvePhaseX: Math.random() * Math.PI * 2,
         curvePhaseY: Math.random() * Math.PI * 2,
         curvePhaseZ: Math.random() * Math.PI * 2,
-        // Rotations
         rotX: Math.random() * Math.PI * 2,
         rotY: Math.random() * Math.PI * 2,
         rotZ: (Math.random() - 0.5) * 0.4,
         rotSpeedX: (Math.random() - 0.5) * 0.0006,
         rotSpeedY: (Math.random() - 0.5) * 0.0008,
         rotSpeedZ: (Math.random() - 0.5) * 0.0004,
+        physicsState: 'AUTONOMOUS',
+        mass,
+        springFactor,
+        dragFactor,
+        throwVx: 0,
+        throwVy: 0,
+        throwVz: 0,
+        throwRotVx: 0,
+        throwRotVy: 0,
+        throwRotVz: 0,
         baseSize,
         baseOpacity,
         age: 0,
         lifetime: 22 + Math.random() * 16,
         hoverProgress: 0,
+        grabProgress: 0,
         proxBoost: 0,
         bookWidth,
         bookHeight,
@@ -713,14 +754,11 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       };
     };
 
-    // Target 11–13 active flying entities distributed across all 8 sectors
     const targetEntityCount = isMobile ? 6 : isTablet ? 9 : 12;
     const flyingEntities: FlyingEntity3D[] = [];
 
-    // Pre-seed diverse entities across all 9 portals so the space is alive on first render
     for (let i = 0; i < targetEntityCount; i++) {
       const ent = spawnFlyingEntity(i % 9);
-      // Advance positions smoothly along flight path
       const advanceTime = Math.random() * 16;
       ent.age = advanceTime;
       ent.baseX += ent.vx * advanceTime * 30;
@@ -731,6 +769,149 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       ent.z = ent.baseZ + Math.sin(ent.age * ent.curveFreqZ + ent.curvePhaseZ) * ent.curveAmpZ;
       flyingEntities.push(ent);
     }
+
+    // Pointer Interaction State (Drag, Velocity Tracking & Throwing)
+    const pointerRef = {
+      x: -9999,
+      y: -9999,
+      isDown: false,
+      grabbedEntity: null as FlyingEntity3D | null,
+      hoveredEntity: null as FlyingEntity3D | null,
+      history: [] as { x: number; y: number; time: number }[],
+    };
+
+    const handlePointerMove = (e: MouseEvent | TouchEvent) => {
+      const clientX = 'touches' in e ? e.touches[0].clientX : (e as MouseEvent).clientX;
+      const clientY = 'touches' in e ? e.touches[0].clientY : (e as MouseEvent).clientY;
+
+      pointerRef.x = clientX;
+      pointerRef.y = clientY;
+
+      const halfW = window.innerWidth / 2;
+      const halfH = window.innerHeight / 2;
+      mouseRef.current.targetX = (clientX - halfW) / halfW;
+      mouseRef.current.targetY = (clientY - halfH) / halfH;
+      mouseRef.current.screenX = clientX;
+      mouseRef.current.screenY = clientY;
+      mouseRef.current.isInside = true;
+
+      // Sample pointer history for throw velocity calculation
+      const now = performance.now();
+      pointerRef.history.push({ x: clientX, y: clientY, time: now });
+      if (pointerRef.history.length > 5) {
+        pointerRef.history.shift();
+      }
+
+      // If currently holding an object, update cursor to grabbing
+      if (pointerRef.grabbedEntity) {
+        document.body.style.cursor = 'grabbing';
+        return;
+      }
+
+      // Check if hovering over website UI controls (buttons, navigation, links)
+      const targetElem = e.target as HTMLElement | null;
+      if (targetElem && targetElem.closest('button, a, input, [role="button"], nav')) {
+        pointerRef.hoveredEntity = null;
+        document.body.style.cursor = 'default';
+        return;
+      }
+
+      // Hit-testing against projected 3D objects
+      let foundHover: FlyingEntity3D | null = null;
+      let minDistance = 9999;
+
+      for (let i = flyingEntities.length - 1; i >= 0; i--) {
+        const ent = flyingEntities[i];
+        const proj = project(
+          { x: ent.x, y: ent.y, z: ent.z },
+          0, 0, 0,
+          mouseRef.current.currentX * 14,
+          mouseRef.current.currentY * 10
+        );
+        if (proj.scale <= 0) continue;
+
+        const dx = clientX - proj.x;
+        const dy = clientY - proj.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const hitRadius = Math.max(42, ent.baseSize * proj.scale * 1.5);
+
+        if (dist < hitRadius && dist < minDistance) {
+          minDistance = dist;
+          foundHover = ent;
+        }
+      }
+
+      pointerRef.hoveredEntity = foundHover;
+      if (foundHover) {
+        document.body.style.cursor = 'grab';
+      } else {
+        document.body.style.cursor = 'default';
+      }
+    };
+
+    const handlePointerDown = (e: MouseEvent | TouchEvent) => {
+      const targetElem = e.target as HTMLElement | null;
+      // Do not grab background objects if clicking on navigation, CTAs or buttons
+      if (targetElem && targetElem.closest('button, a, input, [role="button"], nav')) {
+        return;
+      }
+
+      if (pointerRef.hoveredEntity) {
+        pointerRef.isDown = true;
+        pointerRef.grabbedEntity = pointerRef.hoveredEntity;
+        pointerRef.grabbedEntity.physicsState = 'GRABBED';
+        pointerRef.history = [
+          { x: pointerRef.x, y: pointerRef.y, time: performance.now() },
+        ];
+        document.body.style.cursor = 'grabbing';
+      }
+    };
+
+    const handlePointerUp = () => {
+      if (pointerRef.grabbedEntity) {
+        const ent = pointerRef.grabbedEntity;
+        const history = pointerRef.history;
+        let throwVx = 0;
+        let throwVy = 0;
+
+        if (history.length >= 2) {
+          const first = history[0];
+          const last = history[history.length - 1];
+          const dt = (last.time - first.time) / 1000;
+          if (dt > 0.01 && dt < 0.40) {
+            // Speed in pixels per frame (~60 FPS)
+            throwVx = (last.x - first.x) / (dt * 60);
+            throwVy = (last.y - first.y) / (dt * 60);
+          }
+        }
+
+        // Clamp to safe max throw speed
+        const speed = Math.sqrt(throwVx * throwVx + throwVy * throwVy);
+        const maxSpeed = 16;
+        if (speed > maxSpeed) {
+          throwVx = (throwVx / speed) * maxSpeed;
+          throwVy = (throwVy / speed) * maxSpeed;
+        }
+
+        // Apply throw velocity & angular momentum in the exact swipe direction
+        ent.throwVx = throwVx;
+        ent.throwVy = throwVy;
+        ent.throwRotVx = -throwVy * 0.0035;
+        ent.throwRotVy = throwVx * 0.0035;
+        ent.physicsState = speed > 0.6 ? 'THROWN' : 'MOMENTUM';
+
+        pointerRef.grabbedEntity = null;
+        pointerRef.isDown = false;
+        document.body.style.cursor = pointerRef.hoveredEntity ? 'grab' : 'default';
+      }
+    };
+
+    window.addEventListener('mousemove', handlePointerMove, { passive: true });
+    window.addEventListener('mousedown', handlePointerDown, { passive: true });
+    window.addEventListener('mouseup', handlePointerUp, { passive: true });
+    window.addEventListener('touchstart', handlePointerMove, { passive: true });
+    window.addEventListener('touchmove', handlePointerMove, { passive: true });
+    window.addEventListener('touchend', handlePointerUp, { passive: true });
 
     // -------------------------------------------------------------------------
     // 6. ATMOSPHERIC DUST PARTICLES (Light-reactive motes)
@@ -977,7 +1158,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         );
         const coreAlpha = (0.75 + lightBoost * 0.35 + waveBoost * 0.40) * revealProgress;
 
-        // Incomplete Arc 1: Thin architectural circle
         const r1 = 180 * projCore.scale;
         ctx.save();
         ctx.rotate(prefersReducedMotion ? 0.3 : elapsed * 0.030);
@@ -988,7 +1168,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         ctx.stroke();
         ctx.restore();
 
-        // Incomplete Arc 2: Tilted 3D Mathematical Curve
         const r2x = 260 * projCore.scale;
         const r2y = 150 * projCore.scale;
         ctx.save();
@@ -1002,7 +1181,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         ctx.setLineDash([]);
         ctx.restore();
 
-        // Incomplete Arc 3: Distant Subtle Cosmic Rim
         if (!isMobile) {
           const r3 = 340 * projCore.scale;
           ctx.save();
@@ -1020,7 +1198,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
 
       // -----------------------------------------------------------------------
       // OBJECT-TO-OBJECT MUTUAL PROXIMITY INTERACTION
-      // Evaluate pairwise distances between flying entities
       // -----------------------------------------------------------------------
       for (let i = 0; i < flyingEntities.length; i++) {
         flyingEntities[i].proxBoost = 0;
@@ -1044,39 +1221,131 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       }
 
       // -----------------------------------------------------------------------
-      // UPDATE, SORT & RENDER 3D FLYING ENTITIES (Curved Splines & Inertia)
+      // 3D PHYSICAL MOTION & MOMENTUM INTEGRATION
       // -----------------------------------------------------------------------
       for (let i = flyingEntities.length - 1; i >= 0; i--) {
         const ent = flyingEntities[i];
 
-        if (!prefersReducedMotion) {
-          ent.age += dt;
-          ent.baseX += ent.vx;
-          ent.baseY += ent.vy;
-          ent.baseZ += ent.vz;
+        // 1. STATE: GRABBED (Following pointer with spring inertia & 3D tilt)
+        if (ent.physicsState === 'GRABBED') {
+          ent.grabProgress += (1.0 - ent.grabProgress) * 0.15;
+          ent.hoverProgress += (1.0 - ent.hoverProgress) * 0.15;
 
-          // 3D Curved Spline offsets
-          ent.x = ent.baseX + Math.sin(ent.age * ent.curveFreqX + ent.curvePhaseX) * ent.curveAmpX;
-          ent.y = ent.baseY + Math.cos(ent.age * ent.curveFreqY + ent.curvePhaseY) * ent.curveAmpY;
-          ent.z = ent.baseZ + Math.sin(ent.age * ent.curveFreqZ + ent.curvePhaseZ) * ent.curveAmpZ;
+          // Convert screen pointer position back into 3D world space at object's depth
+          const relZ = Math.max(ent.z, 12);
+          const currentScale = fov / (fov + relZ);
+          const targetWorldX = (pointerRef.x - width / 2) / currentScale + width / 2;
+          const targetWorldY = (pointerRef.y - height / 2) / currentScale + height / 2;
 
-          ent.rotX += ent.rotSpeedX;
-          ent.rotY += ent.rotSpeedY;
-          ent.rotZ += ent.rotSpeedZ;
+          const deltaX = targetWorldX - ent.x;
+          const deltaY = targetWorldY - ent.y;
+
+          // Mass-inertia lag
+          ent.x += deltaX * ent.springFactor;
+          ent.y += deltaY * ent.springFactor;
+
+          // Dynamic 3D tilt on drag
+          ent.rotY += deltaX * 0.0025;
+          ent.rotX -= deltaY * 0.0025;
+
+          // Sync base coordinates so flight continues seamlessly from new position
+          ent.baseX = ent.x;
+          ent.baseY = ent.y;
+          ent.baseZ = ent.z;
         }
 
-        // Boundary check (across full viewport)
-        const isOutOfScreen =
-          ent.x < -width * 0.22 ||
-          ent.x > width * 1.22 ||
-          ent.y < -height * 0.22 ||
-          ent.y > height * 1.22 ||
-          ent.z < 90 ||
-          ent.z > 860;
+        // 2. STATE: THROWN / MOMENTUM (Flying with real inertia, damping & bounce)
+        else if (ent.physicsState === 'THROWN' || ent.physicsState === 'MOMENTUM') {
+          ent.grabProgress += (0.0 - ent.grabProgress) * 0.08;
+          ent.hoverProgress += (0.0 - ent.hoverProgress) * 0.08;
 
-        if (isOutOfScreen && ent.age > 8) {
-          flyingEntities.splice(i, 1);
-          flyingEntities.push(spawnFlyingEntity());
+          ent.x += ent.throwVx;
+          ent.y += ent.throwVy;
+          ent.z += ent.throwVz;
+
+          ent.rotX += ent.throwRotVx;
+          ent.rotY += ent.throwRotVy;
+
+          // Air resistance damping
+          ent.throwVx *= ent.dragFactor;
+          ent.throwVy *= ent.dragFactor;
+          ent.throwVz *= 0.98;
+          ent.throwRotVx *= 0.98;
+          ent.throwRotVy *= 0.98;
+
+          // Soft Screen Edge Bouncing
+          if (ent.x < width * 0.04) {
+            ent.x = width * 0.04;
+            ent.throwVx = -ent.throwVx * 0.75;
+          } else if (ent.x > width * 0.96) {
+            ent.x = width * 0.96;
+            ent.throwVx = -ent.throwVx * 0.75;
+          }
+          if (ent.y < height * 0.06) {
+            ent.y = height * 0.06;
+            ent.throwVy = -ent.throwVy * 0.75;
+          } else if (ent.y > height * 0.94) {
+            ent.y = height * 0.94;
+            ent.throwVy = -ent.throwVy * 0.75;
+          }
+
+          // Depth safe bounds
+          if (ent.z < 140) {
+            ent.z = 140;
+            ent.throwVz = Math.abs(ent.throwVz) + 0.1;
+          } else if (ent.z > 740) {
+            ent.z = 740;
+            ent.throwVz = -Math.abs(ent.throwVz) - 0.1;
+          }
+
+          // Return to autonomous flight once throw momentum decays
+          const currentSpeed = Math.sqrt(ent.throwVx * ent.throwVx + ent.throwVy * ent.throwVy);
+          if (currentSpeed < 0.4) {
+            ent.physicsState = 'AUTONOMOUS';
+            ent.baseX = ent.x;
+            ent.baseY = ent.y;
+            ent.baseZ = ent.z;
+            ent.vx = (Math.random() - 0.5) * 0.30;
+            ent.vy = (Math.random() - 0.5) * 0.20;
+            ent.vz = (Math.random() - 0.5) * 0.12;
+          }
+        }
+
+        // 3. STATE: AUTONOMOUS / HOVER (Continuous smooth 3D curved spline flight)
+        else {
+          const isTargetHover = pointerRef.hoveredEntity?.id === ent.id;
+          const targetH = isTargetHover ? 1.0 : 0.0;
+          ent.hoverProgress += (targetH - ent.hoverProgress) * 0.10;
+          ent.grabProgress += (0.0 - ent.grabProgress) * 0.10;
+
+          if (!prefersReducedMotion) {
+            ent.age += dt;
+            ent.baseX += ent.vx;
+            ent.baseY += ent.vy;
+            ent.baseZ += ent.vz;
+
+            ent.x = ent.baseX + Math.sin(ent.age * ent.curveFreqX + ent.curvePhaseX) * ent.curveAmpX;
+            ent.y = ent.baseY + Math.cos(ent.age * ent.curveFreqY + ent.curvePhaseY) * ent.curveAmpY;
+            ent.z = ent.baseZ + Math.sin(ent.age * ent.curveFreqZ + ent.curvePhaseZ) * ent.curveAmpZ;
+
+            ent.rotX += ent.rotSpeedX;
+            ent.rotY += ent.rotSpeedY;
+            ent.rotZ += ent.rotSpeedZ;
+          }
+
+          // Recycle when out of screen bounds after full flight
+          const isOutOfScreen =
+            ent.x < -width * 0.22 ||
+            ent.x > width * 1.22 ||
+            ent.y < -height * 0.22 ||
+            ent.y > height * 1.22 ||
+            ent.z < 90 ||
+            ent.z > 860;
+
+          if (isOutOfScreen && ent.age > 8) {
+            flyingEntities.splice(i, 1);
+            flyingEntities.push(spawnFlyingEntity());
+          }
         }
       }
 
@@ -1084,10 +1353,10 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         flyingEntities.push(spawnFlyingEntity());
       }
 
-      // Depth Sorting (Painter's Algorithm): Furthest objects rendered first
+      // Depth Sorting: Furthest objects rendered first
       flyingEntities.sort((a, b) => b.z - a.z);
 
-      // Render all active flying entities
+      // Render all entities
       flyingEntities.forEach((obj) => {
         const proj = project(
           { x: obj.x, y: obj.y, z: obj.z },
@@ -1103,28 +1372,21 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         // Dynamic Safe Zone Attenuation
         const safeFactor = computeSafeZoneFactor(proj.x, proj.y);
 
-        // Edge fade for smooth entry/exit
+        // Edge fade
         const edgeFadeX = Math.min(1, Math.min(proj.x + 80, width + 80 - proj.x) / 100);
         const edgeFadeY = Math.min(1, Math.min(proj.y + 80, height + 80 - proj.y) / 100);
         const edgeAlpha = Math.max(0, Math.min(1, edgeFadeX * edgeFadeY));
 
-        // Proximity Illumination from 5 moving virtual lights + Traveling Light Wave
         const { lightBoost, waveBoost } = getIlluminationBoost(obj.x, obj.y, obj.z);
 
-        // Interactive 3D Physical Hover Reaction (400–700ms smooth spring)
-        let isHovered = false;
-        if (mouseRef.current.isInside && !isMobile) {
-          const dxCursor = mouseRef.current.screenX - proj.x;
-          const dyCursor = mouseRef.current.screenY - proj.y;
-          const cursorDist = Math.sqrt(dxCursor * dxCursor + dyCursor * dyCursor);
-          isHovered = cursorDist < 75;
-        }
-        const targetHover = isHovered ? 1.0 : 0.0;
-        obj.hoverProgress += (targetHover - obj.hoverProgress) * 0.08;
+        const totalIllum =
+          lightBoost * 0.35 +
+          waveBoost * 0.45 +
+          obj.proxBoost * 0.40 +
+          obj.grabProgress * 0.30;
 
-        const totalIllum = lightBoost * 0.35 + waveBoost * 0.45 + obj.proxBoost * 0.40;
         const finalAlpha =
-          (obj.baseOpacity + totalIllum + obj.hoverProgress * 0.18) *
+          (obj.baseOpacity + totalIllum + obj.hoverProgress * 0.16) *
           edgeAlpha *
           safeFactor *
           revealProgress;
@@ -1134,10 +1396,28 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         ctx.save();
         ctx.translate(proj.x, proj.y);
 
+        // Interactive Grab Scale (1.0 -> 1.04) & Hover Scale (1.0 -> 1.02)
+        const interactiveScale = 1.0 + obj.hoverProgress * 0.02 + obj.grabProgress * 0.03;
+        ctx.scale(interactiveScale, interactiveScale);
+
+        // Grab Golden Aura Glow
+        if (obj.grabProgress > 0.05) {
+          const grabAuraSize = spriteGrabAura.width * proj.scale * 1.4;
+          ctx.globalAlpha = obj.grabProgress * 0.55 * revealProgress;
+          ctx.drawImage(
+            spriteGrabAura,
+            -grabAuraSize / 2,
+            -grabAuraSize / 2,
+            grabAuraSize,
+            grabAuraSize
+          );
+          ctx.globalAlpha = 1.0;
+        }
+
         // Dynamic warm gold coloration
         let goldStroke = `rgba(243, 210, 118, ${(finalAlpha + totalIllum * 0.4) * 0.95})`;
         let goldFill = `rgba(217, 168, 63, ${finalAlpha * 0.85})`;
-        if (obj.z < 260) {
+        if (obj.z < 260 || obj.grabProgress > 0.2) {
           goldStroke = `rgba(255, 235, 170, ${(finalAlpha + totalIllum * 0.5) * 1.0})`;
           goldFill = `rgba(255, 245, 215, ${finalAlpha * 0.95})`;
         } else if (obj.z > 500) {
@@ -1145,9 +1425,8 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           goldFill = `rgba(185, 140, 50, ${finalAlpha * 0.65})`;
         }
 
-        const hoverRot = obj.hoverProgress * 0.20;
-        const rx = obj.rotX + hoverRot;
-        const ry = obj.rotY + hoverRot;
+        const rx = obj.rotX;
+        const ry = obj.rotY;
         const rz = obj.rotZ;
 
         // =====================================================================
@@ -1158,13 +1437,14 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           const bh = obj.bookHeight * proj.scale;
           const bThick = obj.bookThickness * proj.scale;
 
-          const openAngle = obj.hoverProgress * 0.08;
+          const openAngle = (obj.hoverProgress + obj.grabProgress) * 0.08;
           ctx.rotate(rz + openAngle);
 
-          // Back cover drop shadow
+          // Shadow depth boost when grabbed
+          const shadowOffset = 2 + obj.grabProgress * 3;
           ctx.beginPath();
-          ctx.roundRect(-bw / 2 + 2, -bh / 2 + 2, bw, bh, 3);
-          ctx.fillStyle = 'rgba(5, 3, 4, 0.5)';
+          ctx.roundRect(-bw / 2 + shadowOffset, -bh / 2 + shadowOffset, bw, bh, 3);
+          ctx.fillStyle = `rgba(5, 3, 4, ${0.45 + obj.grabProgress * 0.35})`;
           ctx.fill();
 
           // Stacked Book Pages Texture
@@ -1180,7 +1460,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
 
           // Gold Double Hairline Border
           ctx.strokeStyle = `rgba(255, 235, 170, ${(finalAlpha + totalIllum * 0.5) * 0.9})`;
-          ctx.lineWidth = 1.1;
+          ctx.lineWidth = 1.1 + obj.grabProgress * 0.4;
           ctx.stroke();
 
           // Inner gold inlay frame
@@ -1225,7 +1505,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           }
           ctx.stroke();
 
-          // Coordinate Axes: X-axis & Y-axis with dashed intervals
           ctx.strokeStyle = `rgba(217, 168, 63, ${finalAlpha * 0.75})`;
           ctx.lineWidth = 0.85;
           ctx.setLineDash([3, 5]);
@@ -1245,7 +1524,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           ctx.stroke();
           ctx.setLineDash([]);
 
-          // Vector Arrowhead
           const pYTip1 = rotate3D({ x: -3 * (s / 32), y: -24 * (s / 32), z: 0 }, rx, ry, rz);
           const pYTip2 = rotate3D({ x: 3 * (s / 32), y: -24 * (s / 32), z: 0 }, rx, ry, rz);
           ctx.beginPath();
@@ -1254,7 +1532,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           ctx.lineTo(pYTip2.x, pYTip2.y);
           ctx.stroke();
 
-          // Formula text: y = x²
           ctx.font = `italic 600 ${Math.max(7, Math.floor(10 * proj.scale))}px "Playfair Display", Georgia, serif`;
           ctx.fillStyle = goldFill;
           const pLabel = rotate3D({ x: 16 * (s / 32), y: -22 * (s / 32), z: 0 }, rx, ry, rz);
@@ -1284,7 +1561,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           }
           ctx.stroke();
 
-          // Baseline axis
           ctx.strokeStyle = `rgba(217, 168, 63, ${finalAlpha * 0.65})`;
           ctx.lineWidth = 0.8;
           ctx.setLineDash([2, 6]);
@@ -1609,9 +1885,13 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseleave', handleMouseLeave);
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('mousemove', handlePointerMove);
+      window.removeEventListener('mousedown', handlePointerDown);
+      window.removeEventListener('mouseup', handlePointerUp);
+      window.removeEventListener('touchstart', handlePointerMove);
+      window.removeEventListener('touchmove', handlePointerMove);
+      window.removeEventListener('touchend', handlePointerUp);
       if (animFrameIdRef.current) {
         cancelAnimationFrame(animFrameIdRef.current);
       }
