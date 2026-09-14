@@ -29,6 +29,7 @@ import {
 import { LumosLogo } from '../../components/ui/LumosLogo';
 import { Hero3DScene } from '../../components/hero/Hero3DScene';
 import { LumosAmbient3D } from '../../components/common/LumosAmbient3D';
+import { Courses3DSection } from '../../components/courses/Courses3DSection';
 import { PublicTeacherModal } from '../../components/modals/PublicTeacherModal';
 import { MultiStepRegisterModal } from '../../components/modals/MultiStepRegisterModal';
 import { DiagnosticTestModal } from '../../components/modals/DiagnosticTestModal';
@@ -491,112 +492,13 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* -------------------------------------------------------------------------
-          3. KURSLAR / COURSES SECTION (#courses)
+          3. KURSLAR / COURSES SECTION (#courses) — 3D Education Gallery
           ------------------------------------------------------------------------- */}
-      <section id="courses" className="py-24 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto relative z-10">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-          <div className="space-y-3 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#16090D] border border-[#D9A93A]/30 text-[11px] font-bold uppercase tracking-widest text-[#D9A93A]">
-              <BookOpen className="h-3.5 w-3.5" />
-              <span>Ta’lim Yo‘nalishlari</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE]">
-              Kelajak kasblari va <span className="text-[#D9A93A]">akademik fanlar</span>
-            </h2>
-            <p className="text-xs sm:text-sm text-[#A9A3A0]">
-              Har bir kurs amaliy mashg‘ulotlar, diagnostik testlar va shaxsiy murabbiy ko‘magi bilan ta’minlangan.
-            </p>
-          </div>
-
-          {/* Category Filter Pills */}
-          <div className="flex flex-wrap items-center gap-2">
-            {categoryFilters.map((cat) => (
-              <button
-                key={cat.key}
-                type="button"
-                onClick={() => setSelectedCategoryKey(cat.key)}
-                className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                  selectedCategoryKey === cat.key
-                    ? 'bg-[#D9A93A] text-[#080607] shadow-lg shadow-[#D9A93A]/20'
-                    : 'bg-[#14080B] border border-[#D9A93A]/30 text-[#A9A3A0] hover:text-[#F7F4EE] hover:border-[#D9A93A]'
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Courses 3D Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredCourses.map((course) => (
-            <div
-              key={course.id}
-              className="group relative rounded-[32px] bg-gradient-to-b from-[#14080B] via-[#0E0507] to-[#080607] border border-[#D9A93A]/20 hover:border-[#D9A93A]/60 p-7 shadow-[0_20px_50px_rgba(0,0,0,0.85)] hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between"
-            >
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#D9A93A]/15 text-[#F3D276] border border-[#D9A93A]/30">
-                    {course.category}
-                  </span>
-                  <div className="flex items-center gap-1 text-[#F3D276] text-xs font-bold">
-                    <Star className="h-3.5 w-3.5 fill-[#D9A93A] text-[#D9A93A]" />
-                    <span>4.95</span>
-                  </div>
-                </div>
-
-                <h3 className="text-xl font-luxury-serif font-black text-[#F7F4EE] group-hover:text-[#F3D276] transition-colors line-clamp-1">
-                  {course.title}
-                </h3>
-
-                <p className="text-xs text-[#A9A3A0] line-clamp-2 leading-relaxed">
-                  {course.description}
-                </p>
-
-                <div className="grid grid-cols-2 gap-3 py-3 border-y border-[#D9A93A]/15 text-xs text-[#F7F4EE]">
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-3.5 w-3.5 text-[#D9A93A]" />
-                    <span>{course.durationMonths} oy</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-3.5 w-3.5 text-[#D9A93A]" />
-                    <span>Haftada 3 kun</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-6 flex items-center justify-between mt-4">
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-[#A9A3A0] block">Oylik to‘lov</span>
-                  <span className="text-lg font-black text-[#F3D276]">
-                    {formatMoney(course.pricePerMonth)}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedCourseForDetails(course)}
-                    className="p-2.5 rounded-full border border-[#D9A93A]/30 hover:border-[#D9A93A] text-[#A9A3A0] hover:text-[#F7F4EE] transition-colors"
-                    title="Batafsil"
-                  >
-                    <BookOpen className="h-4 w-4" />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleOpenRegisterWithCourse(course.title)}
-                    className="px-4 py-2.5 rounded-full text-xs font-bold text-[#080607] bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] hover:brightness-110 shadow-md shadow-[#D9A93A]/20 transition-all flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <span>Yozilish</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      <Courses3DSection
+        onOpenDetails={setSelectedCourseForDetails}
+        onOpenRegister={handleOpenRegisterWithCourse}
+        onOpenDiagnostic={() => setIsDiagnosticModalOpen(true)}
+      />
 
       {/* -------------------------------------------------------------------------
           4. AFZALLIKLAR / BENEFITS SECTION (#benefits)
