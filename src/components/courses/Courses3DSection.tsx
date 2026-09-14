@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   BookOpen,
-  Star,
   Clock,
   Calendar,
   ArrowRight,
@@ -11,10 +10,8 @@ import {
   Sparkles,
   Award,
   Layers,
-  Code,
   GraduationCap,
-  ExternalLink,
-  ShieldCheck,
+  RotateCw,
 } from 'lucide-react';
 import { Course } from '../../types/admin';
 import { INITIAL_COURSES } from '../../data/coursesData';
@@ -26,29 +23,42 @@ interface Courses3DSectionProps {
   onOpenDiagnostic?: () => void;
 }
 
-type CourseVisualType = 'math' | 'english' | 'it' | 'academic';
+type CourseVisualTheme = 'math' | 'english' | 'it' | 'academic';
 
 interface SatelliteObject3D {
-  type: string;
+  id: string;
+  type: 'ring' | 'parabola' | 'sinewave' | 'knot' | 'helix' | 'axes' | 'formula' | 'letter' | 'word' | 'code' | 'star';
   label?: string;
-  x: number;
-  y: number;
-  z: number;
-  baseX: number;
-  baseY: number;
-  baseZ: number;
+  // 3D Orbital Coordinates
+  orbitLayer: 'inner' | 'middle' | 'outer';
   orbitRadius: number;
   orbitSpeed: number;
   orbitPhase: number;
-  orbitTilt: number;
+  orbitInclination: number; // orbital tilt in radians
+  orbitEccentricity: number; // 1 = circle, 0.7 = ellipse
+  // Local Coordinates
+  x: number;
+  y: number;
+  z: number;
+  // Local Rotations
   rotX: number;
   rotY: number;
   rotZ: number;
   rotSpeedX: number;
   rotSpeedY: number;
   rotSpeedZ: number;
+  // Physics & Grab State
+  isHovered: boolean;
+  isGrabbed: boolean;
+  spinVx: number;
+  spinVy: number;
   size: number;
-  opacity: number;
+  baseOpacity: number;
+  // Cached Screen Coordinates for Hit-Testing
+  projX: number;
+  projY: number;
+  projScale: number;
+  projZ: number;
 }
 
 export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
@@ -58,75 +68,25 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 }) => {
   const { formatMoney } = useI18n();
 
-  // Category filter state
-  const [selectedCategoryKey, setSelectedCategoryKey] = useState<string>('all');
-  const categoryFilters = [
-    { key: 'all', label: 'Barchasi' },
-    { key: 'til', label: 'Xorijiy tillar' },
-    { key: 'it', label: 'IT & Dasturlash' },
-    { key: 'aniq', label: 'Aniq fanlar & DTM' },
-  ];
-
-  // Filtered courses
-  const filteredCourses = useMemo(() => {
-    if (selectedCategoryKey === 'all') return INITIAL_COURSES;
-    return INITIAL_COURSES.filter((c) => {
-      const cat = (c.category || '').toLowerCase();
-      const title = c.title.toLowerCase();
-      if (selectedCategoryKey === 'til')
-        return (
-          cat.includes('language') ||
-          cat.includes('til') ||
-          title.includes('ielts') ||
-          title.includes('cefr') ||
-          title.includes('english') ||
-          title.includes('ingliz')
-        );
-      if (selectedCategoryKey === 'it')
-        return (
-          cat.includes('programming') ||
-          cat.includes('it') ||
-          title.includes('dastur') ||
-          title.includes('python') ||
-          title.includes('frontend')
-        );
-      if (selectedCategoryKey === 'aniq')
-        return (
-          cat.includes('math') ||
-          cat.includes('aniq') ||
-          cat.includes('science') ||
-          title.includes('matematika') ||
-          title.includes('fizika') ||
-          title.includes('dtm') ||
-          title.includes('prezident')
-        );
-      return true;
-    });
-  }, [selectedCategoryKey]);
-
-  // Active course index
+  // Active course state
   const [activeCourseId, setActiveCourseId] = useState<string>(INITIAL_COURSES[0].id);
-
-  // Transition state for smooth switching
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
 
   const activeCourse = useMemo(() => {
     return (
-      filteredCourses.find((c) => c.id === activeCourseId) ||
-      filteredCourses[0] ||
+      INITIAL_COURSES.find((c) => c.id === activeCourseId) ||
       INITIAL_COURSES[0]
     );
-  }, [filteredCourses, activeCourseId]);
+  }, [activeCourseId]);
 
-  const activeIndexInFiltered = useMemo(() => {
-    const idx = filteredCourses.findIndex((c) => c.id === activeCourse.id);
-    return idx >= 0 ? idx : 0;
-  }, [filteredCourses, activeCourse]);
+  const activeIndex = useMemo(() => {
+    return INITIAL_COURSES.findIndex((c) => c.id === activeCourse.id);
+  }, [activeCourse]);
 
-  // Detect Visual Type for 3D Identity
-  const visualType: CourseVisualType = useMemo(() => {
-    const cat = (activeCourse.category || '').toLowerCase();
+  // Determine Course Theme for 3D Scent and Objects
+  const theme: CourseVisualTheme = useMemo(() => {
     const title = activeCourse.title.toLowerCase();
+    const cat = (activeCourse.category || '').toLowerCase();
     if (cat.includes('it') || title.includes('frontend') || title.includes('dastur')) return 'it';
     if (title.includes('ielts') || cat.includes('til') || title.includes('ingliz')) return 'english';
     if (title.includes('prezident') || title.includes('abituriyent') || title.includes('dtm')) return 'academic';
@@ -139,107 +99,310 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     setActiveCourseId(course.id);
     setTimeout(() => {
       setIsTransitioning(false);
-    }, 450);
+    }, 400);
   };
 
-  const handlePrevCourse = () => {
-    if (filteredCourses.length <= 1) return;
-    const nextIdx = (activeIndexInFiltered - 1 + filteredCourses.length) % filteredCourses.length;
-    handleSelectCourse(filteredCourses[nextIdx]);
+  const handlePrev = () => {
+    const nextIdx = (activeIndex - 1 + INITIAL_COURSES.length) % INITIAL_COURSES.length;
+    handleSelectCourse(INITIAL_COURSES[nextIdx]);
   };
 
-  const handleNextCourse = () => {
-    if (filteredCourses.length <= 1) return;
-    const nextIdx = (activeIndexInFiltered + 1) % filteredCourses.length;
-    handleSelectCourse(filteredCourses[nextIdx]);
+  const handleNext = () => {
+    const nextIdx = (activeIndex + 1) % INITIAL_COURSES.length;
+    handleSelectCourse(INITIAL_COURSES[nextIdx]);
   };
 
   // ---------------------------------------------------------------------------
-  // 3D CANVAS & TILT PHYSICS ENGINE (0 GC Allocations, 60 FPS)
+  // 3D CANVAS & UNIFIED PHYSICS ENGINE (Anchored 360° Book + Orbiting Ecosystem)
   // ---------------------------------------------------------------------------
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const animFrameRef = useRef<number | null>(null);
 
-  // Interaction tracking
-  const tiltRef = useRef({
-    targetX: 0,
-    targetY: 0,
-    currentX: 0,
-    currentY: 0,
-    isHovered: false,
+  // Book 360° Physics State
+  const bookPhysicsRef = useRef({
+    // Angles in radians (full 360° freedom)
+    rotX: -0.22,
+    rotY: 0.42,
+    rotZ: -0.06,
+    // Velocities
+    angVx: 0,
+    angVy: 0,
+    // Pointer sampling for realistic momentum
     isDragging: false,
-    dragStartX: 0,
-    dragStartY: 0,
-    dragCurrentX: 0,
-    dragCurrentY: 0,
-    throwVx: 0,
-    throwVy: 0,
+    lastPointerX: 0,
+    lastPointerY: 0,
+    lastTime: 0,
+    samples: [] as { x: number; y: number; time: number }[],
+    // Hover State
+    isHovered: false,
   });
 
-  const visualTypeRef = useRef(visualType);
-  useEffect(() => {
-    visualTypeRef.current = visualType;
-  }, [visualType]);
+  // Active Dragged Target ('book' | satelliteId | null)
+  const activeGrabTargetRef = useRef<string | null>(null);
 
-  // Satellite Objects Definition
+  // Satellites State Ref
   const satellitesRef = useRef<SatelliteObject3D[]>([]);
 
+  // Build Ecosystem Satellites based on Theme
   useEffect(() => {
-    // Generate Curated Satellites based on Visual Type
     const list: SatelliteObject3D[] = [];
-    const count = 7;
 
-    for (let i = 0; i < count; i++) {
-      const angle = (i / count) * Math.PI * 2;
-      const radius = 135 + Math.random() * 45;
-      let label = '';
-      let type = 'formula';
-
-      if (visualType === 'math') {
-        const mathLabels = ['π', 'y=x²', '∫f(x)', '∑', '√x', 'a²+b²=c²', 'Δ'];
-        label = mathLabels[i % mathLabels.length];
-        type = i % 2 === 0 ? 'formula' : 'curve';
-      } else if (visualType === 'english') {
-        const engLabels = ['A', 'LEARN', 'B', 'SPEAK', 'C', 'THINK', 'GROW'];
-        label = engLabels[i % engLabels.length];
-        type = i % 2 === 0 ? 'letter' : 'ribbon';
-      } else if (visualType === 'it') {
-        const itLabels = ['<dev/>', '{ }', '01', 'git', '=>', '[]', 'UI'];
-        label = itLabels[i % itLabels.length];
-        type = 'code';
-      } else {
-        const acadLabels = ['189+', 'DTM', '★', 'A+', 'IQ', 'TOP', 'CEFR'];
-        label = acadLabels[i % acadLabels.length];
-        type = 'honor';
-      }
-
+    if (theme === 'math') {
+      // 1. Inner Orbit: Formulas & Rings (Fast, Close)
       list.push({
-        type,
-        label,
-        x: Math.cos(angle) * radius,
-        y: Math.sin(angle) * (radius * 0.45),
-        z: Math.sin(angle) * 80,
-        baseX: Math.cos(angle) * radius,
-        baseY: Math.sin(angle) * (radius * 0.45),
-        baseZ: Math.sin(angle) * 80,
-        orbitRadius: radius,
-        orbitSpeed: 0.0008 + (i % 3) * 0.0003,
-        orbitPhase: angle,
-        orbitTilt: (i % 2 === 0 ? 1 : -1) * 0.28,
-        rotX: Math.random() * Math.PI,
-        rotY: Math.random() * Math.PI,
-        rotZ: (Math.random() - 0.5) * 0.4,
-        rotSpeedX: (Math.random() - 0.5) * 0.0012,
-        rotSpeedY: 0.001 + Math.random() * 0.001,
-        rotSpeedZ: (Math.random() - 0.5) * 0.0008,
-        size: label.length > 2 ? 11 : 14,
-        opacity: 0.24 + Math.random() * 0.16,
+        id: 'math-pi',
+        type: 'formula',
+        label: 'π',
+        orbitLayer: 'inner',
+        orbitRadius: 145,
+        orbitSpeed: 0.0014,
+        orbitPhase: 0.2,
+        orbitInclination: 0.25,
+        orbitEccentricity: 0.95,
+        x: 0, y: 0, z: 0,
+        rotX: 0, rotY: 0, rotZ: 0,
+        rotSpeedX: 0.001, rotSpeedY: 0.0015, rotSpeedZ: 0.0005,
+        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+        size: 16, baseOpacity: 0.85,
+        projX: 0, projY: 0, projScale: 1, projZ: 0,
+      });
+      list.push({
+        id: 'math-sqrt',
+        type: 'formula',
+        label: '√x',
+        orbitLayer: 'inner',
+        orbitRadius: 155,
+        orbitSpeed: -0.0012,
+        orbitPhase: 2.1,
+        orbitInclination: -0.35,
+        orbitEccentricity: 0.92,
+        x: 0, y: 0, z: 0,
+        rotX: 0, rotY: 0, rotZ: 0,
+        rotSpeedX: -0.001, rotSpeedY: 0.001, rotSpeedZ: 0.0008,
+        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+        size: 13, baseOpacity: 0.80,
+        projX: 0, projY: 0, projScale: 1, projZ: 0,
+      });
+      list.push({
+        id: 'math-sum',
+        type: 'formula',
+        label: '∑',
+        orbitLayer: 'inner',
+        orbitRadius: 150,
+        orbitSpeed: 0.0013,
+        orbitPhase: 4.2,
+        orbitInclination: 0.15,
+        orbitEccentricity: 0.96,
+        x: 0, y: 0, z: 0,
+        rotX: 0, rotY: 0, rotZ: 0,
+        rotSpeedX: 0.0008, rotSpeedY: -0.0012, rotSpeedZ: 0.0006,
+        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+        size: 15, baseOpacity: 0.85,
+        projX: 0, projY: 0, projScale: 1, projZ: 0,
+      });
+
+      // 2. Middle Orbit: Parabola, Sine Wave, Coordinate Tripod, Ring
+      list.push({
+        id: 'math-parabola',
+        type: 'parabola',
+        label: 'y = x²',
+        orbitLayer: 'middle',
+        orbitRadius: 215,
+        orbitSpeed: 0.0009,
+        orbitPhase: 1.2,
+        orbitInclination: 0.40,
+        orbitEccentricity: 0.88,
+        x: 0, y: 0, z: 0,
+        rotX: 0.3, rotY: 0.4, rotZ: 0,
+        rotSpeedX: 0.0006, rotSpeedY: 0.0009, rotSpeedZ: 0.0003,
+        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+        size: 26, baseOpacity: 0.75,
+        projX: 0, projY: 0, projScale: 1, projZ: 0,
+      });
+      list.push({
+        id: 'math-sinewave',
+        type: 'sinewave',
+        label: 'y = sin(x)',
+        orbitLayer: 'middle',
+        orbitRadius: 225,
+        orbitSpeed: -0.0008,
+        orbitPhase: 3.5,
+        orbitInclination: -0.28,
+        orbitEccentricity: 0.90,
+        x: 0, y: 0, z: 0,
+        rotX: -0.2, rotY: 0.6, rotZ: 0.1,
+        rotSpeedX: -0.0005, rotSpeedY: 0.0007, rotSpeedZ: 0.0004,
+        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+        size: 28, baseOpacity: 0.75,
+        projX: 0, projY: 0, projScale: 1, projZ: 0,
+      });
+      list.push({
+        id: 'math-axes',
+        type: 'axes',
+        label: 'XYZ',
+        orbitLayer: 'middle',
+        orbitRadius: 205,
+        orbitSpeed: 0.0007,
+        orbitPhase: 5.4,
+        orbitInclination: 0.55,
+        orbitEccentricity: 0.85,
+        x: 0, y: 0, z: 0,
+        rotX: 0.4, rotY: 0.2, rotZ: -0.3,
+        rotSpeedX: 0.0007, rotSpeedY: 0.0005, rotSpeedZ: 0.0004,
+        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+        size: 22, baseOpacity: 0.80,
+        projX: 0, projY: 0, projScale: 1, projZ: 0,
+      });
+      list.push({
+        id: 'math-ring',
+        type: 'ring',
+        orbitLayer: 'middle',
+        orbitRadius: 235,
+        orbitSpeed: 0.0010,
+        orbitPhase: 0.8,
+        orbitInclination: -0.45,
+        orbitEccentricity: 0.92,
+        x: 0, y: 0, z: 0,
+        rotX: 0.6, rotY: 0.3, rotZ: 0,
+        rotSpeedX: 0.0009, rotSpeedY: 0.0008, rotSpeedZ: 0.0005,
+        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+        size: 25, baseOpacity: 0.70,
+        projX: 0, projY: 0, projScale: 1, projZ: 0,
+      });
+
+      // 3. Outer Orbit: Trefoil Knot, Helix Spiral (Slow, Architectural)
+      list.push({
+        id: 'math-knot',
+        type: 'knot',
+        orbitLayer: 'outer',
+        orbitRadius: 280,
+        orbitSpeed: 0.0005,
+        orbitPhase: 2.8,
+        orbitInclination: 0.32,
+        orbitEccentricity: 0.84,
+        x: 0, y: 0, z: 0,
+        rotX: 0.2, rotY: 0.8, rotZ: 0.4,
+        rotSpeedX: 0.0004, rotSpeedY: 0.0006, rotSpeedZ: 0.0002,
+        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+        size: 24, baseOpacity: 0.65,
+        projX: 0, projY: 0, projScale: 1, projZ: 0,
+      });
+      list.push({
+        id: 'math-helix',
+        type: 'helix',
+        orbitLayer: 'outer',
+        orbitRadius: 290,
+        orbitSpeed: -0.0006,
+        orbitPhase: 4.8,
+        orbitInclination: -0.38,
+        orbitEccentricity: 0.86,
+        x: 0, y: 0, z: 0,
+        rotX: -0.4, rotY: 0.5, rotZ: 0.2,
+        rotSpeedX: 0.0005, rotSpeedY: 0.0007, rotSpeedZ: 0.0003,
+        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+        size: 26, baseOpacity: 0.65,
+        projX: 0, projY: 0, projScale: 1, projZ: 0,
+      });
+    } else if (theme === 'english') {
+      // English Ecosystem: 3D Typography Letters & Words
+      const engItems = [
+        { label: 'A', layer: 'inner' as const, r: 145, speed: 0.0015, phase: 0.3, inc: 0.2 },
+        { label: 'B', layer: 'inner' as const, r: 155, speed: -0.0013, phase: 2.2, inc: -0.3 },
+        { label: 'C', layer: 'inner' as const, r: 150, speed: 0.0014, phase: 4.1, inc: 0.25 },
+        { label: 'LEARN', layer: 'middle' as const, r: 215, speed: 0.0009, phase: 1.0, inc: 0.35 },
+        { label: 'SPEAK', layer: 'middle' as const, r: 230, speed: -0.0008, phase: 3.2, inc: -0.4 },
+        { label: 'THINK', layer: 'middle' as const, r: 220, speed: 0.0008, phase: 5.2, inc: 0.3 },
+        { label: 'GROW', layer: 'outer' as const, r: 285, speed: 0.0005, phase: 2.5, inc: 0.28 },
+        { label: 'ENGLISH', layer: 'outer' as const, r: 295, speed: -0.0005, phase: 4.9, inc: -0.32 },
+      ];
+
+      engItems.forEach((it, idx) => {
+        list.push({
+          id: `eng-${idx}`,
+          type: it.label.length <= 2 ? 'letter' : 'word',
+          label: it.label,
+          orbitLayer: it.layer,
+          orbitRadius: it.r,
+          orbitSpeed: it.speed,
+          orbitPhase: it.phase,
+          orbitInclination: it.inc,
+          orbitEccentricity: 0.9,
+          x: 0, y: 0, z: 0,
+          rotX: 0, rotY: 0, rotZ: 0,
+          rotSpeedX: 0.0008, rotSpeedY: 0.001, rotSpeedZ: 0.0004,
+          isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+          size: it.label.length <= 2 ? 16 : 12,
+          baseOpacity: it.label.length <= 2 ? 0.85 : 0.70,
+          projX: 0, projY: 0, projScale: 1, projZ: 0,
+        });
+      });
+    } else if (theme === 'it') {
+      // IT Ecosystem: Code constructs, brackets, binary
+      const itItems = [
+        { label: '<dev/>', layer: 'inner' as const, r: 145, speed: 0.0014, phase: 0.5, inc: 0.25 },
+        { label: '{ }', layer: 'inner' as const, r: 155, speed: -0.0012, phase: 2.6, inc: -0.3 },
+        { label: '01', layer: 'inner' as const, r: 150, speed: 0.0013, phase: 4.5, inc: 0.2 },
+        { label: 'git', layer: 'middle' as const, r: 215, speed: 0.0009, phase: 1.4, inc: 0.35 },
+        { label: '=>', layer: 'middle' as const, r: 225, speed: -0.0008, phase: 3.6, inc: -0.4 },
+        { label: 'React', layer: 'outer' as const, r: 285, speed: 0.0005, phase: 2.1, inc: 0.3 },
+        { label: 'Code', layer: 'outer' as const, r: 295, speed: -0.0005, phase: 5.0, inc: -0.32 },
+      ];
+
+      itItems.forEach((it, idx) => {
+        list.push({
+          id: `it-${idx}`,
+          type: 'code',
+          label: it.label,
+          orbitLayer: it.layer,
+          orbitRadius: it.r,
+          orbitSpeed: it.speed,
+          orbitPhase: it.phase,
+          orbitInclination: it.inc,
+          orbitEccentricity: 0.9,
+          x: 0, y: 0, z: 0,
+          rotX: 0, rotY: 0, rotZ: 0,
+          rotSpeedX: 0.0008, rotSpeedY: 0.001, rotSpeedZ: 0.0004,
+          isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+          size: 13,
+          baseOpacity: 0.75,
+          projX: 0, projY: 0, projScale: 1, projZ: 0,
+        });
+      });
+    } else {
+      // Academic / Honors Ecosystem
+      const acadItems = [
+        { label: '189+', layer: 'inner' as const, r: 145, speed: 0.0014, phase: 0.4, inc: 0.25 },
+        { label: '★', layer: 'inner' as const, r: 155, speed: -0.0013, phase: 2.4, inc: -0.3 },
+        { label: 'DTM', layer: 'middle' as const, r: 215, speed: 0.0009, phase: 1.2, inc: 0.38 },
+        { label: 'GRANT', layer: 'middle' as const, r: 225, speed: -0.0008, phase: 3.5, inc: -0.35 },
+        { label: 'IQ', layer: 'outer' as const, r: 285, speed: 0.0006, phase: 2.0, inc: 0.3 },
+        { label: 'TOP', layer: 'outer' as const, r: 295, speed: -0.0005, phase: 4.8, inc: -0.28 },
+      ];
+
+      acadItems.forEach((it, idx) => {
+        list.push({
+          id: `acad-${idx}`,
+          type: 'star',
+          label: it.label,
+          orbitLayer: it.layer,
+          orbitRadius: it.r,
+          orbitSpeed: it.speed,
+          orbitPhase: it.phase,
+          orbitInclination: it.inc,
+          orbitEccentricity: 0.9,
+          x: 0, y: 0, z: 0,
+          rotX: 0, rotY: 0, rotZ: 0,
+          rotSpeedX: 0.0008, rotSpeedY: 0.001, rotSpeedZ: 0.0004,
+          isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+          size: 14,
+          baseOpacity: 0.80,
+          projX: 0, projY: 0, projScale: 1, projZ: 0,
+        });
       });
     }
 
     satellitesRef.current = list;
-  }, [visualType]);
+  }, [theme]);
 
   // Main Canvas Render Loop
   useEffect(() => {
@@ -248,8 +411,8 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
-    let width = 540;
-    let height = 540;
+    let width = 600;
+    let height = 600;
     const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
 
     const updateSize = () => {
@@ -265,9 +428,9 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     updateSize();
     window.addEventListener('resize', updateSize, { passive: true });
 
-    // Reusable rotation buffer
+    // Rotation projection buffer
     const rotBuf = { x: 0, y: 0, z: 0 };
-    const rotatePoint = (px: number, py: number, pz: number, rx: number, ry: number, rz: number) => {
+    const rotate3D = (px: number, py: number, pz: number, rx: number, ry: number, rz: number) => {
       const cosY = Math.cos(ry);
       const sinY = Math.sin(ry);
       const x1 = px * cosY + pz * sinY;
@@ -294,362 +457,401 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       lastTime = now;
       time += dt;
 
-      // Lerp tilt physics (Smooth Apple-level inertia)
-      const tilt = tiltRef.current;
-      tilt.currentX += (tilt.targetX - tilt.currentX) * 0.06;
-      tilt.currentY += (tilt.targetY - tilt.currentY) * 0.06;
+      const bookPhys = bookPhysicsRef.current;
+
+      // 1. Damped Momentum Deceleration for Book
+      if (!bookPhys.isDragging) {
+        bookPhys.rotY += bookPhys.angVy;
+        bookPhys.rotX += bookPhys.angVx;
+
+        // Friction damping
+        bookPhys.angVy *= 0.962;
+        bookPhys.angVx *= 0.962;
+
+        if (Math.abs(bookPhys.angVy) < 0.0001) bookPhys.angVy = 0;
+        if (Math.abs(bookPhys.angVx) < 0.0001) bookPhys.angVx = 0;
+
+        // Subtle autonomous breathing when stationary
+        if (bookPhys.angVy === 0 && bookPhys.angVx === 0) {
+          bookPhys.rotY += Math.cos(time * 0.4) * 0.0003;
+          bookPhys.rotX += Math.sin(time * 0.5) * 0.0002;
+        }
+      }
 
       ctx.clearRect(0, 0, width, height);
 
       const centerX = width / 2;
       const centerY = height / 2;
 
-      // Floating gentle hover breathing
-      const floatY = Math.sin(time * 1.2) * 8;
-      const floatZ = Math.cos(time * 0.9) * 12;
-
-      // Base compound angles
-      const baseRotX = -0.18 + tilt.currentY * 0.35 + Math.sin(time * 0.6) * 0.04;
-      const baseRotY = 0.38 + tilt.currentX * 0.45 + Math.cos(time * 0.5) * 0.05;
-      const baseRotZ = -0.08 + tilt.currentX * 0.12;
-
-      // Moving specular highlight coordinate
-      const lightPhase = time * 0.7;
-      const specX = Math.sin(lightPhase) * 60;
-      const specY = Math.cos(lightPhase * 0.8) * 50;
+      // Natural vertical float
+      const floatY = Math.sin(time * 1.3) * 6;
 
       // -----------------------------------------------------------------------
-      // A. RENDER SATELLITE 3D OBJECTS (Background Layer)
+      // A. UPDATE ORBITS & INDIVIDUAL SATELLITE ROTATIONS
       // -----------------------------------------------------------------------
       const satellites = satellitesRef.current;
       for (let i = 0; i < satellites.length; i++) {
         const sat = satellites[i];
-        sat.orbitPhase += sat.orbitSpeed;
-        sat.rotX += sat.rotSpeedX;
-        sat.rotY += sat.rotSpeedY;
-        sat.rotZ += sat.rotSpeedZ;
 
-        const orbX = Math.cos(sat.orbitPhase) * sat.orbitRadius;
-        const orbY = Math.sin(sat.orbitPhase) * (sat.orbitRadius * 0.38) + Math.sin(sat.orbitPhase * 2) * 20;
-        const orbZ = Math.sin(sat.orbitPhase) * sat.orbitRadius;
+        // Orbit progression (paused only while user holds that specific satellite)
+        if (!sat.isGrabbed) {
+          sat.orbitPhase += sat.orbitSpeed;
+          sat.rotX += sat.spinVx + sat.rotSpeedX;
+          sat.rotY += sat.spinVy + sat.rotSpeedY;
+          sat.rotZ += sat.rotSpeedZ;
 
-        rotatePoint(orbX, orbY, orbZ, baseRotX * 0.4, baseRotY * 0.5, baseRotZ);
-        const satProjX = centerX + rotBuf.x;
-        const satProjY = centerY + rotBuf.y + floatY * 0.5;
-        const satDepth = rotBuf.z;
+          sat.spinVx *= 0.96;
+          sat.spinVy *= 0.96;
+        }
 
-        // Render behind book if depth < 0
-        if (satDepth < 30) {
-          const depthScale = Math.max(0.6, (400 + satDepth) / 400);
-          ctx.save();
-          ctx.translate(satProjX, satProjY);
-          ctx.scale(depthScale, depthScale);
+        // Calculate 3D position in inclined elliptical orbit plane
+        const baseOrbX = Math.cos(sat.orbitPhase) * sat.orbitRadius;
+        const baseOrbY = Math.sin(sat.orbitPhase) * sat.orbitRadius * sat.orbitEccentricity;
+        const baseOrbZ = 0;
 
-          ctx.font = `bold ${Math.round(sat.size)}px monospace`;
-          ctx.fillStyle = `rgba(217, 168, 63, ${sat.opacity * 0.75})`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(sat.label || '', 0, 0);
+        // Apply orbital inclination
+        const cosInc = Math.cos(sat.orbitInclination);
+        const sinInc = Math.sin(sat.orbitInclination);
+        const inclinedY = baseOrbY * cosInc - baseOrbZ * sinInc;
+        const inclinedZ = baseOrbY * sinInc + baseOrbZ * cosInc;
 
-          ctx.restore();
+        sat.x = baseOrbX;
+        sat.y = inclinedY;
+        sat.z = inclinedZ;
+
+        // Projected coordinates
+        const perspective = 520 / (520 + sat.z + 100);
+        sat.projX = centerX + sat.x * perspective;
+        sat.projY = centerY + sat.y * perspective + floatY * 0.4;
+        sat.projScale = perspective;
+        sat.projZ = sat.z;
+      }
+
+      // -----------------------------------------------------------------------
+      // B. RENDER BACKGROUND SATELLITES (z < 0: Behind Book)
+      // -----------------------------------------------------------------------
+      for (let i = 0; i < satellites.length; i++) {
+        const sat = satellites[i];
+        if (sat.projZ < 10) {
+          renderSatellite(ctx, sat);
         }
       }
 
       // -----------------------------------------------------------------------
-      // B. RENDER MAIN 3D COURSE OBJECT (3D Book or Tech Prism)
+      // C. RENDER 360° HERO 3D BOOK (Centerpiece)
       // -----------------------------------------------------------------------
       ctx.save();
       ctx.translate(centerX, centerY + floatY);
 
-      const curType = visualTypeRef.current;
+      // Scale based on screen size
+      const isCompact = width < 460;
+      const bw = isCompact ? 160 : 205;
+      const bh = isCompact ? 220 : 275;
+      const bThick = isCompact ? 32 : 42;
 
-      // BOOK DIMENSIONS
-      const bw = width < 420 ? 150 : 185;
-      const bh = width < 420 ? 210 : 255;
-      const bThick = width < 420 ? 30 : 38;
-
-      // Book 8 Corner Vertices in local coordinates
       const hw = bw / 2;
       const hh = bh / 2;
       const ht = bThick / 2;
 
-      // Shaded Book Spine & Cover Colors
-      let coverTop = '#4A0E17';
-      let coverBottom = '#1A0408';
-      let spineColor = '#6B1422';
-      let accentTitle = 'MATEMATIKA';
-      let subTitle = 'LUMOS ACADEMY';
-
-      if (curType === 'english') {
-        coverTop = '#141E2E';
-        coverBottom = '#0A0E17';
-        spineColor = '#1F2E45';
-        accentTitle = 'ENGLISH';
-        subTitle = 'IELTS & GRAMMAR';
-      } else if (curType === 'it') {
-        coverTop = '#16221E';
-        coverBottom = '#0A120E';
-        spineColor = '#223830';
-        accentTitle = 'FRONTEND IT';
-        subTitle = 'CODE & TECH';
-      } else if (curType === 'academic') {
-        coverTop = '#3C121D';
-        coverBottom = '#140509';
-        spineColor = '#5A1A2B';
-        accentTitle = 'DTM & GRANT';
-        subTitle = 'AKADEMIK BLOK';
-      }
-
-      // 1. Realistic Soft Drop Shadow underneath floating object
-      const shadowGrad = ctx.createRadialGradient(0, hh + 45, 10, 0, hh + 45, hw * 1.5);
-      shadowGrad.addColorStop(0, 'rgba(5, 3, 4, 0.75)');
+      // Soft Depth Shadow
+      const shadowGrad = ctx.createRadialGradient(0, hh + 48, 10, 0, hh + 48, hw * 1.6);
+      shadowGrad.addColorStop(0, 'rgba(5, 3, 4, 0.78)');
       shadowGrad.addColorStop(0.5, 'rgba(5, 3, 4, 0.35)');
       shadowGrad.addColorStop(1, 'rgba(5, 3, 4, 0)');
       ctx.fillStyle = shadowGrad;
       ctx.beginPath();
-      ctx.ellipse(0, hh + 45 - floatZ * 0.3, hw * 1.3, 24, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, hh + 48, hw * 1.35, 26, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // 2. Book 3D Vertices Projection
+      // Current Rotation Angles
+      const rx = bookPhys.rotX;
+      const ry = bookPhys.rotY;
+      const rz = bookPhys.rotZ;
+
+      // Vertices in local space:
+      // Front cover: z = +ht (0: top-left, 1: top-right, 2: bottom-right, 3: bottom-left)
+      // Back cover:  z = -ht (4: top-left, 5: top-right, 6: bottom-right, 7: bottom-left)
       const verts = [
-        // Front cover (z = ht)
         [-hw, -hh, ht], [hw, -hh, ht], [hw, hh, ht], [-hw, hh, ht],
-        // Back cover (z = -ht)
         [-hw, -hh, -ht], [hw, -hh, -ht], [hw, hh, -ht], [-hw, hh, -ht],
       ];
 
-      const projVerts = verts.map((v) => {
-        rotatePoint(v[0], v[1], v[2], baseRotX, baseRotY, baseRotZ);
+      const proj = verts.map((v) => {
+        rotate3D(v[0], v[1], v[2], rx, ry, rz);
         return { x: rotBuf.x, y: rotBuf.y, z: rotBuf.z };
       });
 
-      // Front Face
-      const f0 = projVerts[0];
-      const f1 = projVerts[1];
-      const f2 = projVerts[2];
-      const f3 = projVerts[3];
+      // Shading Colors by Theme
+      let coverTop = '#4A0E17';
+      let coverBot = '#1A0408';
+      let spineColor = '#6B1422';
+      let bookTitle = 'MATEMATIKA';
+      let subTitle = 'LUMOS ACADEMY';
 
-      // Back Face
-      const b0 = projVerts[4];
-      const b1 = projVerts[5];
-      const b2 = projVerts[6];
-      const b3 = projVerts[7];
+      if (theme === 'english') {
+        coverTop = '#141E2E';
+        coverBot = '#0A0E17';
+        spineColor = '#1F2E45';
+        bookTitle = 'ENGLISH';
+        subTitle = 'IELTS & GRAMMAR';
+      } else if (theme === 'it') {
+        coverTop = '#16241F';
+        coverBot = '#0A120E';
+        spineColor = '#223830';
+        bookTitle = 'FRONTEND IT';
+        subTitle = 'CODE & TECH';
+      } else if (theme === 'academic') {
+        coverTop = '#3C121D';
+        coverBot = '#140509';
+        spineColor = '#5A1A2B';
+        bookTitle = 'DTM & GRANT';
+        subTitle = 'AKADEMIK BLOK';
+      }
 
-      // A. Draw Ivory Pages Block (Right side: f1, b1, b2, f2)
-      ctx.beginPath();
-      ctx.moveTo(f1.x, f1.y);
-      ctx.lineTo(b1.x, b1.y);
-      ctx.lineTo(b2.x, b2.y);
-      ctx.lineTo(f2.x, f2.y);
-      ctx.closePath();
-      const pageGrad = ctx.createLinearGradient(f1.x, f1.y, b2.x, b2.y);
-      pageGrad.addColorStop(0, 'rgba(242, 235, 218, 0.95)');
-      pageGrad.addColorStop(0.5, 'rgba(215, 204, 182, 0.90)');
-      pageGrad.addColorStop(1, 'rgba(180, 168, 145, 0.85)');
-      ctx.fillStyle = pageGrad;
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(217, 168, 63, 0.35)';
-      ctx.lineWidth = 1;
-      ctx.stroke();
+      // Calculate Face Normal Z to determine front/back visibility (Backface Culling / Shading)
+      // Normal of Front Cover (0 -> 1 x 0 -> 3)
+      const fv01x = proj[1].x - proj[0].x;
+      const fv01y = proj[1].y - proj[0].y;
+      const fv03x = proj[3].x - proj[0].x;
+      const fv03y = proj[3].y - proj[0].y;
+      const frontNormalZ = fv01x * fv03y - fv01y * fv03x;
 
-      // Individual page lines
-      ctx.strokeStyle = 'rgba(160, 148, 125, 0.4)';
-      ctx.beginPath();
-      const midPagesX = (f1.x + b1.x) / 2;
-      const midPagesY = (f1.y + b1.y) / 2;
-      const midPagesX2 = (f2.x + b2.x) / 2;
-      const midPagesY2 = (f2.y + b2.y) / 2;
-      ctx.moveTo(midPagesX, midPagesY);
-      ctx.lineTo(midPagesX2, midPagesY2);
-      ctx.stroke();
+      // Normal of Spine (0 -> 4 x 0 -> 3)
+      const sv04x = proj[4].x - proj[0].x;
+      const sv04y = proj[4].y - proj[0].y;
+      const spineNormalZ = sv04x * fv03y - sv04y * fv03x;
 
-      // B. Draw Top Pages Block (Top side: f0, f1, b1, b0)
-      ctx.beginPath();
-      ctx.moveTo(f0.x, f0.y);
-      ctx.lineTo(f1.x, f1.y);
-      ctx.lineTo(b1.x, b1.y);
-      ctx.lineTo(b0.x, b0.y);
-      ctx.closePath();
-      ctx.fillStyle = 'rgba(225, 216, 195, 0.92)';
-      ctx.fill();
-      ctx.stroke();
+      // Normal of Pages Right (1 -> 5 x 1 -> 2)
+      const pv15x = proj[5].x - proj[1].x;
+      const pv15y = proj[5].y - proj[1].y;
+      const pv12x = proj[2].x - proj[1].x;
+      const pv12y = proj[2].y - proj[1].y;
+      const pagesNormalZ = pv15x * pv12y - pv15y * pv12x;
 
-      // C. Draw Bottom Pages Block (Bottom side: f3, f2, b2, b3)
-      ctx.beginPath();
-      ctx.moveTo(f3.x, f3.y);
-      ctx.lineTo(f2.x, f2.y);
-      ctx.lineTo(b2.x, b2.y);
-      ctx.lineTo(b3.x, b3.y);
-      ctx.closePath();
-      ctx.fillStyle = 'rgba(195, 185, 165, 0.95)';
-      ctx.fill();
-      ctx.stroke();
+      // Normal of Top (0 -> 1 x 0 -> 4)
+      const topNormalZ = fv01x * sv04y - fv01y * sv04x;
 
-      // D. Draw Spine (Left side: f0, b0, b3, f3)
-      ctx.beginPath();
-      ctx.moveTo(f0.x, f0.y);
-      ctx.lineTo(b0.x, b0.y);
-      ctx.lineTo(b3.x, b3.y);
-      ctx.lineTo(f3.x, f3.y);
-      ctx.closePath();
-      const spineGrad = ctx.createLinearGradient(f0.x, f0.y, b3.x, b3.y);
-      spineGrad.addColorStop(0, spineColor);
-      spineGrad.addColorStop(1, '#0C0305');
-      ctx.fillStyle = spineGrad;
-      ctx.fill();
-      ctx.strokeStyle = '#F3D276';
-      ctx.lineWidth = 1.2;
-      ctx.stroke();
+      // Normal of Bottom (3 -> 2 x 3 -> 7)
+      const bv32x = proj[2].x - proj[3].x;
+      const bv32y = proj[2].y - proj[3].y;
+      const bv37x = proj[7].x - proj[3].x;
+      const bv37y = proj[7].y - proj[3].y;
+      const bottomNormalZ = bv32x * bv37y - bv32y * bv37x;
 
-      // E. Draw Front Cover Face with Bevel and Gold Typography
-      ctx.beginPath();
-      ctx.moveTo(f0.x, f0.y);
-      ctx.lineTo(f1.x, f1.y);
-      ctx.lineTo(f2.x, f2.y);
-      ctx.lineTo(f3.x, f3.y);
-      ctx.closePath();
+      // 1. Draw Back Cover if facing camera (frontNormalZ < 0)
+      if (frontNormalZ < 0) {
+        ctx.beginPath();
+        ctx.moveTo(proj[4].x, proj[4].y);
+        ctx.lineTo(proj[5].x, proj[5].y);
+        ctx.lineTo(proj[6].x, proj[6].y);
+        ctx.lineTo(proj[7].x, proj[7].y);
+        ctx.closePath();
+        ctx.fillStyle = coverBot;
+        ctx.fill();
+        ctx.strokeStyle = '#D9A83F';
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
 
-      const coverGrad = ctx.createLinearGradient(f0.x, f0.y, f2.x, f2.y);
-      coverGrad.addColorStop(0, coverTop);
-      coverGrad.addColorStop(0.65, coverBottom);
-      coverGrad.addColorStop(1, '#060203');
-      ctx.fillStyle = coverGrad;
-      ctx.fill();
+        // Embossed Back Seal
+        const backMidX = (proj[4].x + proj[5].x + proj[6].x + proj[7].x) / 4;
+        const backMidY = (proj[4].y + proj[5].y + proj[6].y + proj[7].y) / 4;
+        ctx.save();
+        ctx.translate(backMidX, backMidY);
+        ctx.beginPath();
+        ctx.arc(0, 0, 24, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(217, 168, 63, 0.5)';
+        ctx.stroke();
+        ctx.font = 'bold 9px monospace';
+        ctx.fillStyle = '#F3D276';
+        ctx.textAlign = 'center';
+        ctx.fillText('LUMOS', 0, 3);
+        ctx.restore();
+      }
 
-      // Gold Perimeter Rim
-      ctx.strokeStyle = '#F3D276';
-      ctx.lineWidth = 1.4;
-      ctx.stroke();
+      // 2. Draw Spine if visible
+      if (spineNormalZ > 0) {
+        ctx.beginPath();
+        ctx.moveTo(proj[0].x, proj[0].y);
+        ctx.lineTo(proj[4].x, proj[4].y);
+        ctx.lineTo(proj[7].x, proj[7].y);
+        ctx.lineTo(proj[3].x, proj[3].y);
+        ctx.closePath();
+        const spineGrad = ctx.createLinearGradient(proj[0].x, proj[0].y, proj[7].x, proj[7].y);
+        spineGrad.addColorStop(0, spineColor);
+        spineGrad.addColorStop(1, '#0C0305');
+        ctx.fillStyle = spineGrad;
+        ctx.fill();
+        ctx.strokeStyle = '#F3D276';
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
 
-      // Inner Gold Embossed Frame
-      const inScale = 0.88;
-      const if0x = f0.x * inScale;
-      const if0y = f0.y * inScale;
-      const if1x = f1.x * inScale;
-      const if1y = f1.y * inScale;
-      const if2x = f2.x * inScale;
-      const if2y = f2.y * inScale;
-      const if3x = f3.x * inScale;
-      const if3y = f3.y * inScale;
+        // Spine Gold Rib Lines
+        ctx.strokeStyle = 'rgba(243, 210, 118, 0.6)';
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        const sTop1X = proj[0].x * 0.7 + proj[3].x * 0.3;
+        const sTop1Y = proj[0].y * 0.7 + proj[3].y * 0.3;
+        const sTop2X = proj[4].x * 0.7 + proj[7].x * 0.3;
+        const sTop2Y = proj[4].y * 0.7 + proj[7].y * 0.3;
+        ctx.moveTo(sTop1X, sTop1Y);
+        ctx.lineTo(sTop2X, sTop2Y);
 
-      ctx.beginPath();
-      ctx.moveTo(if0x, if0y);
-      ctx.lineTo(if1x, if1y);
-      ctx.lineTo(if2x, if2y);
-      ctx.lineTo(if3x, if3y);
-      ctx.closePath();
-      ctx.strokeStyle = 'rgba(243, 210, 118, 0.45)';
-      ctx.lineWidth = 0.9;
-      ctx.stroke();
+        const sBot1X = proj[0].x * 0.3 + proj[3].x * 0.7;
+        const sBot1Y = proj[0].y * 0.3 + proj[3].y * 0.7;
+        const sBot2X = proj[4].x * 0.3 + proj[7].x * 0.7;
+        const sBot2Y = proj[4].y * 0.3 + proj[7].y * 0.7;
+        ctx.moveTo(sBot1X, sBot1Y);
+        ctx.lineTo(sBot2X, sBot2Y);
+        ctx.stroke();
+      }
 
-      // Specular Light Sheen across Cover
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(f0.x, f0.y);
-      ctx.lineTo(f1.x, f1.y);
-      ctx.lineTo(f2.x, f2.y);
-      ctx.lineTo(f3.x, f3.y);
-      ctx.closePath();
-      ctx.clip();
+      // 3. Draw Right Pages Block if visible
+      if (pagesNormalZ > 0) {
+        ctx.beginPath();
+        ctx.moveTo(proj[1].x, proj[1].y);
+        ctx.lineTo(proj[5].x, proj[5].y);
+        ctx.lineTo(proj[6].x, proj[6].y);
+        ctx.lineTo(proj[2].x, proj[2].y);
+        ctx.closePath();
+        const pageGrad = ctx.createLinearGradient(proj[1].x, proj[1].y, proj[6].x, proj[6].y);
+        pageGrad.addColorStop(0, 'rgba(244, 238, 224, 0.98)');
+        pageGrad.addColorStop(0.5, 'rgba(215, 204, 185, 0.92)');
+        pageGrad.addColorStop(1, 'rgba(175, 162, 140, 0.88)');
+        ctx.fillStyle = pageGrad;
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(217, 168, 63, 0.35)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
 
-      const sheenGrad = ctx.createRadialGradient(specX, specY, 10, specX, specY, hw * 1.4);
-      sheenGrad.addColorStop(0, 'rgba(255, 240, 195, 0.35)');
-      sheenGrad.addColorStop(0.4, 'rgba(217, 168, 63, 0.12)');
-      sheenGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-      ctx.fillStyle = sheenGrad;
-      ctx.fillRect(-hw * 1.5, -hh * 1.5, bw * 2, bh * 2);
-      ctx.restore();
+        // Individual page striation line
+        ctx.strokeStyle = 'rgba(150, 138, 118, 0.35)';
+        ctx.beginPath();
+        ctx.moveTo((proj[1].x + proj[5].x) / 2, (proj[1].y + proj[5].y) / 2);
+        ctx.lineTo((proj[2].x + proj[6].x) / 2, (proj[2].y + proj[6].y) / 2);
+        ctx.stroke();
+      }
 
-      // F. Embossed Title on Cover
-      ctx.save();
-      const faceMidX = (f0.x + f1.x + f2.x + f3.x) / 4;
-      const faceMidY = (f0.y + f1.y + f2.y + f3.y) / 4;
-      ctx.translate(faceMidX, faceMidY);
+      // 4. Draw Top Pages Block if visible
+      if (topNormalZ > 0) {
+        ctx.beginPath();
+        ctx.moveTo(proj[0].x, proj[0].y);
+        ctx.lineTo(proj[1].x, proj[1].y);
+        ctx.lineTo(proj[5].x, proj[5].y);
+        ctx.lineTo(proj[4].x, proj[4].y);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(225, 218, 202, 0.94)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(217, 168, 63, 0.3)';
+        ctx.stroke();
+      }
 
-      // Perspective skew matching front plane angle
-      const skewAngle = Math.atan2(f1.y - f0.y, f1.x - f0.x);
-      ctx.rotate(skewAngle);
+      // 5. Draw Bottom Pages Block if visible
+      if (bottomNormalZ > 0) {
+        ctx.beginPath();
+        ctx.moveTo(proj[3].x, proj[3].y);
+        ctx.lineTo(proj[2].x, proj[2].y);
+        ctx.lineTo(proj[6].x, proj[6].y);
+        ctx.lineTo(proj[7].x, proj[7].y);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(195, 185, 168, 0.95)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(217, 168, 63, 0.3)';
+        ctx.stroke();
+      }
 
-      // Header Subtitle
-      ctx.font = 'bold 9px -apple-system, sans-serif';
-      ctx.fillStyle = 'rgba(243, 210, 118, 0.85)';
-      ctx.textAlign = 'center';
-      ctx.letterSpacing = '2.5px';
-      ctx.fillText(subTitle, 0, -hh * 0.42);
+      // 6. Draw Front Cover Face if visible
+      if (frontNormalZ > 0) {
+        ctx.beginPath();
+        ctx.moveTo(proj[0].x, proj[0].y);
+        ctx.lineTo(proj[1].x, proj[1].y);
+        ctx.lineTo(proj[2].x, proj[2].y);
+        ctx.lineTo(proj[3].x, proj[3].y);
+        ctx.closePath();
 
-      // Thin divider
-      ctx.strokeStyle = 'rgba(217, 168, 63, 0.6)';
-      ctx.lineWidth = 0.8;
-      ctx.beginPath();
-      ctx.moveTo(-45, -hh * 0.32);
-      ctx.lineTo(45, -hh * 0.32);
-      ctx.stroke();
+        const coverGrad = ctx.createLinearGradient(proj[0].x, proj[0].y, proj[2].x, proj[2].y);
+        coverGrad.addColorStop(0, coverTop);
+        coverGrad.addColorStop(0.65, coverBot);
+        coverGrad.addColorStop(1, '#060203');
+        ctx.fillStyle = coverGrad;
+        ctx.fill();
 
-      // Main Golden Title
-      ctx.font = '900 18px "Playfair Display", serif';
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillText(accentTitle, 0, -hh * 0.08);
+        // Gold Rim
+        ctx.strokeStyle = '#F3D276';
+        ctx.lineWidth = 1.4;
+        ctx.stroke();
 
-      // Gold Glow Shadow behind title
-      ctx.fillStyle = '#F3D276';
-      ctx.fillText(accentTitle, 0.5, -hh * 0.08 + 0.5);
+        // Inner Embossed Gold Line Frame
+        const inScale = 0.88;
+        ctx.beginPath();
+        ctx.moveTo(proj[0].x * inScale, proj[0].y * inScale);
+        ctx.lineTo(proj[1].x * inScale, proj[1].y * inScale);
+        ctx.lineTo(proj[2].x * inScale, proj[2].y * inScale);
+        ctx.lineTo(proj[3].x * inScale, proj[3].y * inScale);
+        ctx.closePath();
+        ctx.strokeStyle = 'rgba(243, 210, 118, 0.45)';
+        ctx.lineWidth = 0.9;
+        ctx.stroke();
 
-      // Course Emblem / Geometric Seal in center of cover
-      ctx.strokeStyle = '#F3D276';
-      ctx.lineWidth = 1.0;
-      ctx.beginPath();
-      ctx.arc(0, hh * 0.28, 22, 0, Math.PI * 2);
-      ctx.stroke();
+        // Front Cover Typography & Emblem
+        const faceMidX = (proj[0].x + proj[1].x + proj[2].x + proj[3].x) / 4;
+        const faceMidY = (proj[0].y + proj[1].y + proj[2].y + proj[3].y) / 4;
 
-      ctx.beginPath();
-      ctx.arc(0, hh * 0.28, 18, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(217, 168, 63, 0.5)';
-      ctx.stroke();
+        ctx.save();
+        ctx.translate(faceMidX, faceMidY);
+        const skewAngle = Math.atan2(proj[1].y - proj[0].y, proj[1].x - proj[0].x);
+        ctx.rotate(skewAngle);
 
-      // Center Icon Glyphs
-      ctx.font = 'bold 12px monospace';
-      ctx.fillStyle = '#F3D276';
-      const sealGlyph = curType === 'math' ? '∑ π' : curType === 'english' ? 'EN' : curType === 'it' ? '< / >' : '★ DTM';
-      ctx.fillText(sealGlyph, 0, hh * 0.28 + 4);
+        // Subtitle
+        ctx.font = 'bold 9px -apple-system, sans-serif';
+        ctx.fillStyle = 'rgba(243, 210, 118, 0.85)';
+        ctx.textAlign = 'center';
+        ctx.letterSpacing = '2.5px';
+        ctx.fillText(subTitle, 0, -hh * 0.42);
 
-      ctx.restore();
+        // Gold Divider
+        ctx.strokeStyle = 'rgba(217, 168, 63, 0.6)';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(-45, -hh * 0.32);
+        ctx.lineTo(45, -hh * 0.32);
+        ctx.stroke();
+
+        // Main Golden Book Title
+        ctx.font = '900 19px "Playfair Display", serif';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText(bookTitle, 0, -hh * 0.08);
+        ctx.fillStyle = '#F3D276';
+        ctx.fillText(bookTitle, 0.5, -hh * 0.08 + 0.5);
+
+        // Emblem Seal
+        ctx.strokeStyle = '#F3D276';
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.arc(0, hh * 0.28, 22, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(0, hh * 0.28, 18, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(217, 168, 63, 0.5)';
+        ctx.stroke();
+
+        ctx.font = 'bold 12px monospace';
+        ctx.fillStyle = '#F3D276';
+        const sealGlyph = theme === 'math' ? '∑ π' : theme === 'english' ? 'EN' : theme === 'it' ? '< / >' : '★ DTM';
+        ctx.fillText(sealGlyph, 0, hh * 0.28 + 4);
+
+        ctx.restore();
+      }
 
       ctx.restore();
 
       // -----------------------------------------------------------------------
-      // C. RENDER SATELLITE 3D OBJECTS (Foreground Layer)
+      // D. RENDER FOREGROUND SATELLITES (z >= 0: In Front of Book)
       // -----------------------------------------------------------------------
       for (let i = 0; i < satellites.length; i++) {
         const sat = satellites[i];
-        const orbX = Math.cos(sat.orbitPhase) * sat.orbitRadius;
-        const orbY = Math.sin(sat.orbitPhase) * (sat.orbitRadius * 0.38) + Math.sin(sat.orbitPhase * 2) * 20;
-        const orbZ = Math.sin(sat.orbitPhase) * sat.orbitRadius;
-
-        rotatePoint(orbX, orbY, orbZ, baseRotX * 0.4, baseRotY * 0.5, baseRotZ);
-        const satProjX = centerX + rotBuf.x;
-        const satProjY = centerY + rotBuf.y + floatY * 0.5;
-        const satDepth = rotBuf.z;
-
-        // Render in front of book if depth >= 30
-        if (satDepth >= 30) {
-          const depthScale = Math.max(0.7, (400 + satDepth) / 400);
-          ctx.save();
-          ctx.translate(satProjX, satProjY);
-          ctx.scale(depthScale, depthScale);
-
-          // Subtle glowing rim halo behind satellite
-          ctx.fillStyle = 'rgba(217, 168, 63, 0.15)';
-          ctx.beginPath();
-          ctx.arc(0, 0, sat.size * 1.4, 0, Math.PI * 2);
-          ctx.fill();
-
-          ctx.font = `bold ${Math.round(sat.size)}px monospace`;
-          ctx.fillStyle = '#F3D276';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(sat.label || '', 0, 0);
-
-          ctx.restore();
+        if (sat.projZ >= 10) {
+          renderSatellite(ctx, sat);
         }
       }
 
@@ -658,54 +860,252 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 
     animFrameRef.current = requestAnimationFrame(render);
 
-    // Mouse & Touch Event Handlers
+    // -------------------------------------------------------------------------
+    // HELPER: RENDER INDIVIDUAL SATELLITE OBJECT
+    // -------------------------------------------------------------------------
+    function renderSatellite(c: CanvasRenderingContext2D, sat: SatelliteObject3D) {
+      c.save();
+      c.translate(sat.projX, sat.projY);
+
+      const hoverScale = sat.isHovered || sat.isGrabbed ? 1.25 : 1.0;
+      c.scale(sat.projScale * hoverScale, sat.projScale * hoverScale);
+
+      // Rotate around local axis
+      c.rotate(sat.rotZ);
+
+      // Gold Halo on Hover
+      if (sat.isHovered || sat.isGrabbed) {
+        c.fillStyle = 'rgba(217, 168, 63, 0.25)';
+        c.beginPath();
+        c.arc(0, 0, sat.size * 1.5, 0, Math.PI * 2);
+        c.fill();
+      }
+
+      c.strokeStyle = sat.isHovered ? '#FFFFFF' : '#F3D276';
+      c.fillStyle = sat.isHovered ? '#FFFFFF' : '#F3D276';
+      c.lineWidth = sat.isHovered ? 1.5 : 1.1;
+
+      if (sat.type === 'formula' || sat.type === 'letter' || sat.type === 'word' || sat.type === 'code' || sat.type === 'star') {
+        c.font = `bold ${Math.round(sat.size)}px monospace`;
+        c.textAlign = 'center';
+        c.textBaseline = 'middle';
+        c.fillText(sat.label || '', 0, 0);
+      } else if (sat.type === 'ring') {
+        c.beginPath();
+        c.ellipse(0, 0, sat.size, sat.size * Math.abs(Math.cos(sat.rotX)), sat.rotY, 0, Math.PI * 2);
+        c.stroke();
+      } else if (sat.type === 'parabola') {
+        c.beginPath();
+        for (let px = -sat.size; px <= sat.size; px += 4) {
+          const py = (0.04 * px * px - 12);
+          if (px === -sat.size) c.moveTo(px, py);
+          else c.lineTo(px, py);
+        }
+        c.stroke();
+      } else if (sat.type === 'sinewave') {
+        c.beginPath();
+        for (let px = -sat.size; px <= sat.size; px += 4) {
+          const py = Math.sin(px * 0.18 + sat.rotY) * 10;
+          if (px === -sat.size) c.moveTo(px, py);
+          else c.lineTo(px, py);
+        }
+        c.stroke();
+      } else if (sat.type === 'axes') {
+        c.beginPath();
+        c.moveTo(0, 0); c.lineTo(sat.size, 0);
+        c.moveTo(0, 0); c.lineTo(0, -sat.size);
+        c.moveTo(0, 0); c.lineTo(-sat.size * 0.6, sat.size * 0.6);
+        c.stroke();
+      } else if (sat.type === 'knot') {
+        c.beginPath();
+        for (let t = 0; t <= Math.PI * 2; t += 0.2) {
+          const kx = (Math.sin(t) + 2 * Math.sin(2 * t)) * (sat.size * 0.35);
+          const ky = (Math.cos(t) - 2 * Math.cos(2 * t)) * (sat.size * 0.35);
+          if (t === 0) c.moveTo(kx, ky);
+          else c.lineTo(kx, ky);
+        }
+        c.stroke();
+      } else if (sat.type === 'helix') {
+        c.beginPath();
+        for (let step = 0; step <= 16; step++) {
+          const theta = (step / 16) * Math.PI * 4;
+          const r = (step / 16) * sat.size;
+          const hx = Math.cos(theta) * r;
+          const hy = Math.sin(theta) * r * 0.4;
+          if (step === 0) c.moveTo(hx, hy);
+          else c.lineTo(hx, hy);
+        }
+        c.stroke();
+      }
+
+      c.restore();
+    }
+
+    // -------------------------------------------------------------------------
+    // POINTER HIT-TESTING & 360° VELOCITY DRAG INTERACTION
+    // -------------------------------------------------------------------------
     const handlePointerMove = (e: PointerEvent) => {
       const rect = canvas.getBoundingClientRect();
-      const normX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      const normY = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+      const pointerX = e.clientX - rect.left;
+      const pointerY = e.clientY - rect.top;
+      const now = performance.now();
 
-      if (tiltRef.current.isDragging) {
-        const dx = e.clientX - tiltRef.current.dragCurrentX;
-        const dy = e.clientY - tiltRef.current.dragCurrentY;
-        tiltRef.current.dragCurrentX = e.clientX;
-        tiltRef.current.dragCurrentY = e.clientY;
-        tiltRef.current.targetX += dx * 0.006;
-        tiltRef.current.targetY += dy * 0.006;
+      const bookPhys = bookPhysicsRef.current;
+
+      // 1. If currently dragging
+      if (activeGrabTargetRef.current === 'book') {
+        const dx = pointerX - bookPhys.lastPointerX;
+        const dy = pointerY - bookPhys.lastPointerY;
+
+        // Instant 360° rotation from drag delta
+        bookPhys.rotY += dx * 0.009;
+        bookPhys.rotX += dy * 0.009;
+
+        // Track velocity samples
+        bookPhys.samples.push({ x: pointerX, y: pointerY, time: now });
+        if (bookPhys.samples.length > 8) bookPhys.samples.shift();
+
+        bookPhys.lastPointerX = pointerX;
+        bookPhys.lastPointerY = pointerY;
+        document.body.style.cursor = 'grabbing';
         e.preventDefault();
         return;
       }
 
-      tiltRef.current.targetX = Math.max(-1, Math.min(1, normX));
-      tiltRef.current.targetY = Math.max(-1, Math.min(1, normY));
+      // If dragging an individual satellite
+      if (activeGrabTargetRef.current && activeGrabTargetRef.current !== 'book') {
+        const sat = satellitesRef.current.find((s) => s.id === activeGrabTargetRef.current);
+        if (sat) {
+          const dx = pointerX - bookPhys.lastPointerX;
+          const dy = pointerY - bookPhys.lastPointerY;
+          sat.rotY += dx * 0.02;
+          sat.rotX += dy * 0.02;
+          sat.spinVy = dx * 0.015;
+          sat.spinVx = dy * 0.015;
+          bookPhys.lastPointerX = pointerX;
+          bookPhys.lastPointerY = pointerY;
+          document.body.style.cursor = 'grabbing';
+          e.preventDefault();
+          return;
+        }
+      }
+
+      // 2. Hover Hit-Testing
+      // Check Satellites first
+      let hitSat: SatelliteObject3D | null = null;
+      for (let i = satellitesRef.current.length - 1; i >= 0; i--) {
+        const sat = satellitesRef.current[i];
+        const dist = Math.hypot(pointerX - sat.projX, pointerY - sat.projY);
+        if (dist < sat.size * 1.6 + 10) {
+          hitSat = sat;
+          break;
+        }
+      }
+
+      satellitesRef.current.forEach((s) => (s.isHovered = s.id === hitSat?.id));
+
+      // Check Book hit
+      const bookDist = Math.hypot(pointerX - width / 2, pointerY - height / 2);
+      bookPhys.isHovered = !hitSat && bookDist < Math.min(width, height) * 0.35;
+
+      if (hitSat || bookPhys.isHovered) {
+        document.body.style.cursor = 'grab';
+      } else {
+        document.body.style.cursor = 'default';
+      }
     };
 
     const handlePointerDown = (e: PointerEvent) => {
-      tiltRef.current.isDragging = true;
-      tiltRef.current.dragStartX = e.clientX;
-      tiltRef.current.dragStartY = e.clientY;
-      tiltRef.current.dragCurrentX = e.clientX;
-      tiltRef.current.dragCurrentY = e.clientY;
-      try {
-        canvas.setPointerCapture(e.pointerId);
-      } catch (err) {}
+      if (e.button !== 0) return;
+      const rect = canvas.getBoundingClientRect();
+      const pointerX = e.clientX - rect.left;
+      const pointerY = e.clientY - rect.top;
+      const now = performance.now();
+
+      const bookPhys = bookPhysicsRef.current;
+
+      // Check Satellites Hit
+      let hitSat: SatelliteObject3D | null = null;
+      for (let i = satellitesRef.current.length - 1; i >= 0; i--) {
+        const sat = satellitesRef.current[i];
+        const dist = Math.hypot(pointerX - sat.projX, pointerY - sat.projY);
+        if (dist < sat.size * 1.6 + 10) {
+          hitSat = sat;
+          break;
+        }
+      }
+
+      if (hitSat) {
+        activeGrabTargetRef.current = hitSat.id;
+        hitSat.isGrabbed = true;
+        bookPhys.lastPointerX = pointerX;
+        bookPhys.lastPointerY = pointerY;
+        try {
+          canvas.setPointerCapture(e.pointerId);
+        } catch (err) {}
+        document.body.style.cursor = 'grabbing';
+        e.preventDefault();
+        return;
+      }
+
+      // Check Book Hit
+      const bookDist = Math.hypot(pointerX - width / 2, pointerY - height / 2);
+      if (bookDist < Math.min(width, height) * 0.36) {
+        activeGrabTargetRef.current = 'book';
+        bookPhys.isDragging = true;
+        bookPhys.angVx = 0;
+        bookPhys.angVy = 0;
+        bookPhys.lastPointerX = pointerX;
+        bookPhys.lastPointerY = pointerY;
+        bookPhys.samples = [{ x: pointerX, y: pointerY, time: now }];
+        try {
+          canvas.setPointerCapture(e.pointerId);
+        } catch (err) {}
+        document.body.style.cursor = 'grabbing';
+        e.preventDefault();
+      }
     };
 
     const handlePointerUp = (e: PointerEvent) => {
-      tiltRef.current.isDragging = false;
-      try {
-        canvas.releasePointerCapture(e.pointerId);
-      } catch (err) {}
-    };
+      const bookPhys = bookPhysicsRef.current;
+      const now = performance.now();
 
-    const handlePointerEnter = () => {
-      tiltRef.current.isHovered = true;
-    };
+      if (activeGrabTargetRef.current === 'book') {
+        bookPhys.isDragging = false;
+        activeGrabTargetRef.current = null;
 
-    const handlePointerLeave = () => {
-      tiltRef.current.isHovered = false;
-      if (!tiltRef.current.isDragging) {
-        tiltRef.current.targetX = 0;
-        tiltRef.current.targetY = 0;
+        // Calculate Release Angular Momentum
+        const samples = bookPhys.samples;
+        if (samples.length >= 2) {
+          const recent = samples.filter((p) => now - p.time <= 90);
+          if (recent.length >= 2) {
+            const first = recent[0];
+            const last = recent[recent.length - 1];
+            const dt = (last.time - first.time) / 1000;
+            if (dt > 0.01) {
+              const vx = (last.x - first.x) / dt;
+              const vy = (last.y - first.y) / dt;
+              // Angular velocity with clamping
+              bookPhys.angVy = Math.max(-0.12, Math.min(0.12, (vx / 60) * 0.012));
+              bookPhys.angVx = Math.max(-0.12, Math.min(0.12, (vy / 60) * 0.012));
+            }
+          }
+        }
+
+        try {
+          canvas.releasePointerCapture(e.pointerId);
+        } catch (err) {}
+        document.body.style.cursor = bookPhys.isHovered ? 'grab' : 'default';
+      } else if (activeGrabTargetRef.current) {
+        const sat = satellitesRef.current.find((s) => s.id === activeGrabTargetRef.current);
+        if (sat) {
+          sat.isGrabbed = false;
+        }
+        activeGrabTargetRef.current = null;
+        try {
+          canvas.releasePointerCapture(e.pointerId);
+        } catch (err) {}
+        document.body.style.cursor = 'default';
       }
     };
 
@@ -713,8 +1113,6 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     canvas.addEventListener('pointerdown', handlePointerDown);
     canvas.addEventListener('pointerup', handlePointerUp);
     canvas.addEventListener('pointercancel', handlePointerUp);
-    canvas.addEventListener('pointerenter', handlePointerEnter);
-    canvas.addEventListener('pointerleave', handlePointerLeave);
 
     return () => {
       window.removeEventListener('resize', updateSize);
@@ -722,8 +1120,6 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       canvas.removeEventListener('pointerdown', handlePointerDown);
       canvas.removeEventListener('pointerup', handlePointerUp);
       canvas.removeEventListener('pointercancel', handlePointerUp);
-      canvas.removeEventListener('pointerenter', handlePointerEnter);
-      canvas.removeEventListener('pointerleave', handlePointerLeave);
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
   }, []);
@@ -733,18 +1129,18 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       id="courses"
       className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto relative z-10 select-text"
     >
-      {/* Background Architectural Ambient Radial Light */}
-      <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] rounded-full bg-radial from-[#D9A83F]/08 via-[#4A0E17]/10 to-transparent blur-3xl pointer-events-none" />
+      {/* Subtle Background Architectural Glow */}
+      <div className="absolute top-1/4 right-1/4 w-[600px] h-[600px] rounded-full bg-radial from-[#D9A83F]/08 via-[#4A0E17]/12 to-transparent blur-3xl pointer-events-none" />
 
       {/* -----------------------------------------------------------------------
-          1. SECTION HERO & CATEGORY BAR
+          1. SECTION HEADER & DYNAMIC COURSE SELECTOR
           ----------------------------------------------------------------------- */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-16 gap-8 relative z-10">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-12 gap-8 relative z-10">
         <div className="space-y-4 max-w-2xl">
           {/* Section Badge */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#16090D] border border-[#D9A93A]/35 text-xs font-bold uppercase tracking-widest text-[#D9A93A] shadow-[0_4px_16px_rgba(217,169,58,0.12)]">
             <BookOpen className="h-3.5 w-3.5" />
-            <span>3D Ta’lim Galereyasi</span>
+            <span>3D Ta’lim Dunyosi</span>
           </div>
 
           {/* Heading */}
@@ -755,26 +1151,26 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 
           {/* Subtitle */}
           <p className="text-sm sm:text-base text-[#B0A7A2] font-normal leading-relaxed">
-            Har bir kurs nazariya, chuqur amaliy laboratoriyalar, diagnostik testlar va shaxsiy murabbiy ko‘magi asosida tuzilgan.
+            Kitobni aylantirib ko‘ring va atrofidagi interaktiv matematik/lingvistik tuzilmalarni kashf eting. Har bir kurs chuqur amaliy laboratoriya va individual murabbiyga ega.
           </p>
         </div>
 
-        {/* Category Pills Selector */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          {categoryFilters.map((cat) => {
-            const isSelected = selectedCategoryKey === cat.key;
+        {/* Dynamic Course Pill Switcher */}
+        <div className="flex flex-wrap items-center gap-2">
+          {INITIAL_COURSES.map((course) => {
+            const isSelected = course.id === activeCourse.id;
             return (
               <button
-                key={cat.key}
+                key={course.id}
                 type="button"
-                onClick={() => setSelectedCategoryKey(cat.key)}
-                className={`px-5 py-2.5 rounded-full text-xs font-bold tracking-wide transition-all duration-300 cursor-pointer flex items-center gap-2 ${
+                onClick={() => handleSelectCourse(course)}
+                className={`px-4 py-2 rounded-full text-xs font-bold tracking-wide transition-all duration-300 cursor-pointer flex items-center gap-1.5 ${
                   isSelected
-                    ? 'bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] text-[#080607] font-black shadow-[0_4px_20px_rgba(217,169,58,0.35)] scale-105'
-                    : 'bg-[#14080B]/80 border border-[#D9A93A]/25 text-[#A9A3A0] hover:text-[#F7F4EE] hover:border-[#D9A93A]/60'
+                    ? 'bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] text-[#080607] font-black shadow-[0_4px_18px_rgba(217,169,58,0.35)] scale-105'
+                    : 'bg-[#14080B]/90 border border-[#D9A93A]/25 text-[#A9A3A0] hover:text-[#F7F4EE] hover:border-[#D9A93A]/60'
                 }`}
               >
-                <span>{cat.label}</span>
+                <span>{course.category}</span>
               </button>
             );
           })}
@@ -782,36 +1178,35 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       </div>
 
       {/* -----------------------------------------------------------------------
-          2. FEATURED 3D COURSE SHOWCASE (Asymmetrical Luxury Gallery Layout)
+          2. UNIFIED SPECTACULAR 3D COURSES WORLD (No 6-card grid!)
           ----------------------------------------------------------------------- */}
-      <div className="relative rounded-[40px] bg-gradient-to-br from-[#16090D] via-[#0E0507] to-[#070304] border border-[#D9A93A]/30 p-6 sm:p-10 lg:p-14 shadow-[0_30px_90px_rgba(0,0,0,0.92)] mb-14 overflow-hidden">
-        {/* Subtle Architectural Coordinate Grid */}
-        <div className="absolute inset-0 bg-[radial-gradient(#D9A93A_1px,transparent_1px)] [background-size:28px_28px] opacity-10 pointer-events-none" />
+      <div className="relative rounded-[44px] bg-gradient-to-br from-[#180A10] via-[#0E0508] to-[#070305] border border-[#D9A93A]/30 p-6 sm:p-10 lg:p-14 shadow-[0_35px_100px_rgba(0,0,0,0.94)] overflow-hidden">
+        {/* Subtle Architectural Grid */}
+        <div className="absolute inset-0 bg-[radial-gradient(#D9A93A_1px,transparent_1px)] [background-size:32px_32px] opacity-10 pointer-events-none" />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center relative z-10">
-          {/* LEFT: Rich Course Information & Metadata */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center relative z-10">
+          {/* LEFT COLUMN: Active Course Information & Metadata */}
           <div
-            className={`lg:col-span-7 space-y-6 transition-all duration-500 ${
+            className={`lg:col-span-6 space-y-6 transition-all duration-400 ${
               isTransitioning ? 'opacity-40 translate-y-2' : 'opacity-100 translate-y-0'
             }`}
           >
-            {/* Top Navigation Row: Index & Category */}
+            {/* Top Indicator & Prev/Next Arrows */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span className="text-sm font-luxury-serif font-black text-[#D9A93A]">
-                  {String(activeIndexInFiltered + 1).padStart(2, '0')} / {String(filteredCourses.length).padStart(2, '0')}
+                  {String(activeIndex + 1).padStart(2, '0')} / {String(INITIAL_COURSES.length).padStart(2, '0')}
                 </span>
                 <div className="h-4 w-[1px] bg-[#D9A93A]/30" />
-                <span className="px-3.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-[#D9A93A]/15 text-[#F3D276] border border-[#D9A93A]/35">
+                <span className="px-3 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-[#D9A93A]/15 text-[#F3D276] border border-[#D9A93A]/35">
                   {activeCourse.category}
                 </span>
               </div>
 
-              {/* Prev / Next Arrows */}
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={handlePrevCourse}
+                  onClick={handlePrev}
                   className="p-2 rounded-full border border-[#D9A93A]/30 hover:border-[#D9A93A] text-[#A9A3A0] hover:text-[#F7F4EE] hover:bg-[#D9A93A]/10 transition-colors cursor-pointer"
                   title="Oldingi kurs"
                   aria-label="Oldingi kurs"
@@ -820,7 +1215,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
                 </button>
                 <button
                   type="button"
-                  onClick={handleNextCourse}
+                  onClick={handleNext}
                   className="p-2 rounded-full border border-[#D9A93A]/30 hover:border-[#D9A93A] text-[#A9A3A0] hover:text-[#F7F4EE] hover:bg-[#D9A93A]/10 transition-colors cursor-pointer"
                   title="Keyingi kurs"
                   aria-label="Keyingi kurs"
@@ -835,12 +1230,12 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
               {activeCourse.title}
             </h3>
 
-            {/* Course Description */}
+            {/* Description */}
             <p className="text-sm sm:text-base text-[#BDB5B0] leading-relaxed font-normal">
               {activeCourse.description}
             </p>
 
-            {/* Key Course Specifications Badges */}
+            {/* Key Specifications Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 py-4 border-y border-[#D9A93A]/20">
               <div className="flex items-center gap-3">
                 <div className="h-9 w-9 rounded-xl bg-[#D9A93A]/10 border border-[#D9A93A]/25 flex items-center justify-center text-[#D9A93A] shrink-0">
@@ -848,7 +1243,9 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
                 </div>
                 <div>
                   <span className="text-[10px] text-[#A9A3A0] font-semibold uppercase block">Davomiyligi</span>
-                  <span className="text-xs font-bold text-[#F7F4EE]">{activeCourse.durationMonths} oy ({activeCourse.lessonsCount} dars)</span>
+                  <span className="text-xs font-bold text-[#F7F4EE]">
+                    {activeCourse.durationMonths} oy ({activeCourse.lessonsCount} dars)
+                  </span>
                 </div>
               </div>
 
@@ -858,7 +1255,9 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
                 </div>
                 <div>
                   <span className="text-[10px] text-[#A9A3A0] font-semibold uppercase block">Dars Grafigi</span>
-                  <span className="text-xs font-bold text-[#F7F4EE] line-clamp-1">{(activeCourse.schedule || '').split('(')[0] || 'Haftada 3 kun'}</span>
+                  <span className="text-xs font-bold text-[#F7F4EE] line-clamp-1">
+                    {(activeCourse.schedule || '').split('(')[0] || 'Haftada 3 kun'}
+                  </span>
                 </div>
               </div>
 
@@ -868,16 +1267,18 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
                 </div>
                 <div>
                   <span className="text-[10px] text-[#A9A3A0] font-semibold uppercase block">Ustoz</span>
-                  <span className="text-xs font-bold text-[#F7F4EE] line-clamp-1">{activeCourse.instructor || 'Yetakchi ustoz'}</span>
+                  <span className="text-xs font-bold text-[#F7F4EE] line-clamp-1">
+                    {activeCourse.instructor || 'Yetakchi ustoz'}
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Syllabus Highlights Preview */}
+            {/* Syllabus Preview */}
             <div className="space-y-2 pt-1">
               <span className="text-xs font-bold text-[#D9A93A] tracking-wide uppercase flex items-center gap-1.5">
                 <Sparkles className="h-3.5 w-3.5" />
-                <span>Kursda nimalarni o‘rganasiz:</span>
+                <span>O‘quv dasturidan asosiy mavzular:</span>
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#E8E1D9]">
                 {(activeCourse.syllabus || []).slice(0, 4).map((topic, idx) => (
@@ -889,7 +1290,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
               </div>
             </div>
 
-            {/* Pricing & CTA Action Tools */}
+            {/* Pricing & CTA Buttons */}
             <div className="pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
               <div>
                 <span className="text-[11px] uppercase font-bold text-[#A9A3A0] block">Oylik to‘lov</span>
@@ -913,121 +1314,50 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
                 <button
                   type="button"
                   onClick={() => onOpenRegister(activeCourse.title)}
-                  className="px-7 py-3.5 rounded-full text-xs font-black text-[#0B0808] bg-gradient-to-r from-[#D9A93A] via-[#F4D27A] to-[#D9A93A] hover:brightness-110 shadow-[0_6px_25px_rgba(217,168,63,0.4)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 flex items-center gap-2 cursor-pointer border border-[#FFF2C6]/40"
+                  className="px-7 py-3.5 rounded-full text-xs font-black text-[#0B0808] bg-gradient-to-r from-[#D9A93A] via-[#F4D27A] to-[#D9A93A] hover:brightness-110 shadow-[0_6px_25px_rgba(217,169,58,0.4)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 flex items-center gap-2 cursor-pointer border border-[#FFF2C6]/40"
                 >
                   <span>Guruhga yozilish</span>
                   <ArrowRight className="h-4 w-4" />
                 </button>
               </div>
             </div>
+
+            {/* Diagnostic Test Link */}
+            {onOpenDiagnostic && (
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={onOpenDiagnostic}
+                  className="text-xs font-bold text-[#D9A93A] hover:text-[#F3D276] hover:underline flex items-center gap-1.5 cursor-pointer transition-colors"
+                >
+                  <span>Qaysi kurs sizga mos kelishini aniqlash uchun bepul diagnostik test topshiring</span>
+                  <ArrowRight className="h-3 w-3" />
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* RIGHT: Large Interactive 3D Course Visual Stage */}
-          <div
-            ref={containerRef}
-            className="lg:col-span-5 relative w-full aspect-square max-w-[480px] mx-auto flex items-center justify-center select-none"
-          >
+          {/* RIGHT COLUMN: Grand Interactive 3D World Stage */}
+          <div className="lg:col-span-6 relative w-full aspect-square max-w-[560px] mx-auto flex items-center justify-center select-none">
             {/* Ambient Behind-Glow */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="w-[85%] h-[85%] rounded-full bg-radial from-[#D9A83F]/20 via-[#4A0E17]/25 to-transparent blur-2xl" />
+              <div className="w-[88%] h-[88%] rounded-full bg-radial from-[#D9A83F]/22 via-[#4A0E17]/28 to-transparent blur-3xl" />
             </div>
 
             {/* 3D Canvas */}
             <canvas
               ref={canvasRef}
-              className="w-full h-full block cursor-grab active:cursor-grabbing touch-none select-none relative z-10"
+              className="w-full h-full block touch-none select-none relative z-10"
               style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
               title="3D Kurs Objekti: Aylantirish uchun ushlang va siljiting"
             />
 
-            {/* Micro Interaction Hint Badge */}
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-[#120608]/80 backdrop-blur-md border border-[#D9A93A]/25 text-[10px] font-semibold text-[#D9A93A] pointer-events-none flex items-center gap-1.5 whitespace-nowrap shadow-lg">
-              <Layers className="h-3 w-3" />
-              <span>3D Fazo: Kursni aylantirish uchun ushlang</span>
+            {/* Interaction Guide Hint Badge */}
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 px-3.5 py-1.5 rounded-full bg-[#120608]/85 backdrop-blur-md border border-[#D9A93A]/30 text-[10px] font-semibold text-[#D9A93A] pointer-events-none flex items-center gap-2 whitespace-nowrap shadow-xl">
+              <RotateCw className="h-3 w-3 animate-spin-slow" />
+              <span>Kitob va orbital ob’ektlarni 360° aylantirish uchun ushlang</span>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* -----------------------------------------------------------------------
-          3. INTERACTIVE 3D COURSE SELECTOR STRIP (Gallery Cards)
-          ----------------------------------------------------------------------- */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#A9A3A0]">
-            Barcha yo‘nalishlar galereyasi ({filteredCourses.length}):
-          </span>
-          {onOpenDiagnostic && (
-            <button
-              type="button"
-              onClick={onOpenDiagnostic}
-              className="text-xs font-bold text-[#D9A93A] hover:text-[#F3D276] hover:underline flex items-center gap-1 cursor-pointer transition-colors"
-            >
-              <span>Qaysi kurs mos kelishini bilmaysizmi?</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </button>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCourses.map((course, idx) => {
-            const isCurrent = course.id === activeCourse.id;
-            return (
-              <div
-                key={course.id}
-                onClick={() => handleSelectCourse(course)}
-                className={`group relative rounded-[28px] p-6 transition-all duration-400 cursor-pointer flex flex-col justify-between ${
-                  isCurrent
-                    ? 'bg-gradient-to-b from-[#220B12] via-[#140609] to-[#0A0305] border-2 border-[#D9A93A] shadow-[0_15px_40px_rgba(217,169,58,0.25)] -translate-y-1.5'
-                    : 'bg-gradient-to-b from-[#14080B]/90 via-[#0E0507]/90 to-[#080607]/90 border border-[#D9A93A]/20 hover:border-[#D9A93A]/60 hover:-translate-y-1 shadow-[0_10px_30px_rgba(0,0,0,0.7)]'
-                }`}
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#D9A93A]/15 text-[#F3D276] border border-[#D9A93A]/30">
-                      {course.category}
-                    </span>
-                    <span className="text-xs font-luxury-serif font-bold text-[#D9A93A]/70">
-                      #{String(idx + 1).padStart(2, '0')}
-                    </span>
-                  </div>
-
-                  <h4 className="text-lg font-luxury-serif font-black text-[#F7F4EE] group-hover:text-[#F3D276] transition-colors line-clamp-1">
-                    {course.title}
-                  </h4>
-
-                  <p className="text-xs text-[#A9A3A0] line-clamp-2 leading-relaxed">
-                    {course.description}
-                  </p>
-                </div>
-
-                <div className="pt-4 mt-3 border-t border-[#D9A93A]/15 flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] text-[#A9A3A0] font-semibold block">Oylik to‘lov</span>
-                    <span className="text-base font-black text-[#F3D276]">
-                      {formatMoney(course.pricePerMonth)}
-                    </span>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onOpenRegister(course.title);
-                    }}
-                    className={`px-3.5 py-1.5 rounded-full text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
-                      isCurrent
-                        ? 'bg-gradient-to-r from-[#D9A93A] via-[#F3D276] to-[#D9A93A] text-[#080607] font-black shadow-md'
-                        : 'border border-[#D9A93A]/40 text-[#D9A93A] hover:bg-[#D9A93A]/15'
-                    }`}
-                  >
-                    <span>Yozilish</span>
-                    <ArrowRight className="h-3 w-3" />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
         </div>
       </div>
     </section>
