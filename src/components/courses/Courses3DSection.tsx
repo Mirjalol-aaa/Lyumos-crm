@@ -8,8 +8,6 @@ import {
   ChevronRight,
   CheckCircle2,
   Sparkles,
-  Award,
-  Layers,
   GraduationCap,
   RotateCw,
 } from 'lucide-react';
@@ -23,43 +21,7 @@ interface Courses3DSectionProps {
   onOpenDiagnostic?: () => void;
 }
 
-type CourseVisualTheme = 'math' | 'english' | 'it' | 'academic';
-
-interface SatelliteObject3D {
-  id: string;
-  type: 'ring' | 'parabola' | 'sinewave' | 'knot' | 'helix' | 'axes' | 'formula' | 'letter' | 'word' | 'code' | 'star';
-  label?: string;
-  // 3D Orbital Coordinates
-  orbitLayer: 'inner' | 'middle' | 'outer';
-  orbitRadius: number;
-  orbitSpeed: number;
-  orbitPhase: number;
-  orbitInclination: number; // orbital tilt in radians
-  orbitEccentricity: number; // 1 = circle, 0.7 = ellipse
-  // Local Coordinates
-  x: number;
-  y: number;
-  z: number;
-  // Local Rotations
-  rotX: number;
-  rotY: number;
-  rotZ: number;
-  rotSpeedX: number;
-  rotSpeedY: number;
-  rotSpeedZ: number;
-  // Physics & Grab State
-  isHovered: boolean;
-  isGrabbed: boolean;
-  spinVx: number;
-  spinVy: number;
-  size: number;
-  baseOpacity: number;
-  // Cached Screen Coordinates for Hit-Testing
-  projX: number;
-  projY: number;
-  projScale: number;
-  projZ: number;
-}
+type CourseTheme = 'math' | 'english' | 'it' | 'academic';
 
 export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
   onOpenDetails,
@@ -83,8 +45,8 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     return INITIAL_COURSES.findIndex((c) => c.id === activeCourse.id);
   }, [activeCourse]);
 
-  // Determine Course Theme for 3D Scent and Objects
-  const theme: CourseVisualTheme = useMemo(() => {
+  // Determine Course Theme
+  const theme: CourseTheme = useMemo(() => {
     const title = activeCourse.title.toLowerCase();
     const cat = (activeCourse.category || '').toLowerCase();
     if (cat.includes('it') || title.includes('frontend') || title.includes('dastur')) return 'it';
@@ -99,7 +61,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     setActiveCourseId(course.id);
     setTimeout(() => {
       setIsTransitioning(false);
-    }, 400);
+    }, 380);
   };
 
   const handlePrev = () => {
@@ -113,298 +75,57 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
   };
 
   // ---------------------------------------------------------------------------
-  // 3D CANVAS & UNIFIED PHYSICS ENGINE (Anchored 360° Book + Orbiting Ecosystem)
+  // MINIMALIST LUXURY 3D SHOWROOM CANVAS
+  // 1 Anchored Hero 3D Book (horizontal 360° rotation with momentum)
+  // + 1 Large 3D Orbital Ring (elliptical orbit with real depth occlusion)
+  // + 2 Dim Background Accents
   // ---------------------------------------------------------------------------
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animFrameRef = useRef<number | null>(null);
 
-  // Book 360° Physics State
-  const bookPhysicsRef = useRef({
-    // Angles in radians (full 360° freedom)
-    rotX: -0.22,
-    rotY: 0.42,
-    rotZ: -0.06,
-    // Velocities
-    angVx: 0,
-    angVy: 0,
-    // Pointer sampling for realistic momentum
+  // Book 360° Physics (Y-axis turntable rotation)
+  const bookStateRef = useRef({
+    rotY: 0.38, // Primary horizontal angle
+    rotX: -0.16, // Subtle initial tilt
+    angVy: 0, // Angular velocity on Y
+    angVx: 0, // Micro physical tilt velocity
     isDragging: false,
     lastPointerX: 0,
     lastPointerY: 0,
-    lastTime: 0,
     samples: [] as { x: number; y: number; time: number }[],
-    // Hover State
     isHovered: false,
   });
 
-  // Active Dragged Target ('book' | satelliteId | null)
-  const activeGrabTargetRef = useRef<string | null>(null);
+  // Ring Orbital & Self-Rotation Physics
+  const ringStateRef = useRef({
+    orbitPhase: 0.8, // Current angle along elliptical orbit
+    orbitSpeed: 0.0009, // Autonomous orbital velocity
+    orbitRx: 215, // Semi-major axis (width)
+    orbitRz: 140, // Semi-minor axis (depth)
+    selfRotX: 0.55, // Fixed inclination
+    selfRotY: 0.2, // Spin angle
+    selfRotZ: -0.15,
+    spinVy: 0, // Momentum velocity when manually dragged
+    isDragging: false,
+    lastPointerX: 0,
+    lastPointerY: 0,
+    samples: [] as { x: number; y: number; time: number }[],
+    isHovered: false,
+    // Cached screen coordinates for raycasting
+    screenX: 0,
+    screenY: 0,
+    depthZ: 0,
+  });
 
-  // Satellites State Ref
-  const satellitesRef = useRef<SatelliteObject3D[]>([]);
+  // Active Grabbed Target ('book' | 'ring' | null)
+  const activeTargetRef = useRef<'book' | 'ring' | null>(null);
 
-  // Build Ecosystem Satellites based on Theme
+  const themeRef = useRef(theme);
   useEffect(() => {
-    const list: SatelliteObject3D[] = [];
-
-    if (theme === 'math') {
-      // 1. Inner Orbit: Formulas & Rings (Fast, Close)
-      list.push({
-        id: 'math-pi',
-        type: 'formula',
-        label: 'π',
-        orbitLayer: 'inner',
-        orbitRadius: 145,
-        orbitSpeed: 0.0014,
-        orbitPhase: 0.2,
-        orbitInclination: 0.25,
-        orbitEccentricity: 0.95,
-        x: 0, y: 0, z: 0,
-        rotX: 0, rotY: 0, rotZ: 0,
-        rotSpeedX: 0.001, rotSpeedY: 0.0015, rotSpeedZ: 0.0005,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 16, baseOpacity: 0.85,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-      list.push({
-        id: 'math-sqrt',
-        type: 'formula',
-        label: '√x',
-        orbitLayer: 'inner',
-        orbitRadius: 155,
-        orbitSpeed: -0.0012,
-        orbitPhase: 2.1,
-        orbitInclination: -0.35,
-        orbitEccentricity: 0.92,
-        x: 0, y: 0, z: 0,
-        rotX: 0, rotY: 0, rotZ: 0,
-        rotSpeedX: -0.001, rotSpeedY: 0.001, rotSpeedZ: 0.0008,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 13, baseOpacity: 0.80,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-      list.push({
-        id: 'math-sum',
-        type: 'formula',
-        label: '∑',
-        orbitLayer: 'inner',
-        orbitRadius: 150,
-        orbitSpeed: 0.0013,
-        orbitPhase: 4.2,
-        orbitInclination: 0.15,
-        orbitEccentricity: 0.96,
-        x: 0, y: 0, z: 0,
-        rotX: 0, rotY: 0, rotZ: 0,
-        rotSpeedX: 0.0008, rotSpeedY: -0.0012, rotSpeedZ: 0.0006,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 15, baseOpacity: 0.85,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-
-      // 2. Middle Orbit: Parabola, Sine Wave, Coordinate Tripod, Ring
-      list.push({
-        id: 'math-parabola',
-        type: 'parabola',
-        label: 'y = x²',
-        orbitLayer: 'middle',
-        orbitRadius: 215,
-        orbitSpeed: 0.0009,
-        orbitPhase: 1.2,
-        orbitInclination: 0.40,
-        orbitEccentricity: 0.88,
-        x: 0, y: 0, z: 0,
-        rotX: 0.3, rotY: 0.4, rotZ: 0,
-        rotSpeedX: 0.0006, rotSpeedY: 0.0009, rotSpeedZ: 0.0003,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 26, baseOpacity: 0.75,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-      list.push({
-        id: 'math-sinewave',
-        type: 'sinewave',
-        label: 'y = sin(x)',
-        orbitLayer: 'middle',
-        orbitRadius: 225,
-        orbitSpeed: -0.0008,
-        orbitPhase: 3.5,
-        orbitInclination: -0.28,
-        orbitEccentricity: 0.90,
-        x: 0, y: 0, z: 0,
-        rotX: -0.2, rotY: 0.6, rotZ: 0.1,
-        rotSpeedX: -0.0005, rotSpeedY: 0.0007, rotSpeedZ: 0.0004,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 28, baseOpacity: 0.75,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-      list.push({
-        id: 'math-axes',
-        type: 'axes',
-        label: 'XYZ',
-        orbitLayer: 'middle',
-        orbitRadius: 205,
-        orbitSpeed: 0.0007,
-        orbitPhase: 5.4,
-        orbitInclination: 0.55,
-        orbitEccentricity: 0.85,
-        x: 0, y: 0, z: 0,
-        rotX: 0.4, rotY: 0.2, rotZ: -0.3,
-        rotSpeedX: 0.0007, rotSpeedY: 0.0005, rotSpeedZ: 0.0004,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 22, baseOpacity: 0.80,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-      list.push({
-        id: 'math-ring',
-        type: 'ring',
-        orbitLayer: 'middle',
-        orbitRadius: 235,
-        orbitSpeed: 0.0010,
-        orbitPhase: 0.8,
-        orbitInclination: -0.45,
-        orbitEccentricity: 0.92,
-        x: 0, y: 0, z: 0,
-        rotX: 0.6, rotY: 0.3, rotZ: 0,
-        rotSpeedX: 0.0009, rotSpeedY: 0.0008, rotSpeedZ: 0.0005,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 25, baseOpacity: 0.70,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-
-      // 3. Outer Orbit: Trefoil Knot, Helix Spiral (Slow, Architectural)
-      list.push({
-        id: 'math-knot',
-        type: 'knot',
-        orbitLayer: 'outer',
-        orbitRadius: 280,
-        orbitSpeed: 0.0005,
-        orbitPhase: 2.8,
-        orbitInclination: 0.32,
-        orbitEccentricity: 0.84,
-        x: 0, y: 0, z: 0,
-        rotX: 0.2, rotY: 0.8, rotZ: 0.4,
-        rotSpeedX: 0.0004, rotSpeedY: 0.0006, rotSpeedZ: 0.0002,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 24, baseOpacity: 0.65,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-      list.push({
-        id: 'math-helix',
-        type: 'helix',
-        orbitLayer: 'outer',
-        orbitRadius: 290,
-        orbitSpeed: -0.0006,
-        orbitPhase: 4.8,
-        orbitInclination: -0.38,
-        orbitEccentricity: 0.86,
-        x: 0, y: 0, z: 0,
-        rotX: -0.4, rotY: 0.5, rotZ: 0.2,
-        rotSpeedX: 0.0005, rotSpeedY: 0.0007, rotSpeedZ: 0.0003,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 26, baseOpacity: 0.65,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-    } else if (theme === 'english') {
-      // English Ecosystem: 3D Typography Letters & Words
-      const engItems = [
-        { label: 'A', layer: 'inner' as const, r: 145, speed: 0.0015, phase: 0.3, inc: 0.2 },
-        { label: 'B', layer: 'inner' as const, r: 155, speed: -0.0013, phase: 2.2, inc: -0.3 },
-        { label: 'C', layer: 'inner' as const, r: 150, speed: 0.0014, phase: 4.1, inc: 0.25 },
-        { label: 'LEARN', layer: 'middle' as const, r: 215, speed: 0.0009, phase: 1.0, inc: 0.35 },
-        { label: 'SPEAK', layer: 'middle' as const, r: 230, speed: -0.0008, phase: 3.2, inc: -0.4 },
-        { label: 'THINK', layer: 'middle' as const, r: 220, speed: 0.0008, phase: 5.2, inc: 0.3 },
-        { label: 'GROW', layer: 'outer' as const, r: 285, speed: 0.0005, phase: 2.5, inc: 0.28 },
-        { label: 'ENGLISH', layer: 'outer' as const, r: 295, speed: -0.0005, phase: 4.9, inc: -0.32 },
-      ];
-
-      engItems.forEach((it, idx) => {
-        list.push({
-          id: `eng-${idx}`,
-          type: it.label.length <= 2 ? 'letter' : 'word',
-          label: it.label,
-          orbitLayer: it.layer,
-          orbitRadius: it.r,
-          orbitSpeed: it.speed,
-          orbitPhase: it.phase,
-          orbitInclination: it.inc,
-          orbitEccentricity: 0.9,
-          x: 0, y: 0, z: 0,
-          rotX: 0, rotY: 0, rotZ: 0,
-          rotSpeedX: 0.0008, rotSpeedY: 0.001, rotSpeedZ: 0.0004,
-          isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-          size: it.label.length <= 2 ? 16 : 12,
-          baseOpacity: it.label.length <= 2 ? 0.85 : 0.70,
-          projX: 0, projY: 0, projScale: 1, projZ: 0,
-        });
-      });
-    } else if (theme === 'it') {
-      // IT Ecosystem: Code constructs, brackets, binary
-      const itItems = [
-        { label: '<dev/>', layer: 'inner' as const, r: 145, speed: 0.0014, phase: 0.5, inc: 0.25 },
-        { label: '{ }', layer: 'inner' as const, r: 155, speed: -0.0012, phase: 2.6, inc: -0.3 },
-        { label: '01', layer: 'inner' as const, r: 150, speed: 0.0013, phase: 4.5, inc: 0.2 },
-        { label: 'git', layer: 'middle' as const, r: 215, speed: 0.0009, phase: 1.4, inc: 0.35 },
-        { label: '=>', layer: 'middle' as const, r: 225, speed: -0.0008, phase: 3.6, inc: -0.4 },
-        { label: 'React', layer: 'outer' as const, r: 285, speed: 0.0005, phase: 2.1, inc: 0.3 },
-        { label: 'Code', layer: 'outer' as const, r: 295, speed: -0.0005, phase: 5.0, inc: -0.32 },
-      ];
-
-      itItems.forEach((it, idx) => {
-        list.push({
-          id: `it-${idx}`,
-          type: 'code',
-          label: it.label,
-          orbitLayer: it.layer,
-          orbitRadius: it.r,
-          orbitSpeed: it.speed,
-          orbitPhase: it.phase,
-          orbitInclination: it.inc,
-          orbitEccentricity: 0.9,
-          x: 0, y: 0, z: 0,
-          rotX: 0, rotY: 0, rotZ: 0,
-          rotSpeedX: 0.0008, rotSpeedY: 0.001, rotSpeedZ: 0.0004,
-          isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-          size: 13,
-          baseOpacity: 0.75,
-          projX: 0, projY: 0, projScale: 1, projZ: 0,
-        });
-      });
-    } else {
-      // Academic / Honors Ecosystem
-      const acadItems = [
-        { label: '189+', layer: 'inner' as const, r: 145, speed: 0.0014, phase: 0.4, inc: 0.25 },
-        { label: '★', layer: 'inner' as const, r: 155, speed: -0.0013, phase: 2.4, inc: -0.3 },
-        { label: 'DTM', layer: 'middle' as const, r: 215, speed: 0.0009, phase: 1.2, inc: 0.38 },
-        { label: 'GRANT', layer: 'middle' as const, r: 225, speed: -0.0008, phase: 3.5, inc: -0.35 },
-        { label: 'IQ', layer: 'outer' as const, r: 285, speed: 0.0006, phase: 2.0, inc: 0.3 },
-        { label: 'TOP', layer: 'outer' as const, r: 295, speed: -0.0005, phase: 4.8, inc: -0.28 },
-      ];
-
-      acadItems.forEach((it, idx) => {
-        list.push({
-          id: `acad-${idx}`,
-          type: 'star',
-          label: it.label,
-          orbitLayer: it.layer,
-          orbitRadius: it.r,
-          orbitSpeed: it.speed,
-          orbitPhase: it.phase,
-          orbitInclination: it.inc,
-          orbitEccentricity: 0.9,
-          x: 0, y: 0, z: 0,
-          rotX: 0, rotY: 0, rotZ: 0,
-          rotSpeedX: 0.0008, rotSpeedY: 0.001, rotSpeedZ: 0.0004,
-          isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-          size: 14,
-          baseOpacity: 0.80,
-          projX: 0, projY: 0, projScale: 1, projZ: 0,
-        });
-      });
-    }
-
-    satellitesRef.current = list;
+    themeRef.current = theme;
   }, [theme]);
 
-  // Main Canvas Render Loop
+  // Main 3D Canvas Loop
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -428,9 +149,9 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     updateSize();
     window.addEventListener('resize', updateSize, { passive: true });
 
-    // Rotation projection buffer
+    // Static rotation buffer (0 allocations)
     const rotBuf = { x: 0, y: 0, z: 0 };
-    const rotate3D = (px: number, py: number, pz: number, rx: number, ry: number, rz: number) => {
+    const rotatePoint = (px: number, py: number, pz: number, rx: number, ry: number, rz: number) => {
       const cosY = Math.cos(ry);
       const sinY = Math.sin(ry);
       const x1 = px * cosY + pz * sinY;
@@ -457,25 +178,31 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       lastTime = now;
       time += dt;
 
-      const bookPhys = bookPhysicsRef.current;
+      const book = bookStateRef.current;
+      const ring = ringStateRef.current;
 
-      // 1. Damped Momentum Deceleration for Book
-      if (!bookPhys.isDragging) {
-        bookPhys.rotY += bookPhys.angVy;
-        bookPhys.rotX += bookPhys.angVx;
+      // 1. DAMPED MOMENTUM FOR BOOK (Settles at final angle without resetting!)
+      if (!book.isDragging) {
+        book.rotY += book.angVy;
+        book.rotX += book.angVx;
 
         // Friction damping
-        bookPhys.angVy *= 0.962;
-        bookPhys.angVx *= 0.962;
+        book.angVy *= 0.965;
+        book.angVx *= 0.965;
 
-        if (Math.abs(bookPhys.angVy) < 0.0001) bookPhys.angVy = 0;
-        if (Math.abs(bookPhys.angVx) < 0.0001) bookPhys.angVx = 0;
+        if (Math.abs(book.angVy) < 0.0001) book.angVy = 0;
+        if (Math.abs(book.angVx) < 0.0001) book.angVx = 0;
 
-        // Subtle autonomous breathing when stationary
-        if (bookPhys.angVy === 0 && bookPhys.angVx === 0) {
-          bookPhys.rotY += Math.cos(time * 0.4) * 0.0003;
-          bookPhys.rotX += Math.sin(time * 0.5) * 0.0002;
-        }
+        // Subtle showroom floating breath (1-2px)
+        book.rotX += ((-0.16) - book.rotX) * 0.02; // Settle micro-tilt back to calm horizontal
+      }
+
+      // 2. ORBIT & MOMENTUM FOR RING
+      if (!ring.isDragging) {
+        ring.orbitPhase += ring.orbitSpeed + ring.spinVy * 0.2;
+        ring.selfRotY += ring.spinVy + 0.0006;
+        ring.spinVy *= 0.965;
+        if (Math.abs(ring.spinVy) < 0.0001) ring.spinVy = 0;
       }
 
       ctx.clearRect(0, 0, width, height);
@@ -483,376 +210,73 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       const centerX = width / 2;
       const centerY = height / 2;
 
-      // Natural vertical float
-      const floatY = Math.sin(time * 1.3) * 6;
+      // Subtle showroom breathing float (1.5px vertical drift)
+      const floatY = Math.sin(time * 1.4) * 2.5;
+
+      // Calculate Ring 3D Orbital Position around the Book
+      const ringOrbX = Math.cos(ring.orbitPhase) * ring.orbitRx;
+      const ringOrbZ = Math.sin(ring.orbitPhase) * ring.orbitRz;
+      // Slight vertical wave as it circles
+      const ringOrbY = Math.sin(ring.orbitPhase * 2) * 12;
+
+      ring.depthZ = ringOrbZ;
+      ring.screenX = centerX + ringOrbX;
+      ring.screenY = centerY + ringOrbY + floatY * 0.4;
+
+      // Studio Moving Specular Light coordinates
+      const lightAngle = time * 0.5;
+      const lightX = Math.sin(lightAngle) * 70;
+      const lightY = Math.cos(lightAngle * 0.7) * 45;
 
       // -----------------------------------------------------------------------
-      // A. UPDATE ORBITS & INDIVIDUAL SATELLITE ROTATIONS
-      // -----------------------------------------------------------------------
-      const satellites = satellitesRef.current;
-      for (let i = 0; i < satellites.length; i++) {
-        const sat = satellites[i];
-
-        // Orbit progression (paused only while user holds that specific satellite)
-        if (!sat.isGrabbed) {
-          sat.orbitPhase += sat.orbitSpeed;
-          sat.rotX += sat.spinVx + sat.rotSpeedX;
-          sat.rotY += sat.spinVy + sat.rotSpeedY;
-          sat.rotZ += sat.rotSpeedZ;
-
-          sat.spinVx *= 0.96;
-          sat.spinVy *= 0.96;
-        }
-
-        // Calculate 3D position in inclined elliptical orbit plane
-        const baseOrbX = Math.cos(sat.orbitPhase) * sat.orbitRadius;
-        const baseOrbY = Math.sin(sat.orbitPhase) * sat.orbitRadius * sat.orbitEccentricity;
-        const baseOrbZ = 0;
-
-        // Apply orbital inclination
-        const cosInc = Math.cos(sat.orbitInclination);
-        const sinInc = Math.sin(sat.orbitInclination);
-        const inclinedY = baseOrbY * cosInc - baseOrbZ * sinInc;
-        const inclinedZ = baseOrbY * sinInc + baseOrbZ * cosInc;
-
-        sat.x = baseOrbX;
-        sat.y = inclinedY;
-        sat.z = inclinedZ;
-
-        // Projected coordinates
-        const perspective = 520 / (520 + sat.z + 100);
-        sat.projX = centerX + sat.x * perspective;
-        sat.projY = centerY + sat.y * perspective + floatY * 0.4;
-        sat.projScale = perspective;
-        sat.projZ = sat.z;
-      }
-
-      // -----------------------------------------------------------------------
-      // B. RENDER BACKGROUND SATELLITES (z < 0: Behind Book)
-      // -----------------------------------------------------------------------
-      for (let i = 0; i < satellites.length; i++) {
-        const sat = satellites[i];
-        if (sat.projZ < 10) {
-          renderSatellite(ctx, sat);
-        }
-      }
-
-      // -----------------------------------------------------------------------
-      // C. RENDER 360° HERO 3D BOOK (Centerpiece)
+      // A. RENDER SUBTLE DEEP BACKGROUND ACCENTS (Dim, Non-competing)
       // -----------------------------------------------------------------------
       ctx.save();
-      ctx.translate(centerX, centerY + floatY);
+      ctx.translate(centerX, centerY);
 
-      // Scale based on screen size
-      const isCompact = width < 460;
-      const bw = isCompact ? 160 : 205;
-      const bh = isCompact ? 220 : 275;
-      const bThick = isCompact ? 32 : 42;
-
-      const hw = bw / 2;
-      const hh = bh / 2;
-      const ht = bThick / 2;
-
-      // Soft Depth Shadow
-      const shadowGrad = ctx.createRadialGradient(0, hh + 48, 10, 0, hh + 48, hw * 1.6);
-      shadowGrad.addColorStop(0, 'rgba(5, 3, 4, 0.78)');
-      shadowGrad.addColorStop(0.5, 'rgba(5, 3, 4, 0.35)');
-      shadowGrad.addColorStop(1, 'rgba(5, 3, 4, 0)');
-      ctx.fillStyle = shadowGrad;
+      // 1. Subtle Background Parabola Coordinate Guide (Dim Burgundy/Gold)
+      ctx.strokeStyle = 'rgba(217, 168, 63, 0.12)';
+      ctx.lineWidth = 0.9;
       ctx.beginPath();
-      ctx.ellipse(0, hh + 48, hw * 1.35, 26, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Current Rotation Angles
-      const rx = bookPhys.rotX;
-      const ry = bookPhys.rotY;
-      const rz = bookPhys.rotZ;
-
-      // Vertices in local space:
-      // Front cover: z = +ht (0: top-left, 1: top-right, 2: bottom-right, 3: bottom-left)
-      // Back cover:  z = -ht (4: top-left, 5: top-right, 6: bottom-right, 7: bottom-left)
-      const verts = [
-        [-hw, -hh, ht], [hw, -hh, ht], [hw, hh, ht], [-hw, hh, ht],
-        [-hw, -hh, -ht], [hw, -hh, -ht], [hw, hh, -ht], [-hw, hh, -ht],
-      ];
-
-      const proj = verts.map((v) => {
-        rotate3D(v[0], v[1], v[2], rx, ry, rz);
-        return { x: rotBuf.x, y: rotBuf.y, z: rotBuf.z };
-      });
-
-      // Shading Colors by Theme
-      let coverTop = '#4A0E17';
-      let coverBot = '#1A0408';
-      let spineColor = '#6B1422';
-      let bookTitle = 'MATEMATIKA';
-      let subTitle = 'LUMOS ACADEMY';
-
-      if (theme === 'english') {
-        coverTop = '#141E2E';
-        coverBot = '#0A0E17';
-        spineColor = '#1F2E45';
-        bookTitle = 'ENGLISH';
-        subTitle = 'IELTS & GRAMMAR';
-      } else if (theme === 'it') {
-        coverTop = '#16241F';
-        coverBot = '#0A120E';
-        spineColor = '#223830';
-        bookTitle = 'FRONTEND IT';
-        subTitle = 'CODE & TECH';
-      } else if (theme === 'academic') {
-        coverTop = '#3C121D';
-        coverBot = '#140509';
-        spineColor = '#5A1A2B';
-        bookTitle = 'DTM & GRANT';
-        subTitle = 'AKADEMIK BLOK';
+      for (let px = -65; px <= 65; px += 5) {
+        const py = (0.025 * px * px - 35);
+        rotatePoint(px * 1.6 + 180, py * 1.6 - 130, -180, -0.2, 0.4, 0);
+        if (px === -65) ctx.moveTo(rotBuf.x, rotBuf.y);
+        else ctx.lineTo(rotBuf.x, rotBuf.y);
       }
+      ctx.stroke();
 
-      // Calculate Face Normal Z to determine front/back visibility (Backface Culling / Shading)
-      // Normal of Front Cover (0 -> 1 x 0 -> 3)
-      const fv01x = proj[1].x - proj[0].x;
-      const fv01y = proj[1].y - proj[0].y;
-      const fv03x = proj[3].x - proj[0].x;
-      const fv03y = proj[3].y - proj[0].y;
-      const frontNormalZ = fv01x * fv03y - fv01y * fv03x;
-
-      // Normal of Spine (0 -> 4 x 0 -> 3)
-      const sv04x = proj[4].x - proj[0].x;
-      const sv04y = proj[4].y - proj[0].y;
-      const spineNormalZ = sv04x * fv03y - sv04y * fv03x;
-
-      // Normal of Pages Right (1 -> 5 x 1 -> 2)
-      const pv15x = proj[5].x - proj[1].x;
-      const pv15y = proj[5].y - proj[1].y;
-      const pv12x = proj[2].x - proj[1].x;
-      const pv12y = proj[2].y - proj[1].y;
-      const pagesNormalZ = pv15x * pv12y - pv15y * pv12x;
-
-      // Normal of Top (0 -> 1 x 0 -> 4)
-      const topNormalZ = fv01x * sv04y - fv01y * sv04x;
-
-      // Normal of Bottom (3 -> 2 x 3 -> 7)
-      const bv32x = proj[2].x - proj[3].x;
-      const bv32y = proj[2].y - proj[3].y;
-      const bv37x = proj[7].x - proj[3].x;
-      const bv37y = proj[7].y - proj[3].y;
-      const bottomNormalZ = bv32x * bv37y - bv32y * bv37x;
-
-      // 1. Draw Back Cover if facing camera (frontNormalZ < 0)
-      if (frontNormalZ < 0) {
-        ctx.beginPath();
-        ctx.moveTo(proj[4].x, proj[4].y);
-        ctx.lineTo(proj[5].x, proj[5].y);
-        ctx.lineTo(proj[6].x, proj[6].y);
-        ctx.lineTo(proj[7].x, proj[7].y);
-        ctx.closePath();
-        ctx.fillStyle = coverBot;
-        ctx.fill();
-        ctx.strokeStyle = '#D9A83F';
-        ctx.lineWidth = 1.2;
-        ctx.stroke();
-
-        // Embossed Back Seal
-        const backMidX = (proj[4].x + proj[5].x + proj[6].x + proj[7].x) / 4;
-        const backMidY = (proj[4].y + proj[5].y + proj[6].y + proj[7].y) / 4;
-        ctx.save();
-        ctx.translate(backMidX, backMidY);
-        ctx.beginPath();
-        ctx.arc(0, 0, 24, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(217, 168, 63, 0.5)';
-        ctx.stroke();
-        ctx.font = 'bold 9px monospace';
-        ctx.fillStyle = '#F3D276';
-        ctx.textAlign = 'center';
-        ctx.fillText('LUMOS', 0, 3);
-        ctx.restore();
-      }
-
-      // 2. Draw Spine if visible
-      if (spineNormalZ > 0) {
-        ctx.beginPath();
-        ctx.moveTo(proj[0].x, proj[0].y);
-        ctx.lineTo(proj[4].x, proj[4].y);
-        ctx.lineTo(proj[7].x, proj[7].y);
-        ctx.lineTo(proj[3].x, proj[3].y);
-        ctx.closePath();
-        const spineGrad = ctx.createLinearGradient(proj[0].x, proj[0].y, proj[7].x, proj[7].y);
-        spineGrad.addColorStop(0, spineColor);
-        spineGrad.addColorStop(1, '#0C0305');
-        ctx.fillStyle = spineGrad;
-        ctx.fill();
-        ctx.strokeStyle = '#F3D276';
-        ctx.lineWidth = 1.2;
-        ctx.stroke();
-
-        // Spine Gold Rib Lines
-        ctx.strokeStyle = 'rgba(243, 210, 118, 0.6)';
-        ctx.lineWidth = 1.0;
-        ctx.beginPath();
-        const sTop1X = proj[0].x * 0.7 + proj[3].x * 0.3;
-        const sTop1Y = proj[0].y * 0.7 + proj[3].y * 0.3;
-        const sTop2X = proj[4].x * 0.7 + proj[7].x * 0.3;
-        const sTop2Y = proj[4].y * 0.7 + proj[7].y * 0.3;
-        ctx.moveTo(sTop1X, sTop1Y);
-        ctx.lineTo(sTop2X, sTop2Y);
-
-        const sBot1X = proj[0].x * 0.3 + proj[3].x * 0.7;
-        const sBot1Y = proj[0].y * 0.3 + proj[3].y * 0.7;
-        const sBot2X = proj[4].x * 0.3 + proj[7].x * 0.7;
-        const sBot2Y = proj[4].y * 0.3 + proj[7].y * 0.7;
-        ctx.moveTo(sBot1X, sBot1Y);
-        ctx.lineTo(sBot2X, sBot2Y);
-        ctx.stroke();
-      }
-
-      // 3. Draw Right Pages Block if visible
-      if (pagesNormalZ > 0) {
-        ctx.beginPath();
-        ctx.moveTo(proj[1].x, proj[1].y);
-        ctx.lineTo(proj[5].x, proj[5].y);
-        ctx.lineTo(proj[6].x, proj[6].y);
-        ctx.lineTo(proj[2].x, proj[2].y);
-        ctx.closePath();
-        const pageGrad = ctx.createLinearGradient(proj[1].x, proj[1].y, proj[6].x, proj[6].y);
-        pageGrad.addColorStop(0, 'rgba(244, 238, 224, 0.98)');
-        pageGrad.addColorStop(0.5, 'rgba(215, 204, 185, 0.92)');
-        pageGrad.addColorStop(1, 'rgba(175, 162, 140, 0.88)');
-        ctx.fillStyle = pageGrad;
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(217, 168, 63, 0.35)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-
-        // Individual page striation line
-        ctx.strokeStyle = 'rgba(150, 138, 118, 0.35)';
-        ctx.beginPath();
-        ctx.moveTo((proj[1].x + proj[5].x) / 2, (proj[1].y + proj[5].y) / 2);
-        ctx.lineTo((proj[2].x + proj[6].x) / 2, (proj[2].y + proj[6].y) / 2);
-        ctx.stroke();
-      }
-
-      // 4. Draw Top Pages Block if visible
-      if (topNormalZ > 0) {
-        ctx.beginPath();
-        ctx.moveTo(proj[0].x, proj[0].y);
-        ctx.lineTo(proj[1].x, proj[1].y);
-        ctx.lineTo(proj[5].x, proj[5].y);
-        ctx.lineTo(proj[4].x, proj[4].y);
-        ctx.closePath();
-        ctx.fillStyle = 'rgba(225, 218, 202, 0.94)';
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(217, 168, 63, 0.3)';
-        ctx.stroke();
-      }
-
-      // 5. Draw Bottom Pages Block if visible
-      if (bottomNormalZ > 0) {
-        ctx.beginPath();
-        ctx.moveTo(proj[3].x, proj[3].y);
-        ctx.lineTo(proj[2].x, proj[2].y);
-        ctx.lineTo(proj[6].x, proj[6].y);
-        ctx.lineTo(proj[7].x, proj[7].y);
-        ctx.closePath();
-        ctx.fillStyle = 'rgba(195, 185, 168, 0.95)';
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(217, 168, 63, 0.3)';
-        ctx.stroke();
-      }
-
-      // 6. Draw Front Cover Face if visible
-      if (frontNormalZ > 0) {
-        ctx.beginPath();
-        ctx.moveTo(proj[0].x, proj[0].y);
-        ctx.lineTo(proj[1].x, proj[1].y);
-        ctx.lineTo(proj[2].x, proj[2].y);
-        ctx.lineTo(proj[3].x, proj[3].y);
-        ctx.closePath();
-
-        const coverGrad = ctx.createLinearGradient(proj[0].x, proj[0].y, proj[2].x, proj[2].y);
-        coverGrad.addColorStop(0, coverTop);
-        coverGrad.addColorStop(0.65, coverBot);
-        coverGrad.addColorStop(1, '#060203');
-        ctx.fillStyle = coverGrad;
-        ctx.fill();
-
-        // Gold Rim
-        ctx.strokeStyle = '#F3D276';
-        ctx.lineWidth = 1.4;
-        ctx.stroke();
-
-        // Inner Embossed Gold Line Frame
-        const inScale = 0.88;
-        ctx.beginPath();
-        ctx.moveTo(proj[0].x * inScale, proj[0].y * inScale);
-        ctx.lineTo(proj[1].x * inScale, proj[1].y * inScale);
-        ctx.lineTo(proj[2].x * inScale, proj[2].y * inScale);
-        ctx.lineTo(proj[3].x * inScale, proj[3].y * inScale);
-        ctx.closePath();
-        ctx.strokeStyle = 'rgba(243, 210, 118, 0.45)';
-        ctx.lineWidth = 0.9;
-        ctx.stroke();
-
-        // Front Cover Typography & Emblem
-        const faceMidX = (proj[0].x + proj[1].x + proj[2].x + proj[3].x) / 4;
-        const faceMidY = (proj[0].y + proj[1].y + proj[2].y + proj[3].y) / 4;
-
-        ctx.save();
-        ctx.translate(faceMidX, faceMidY);
-        const skewAngle = Math.atan2(proj[1].y - proj[0].y, proj[1].x - proj[0].x);
-        ctx.rotate(skewAngle);
-
-        // Subtitle
-        ctx.font = 'bold 9px -apple-system, sans-serif';
-        ctx.fillStyle = 'rgba(243, 210, 118, 0.85)';
-        ctx.textAlign = 'center';
-        ctx.letterSpacing = '2.5px';
-        ctx.fillText(subTitle, 0, -hh * 0.42);
-
-        // Gold Divider
-        ctx.strokeStyle = 'rgba(217, 168, 63, 0.6)';
-        ctx.lineWidth = 0.8;
-        ctx.beginPath();
-        ctx.moveTo(-45, -hh * 0.32);
-        ctx.lineTo(45, -hh * 0.32);
-        ctx.stroke();
-
-        // Main Golden Book Title
-        ctx.font = '900 19px "Playfair Display", serif';
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillText(bookTitle, 0, -hh * 0.08);
-        ctx.fillStyle = '#F3D276';
-        ctx.fillText(bookTitle, 0.5, -hh * 0.08 + 0.5);
-
-        // Emblem Seal
-        ctx.strokeStyle = '#F3D276';
-        ctx.lineWidth = 1.0;
-        ctx.beginPath();
-        ctx.arc(0, hh * 0.28, 22, 0, Math.PI * 2);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(0, hh * 0.28, 18, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(217, 168, 63, 0.5)';
-        ctx.stroke();
-
-        ctx.font = 'bold 12px monospace';
-        ctx.fillStyle = '#F3D276';
-        const sealGlyph = theme === 'math' ? '∑ π' : theme === 'english' ? 'EN' : theme === 'it' ? '< / >' : '★ DTM';
-        ctx.fillText(sealGlyph, 0, hh * 0.28 + 4);
-
-        ctx.restore();
-      }
+      // 2. Subtle Coordinate Axes (Dim, in deep left corner)
+      ctx.strokeStyle = 'rgba(217, 168, 63, 0.10)';
+      ctx.beginPath();
+      rotatePoint(-220, 110, -160, -0.2, 0.3, 0);
+      ctx.moveTo(rotBuf.x, rotBuf.y);
+      rotatePoint(-170, 110, -160, -0.2, 0.3, 0);
+      ctx.lineTo(rotBuf.x, rotBuf.y);
+      rotatePoint(-220, 110, -160, -0.2, 0.3, 0);
+      rotatePoint(-220, 70, -160, -0.2, 0.3, 0);
+      ctx.lineTo(rotBuf.x, rotBuf.y);
+      ctx.stroke();
 
       ctx.restore();
 
       // -----------------------------------------------------------------------
-      // D. RENDER FOREGROUND SATELLITES (z >= 0: In Front of Book)
+      // B. DEPTH SORTING: RING BEHIND BOOK (ring.depthZ < 0)
       // -----------------------------------------------------------------------
-      for (let i = 0; i < satellites.length; i++) {
-        const sat = satellites[i];
-        if (sat.projZ >= 10) {
-          renderSatellite(ctx, sat);
-        }
+      if (ring.depthZ < 0) {
+        renderOrbitalRing(ctx, ring, floatY, lightX, lightY);
+      }
+
+      // -----------------------------------------------------------------------
+      // C. RENDER THE HERO: ANCHORED REALISTIC 3D BOOK
+      // -----------------------------------------------------------------------
+      renderHeroBook(ctx, centerX, centerY + floatY, book, themeRef.current, lightX, lightY, width);
+
+      // -----------------------------------------------------------------------
+      // D. DEPTH SORTING: RING IN FRONT OF BOOK (ring.depthZ >= 0)
+      // -----------------------------------------------------------------------
+      if (ring.depthZ >= 0) {
+        renderOrbitalRing(ctx, ring, floatY, lightX, lightY);
       }
 
       animFrameRef.current = requestAnimationFrame(render);
@@ -861,154 +285,454 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     animFrameRef.current = requestAnimationFrame(render);
 
     // -------------------------------------------------------------------------
-    // HELPER: RENDER INDIVIDUAL SATELLITE OBJECT
+    // RENDER: HERO 3D BOOK WITH 360° ROTATION & PHYSICAL SHADING
     // -------------------------------------------------------------------------
-    function renderSatellite(c: CanvasRenderingContext2D, sat: SatelliteObject3D) {
+    function renderHeroBook(
+      c: CanvasRenderingContext2D,
+      cx: number,
+      cy: number,
+      book: typeof bookStateRef.current,
+      curTheme: CourseTheme,
+      lx: number,
+      ly: number,
+      canvasW: number
+    ) {
       c.save();
-      c.translate(sat.projX, sat.projY);
+      c.translate(cx, cy);
 
-      const hoverScale = sat.isHovered || sat.isGrabbed ? 1.25 : 1.0;
-      c.scale(sat.projScale * hoverScale, sat.projScale * hoverScale);
+      // Book Proportions: physically believable university textbook
+      const isMobileSize = canvasW < 460;
+      const bw = isMobileSize ? 165 : 205;
+      const bh = isMobileSize ? 230 : 280;
+      const bThick = isMobileSize ? 34 : 42;
 
-      // Rotate around local axis
-      c.rotate(sat.rotZ);
+      const hw = bw / 2;
+      const hh = bh / 2;
+      const ht = bThick / 2;
 
-      // Gold Halo on Hover
-      if (sat.isHovered || sat.isGrabbed) {
-        c.fillStyle = 'rgba(217, 168, 63, 0.25)';
-        c.beginPath();
-        c.arc(0, 0, sat.size * 1.5, 0, Math.PI * 2);
-        c.fill();
+      // Realistic Soft Contact Drop Shadow (Calm, Grounded)
+      const shadowGrad = c.createRadialGradient(0, hh + 44, 8, 0, hh + 44, hw * 1.55);
+      shadowGrad.addColorStop(0, 'rgba(5, 3, 4, 0.82)');
+      shadowGrad.addColorStop(0.5, 'rgba(5, 3, 4, 0.35)');
+      shadowGrad.addColorStop(1, 'rgba(5, 3, 4, 0)');
+      c.fillStyle = shadowGrad;
+      c.beginPath();
+      c.ellipse(0, hh + 44, hw * 1.35, 24, 0, 0, Math.PI * 2);
+      c.fill();
+
+      // Current Rotation Angles (Strict Horizontal Y Turntable)
+      const rx = book.rotX;
+      const ry = book.rotY;
+      const rz = 0;
+
+      // Vertices in local book space:
+      // Front cover (z = +ht): 0: top-left, 1: top-right, 2: bottom-right, 3: bottom-left
+      // Back cover  (z = -ht): 4: top-left, 5: top-right, 6: bottom-right, 7: bottom-left
+      const verts = [
+        [-hw, -hh, ht], [hw, -hh, ht], [hw, hh, ht], [-hw, hh, ht],
+        [-hw, -hh, -ht], [hw, -hh, -ht], [hw, hh, -ht], [-hw, hh, -ht],
+      ];
+
+      const proj = verts.map((v) => {
+        rotatePoint(v[0], v[1], v[2], rx, ry, rz);
+        return { x: rotBuf.x, y: rotBuf.y, z: rotBuf.z };
+      });
+
+      // Shading Palette by Theme
+      let coverBase = '#4A0E17';
+      let coverDark = '#180408';
+      let spineColor = '#6B1422';
+      let bookTitle = 'MATHEMATICS';
+      let subTitle = 'LUMOS ACADEMY';
+
+      if (curTheme === 'english') {
+        coverBase = '#162234';
+        coverDark = '#090E17';
+        spineColor = '#21334E';
+        bookTitle = 'ENGLISH';
+        subTitle = 'IELTS & GRAMMAR';
+      } else if (curTheme === 'it') {
+        coverBase = '#182822';
+        coverDark = '#0A120E';
+        spineColor = '#243C33';
+        bookTitle = 'FRONTEND IT';
+        subTitle = 'CODE & SYSTEMS';
+      } else if (curTheme === 'academic') {
+        coverBase = '#3E121E';
+        coverDark = '#15050A';
+        spineColor = '#5E1A2D';
+        bookTitle = 'DTM & GRANT';
+        subTitle = 'AKADEMIK BLOK';
       }
 
-      c.strokeStyle = sat.isHovered ? '#FFFFFF' : '#F3D276';
-      c.fillStyle = sat.isHovered ? '#FFFFFF' : '#F3D276';
-      c.lineWidth = sat.isHovered ? 1.5 : 1.1;
+      // Calculate Face Normals for 360° Visiblity
+      // Front Cover Normal
+      const f01x = proj[1].x - proj[0].x;
+      const f01y = proj[1].y - proj[0].y;
+      const f03x = proj[3].x - proj[0].x;
+      const f03y = proj[3].y - proj[0].y;
+      const frontNormZ = f01x * f03y - f01y * f03x;
 
-      if (sat.type === 'formula' || sat.type === 'letter' || sat.type === 'word' || sat.type === 'code' || sat.type === 'star') {
-        c.font = `bold ${Math.round(sat.size)}px monospace`;
+      // Spine Normal (Left Side: 0, 4, 7, 3)
+      const s04x = proj[4].x - proj[0].x;
+      const s04y = proj[4].y - proj[0].y;
+      const spineNormZ = s04x * f03y - s04y * f03x;
+
+      // Right Pages Block Normal (1, 5, 6, 2)
+      const p15x = proj[5].x - proj[1].x;
+      const p15y = proj[5].y - proj[1].y;
+      const p12x = proj[2].x - proj[1].x;
+      const p12y = proj[2].y - proj[1].y;
+      const pagesNormZ = p15x * p12y - p15y * p12x;
+
+      // Top Normal (0, 1, 5, 4)
+      const topNormZ = f01x * s04y - f01y * s04x;
+
+      // Bottom Normal (3, 2, 6, 7)
+      const b32x = proj[2].x - proj[3].x;
+      const b32y = proj[2].y - proj[3].y;
+      const b37x = proj[7].x - proj[3].x;
+      const b37y = proj[7].y - proj[3].y;
+      const botNormZ = b32x * b37y - b32y * b37x;
+
+      // 1. Back Cover Face (Rendered when rotated 180° / facing away)
+      if (frontNormZ < 0) {
+        c.beginPath();
+        c.moveTo(proj[4].x, proj[4].y);
+        c.lineTo(proj[5].x, proj[5].y);
+        c.lineTo(proj[6].x, proj[6].y);
+        c.lineTo(proj[7].x, proj[7].y);
+        c.closePath();
+        const backGrad = c.createLinearGradient(proj[4].x, proj[4].y, proj[6].x, proj[6].y);
+        backGrad.addColorStop(0, coverDark);
+        backGrad.addColorStop(1, '#060203');
+        c.fillStyle = backGrad;
+        c.fill();
+        c.strokeStyle = '#D9A83F';
+        c.lineWidth = 1.2;
+        c.stroke();
+
+        // Embossed Back Seal
+        const backMidX = (proj[4].x + proj[5].x + proj[6].x + proj[7].x) / 4;
+        const backMidY = (proj[4].y + proj[5].y + proj[6].y + proj[7].y) / 4;
+        c.save();
+        c.translate(backMidX, backMidY);
+        c.beginPath();
+        c.arc(0, 0, 24, 0, Math.PI * 2);
+        c.strokeStyle = 'rgba(217, 168, 63, 0.45)';
+        c.stroke();
+        c.font = 'bold 9px monospace';
+        c.fillStyle = '#F3D276';
         c.textAlign = 'center';
-        c.textBaseline = 'middle';
-        c.fillText(sat.label || '', 0, 0);
-      } else if (sat.type === 'ring') {
+        c.fillText('LUMOS', 0, 3);
+        c.restore();
+      }
+
+      // 2. Spine (Left side)
+      if (spineNormZ > 0) {
         c.beginPath();
-        c.ellipse(0, 0, sat.size, sat.size * Math.abs(Math.cos(sat.rotX)), sat.rotY, 0, Math.PI * 2);
+        c.moveTo(proj[0].x, proj[0].y);
+        c.lineTo(proj[4].x, proj[4].y);
+        c.lineTo(proj[7].x, proj[7].y);
+        c.lineTo(proj[3].x, proj[3].y);
+        c.closePath();
+        const spineGrad = c.createLinearGradient(proj[0].x, proj[0].y, proj[7].x, proj[7].y);
+        spineGrad.addColorStop(0, spineColor);
+        spineGrad.addColorStop(1, '#0C0305');
+        c.fillStyle = spineGrad;
+        c.fill();
+        c.strokeStyle = '#F3D276';
+        c.lineWidth = 1.2;
         c.stroke();
-      } else if (sat.type === 'parabola') {
+
+        // Gold Spine Ribbing Lines
+        c.strokeStyle = 'rgba(243, 210, 118, 0.6)';
+        c.lineWidth = 1.0;
         c.beginPath();
-        for (let px = -sat.size; px <= sat.size; px += 4) {
-          const py = (0.04 * px * px - 12);
-          if (px === -sat.size) c.moveTo(px, py);
-          else c.lineTo(px, py);
-        }
+        c.moveTo(proj[0].x * 0.7 + proj[3].x * 0.3, proj[0].y * 0.7 + proj[3].y * 0.3);
+        c.lineTo(proj[4].x * 0.7 + proj[7].x * 0.3, proj[4].y * 0.7 + proj[7].y * 0.3);
+        c.moveTo(proj[0].x * 0.3 + proj[3].x * 0.7, proj[0].y * 0.3 + proj[3].y * 0.7);
+        c.lineTo(proj[4].x * 0.3 + proj[7].x * 0.7, proj[4].y * 0.3 + proj[7].y * 0.7);
         c.stroke();
-      } else if (sat.type === 'sinewave') {
+      }
+
+      // 3. Right Pages Block (Real Ivory Pages with Striations)
+      if (pagesNormZ > 0) {
         c.beginPath();
-        for (let px = -sat.size; px <= sat.size; px += 4) {
-          const py = Math.sin(px * 0.18 + sat.rotY) * 10;
-          if (px === -sat.size) c.moveTo(px, py);
-          else c.lineTo(px, py);
-        }
+        c.moveTo(proj[1].x, proj[1].y);
+        c.lineTo(proj[5].x, proj[5].y);
+        c.lineTo(proj[6].x, proj[6].y);
+        c.lineTo(proj[2].x, proj[2].y);
+        c.closePath();
+        const pageGrad = c.createLinearGradient(proj[1].x, proj[1].y, proj[6].x, proj[6].y);
+        pageGrad.addColorStop(0, 'rgba(244, 238, 224, 0.98)');
+        pageGrad.addColorStop(0.5, 'rgba(215, 204, 185, 0.92)');
+        pageGrad.addColorStop(1, 'rgba(175, 162, 140, 0.88)');
+        c.fillStyle = pageGrad;
+        c.fill();
+        c.strokeStyle = 'rgba(217, 168, 63, 0.35)';
+        c.lineWidth = 1;
         c.stroke();
-      } else if (sat.type === 'axes') {
+
+        // Individual page lines
+        c.strokeStyle = 'rgba(150, 138, 118, 0.35)';
         c.beginPath();
-        c.moveTo(0, 0); c.lineTo(sat.size, 0);
-        c.moveTo(0, 0); c.lineTo(0, -sat.size);
-        c.moveTo(0, 0); c.lineTo(-sat.size * 0.6, sat.size * 0.6);
+        c.moveTo((proj[1].x + proj[5].x) / 2, (proj[1].y + proj[5].y) / 2);
+        c.lineTo((proj[2].x + proj[6].x) / 2, (proj[2].y + proj[6].y) / 2);
         c.stroke();
-      } else if (sat.type === 'knot') {
+      }
+
+      // 4. Top Pages Block
+      if (topNormZ > 0) {
         c.beginPath();
-        for (let t = 0; t <= Math.PI * 2; t += 0.2) {
-          const kx = (Math.sin(t) + 2 * Math.sin(2 * t)) * (sat.size * 0.35);
-          const ky = (Math.cos(t) - 2 * Math.cos(2 * t)) * (sat.size * 0.35);
-          if (t === 0) c.moveTo(kx, ky);
-          else c.lineTo(kx, ky);
-        }
+        c.moveTo(proj[0].x, proj[0].y);
+        c.lineTo(proj[1].x, proj[1].y);
+        c.lineTo(proj[5].x, proj[5].y);
+        c.lineTo(proj[4].x, proj[4].y);
+        c.closePath();
+        c.fillStyle = 'rgba(226, 218, 202, 0.94)';
+        c.fill();
+        c.strokeStyle = 'rgba(217, 168, 63, 0.3)';
         c.stroke();
-      } else if (sat.type === 'helix') {
+      }
+
+      // 5. Bottom Pages Block
+      if (botNormZ > 0) {
         c.beginPath();
-        for (let step = 0; step <= 16; step++) {
-          const theta = (step / 16) * Math.PI * 4;
-          const r = (step / 16) * sat.size;
-          const hx = Math.cos(theta) * r;
-          const hy = Math.sin(theta) * r * 0.4;
-          if (step === 0) c.moveTo(hx, hy);
-          else c.lineTo(hx, hy);
-        }
+        c.moveTo(proj[3].x, proj[3].y);
+        c.lineTo(proj[2].x, proj[2].y);
+        c.lineTo(proj[6].x, proj[6].y);
+        c.lineTo(proj[7].x, proj[7].y);
+        c.closePath();
+        c.fillStyle = 'rgba(196, 186, 170, 0.95)';
+        c.fill();
+        c.strokeStyle = 'rgba(217, 168, 63, 0.3)';
         c.stroke();
+      }
+
+      // 6. Front Cover Face (The Hero Presentation)
+      if (frontNormZ > 0) {
+        c.beginPath();
+        c.moveTo(proj[0].x, proj[0].y);
+        c.lineTo(proj[1].x, proj[1].y);
+        c.lineTo(proj[2].x, proj[2].y);
+        c.lineTo(proj[3].x, proj[3].y);
+        c.closePath();
+
+        const coverGrad = c.createLinearGradient(proj[0].x, proj[0].y, proj[2].x, proj[2].y);
+        coverGrad.addColorStop(0, coverBase);
+        coverGrad.addColorStop(0.65, coverDark);
+        coverGrad.addColorStop(1, '#070204');
+        c.fillStyle = coverGrad;
+        c.fill();
+
+        // Warm Gold Bevelled Rim Highlight
+        c.strokeStyle = '#F3D276';
+        c.lineWidth = 1.4;
+        c.stroke();
+
+        // Inner Embossed Gold Line Frame
+        const inScale = 0.88;
+        c.beginPath();
+        c.moveTo(proj[0].x * inScale, proj[0].y * inScale);
+        c.lineTo(proj[1].x * inScale, proj[1].y * inScale);
+        c.lineTo(proj[2].x * inScale, proj[2].y * inScale);
+        c.lineTo(proj[3].x * inScale, proj[3].y * inScale);
+        c.closePath();
+        c.strokeStyle = 'rgba(243, 210, 118, 0.45)';
+        c.lineWidth = 0.9;
+        c.stroke();
+
+        // Studio Specular Light Sweep (Illuminates as it rotates)
+        c.save();
+        c.beginPath();
+        c.moveTo(proj[0].x, proj[0].y);
+        c.lineTo(proj[1].x, proj[1].y);
+        c.lineTo(proj[2].x, proj[2].y);
+        c.lineTo(proj[3].x, proj[3].y);
+        c.closePath();
+        c.clip();
+
+        const sheenGrad = c.createRadialGradient(lx, ly, 10, lx, ly, hw * 1.5);
+        sheenGrad.addColorStop(0, 'rgba(255, 240, 195, 0.32)');
+        sheenGrad.addColorStop(0.45, 'rgba(217, 168, 63, 0.10)');
+        sheenGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        c.fillStyle = sheenGrad;
+        c.fillRect(-hw * 1.5, -hh * 1.5, bw * 2, bh * 2);
+        c.restore();
+
+        // Front Cover Typography (Rotated to align with perspective plane)
+        const faceMidX = (proj[0].x + proj[1].x + proj[2].x + proj[3].x) / 4;
+        const faceMidY = (proj[0].y + proj[1].y + proj[2].y + proj[3].y) / 4;
+
+        c.save();
+        c.translate(faceMidX, faceMidY);
+        const skewAngle = Math.atan2(proj[1].y - proj[0].y, proj[1].x - proj[0].x);
+        c.rotate(skewAngle);
+
+        // Subtitle
+        c.font = 'bold 9px -apple-system, sans-serif';
+        c.fillStyle = 'rgba(243, 210, 118, 0.85)';
+        c.textAlign = 'center';
+        c.letterSpacing = '2.5px';
+        c.fillText(subTitle, 0, -hh * 0.42);
+
+        // Gold Divider Line
+        c.strokeStyle = 'rgba(217, 168, 63, 0.6)';
+        c.lineWidth = 0.8;
+        c.beginPath();
+        c.moveTo(-45, -hh * 0.32);
+        c.lineTo(45, -hh * 0.32);
+        c.stroke();
+
+        // Main Golden Book Title
+        c.font = '900 19px "Playfair Display", serif';
+        c.fillStyle = '#FFFFFF';
+        c.fillText(bookTitle, 0, -hh * 0.08);
+        c.fillStyle = '#F3D276';
+        c.fillText(bookTitle, 0.5, -hh * 0.08 + 0.5);
+
+        // Center Seal Emblem
+        c.strokeStyle = '#F3D276';
+        c.lineWidth = 1.0;
+        c.beginPath();
+        c.arc(0, hh * 0.28, 22, 0, Math.PI * 2);
+        c.stroke();
+
+        c.beginPath();
+        c.arc(0, hh * 0.28, 18, 0, Math.PI * 2);
+        c.strokeStyle = 'rgba(217, 168, 63, 0.5)';
+        c.stroke();
+
+        c.font = 'bold 12px monospace';
+        c.fillStyle = '#F3D276';
+        const sealGlyph = curTheme === 'math' ? '∑ π' : curTheme === 'english' ? 'EN' : curTheme === 'it' ? '< / >' : '★ DTM';
+        c.fillText(sealGlyph, 0, hh * 0.28 + 4);
+
+        c.restore();
       }
 
       c.restore();
     }
 
     // -------------------------------------------------------------------------
-    // POINTER HIT-TESTING & 360° VELOCITY DRAG INTERACTION
+    // RENDER: LARGE 3D ORBITAL RING (Horizontal Orbit with Real 3D Depth)
+    // -------------------------------------------------------------------------
+    function renderOrbitalRing(
+      c: CanvasRenderingContext2D,
+      ring: typeof ringStateRef.current,
+      floatY: number,
+      lx: number,
+      ly: number
+    ) {
+      c.save();
+      c.translate(ring.screenX, ring.screenY);
+
+      // Scale based on orbital depth (Z)
+      const depthScale = Math.max(0.68, Math.min(1.28, 1.0 + (ring.depthZ / 260) * 0.35));
+      c.scale(depthScale, depthScale);
+
+      // Gold Glow Highlight on Hover or Drag
+      if (ring.isHovered || ring.isDragging) {
+        c.fillStyle = 'rgba(217, 168, 63, 0.22)';
+        c.beginPath();
+        c.arc(0, 0, 52, 0, Math.PI * 2);
+        c.fill();
+      }
+
+      // Render Layered Bevelled 3D Ring
+      const ringRadius = 42;
+      const ringTube = 7;
+
+      // Outer Gold Rim Ellipse
+      c.beginPath();
+      c.ellipse(0, 0, ringRadius, ringRadius * 0.46, ring.selfRotY, 0, Math.PI * 2);
+      c.strokeStyle = ring.isHovered ? '#FFFFFF' : '#F3D276';
+      c.lineWidth = 2.4;
+      c.stroke();
+
+      // Inner Metallic Core Ellipse
+      c.beginPath();
+      c.ellipse(0, 0, ringRadius - ringTube, (ringRadius - ringTube) * 0.46, ring.selfRotY, 0, Math.PI * 2);
+      c.strokeStyle = 'rgba(217, 168, 63, 0.45)';
+      c.lineWidth = 1.2;
+      c.stroke();
+
+      // Subtle Mathematical Tick Notches on Ring
+      for (let k = 0; k < 4; k++) {
+        const angle = ring.selfRotY + (k * Math.PI) / 2;
+        const nx = Math.cos(angle) * ringRadius;
+        const ny = Math.sin(angle) * ringRadius * 0.46;
+        c.fillStyle = '#F3D276';
+        c.beginPath();
+        c.arc(nx, ny, 1.8, 0, Math.PI * 2);
+        c.fill();
+      }
+
+      c.restore();
+    }
+
+    // -------------------------------------------------------------------------
+    // POINTER & TOUCH INTERACTIONS (360° Horizontal Drag & Real Momentum)
     // -------------------------------------------------------------------------
     const handlePointerMove = (e: PointerEvent) => {
       const rect = canvas.getBoundingClientRect();
-      const pointerX = e.clientX - rect.left;
-      const pointerY = e.clientY - rect.top;
+      const px = e.clientX - rect.left;
+      const py = e.clientY - rect.top;
       const now = performance.now();
 
-      const bookPhys = bookPhysicsRef.current;
+      const book = bookStateRef.current;
+      const ring = ringStateRef.current;
 
-      // 1. If currently dragging
-      if (activeGrabTargetRef.current === 'book') {
-        const dx = pointerX - bookPhys.lastPointerX;
-        const dy = pointerY - bookPhys.lastPointerY;
+      // 1. DRAGGING BOOK HORIZONTALLY
+      if (activeTargetRef.current === 'book') {
+        const dx = px - book.lastPointerX;
+        const dy = py - book.lastPointerY;
 
-        // Instant 360° rotation from drag delta
-        bookPhys.rotY += dx * 0.009;
-        bookPhys.rotX += dy * 0.009;
+        // Strictly Horizontal Y Rotation (Turntable)
+        book.rotY += dx * 0.0085;
+        // Subtle micro physical tilt on X (max 2-3 degrees)
+        book.rotX = Math.max(-0.24, Math.min(-0.08, book.rotX + dy * 0.0012));
 
-        // Track velocity samples
-        bookPhys.samples.push({ x: pointerX, y: pointerY, time: now });
-        if (bookPhys.samples.length > 8) bookPhys.samples.shift();
+        // Sample pointer velocity
+        book.samples.push({ x: px, y: py, time: now });
+        if (book.samples.length > 8) book.samples.shift();
 
-        bookPhys.lastPointerX = pointerX;
-        bookPhys.lastPointerY = pointerY;
+        book.lastPointerX = px;
+        book.lastPointerY = py;
         document.body.style.cursor = 'grabbing';
         e.preventDefault();
         return;
       }
 
-      // If dragging an individual satellite
-      if (activeGrabTargetRef.current && activeGrabTargetRef.current !== 'book') {
-        const sat = satellitesRef.current.find((s) => s.id === activeGrabTargetRef.current);
-        if (sat) {
-          const dx = pointerX - bookPhys.lastPointerX;
-          const dy = pointerY - bookPhys.lastPointerY;
-          sat.rotY += dx * 0.02;
-          sat.rotX += dy * 0.02;
-          sat.spinVy = dx * 0.015;
-          sat.spinVx = dy * 0.015;
-          bookPhys.lastPointerX = pointerX;
-          bookPhys.lastPointerY = pointerY;
-          document.body.style.cursor = 'grabbing';
-          e.preventDefault();
-          return;
-        }
+      // 2. DRAGGING RING MANUALLY
+      if (activeTargetRef.current === 'ring') {
+        const dx = px - ring.lastPointerX;
+        ring.selfRotY += dx * 0.015;
+        ring.orbitPhase += dx * 0.004; // User manually pulls ring along orbit
+
+        ring.samples.push({ x: px, y: py, time: now });
+        if (ring.samples.length > 8) ring.samples.shift();
+
+        ring.lastPointerX = px;
+        ring.lastPointerY = py;
+        document.body.style.cursor = 'grabbing';
+        e.preventDefault();
+        return;
       }
 
-      // 2. Hover Hit-Testing
-      // Check Satellites first
-      let hitSat: SatelliteObject3D | null = null;
-      for (let i = satellitesRef.current.length - 1; i >= 0; i--) {
-        const sat = satellitesRef.current[i];
-        const dist = Math.hypot(pointerX - sat.projX, pointerY - sat.projY);
-        if (dist < sat.size * 1.6 + 10) {
-          hitSat = sat;
-          break;
-        }
-      }
+      // 3. HOVER DETECTION
+      // Ring Hit Check
+      const distToRing = Math.hypot(px - ring.screenX, py - ring.screenY);
+      const isRingHit = distToRing < 54;
+      ring.isHovered = isRingHit;
 
-      satellitesRef.current.forEach((s) => (s.isHovered = s.id === hitSat?.id));
+      // Book Hit Check
+      const distToCenter = Math.hypot(px - width / 2, py - height / 2);
+      const isBookHit = !isRingHit && distToCenter < Math.min(width, height) * 0.38;
+      book.isHovered = isBookHit;
 
-      // Check Book hit
-      const bookDist = Math.hypot(pointerX - width / 2, pointerY - height / 2);
-      bookPhys.isHovered = !hitSat && bookDist < Math.min(width, height) * 0.35;
-
-      if (hitSat || bookPhys.isHovered) {
+      if (isRingHit || isBookHit) {
         document.body.style.cursor = 'grab';
       } else {
         document.body.style.cursor = 'default';
@@ -1018,28 +742,22 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     const handlePointerDown = (e: PointerEvent) => {
       if (e.button !== 0) return;
       const rect = canvas.getBoundingClientRect();
-      const pointerX = e.clientX - rect.left;
-      const pointerY = e.clientY - rect.top;
+      const px = e.clientX - rect.left;
+      const py = e.clientY - rect.top;
       const now = performance.now();
 
-      const bookPhys = bookPhysicsRef.current;
+      const book = bookStateRef.current;
+      const ring = ringStateRef.current;
 
-      // Check Satellites Hit
-      let hitSat: SatelliteObject3D | null = null;
-      for (let i = satellitesRef.current.length - 1; i >= 0; i--) {
-        const sat = satellitesRef.current[i];
-        const dist = Math.hypot(pointerX - sat.projX, pointerY - sat.projY);
-        if (dist < sat.size * 1.6 + 10) {
-          hitSat = sat;
-          break;
-        }
-      }
-
-      if (hitSat) {
-        activeGrabTargetRef.current = hitSat.id;
-        hitSat.isGrabbed = true;
-        bookPhys.lastPointerX = pointerX;
-        bookPhys.lastPointerY = pointerY;
+      // Check Ring Hit
+      const distToRing = Math.hypot(px - ring.screenX, py - ring.screenY);
+      if (distToRing < 54) {
+        activeTargetRef.current = 'ring';
+        ring.isDragging = true;
+        ring.spinVy = 0;
+        ring.lastPointerX = px;
+        ring.lastPointerY = py;
+        ring.samples = [{ x: px, y: py, time: now }];
         try {
           canvas.setPointerCapture(e.pointerId);
         } catch (err) {}
@@ -1049,15 +767,15 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       }
 
       // Check Book Hit
-      const bookDist = Math.hypot(pointerX - width / 2, pointerY - height / 2);
-      if (bookDist < Math.min(width, height) * 0.36) {
-        activeGrabTargetRef.current = 'book';
-        bookPhys.isDragging = true;
-        bookPhys.angVx = 0;
-        bookPhys.angVy = 0;
-        bookPhys.lastPointerX = pointerX;
-        bookPhys.lastPointerY = pointerY;
-        bookPhys.samples = [{ x: pointerX, y: pointerY, time: now }];
+      const distToCenter = Math.hypot(px - width / 2, py - height / 2);
+      if (distToCenter < Math.min(width, height) * 0.38) {
+        activeTargetRef.current = 'book';
+        book.isDragging = true;
+        book.angVy = 0;
+        book.angVx = 0;
+        book.lastPointerX = px;
+        book.lastPointerY = py;
+        book.samples = [{ x: px, y: py, time: now }];
         try {
           canvas.setPointerCapture(e.pointerId);
         } catch (err) {}
@@ -1067,27 +785,26 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     };
 
     const handlePointerUp = (e: PointerEvent) => {
-      const bookPhys = bookPhysicsRef.current;
       const now = performance.now();
 
-      if (activeGrabTargetRef.current === 'book') {
-        bookPhys.isDragging = false;
-        activeGrabTargetRef.current = null;
+      // Release Book
+      if (activeTargetRef.current === 'book') {
+        const book = bookStateRef.current;
+        book.isDragging = false;
+        activeTargetRef.current = null;
 
-        // Calculate Release Angular Momentum
-        const samples = bookPhys.samples;
+        // Calculate Horizontal Velocity & Momentum
+        const samples = book.samples;
         if (samples.length >= 2) {
-          const recent = samples.filter((p) => now - p.time <= 90);
+          const recent = samples.filter((p) => now - p.time <= 100);
           if (recent.length >= 2) {
             const first = recent[0];
             const last = recent[recent.length - 1];
             const dt = (last.time - first.time) / 1000;
             if (dt > 0.01) {
               const vx = (last.x - first.x) / dt;
-              const vy = (last.y - first.y) / dt;
-              // Angular velocity with clamping
-              bookPhys.angVy = Math.max(-0.12, Math.min(0.12, (vx / 60) * 0.012));
-              bookPhys.angVx = Math.max(-0.12, Math.min(0.12, (vy / 60) * 0.012));
+              // Convert pointer velocity into angular momentum
+              book.angVy = Math.max(-0.14, Math.min(0.14, (vx / 60) * 0.014));
             }
           }
         }
@@ -1095,17 +812,33 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         try {
           canvas.releasePointerCapture(e.pointerId);
         } catch (err) {}
-        document.body.style.cursor = bookPhys.isHovered ? 'grab' : 'default';
-      } else if (activeGrabTargetRef.current) {
-        const sat = satellitesRef.current.find((s) => s.id === activeGrabTargetRef.current);
-        if (sat) {
-          sat.isGrabbed = false;
+        document.body.style.cursor = book.isHovered ? 'grab' : 'default';
+      }
+
+      // Release Ring
+      else if (activeTargetRef.current === 'ring') {
+        const ring = ringStateRef.current;
+        ring.isDragging = false;
+        activeTargetRef.current = null;
+
+        const samples = ring.samples;
+        if (samples.length >= 2) {
+          const recent = samples.filter((p) => now - p.time <= 100);
+          if (recent.length >= 2) {
+            const first = recent[0];
+            const last = recent[recent.length - 1];
+            const dt = (last.time - first.time) / 1000;
+            if (dt > 0.01) {
+              const vx = (last.x - first.x) / dt;
+              ring.spinVy = Math.max(-0.16, Math.min(0.16, (vx / 60) * 0.018));
+            }
+          }
         }
-        activeGrabTargetRef.current = null;
+
         try {
           canvas.releasePointerCapture(e.pointerId);
         } catch (err) {}
-        document.body.style.cursor = 'default';
+        document.body.style.cursor = ring.isHovered ? 'grab' : 'default';
       }
     };
 
@@ -1130,17 +863,17 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto relative z-10 select-text"
     >
       {/* Subtle Background Architectural Glow */}
-      <div className="absolute top-1/4 right-1/4 w-[600px] h-[600px] rounded-full bg-radial from-[#D9A83F]/08 via-[#4A0E17]/12 to-transparent blur-3xl pointer-events-none" />
+      <div className="absolute top-1/4 right-1/4 w-[600px] h-[600px] rounded-full bg-radial from-[#D9A83F]/06 via-[#4A0E17]/10 to-transparent blur-3xl pointer-events-none" />
 
       {/* -----------------------------------------------------------------------
-          1. SECTION HEADER & DYNAMIC COURSE SELECTOR
+          1. SECTION HEADER & DYNAMIC COURSE SELECTOR BAR
           ----------------------------------------------------------------------- */}
       <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-12 gap-8 relative z-10">
         <div className="space-y-4 max-w-2xl">
           {/* Section Badge */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#16090D] border border-[#D9A93A]/35 text-xs font-bold uppercase tracking-widest text-[#D9A93A] shadow-[0_4px_16px_rgba(217,169,58,0.12)]">
             <BookOpen className="h-3.5 w-3.5" />
-            <span>3D Ta’lim Dunyosi</span>
+            <span>3D Kurslar Ko‘rgazmasi</span>
           </div>
 
           {/* Heading */}
@@ -1151,7 +884,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 
           {/* Subtitle */}
           <p className="text-sm sm:text-base text-[#B0A7A2] font-normal leading-relaxed">
-            Kitobni aylantirib ko‘ring va atrofidagi interaktiv matematik/lingvistik tuzilmalarni kashf eting. Har bir kurs chuqur amaliy laboratoriya va individual murabbiyga ega.
+            Markazdagi 3D kitobni kursor orqali 360° gorizontal aylantiring, uning orqa muhrini va umurtqasini ko‘zdan kechiring. Har bir kurs chuqur amaliy laboratoriyalar va shaxsiy murabbiyga ega.
           </p>
         </div>
 
@@ -1178,20 +911,20 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       </div>
 
       {/* -----------------------------------------------------------------------
-          2. UNIFIED SPECTACULAR 3D COURSES WORLD (No 6-card grid!)
+          2. MINIMALIST LUXURY SHOWROOM STAGE (No 6-Card Grid!)
           ----------------------------------------------------------------------- */}
       <div className="relative rounded-[44px] bg-gradient-to-br from-[#180A10] via-[#0E0508] to-[#070305] border border-[#D9A93A]/30 p-6 sm:p-10 lg:p-14 shadow-[0_35px_100px_rgba(0,0,0,0.94)] overflow-hidden">
-        {/* Subtle Architectural Grid */}
-        <div className="absolute inset-0 bg-[radial-gradient(#D9A93A_1px,transparent_1px)] [background-size:32px_32px] opacity-10 pointer-events-none" />
+        {/* Subtle Faint Coordinate Pattern */}
+        <div className="absolute inset-0 bg-[radial-gradient(#D9A93A_1px,transparent_1px)] [background-size:36px_36px] opacity-08 pointer-events-none" />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center relative z-10">
-          {/* LEFT COLUMN: Active Course Information & Metadata */}
+          {/* LEFT COLUMN: Course Details & Metadata */}
           <div
-            className={`lg:col-span-6 space-y-6 transition-all duration-400 ${
+            className={`lg:col-span-6 space-y-6 transition-all duration-380 ${
               isTransitioning ? 'opacity-40 translate-y-2' : 'opacity-100 translate-y-0'
             }`}
           >
-            {/* Top Indicator & Prev/Next Arrows */}
+            {/* Top Indicator & Navigation Arrows */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span className="text-sm font-luxury-serif font-black text-[#D9A93A]">
@@ -1274,7 +1007,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
               </div>
             </div>
 
-            {/* Syllabus Preview */}
+            {/* Syllabus Highlights Preview */}
             <div className="space-y-2 pt-1">
               <span className="text-xs font-bold text-[#D9A93A] tracking-wide uppercase flex items-center gap-1.5">
                 <Sparkles className="h-3.5 w-3.5" />
@@ -1337,11 +1070,11 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
             )}
           </div>
 
-          {/* RIGHT COLUMN: Grand Interactive 3D World Stage */}
+          {/* RIGHT COLUMN: Luxury 3D Showroom (1 Anchored Book + 1 Large Orbital Ring) */}
           <div className="lg:col-span-6 relative w-full aspect-square max-w-[560px] mx-auto flex items-center justify-center select-none">
             {/* Ambient Behind-Glow */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="w-[88%] h-[88%] rounded-full bg-radial from-[#D9A83F]/22 via-[#4A0E17]/28 to-transparent blur-3xl" />
+              <div className="w-[86%] h-[86%] rounded-full bg-radial from-[#D9A83F]/18 via-[#4A0E17]/22 to-transparent blur-3xl" />
             </div>
 
             {/* 3D Canvas */}
@@ -1349,13 +1082,13 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
               ref={canvasRef}
               className="w-full h-full block touch-none select-none relative z-10"
               style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
-              title="3D Kurs Objekti: Aylantirish uchun ushlang va siljiting"
+              title="3D Kurs Kitobi: Gorizontal 360° aylantirish uchun ushlang"
             />
 
-            {/* Interaction Guide Hint Badge */}
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 px-3.5 py-1.5 rounded-full bg-[#120608]/85 backdrop-blur-md border border-[#D9A93A]/30 text-[10px] font-semibold text-[#D9A93A] pointer-events-none flex items-center gap-2 whitespace-nowrap shadow-xl">
-              <RotateCw className="h-3 w-3 animate-spin-slow" />
-              <span>Kitob va orbital ob’ektlarni 360° aylantirish uchun ushlang</span>
+            {/* Micro Interaction Hint Badge */}
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-[#120608]/85 backdrop-blur-md border border-[#D9A93A]/30 text-[10px] font-semibold text-[#D9A93A] pointer-events-none flex items-center gap-2 whitespace-nowrap shadow-xl">
+              <RotateCw className="h-3 w-3" />
+              <span>Kitob va halqani gorizontal 360° aylantirish uchun ushlang</span>
             </div>
           </div>
         </div>
