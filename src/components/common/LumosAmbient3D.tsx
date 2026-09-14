@@ -60,8 +60,10 @@ interface TravelingLightWave {
   cycleCount: number;
 }
 
-// Type of Mathematical / Geometric / Educational Entity in 3D Space
-type Math3DType =
+// Complete Archetype Roster for the 3D Floating Education World
+type ArchetypeType =
+  | 'book_math'
+  | 'book_english'
   | 'parabola'
   | 'sinewave'
   | 'grid3d'
@@ -70,39 +72,43 @@ type Math3DType =
   | 'torus'
   | 'spiral'
   | 'cone'
-  | 'book'
-  | 'math_token'
-  | 'english_token';
+  | 'math_pi'
+  | 'math_sqrt'
+  | 'math_pyth'
+  | 'math_inf'
+  | 'eng_abc'
+  | 'eng_speak'
+  | 'eng_learn';
 
-interface Math3DObject {
+interface FlyingEntity3D {
   id: string;
-  type: Math3DType;
-  layer: 2 | 3 | 5; // Layer 2: Distant, Layer 3: Mid/Main, Layer 5: Near
+  archetype: ArchetypeType;
   title?: string;
   text?: string;
   formula?: string;
+  // 3D Coordinates & Flight Velocity
   x: number;
   y: number;
   z: number;
   vx: number;
   vy: number;
   vz: number;
-  baseSize: number;
-  baseOpacity: number;
+  // 3D Rotations & Angular Velocities
   rotX: number;
   rotY: number;
   rotZ: number;
   rotSpeedX: number;
   rotSpeedY: number;
   rotSpeedZ: number;
-  wavePhase: number;
-  waveSpeed: number;
-  waveAmp: number;
-  zPhase: number;
-  zSpeed: number;
-  zAmp: number;
+  // Sizing & Base Opacity
+  baseSize: number;
+  baseOpacity: number;
+  // Lifecycle
+  age: number;
+  lifetime: number; // Flight duration (seconds)
   hoverProgress: number; // 0 to 1 smooth physical reaction
-  mobileVisible?: boolean;
+  // Object-to-object mutual proximity boost
+  proxBoost: number;
   // Book specific dimensions
   bookWidth?: number;
   bookHeight?: number;
@@ -409,7 +415,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       };
     };
 
-    // Calculate light and wave proximity boost
     const getIlluminationBoost = (x: number, y: number, z: number): { lightBoost: number; waveBoost: number } => {
       let lightBoost = 0;
       for (let i = 0; i < virtualLights.length; i++) {
@@ -445,481 +450,242 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
     };
 
     // -------------------------------------------------------------------------
-    // 5. 3D MATHEMATICAL SPACE: ART-DIRECTED OBJECTS & STRUCTURES
-    // Parabolas, Sine waves, 3D grids, Cubes, Pyramids, Toruses, Spirals & Books
+    // 5. CONTINUOUS 3D TRAFFIC & FLIGHT ENGINE
+    // Objects continuously fly across the 3D space, enter, traverse, and exit
     // -------------------------------------------------------------------------
-    const mathObjects: Math3DObject[] = [
-      // 1. 3D PARABOLA (y = x²) with 3D coordinate axes & vector arrowheads (Upper-Left)
-      {
-        id: 'math-parabola-1',
-        type: 'parabola',
-        layer: 3,
-        formula: 'y = x²',
-        x: width * 0.18,
-        y: height * 0.22,
-        z: 280,
-        vx: 0.016,
-        vy: 0.008,
-        vz: 0.012,
-        baseSize: 32,
-        baseOpacity: 0.28,
-        rotX: 0.35,
-        rotY: 0.40,
-        rotZ: -0.08,
-        rotSpeedX: 0.00012,
-        rotSpeedY: 0.00015,
-        rotSpeedZ: 0.00008,
-        wavePhase: 0.6,
-        waveSpeed: 0.0004,
-        waveAmp: 8,
-        zPhase: 0.8,
-        zSpeed: 0.0003,
-        zAmp: 35,
-        hoverProgress: 0,
-        mobileVisible: true,
-      },
-
-      // 2. 3D SINUSOIDAL WAVE (y = sin(x)) with flowing phase & tick marks (Right Mid-Space)
-      {
-        id: 'math-sinewave-1',
-        type: 'sinewave',
-        layer: 3,
-        formula: 'y = sin(x)',
-        x: width * 0.82,
-        y: height * 0.68,
-        z: 290,
-        vx: -0.015,
-        vy: -0.010,
-        vz: -0.014,
-        baseSize: 36,
-        baseOpacity: 0.26,
-        rotX: -0.28,
-        rotY: 0.32,
-        rotZ: 0.06,
-        rotSpeedX: -0.0001,
-        rotSpeedY: 0.00012,
-        rotSpeedZ: -0.00008,
-        wavePhase: 1.8,
-        waveSpeed: 0.00045,
-        waveAmp: 8,
-        zPhase: 2.1,
-        zSpeed: 0.00035,
-        zAmp: 30,
-        hoverProgress: 0,
-        mobileVisible: true,
-      },
-
-      // 3. 3D HOLOGRAPHIC COORDINATE GRID PLANE (Tilted CAD Perspective Grid, Lower-Left)
-      {
-        id: 'math-grid3d-1',
-        type: 'grid3d',
-        layer: 3,
-        x: width * 0.14,
-        y: height * 0.78,
-        z: 320,
-        vx: 0.012,
-        vy: -0.008,
-        vz: 0.010,
-        baseSize: 42,
-        baseOpacity: 0.20,
-        rotX: 0.95, // Steep perspective tilt
-        rotY: -0.35,
-        rotZ: 0.12,
-        rotSpeedX: 0.00005,
-        rotSpeedY: 0.00008,
-        rotSpeedZ: 0.00005,
-        wavePhase: 3.2,
-        waveSpeed: 0.0003,
-        waveAmp: 6,
-        zPhase: 1.4,
-        zSpeed: 0.00025,
-        zAmp: 25,
-        hoverProgress: 0,
-        mobileVisible: false,
-      },
-
-      // 4. 3D GLASS CUBE (Dark glass facets, thin gold edges, Mid-Left space)
-      {
-        id: 'geom-cube-1',
-        type: 'cube',
-        layer: 3,
-        x: width * 0.08,
-        y: height * 0.44,
-        z: 250,
-        vx: 0.016,
-        vy: 0.010,
-        vz: 0.018,
-        baseSize: 38,
-        baseOpacity: 0.24,
-        rotX: 0.35,
-        rotY: 0.45,
-        rotZ: 0.20,
-        rotSpeedX: 0.00018,
-        rotSpeedY: 0.00024,
-        rotSpeedZ: 0.00010,
-        wavePhase: 0.7,
-        waveSpeed: 0.00045,
-        waveAmp: 8,
-        zPhase: 1.1,
-        zSpeed: 0.00035,
-        zAmp: 32,
-        hoverProgress: 0,
-        mobileVisible: true,
-      },
-
-      // 5. 3D PYRAMID (Tetrahedron with gold ribs and translucent base, Upper-Right)
-      {
-        id: 'geom-pyramid-1',
-        type: 'pyramid',
-        layer: 3,
-        x: width * 0.86,
-        y: height * 0.18,
-        z: 270,
-        vx: -0.016,
-        vy: 0.011,
-        vz: -0.015,
-        baseSize: 34,
-        baseOpacity: 0.24,
-        rotX: 0.40,
-        rotY: -0.38,
-        rotZ: 0.15,
-        rotSpeedX: 0.00015,
-        rotSpeedY: -0.00020,
-        rotSpeedZ: 0.00008,
-        wavePhase: 2.5,
-        waveSpeed: 0.0004,
-        waveAmp: 7,
-        zPhase: 3.2,
-        zSpeed: 0.0003,
-        zAmp: 28,
-        hoverProgress: 0,
-        mobileVisible: false,
-      },
-
-      // 6. 3D TORUS (Gold wireframe longitude and latitude loops, Lower-Right)
-      {
-        id: 'geom-torus-1',
-        type: 'torus',
-        layer: 3,
-        x: width * 0.74,
-        y: height * 0.86,
-        z: 290,
-        vx: -0.014,
-        vy: -0.009,
-        vz: 0.012,
-        baseSize: 30,
-        baseOpacity: 0.22,
-        rotX: 0.65,
-        rotY: 0.25,
-        rotZ: -0.20,
-        rotSpeedX: 0.00014,
-        rotSpeedY: 0.00018,
-        rotSpeedZ: 0.00012,
-        wavePhase: 4.1,
-        waveSpeed: 0.0004,
-        waveAmp: 7,
-        zPhase: 0.4,
-        zSpeed: 0.0003,
-        zAmp: 30,
-        hoverProgress: 0,
-        mobileVisible: false,
-      },
-
-      // 7. 3D MATHEMATICAL HELIX / SPIRAL (Twisting in space, Center-Top depth)
-      {
-        id: 'math-spiral-1',
-        type: 'spiral',
-        layer: 3,
-        x: width * 0.50,
-        y: height * 0.10,
-        z: 340,
-        vx: 0.014,
-        vy: 0.008,
-        vz: -0.012,
-        baseSize: 22,
-        baseOpacity: 0.20,
-        rotX: 0.30,
-        rotY: 0.50,
-        rotZ: 0.20,
-        rotSpeedX: 0.00012,
-        rotSpeedY: 0.00022,
-        rotSpeedZ: 0.00010,
-        wavePhase: 1.5,
-        waveSpeed: 0.00045,
-        waveAmp: 6,
-        zPhase: 2.8,
-        zSpeed: 0.00035,
-        zAmp: 25,
-        hoverProgress: 0,
-        mobileVisible: false,
-      },
-
-      // 8. 3D HARDCOVER BOOK: MATHEMATIKA (Floating lower-left flank)
-      {
-        id: 'book-math',
-        type: 'book',
-        layer: 3,
-        title: 'MATHEMATIKA',
-        x: width * 0.11,
-        y: height * 0.62,
-        z: 210,
-        vx: 0.018,
-        vy: -0.012,
-        vz: 0.016,
-        baseSize: 10,
-        baseOpacity: 0.30,
-        bookWidth: 72,
-        bookHeight: 94,
-        bookThickness: 17,
-        coverColor: '#4A0E17',
-        spineColor: '#6B1422',
-        rotX: 0.22,
-        rotY: -0.30,
-        rotZ: 0.08,
-        rotSpeedX: 0.00008,
-        rotSpeedY: 0.00010,
-        rotSpeedZ: 0.00008,
-        wavePhase: 1.0,
-        waveSpeed: 0.0005,
-        waveAmp: 10,
-        zPhase: 0.8,
-        zSpeed: 0.0004,
-        zAmp: 28,
-        hoverProgress: 0,
-        mobileVisible: true,
-      },
-
-      // 9. 3D HARDCOVER BOOK: ENGLISH (Floating upper-right flank)
-      {
-        id: 'book-english',
-        type: 'book',
-        layer: 3,
-        title: 'ENGLISH',
-        x: width * 0.90,
-        y: height * 0.30,
-        z: 230,
-        vx: -0.018,
-        vy: 0.014,
-        vz: -0.014,
-        baseSize: 10,
-        baseOpacity: 0.30,
-        bookWidth: 70,
-        bookHeight: 92,
-        bookThickness: 16,
-        coverColor: '#121A28',
-        spineColor: '#1C273C',
-        rotX: -0.18,
-        rotY: 0.30,
-        rotZ: -0.06,
-        rotSpeedX: -0.00008,
-        rotSpeedY: 0.00009,
-        rotSpeedZ: -0.00007,
-        wavePhase: 2.2,
-        waveSpeed: 0.0005,
-        waveAmp: 9,
-        zPhase: 2.1,
-        zSpeed: 0.0004,
-        zAmp: 26,
-        hoverProgress: 0,
-        mobileVisible: false,
-      },
-
-      // 10. DISTANT GIANT π (Distant World Z=640)
-      {
-        id: 'dist-pi',
-        type: 'math_token',
-        layer: 2,
-        text: 'π',
-        x: width * 0.15,
-        y: height * 0.18,
-        z: 640,
-        vx: 0.022,
-        vy: 0.010,
-        vz: 0.014,
-        baseSize: 42,
-        baseOpacity: 0.065,
-        rotX: 0,
-        rotY: 0,
-        rotZ: -0.05,
-        rotSpeedX: 0,
-        rotSpeedY: 0,
-        rotSpeedZ: 0.00008,
-        wavePhase: 0.5,
-        waveSpeed: 0.00035,
-        waveAmp: 7,
-        zPhase: 0.2,
-        zSpeed: 0.0003,
-        zAmp: 35,
-        hoverProgress: 0,
-        mobileVisible: true,
-      },
-
-      // 11. FORMULA: a² + b² = c² (Central-top space)
-      {
-        id: 'math-pyth',
-        type: 'math_token',
-        layer: 3,
-        text: 'a² + b² = c²',
-        x: width * 0.65,
-        y: height * 0.14,
-        z: 310,
-        vx: 0.014,
-        vy: 0.007,
-        vz: -0.014,
-        baseSize: 15,
-        baseOpacity: 0.18,
-        rotX: 0,
-        rotY: 0,
-        rotZ: -0.02,
-        rotSpeedX: 0,
-        rotSpeedY: 0,
-        rotSpeedZ: -0.00007,
-        wavePhase: 4.2,
-        waveSpeed: 0.00035,
-        waveAmp: 6,
-        zPhase: 2.7,
-        zSpeed: 0.0003,
-        zAmp: 25,
-        hoverProgress: 0,
-        mobileVisible: false,
-      },
-
-      // 12. FORMULA: √x (Vector metallic square root, upper-left)
-      {
-        id: 'math-sqrt',
-        type: 'math_token',
-        layer: 3,
-        text: '√x',
-        x: width * 0.32,
-        y: height * 0.16,
-        z: 290,
-        vx: -0.018,
-        vy: 0.009,
-        vz: 0.012,
-        baseSize: 19,
-        baseOpacity: 0.18,
-        rotX: 0,
-        rotY: 0,
-        rotZ: 0.04,
-        rotSpeedX: 0,
-        rotSpeedY: 0,
-        rotSpeedZ: 0.00008,
-        wavePhase: 3.1,
-        waveSpeed: 0.0004,
-        waveAmp: 7,
-        zPhase: 0.9,
-        zSpeed: 0.0003,
-        zAmp: 24,
-        hoverProgress: 0,
-        mobileVisible: true,
-      },
-
-      // 13. FORMULA: ∞ (Infinity, lower space)
-      {
-        id: 'math-inf',
-        type: 'math_token',
-        layer: 3,
-        text: '∞',
-        x: width * 0.52,
-        y: height * 0.90,
-        z: 280,
-        vx: 0.02,
-        vy: -0.008,
-        vz: -0.012,
-        baseSize: 22,
-        baseOpacity: 0.17,
-        rotX: 0,
-        rotY: 0,
-        rotZ: 0.03,
-        rotSpeedX: 0,
-        rotSpeedY: 0,
-        rotSpeedZ: -0.00008,
-        wavePhase: 5.0,
-        waveSpeed: 0.0004,
-        waveAmp: 7,
-        zPhase: 1.6,
-        zSpeed: 0.0003,
-        zAmp: 26,
-        hoverProgress: 0,
-        mobileVisible: false,
-      },
-
-      // 14. ENGLISH 3D BLOCK: ABC (Physical block, mid-left)
-      {
-        id: 'eng-abc',
-        type: 'english_token',
-        layer: 3,
-        text: 'ABC',
-        x: width * 0.14,
-        y: height * 0.52,
-        z: 250,
-        vx: 0.016,
-        vy: -0.010,
-        vz: 0.014,
-        baseSize: 16,
-        baseOpacity: 0.20,
-        rotX: 0.12,
-        rotY: -0.16,
-        rotZ: -0.04,
-        rotSpeedX: 0.00008,
-        rotSpeedY: 0.00008,
-        rotSpeedZ: 0.00007,
-        wavePhase: 2.1,
-        waveSpeed: 0.0005,
-        waveAmp: 7,
-        zPhase: 0.5,
-        zSpeed: 0.0004,
-        zAmp: 28,
-        hoverProgress: 0,
-        mobileVisible: true,
-      },
-
-      // 15. ENGLISH TOKEN: PRACTICE / SPEAK (Right flank)
-      {
-        id: 'eng-speak',
-        type: 'english_token',
-        layer: 3,
-        text: 'PRACTICE',
-        x: width * 0.80,
-        y: height * 0.80,
-        z: 270,
-        vx: -0.016,
-        vy: -0.009,
-        vz: 0.014,
-        baseSize: 12,
-        baseOpacity: 0.17,
-        rotX: 0.05,
-        rotY: 0.12,
-        rotZ: 0.02,
-        rotSpeedX: 0.00008,
-        rotSpeedY: -0.00008,
-        rotSpeedZ: 0.00007,
-        wavePhase: 0.8,
-        waveSpeed: 0.0004,
-        waveAmp: 6,
-        zPhase: 3.7,
-        zSpeed: 0.00035,
-        zAmp: 26,
-        hoverProgress: 0,
-        mobileVisible: false,
-      },
+    const ARCHETYPES_CATALOG: ArchetypeType[] = [
+      'book_math',
+      'parabola',
+      'cube',
+      'book_english',
+      'sinewave',
+      'pyramid',
+      'grid3d',
+      'torus',
+      'spiral',
+      'cone',
+      'math_pi',
+      'eng_abc',
+      'math_sqrt',
+      'math_pyth',
+      'math_inf',
+      'eng_speak',
+      'eng_learn',
     ];
 
-    const activeObjects = isMobile ? mathObjects.filter((o) => o.mobileVisible) : mathObjects;
+    let entitySpawnCounter = 0;
+
+    // Helper to spawn a new entity from one of diverse 3D entry portals
+    const spawnFlyingEntity = (portalIndex?: number, forcedArchetype?: ArchetypeType): FlyingEntity3D => {
+      entitySpawnCounter++;
+      const pIndex = portalIndex !== undefined ? portalIndex : Math.floor(Math.random() * 6);
+      const archetype = forcedArchetype || ARCHETYPES_CATALOG[entitySpawnCounter % ARCHETYPES_CATALOG.length];
+
+      let x = 0, y = 0, z = 300;
+      let vx = 0, vy = 0, vz = 0;
+
+      // Portal 0: Top-Left -> Diagonal Down-Right & Forward towards camera
+      if (pIndex === 0) {
+        x = -width * 0.08 - Math.random() * 80;
+        y = height * (0.08 + Math.random() * 0.35);
+        z = 450 + Math.random() * 200;
+        vx = 0.35 + Math.random() * 0.25;
+        vy = 0.15 + Math.random() * 0.15;
+        vz = -(0.15 + Math.random() * 0.18); // Flies forward!
+      }
+      // Portal 1: Bottom-Right -> Diagonal Up-Left & Receding into depth
+      else if (pIndex === 1) {
+        x = width * 1.08 + Math.random() * 80;
+        y = height * (0.60 + Math.random() * 0.30);
+        z = 180 + Math.random() * 150;
+        vx = -(0.32 + Math.random() * 0.22);
+        vy = -(0.14 + Math.random() * 0.16);
+        vz = 0.16 + Math.random() * 0.20; // Recedes into depth!
+      }
+      // Portal 2: Deep Background -> Forward toward Camera & Sideways Drift
+      else if (pIndex === 2) {
+        x = width * (0.15 + Math.random() * 0.70);
+        y = height * (0.15 + Math.random() * 0.70);
+        z = 700 + Math.random() * 120;
+        vx = (Math.random() - 0.5) * 0.35;
+        vy = (Math.random() - 0.5) * 0.25;
+        vz = -(0.35 + Math.random() * 0.25); // Fast forward flight!
+      }
+      // Portal 3: Top -> Downward flight with gentle horizontal curve
+      else if (pIndex === 3) {
+        x = width * (0.35 + Math.random() * 0.55);
+        y = -height * 0.10 - Math.random() * 60;
+        z = 260 + Math.random() * 220;
+        vx = -(0.18 + Math.random() * 0.20);
+        vy = 0.30 + Math.random() * 0.25;
+        vz = (Math.random() - 0.5) * 0.15;
+      }
+      // Portal 4: Bottom-Left -> Up-Right sweeping across behind laptop
+      else if (pIndex === 4) {
+        x = width * (0.05 + Math.random() * 0.25);
+        y = height * 1.10 + Math.random() * 60;
+        z = 320 + Math.random() * 160;
+        vx = 0.32 + Math.random() * 0.24;
+        vy = -(0.25 + Math.random() * 0.20);
+        vz = -(0.10 + Math.random() * 0.15);
+      }
+      // Portal 5: Right -> Westward flight into deep background
+      else {
+        x = width * 1.10 + Math.random() * 80;
+        y = height * (0.25 + Math.random() * 0.50);
+        z = 240 + Math.random() * 180;
+        vx = -(0.38 + Math.random() * 0.24);
+        vy = (Math.random() - 0.5) * 0.16;
+        vz = 0.18 + Math.random() * 0.22;
+      }
+
+      // Base sizes and configurations
+      let baseSize = 34;
+      let baseOpacity = 0.28;
+      let title: string | undefined = undefined;
+      let text: string | undefined = undefined;
+      let formula: string | undefined = undefined;
+      let bookWidth: number | undefined = undefined;
+      let bookHeight: number | undefined = undefined;
+      let bookThickness: number | undefined = undefined;
+      let coverColor: string | undefined = undefined;
+      let spineColor: string | undefined = undefined;
+
+      if (archetype === 'book_math') {
+        title = 'MATEMATIKA';
+        baseSize = 10;
+        baseOpacity = 0.32;
+        bookWidth = 72;
+        bookHeight = 94;
+        bookThickness = 17;
+        coverColor = '#4A0E17';
+        spineColor = '#6B1422';
+      } else if (archetype === 'book_english') {
+        title = 'ENGLISH';
+        baseSize = 10;
+        baseOpacity = 0.32;
+        bookWidth = 70;
+        bookHeight = 92;
+        bookThickness = 16;
+        coverColor = '#121A28';
+        spineColor = '#1C273C';
+      } else if (archetype === 'parabola') {
+        formula = 'y = x²';
+        baseSize = 32;
+        baseOpacity = 0.30;
+      } else if (archetype === 'sinewave') {
+        formula = 'y = sin(x)';
+        baseSize = 36;
+        baseOpacity = 0.28;
+      } else if (archetype === 'grid3d') {
+        baseSize = 42;
+        baseOpacity = 0.22;
+      } else if (archetype === 'cube') {
+        baseSize = 38;
+        baseOpacity = 0.26;
+      } else if (archetype === 'pyramid') {
+        baseSize = 34;
+        baseOpacity = 0.26;
+      } else if (archetype === 'torus') {
+        baseSize = 30;
+        baseOpacity = 0.24;
+      } else if (archetype === 'spiral') {
+        baseSize = 24;
+        baseOpacity = 0.22;
+      } else if (archetype === 'cone') {
+        baseSize = 28;
+        baseOpacity = 0.24;
+      } else if (archetype === 'math_pi') {
+        text = 'π';
+        baseSize = 38;
+        baseOpacity = 0.18;
+      } else if (archetype === 'math_sqrt') {
+        text = '√x';
+        baseSize = 22;
+        baseOpacity = 0.24;
+      } else if (archetype === 'math_pyth') {
+        text = 'a² + b² = c²';
+        baseSize = 16;
+        baseOpacity = 0.22;
+      } else if (archetype === 'math_inf') {
+        text = '∞';
+        baseSize = 22;
+        baseOpacity = 0.20;
+      } else if (archetype === 'eng_abc') {
+        text = 'ABC';
+        baseSize = 18;
+        baseOpacity = 0.24;
+      } else if (archetype === 'eng_speak') {
+        text = 'PRACTICE';
+        baseSize = 13;
+        baseOpacity = 0.20;
+      } else if (archetype === 'eng_learn') {
+        text = 'LEARN';
+        baseSize = 14;
+        baseOpacity = 0.20;
+      }
+
+      return {
+        id: `entity-${entitySpawnCounter}-${Date.now()}`,
+        archetype,
+        title,
+        text,
+        formula,
+        x,
+        y,
+        z,
+        vx,
+        vy,
+        vz,
+        rotX: Math.random() * Math.PI * 2,
+        rotY: Math.random() * Math.PI * 2,
+        rotZ: (Math.random() - 0.5) * 0.4,
+        rotSpeedX: (Math.random() - 0.5) * 0.0006,
+        rotSpeedY: (Math.random() - 0.5) * 0.0008,
+        rotSpeedZ: (Math.random() - 0.5) * 0.0004,
+        baseSize,
+        baseOpacity,
+        age: 0,
+        lifetime: 22 + Math.random() * 16, // 22 to 38 seconds flight
+        hoverProgress: 0,
+        proxBoost: 0,
+        bookWidth,
+        bookHeight,
+        bookThickness,
+        coverColor,
+        spineColor,
+      };
+    };
+
+    // Initialize 11–13 active flying entities distributed across spatial locations
+    const targetEntityCount = isMobile ? 6 : isTablet ? 9 : 12;
+    const flyingEntities: FlyingEntity3D[] = [];
+
+    // Pre-seed diverse entities so the space is alive on initial render
+    for (let i = 0; i < targetEntityCount; i++) {
+      const ent = spawnFlyingEntity(i % 6);
+      // Advance positions randomly along flight path so they are mid-flight
+      const advanceTime = Math.random() * 16;
+      ent.x += ent.vx * advanceTime * 30;
+      ent.y += ent.vy * advanceTime * 30;
+      ent.z += ent.vz * advanceTime * 30;
+      ent.age = advanceTime;
+      flyingEntities.push(ent);
+    }
 
     // -------------------------------------------------------------------------
     // 6. ATMOSPHERIC DUST PARTICLES (Light-reactive motes)
     // -------------------------------------------------------------------------
-    let dustCount = isMobile ? 22 : isTablet ? 45 : 65;
+    let dustCount = isMobile ? 20 : isTablet ? 40 : 60;
     const dustParticles: DustParticle3D[] = Array.from({ length: dustCount }, () => {
       const z = Math.random() * 750 + 40;
       return {
         x: Math.random() * (width * 1.3) - width * 0.15,
         y: Math.random() * (height * 1.3) - height * 0.15,
         z,
-        vx: (Math.random() - 0.5) * 0.12,
-        vy: -(0.10 + Math.random() * 0.20),
-        vz: (Math.random() - 0.5) * 0.08,
+        vx: (Math.random() - 0.5) * 0.10,
+        vy: -(0.08 + Math.random() * 0.18),
+        vz: (Math.random() - 0.5) * 0.07,
         baseAlpha: 0.10 + (1 - z / 800) * 0.30,
         phase: Math.random() * Math.PI * 2,
         pulseSpeed: 0.005 + Math.random() * 0.012,
@@ -990,12 +756,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       const revealProgress = prefersReducedMotion
         ? 1.0
         : Math.min(1.0, Math.pow(elapsed / 2.5, 1.6));
-
-      const revealMath = Math.min(1.0, Math.max(0, (elapsed - 0.4) / 1.0));
-      const revealGeom = Math.min(1.0, Math.max(0, (elapsed - 0.8) / 1.0));
-      const revealEnglish = Math.min(1.0, Math.max(0, (elapsed - 1.1) / 1.0));
-      const revealBooks = Math.min(1.0, Math.max(0, (elapsed - 1.4) / 1.0));
-      const revealCore = Math.min(1.0, Math.max(0, (elapsed - 1.7) / 0.9));
 
       // FPS Monitoring
       frameCount++;
@@ -1156,7 +916,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           coreCenter3D.y,
           coreCenter3D.z
         );
-        const coreAlpha = (0.75 + lightBoost * 0.35 + waveBoost * 0.40) * revealCore;
+        const coreAlpha = (0.75 + lightBoost * 0.35 + waveBoost * 0.40) * revealProgress;
 
         // Incomplete Arc 1: Thin architectural circle
         const r1 = 180 * projCore.scale;
@@ -1200,45 +960,75 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       }
 
       // -----------------------------------------------------------------------
-      // 3D MATHEMATICAL STRUCTURES & OBJECTS RENDERING
+      // OBJECT-TO-OBJECT MUTUAL PROXIMITY INTERACTION
+      // Evaluate pairwise distances between flying entities
       // -----------------------------------------------------------------------
-      activeObjects.forEach((obj) => {
-        // Continuous autonomous 3D movement through space
+      for (let i = 0; i < flyingEntities.length; i++) {
+        flyingEntities[i].proxBoost = 0;
+      }
+      for (let i = 0; i < flyingEntities.length; i++) {
+        const a = flyingEntities[i];
+        for (let j = i + 1; j < flyingEntities.length; j++) {
+          const b = flyingEntities[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const dz = a.z - b.z;
+          const distSq = dx * dx + dy * dy + dz * dz;
+          const maxDist = 210;
+          if (distSq < maxDist * maxDist) {
+            const dist = Math.sqrt(distSq);
+            const mutualBoost = (1 - dist / maxDist) * 0.35;
+            a.proxBoost = Math.max(a.proxBoost, mutualBoost);
+            b.proxBoost = Math.max(b.proxBoost, mutualBoost);
+          }
+        }
+      }
+
+      // -----------------------------------------------------------------------
+      // UPDATE, SORT & RENDER 3D FLYING ENTITIES (Continuous Traffic)
+      // -----------------------------------------------------------------------
+      // Update flight vectors, rotations, and lifecycles
+      for (let i = flyingEntities.length - 1; i >= 0; i--) {
+        const ent = flyingEntities[i];
+
         if (!prefersReducedMotion) {
-          obj.x += obj.vx;
-          obj.y += obj.vy;
-          obj.z += obj.vz;
-          obj.wavePhase += obj.waveSpeed;
-          obj.zPhase += obj.zSpeed;
-          obj.rotX += obj.rotSpeedX;
-          obj.rotY += obj.rotSpeedY;
-          obj.rotZ += obj.rotSpeedZ;
+          ent.x += ent.vx;
+          ent.y += ent.vy;
+          ent.z += ent.vz;
+          ent.rotX += ent.rotSpeedX;
+          ent.rotY += ent.rotSpeedY;
+          ent.rotZ += ent.rotSpeedZ;
+          ent.age += dt;
         }
 
-        // Dynamic 3D depth oscillation ($Z$-depth through-space movement)
-        const dynamicZ = obj.z + Math.sin(obj.zPhase) * obj.zAmp;
+        // Check if entity has exited screen boundaries or depth limits
+        const isOutOfScreen =
+          ent.x < -width * 0.25 ||
+          ent.x > width * 1.25 ||
+          ent.y < -height * 0.25 ||
+          ent.y > height * 1.25 ||
+          ent.z < 90 ||
+          ent.z > 860;
 
-        // Boundary wrap & smooth re-entry
-        if (obj.y < -80) {
-          obj.y = height + 70;
-          obj.x = Math.random() * width;
+        if (isOutOfScreen && ent.age > 8) {
+          // Replace with newly spawned entity from an opposing portal
+          flyingEntities.splice(i, 1);
+          flyingEntities.push(spawnFlyingEntity());
         }
-        if (obj.y > height + 80) {
-          obj.y = -70;
-          obj.x = Math.random() * width;
-        }
-        if (obj.x < -100) {
-          obj.x = width + 90;
-          obj.y = Math.random() * height;
-        }
-        if (obj.x > width + 100) {
-          obj.x = -90;
-          obj.y = Math.random() * height;
-        }
+      }
 
-        const waveOffset = Math.sin(obj.wavePhase) * obj.waveAmp;
+      // Maintain active pool count
+      while (flyingEntities.length < targetEntityCount) {
+        flyingEntities.push(spawnFlyingEntity());
+      }
+
+      // Depth Sorting (Painter's Algorithm): Furthest objects rendered first
+      flyingEntities.sort((a, b) => b.z - a.z);
+
+      // Render all active flying entities
+      flyingEntities.forEach((obj) => {
         const proj = project(
-          { x: obj.x, y: obj.y + waveOffset, z: dynamicZ },
+          { x: obj.x, y: obj.y, z: obj.z },
           camX,
           camY,
           camZ + scrollDepthShift,
@@ -1251,13 +1041,13 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         // Dynamic Safe Zone Attenuation
         const safeFactor = computeSafeZoneFactor(proj.x, proj.y);
 
-        // Edge fade
-        const edgeFadeX = Math.min(1, Math.min(proj.x, width - proj.x) / 70);
-        const edgeFadeY = Math.min(1, Math.min(proj.y, height - proj.y) / 70);
-        const edgeAlpha = Math.max(0, edgeFadeX * edgeFadeY);
+        // Edge fade for smooth entry/exit
+        const edgeFadeX = Math.min(1, Math.min(proj.x + 80, width + 80 - proj.x) / 100);
+        const edgeFadeY = Math.min(1, Math.min(proj.y + 80, height + 80 - proj.y) / 100);
+        const edgeAlpha = Math.max(0, Math.min(1, edgeFadeX * edgeFadeY));
 
         // Proximity Illumination from 5 moving virtual lights + Traveling Light Wave
-        const { lightBoost, waveBoost } = getIlluminationBoost(obj.x, obj.y, dynamicZ);
+        const { lightBoost, waveBoost } = getIlluminationBoost(obj.x, obj.y, obj.z);
 
         // Interactive 3D Physical Hover Reaction (400–700ms smooth spring)
         let isHovered = false;
@@ -1270,24 +1060,12 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         const targetHover = isHovered ? 1.0 : 0.0;
         obj.hoverProgress += (targetHover - obj.hoverProgress) * 0.08;
 
-        // Layer reveal factor
-        let staggerFactor = revealProgress;
-        if (obj.type === 'parabola' || obj.type === 'sinewave' || obj.type === 'math_token') {
-          staggerFactor = revealMath;
-        } else if (obj.type === 'cube' || obj.type === 'pyramid' || obj.type === 'torus' || obj.type === 'spiral' || obj.type === 'grid3d') {
-          staggerFactor = revealGeom;
-        } else if (obj.type === 'book') {
-          staggerFactor = revealBooks;
-        } else if (obj.type === 'english_token') {
-          staggerFactor = revealEnglish;
-        }
-
-        const totalIllum = lightBoost * 0.35 + waveBoost * 0.45;
+        const totalIllum = lightBoost * 0.35 + waveBoost * 0.45 + obj.proxBoost * 0.40;
         const finalAlpha =
           (obj.baseOpacity + totalIllum + obj.hoverProgress * 0.18) *
           edgeAlpha *
           safeFactor *
-          staggerFactor;
+          revealProgress;
 
         if (finalAlpha < 0.012) return;
 
@@ -1297,344 +1075,31 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         // Dynamic warm gold coloration
         let goldStroke = `rgba(243, 210, 118, ${(finalAlpha + totalIllum * 0.4) * 0.95})`;
         let goldFill = `rgba(217, 168, 63, ${finalAlpha * 0.85})`;
-        if (dynamicZ < 260) {
+        if (obj.z < 260) {
           goldStroke = `rgba(255, 235, 170, ${(finalAlpha + totalIllum * 0.5) * 1.0})`;
           goldFill = `rgba(255, 245, 215, ${finalAlpha * 0.95})`;
-        } else if (dynamicZ > 500) {
+        } else if (obj.z > 500) {
           goldStroke = `rgba(195, 150, 55, ${finalAlpha * 0.75})`;
           goldFill = `rgba(185, 140, 50, ${finalAlpha * 0.65})`;
         }
 
-        // =====================================================================
-        // STRUCTURE 1: 3D PARABOLA (y = x²) with 3D Axes & Vector Arrows
-        // =====================================================================
-        if (obj.type === 'parabola') {
-          const hoverRot = obj.hoverProgress * 0.20;
-          const rx = obj.rotX + hoverRot;
-          const ry = obj.rotY + hoverRot;
-          const rz = obj.rotZ;
-
-          const s = obj.baseSize * proj.scale;
-
-          // Parabola curve points: y = a * x^2
-          ctx.strokeStyle = goldStroke;
-          ctx.lineWidth = 1.15;
-          ctx.beginPath();
-          const pStart = rotate3D({ x: -40 * (s / 32), y: 22 * (s / 32), z: 0 }, rx, ry, rz);
-          ctx.moveTo(pStart.x, pStart.y);
-
-          for (let px = -36; px <= 40; px += 4) {
-            const py = (0.024 * px * px - 18) * (s / 32);
-            const pt = rotate3D({ x: px * (s / 32), y: py, z: 0 }, rx, ry, rz);
-            ctx.lineTo(pt.x, pt.y);
-          }
-          ctx.stroke();
-
-          // Coordinate Axes: X-axis [-48, 48] and Y-axis [-30, 24] with vector arrows
-          ctx.strokeStyle = `rgba(217, 168, 63, ${finalAlpha * 0.75})`;
-          ctx.lineWidth = 0.85;
-          ctx.setLineDash([3, 5]);
-
-          // X-Axis
-          const pX1 = rotate3D({ x: -48 * (s / 32), y: 0, z: 0 }, rx, ry, rz);
-          const pX2 = rotate3D({ x: 48 * (s / 32), y: 0, z: 0 }, rx, ry, rz);
-          ctx.beginPath();
-          ctx.moveTo(pX1.x, pX1.y);
-          ctx.lineTo(pX2.x, pX2.y);
-          ctx.stroke();
-
-          // Y-Axis
-          const pY1 = rotate3D({ x: 0, y: 24 * (s / 32), z: 0 }, rx, ry, rz);
-          const pY2 = rotate3D({ x: 0, y: -30 * (s / 32), z: 0 }, rx, ry, rz);
-          ctx.beginPath();
-          ctx.moveTo(pY1.x, pY1.y);
-          ctx.lineTo(pY2.x, pY2.y);
-          ctx.stroke();
-          ctx.setLineDash([]);
-
-          // Vector Arrowhead on Y-Axis
-          const pYTip1 = rotate3D({ x: -3 * (s / 32), y: -24 * (s / 32), z: 0 }, rx, ry, rz);
-          const pYTip2 = rotate3D({ x: 3 * (s / 32), y: -24 * (s / 32), z: 0 }, rx, ry, rz);
-          ctx.beginPath();
-          ctx.moveTo(pYTip1.x, pYTip1.y);
-          ctx.lineTo(pY2.x, pY2.y);
-          ctx.lineTo(pYTip2.x, pYTip2.y);
-          ctx.stroke();
-
-          // Formula text: y = x²
-          ctx.font = `italic 600 ${Math.max(7, Math.floor(10 * proj.scale))}px "Playfair Display", Georgia, serif`;
-          ctx.fillStyle = goldFill;
-          const pLabel = rotate3D({ x: 16 * (s / 32), y: -22 * (s / 32), z: 0 }, rx, ry, rz);
-          ctx.fillText('y = x²', pLabel.x, pLabel.y);
-        }
+        const hoverRot = obj.hoverProgress * 0.20;
+        const rx = obj.rotX + hoverRot;
+        const ry = obj.rotY + hoverRot;
+        const rz = obj.rotZ;
 
         // =====================================================================
-        // STRUCTURE 2: 3D SINUSOIDAL FUNCTION WAVE (y = sin(x))
+        // ARCHETYPE: 3D HARDCOVER BOOKS (MATEMATIKA & ENGLISH)
         // =====================================================================
-        else if (obj.type === 'sinewave') {
-          const hoverRot = obj.hoverProgress * 0.18;
-          const rx = obj.rotX + hoverRot;
-          const ry = obj.rotY + hoverRot;
-          const rz = obj.rotZ;
-
-          const s = obj.baseSize * proj.scale;
-          const waveT = elapsed * 1.8;
-
-          // Wave Points
-          ctx.strokeStyle = goldStroke;
-          ctx.lineWidth = 1.1;
-          ctx.beginPath();
-          const pStart = rotate3D(
-            { x: -55 * (s / 36), y: 16 * Math.sin(-55 * 0.08 + waveT) * (s / 36), z: 0 },
-            rx, ry, rz
-          );
-          ctx.moveTo(pStart.x, pStart.y);
-
-          for (let px = -50; px <= 55; px += 5) {
-            const py = 16 * Math.sin(px * 0.08 + waveT) * (s / 36);
-            const pt = rotate3D({ x: px * (s / 36), y: py, z: 0 }, rx, ry, rz);
-            ctx.lineTo(pt.x, pt.y);
-          }
-          ctx.stroke();
-
-          // Horizontal baseline axis with tick marks
-          ctx.strokeStyle = `rgba(217, 168, 63, ${finalAlpha * 0.65})`;
-          ctx.lineWidth = 0.8;
-          ctx.setLineDash([2, 6]);
-          const ax1 = rotate3D({ x: -62 * (s / 36), y: 0, z: 0 }, rx, ry, rz);
-          const ax2 = rotate3D({ x: 62 * (s / 36), y: 0, z: 0 }, rx, ry, rz);
-          ctx.beginPath();
-          ctx.moveTo(ax1.x, ax1.y);
-          ctx.lineTo(ax2.x, ax2.y);
-          ctx.stroke();
-          ctx.setLineDash([]);
-
-          // Formula Label: y = sin(x)
-          ctx.font = `italic 600 ${Math.max(7, Math.floor(9.5 * proj.scale))}px "Playfair Display", Georgia, serif`;
-          ctx.fillStyle = goldFill;
-          const pLabel = rotate3D({ x: -30 * (s / 36), y: -18 * (s / 36), z: 0 }, rx, ry, rz);
-          ctx.fillText('y = sin(x)', pLabel.x, pLabel.y);
-        }
-
-        // =====================================================================
-        // STRUCTURE 3: 3D HOLOGRAPHIC PERSPECTIVE COORDINATE GRID PLANE
-        // =====================================================================
-        else if (obj.type === 'grid3d') {
-          const hoverRot = obj.hoverProgress * 0.15;
-          const rx = obj.rotX + hoverRot;
-          const ry = obj.rotY + hoverRot;
-          const rz = obj.rotZ;
-
-          const s = obj.baseSize * proj.scale;
-          const gridSize = 45 * (s / 42);
-          const step = gridSize / 3;
-
-          ctx.strokeStyle = `rgba(243, 210, 118, ${finalAlpha * 0.75})`;
-          ctx.lineWidth = 0.85;
-          ctx.setLineDash([3, 5]);
-
-          // Longitudinal grid lines along X
-          for (let gz = -gridSize; gz <= gridSize; gz += step) {
-            const p1 = rotate3D({ x: -gridSize, y: 0, z: gz }, rx, ry, rz);
-            const p2 = rotate3D({ x: gridSize, y: 0, z: gz }, rx, ry, rz);
-            ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.stroke();
-          }
-
-          // Latitudinal grid lines along Z
-          for (let gx = -gridSize; gx <= gridSize; gx += step) {
-            const p1 = rotate3D({ x: gx, y: 0, z: -gridSize }, rx, ry, rz);
-            const p2 = rotate3D({ x: gx, y: 0, z: gridSize }, rx, ry, rz);
-            ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.stroke();
-          }
-          ctx.setLineDash([]);
-
-          // 3D Axis indicator vectors (X in gold, Z in lighter gold)
-          const origin = rotate3D({ x: 0, y: 0, z: 0 }, rx, ry, rz);
-          const axisX = rotate3D({ x: gridSize * 1.15, y: 0, z: 0 }, rx, ry, rz);
-          const axisZ = rotate3D({ x: 0, y: 0, z: gridSize * 1.15 }, rx, ry, rz);
-
-          ctx.lineWidth = 1.1;
-          ctx.strokeStyle = goldStroke;
-          ctx.beginPath();
-          ctx.moveTo(origin.x, origin.y);
-          ctx.lineTo(axisX.x, axisX.y);
-          ctx.moveTo(origin.x, origin.y);
-          ctx.lineTo(axisZ.x, axisZ.y);
-          ctx.stroke();
-        }
-
-        // =====================================================================
-        // STRUCTURE 4: 3D GLASS CUBE
-        // =====================================================================
-        else if (obj.type === 'cube') {
-          const hoverRot = obj.hoverProgress * 0.25;
-          const currentRotX = obj.rotX + hoverRot;
-          const currentRotY = obj.rotY + hoverRot;
-
-          const cubeVertices: Point3D[] = [
-            { x: -1, y: -1, z: -1 }, { x: 1, y: -1, z: -1 },
-            { x: 1, y: 1, z: -1 }, { x: -1, y: 1, z: -1 },
-            { x: -1, y: -1, z: 1 }, { x: 1, y: -1, z: 1 },
-            { x: 1, y: 1, z: 1 }, { x: -1, y: 1, z: 1 },
-          ];
-          const cubeEdges: [number, number][] = [
-            [0, 1], [1, 2], [2, 3], [3, 0],
-            [4, 5], [5, 6], [6, 7], [7, 4],
-            [0, 4], [1, 5], [2, 6], [3, 7],
-          ];
-
-          const geomScale = obj.baseSize * proj.scale;
-          const projectedCube = cubeVertices.map((v) => {
-            const rot = rotate3D(v, currentRotX, currentRotY, obj.rotZ);
-            return { x: rot.x * geomScale, y: rot.y * geomScale };
-          });
-
-          // Translucent glass face tint
-          ctx.fillStyle = `rgba(34, 10, 15, ${finalAlpha * 0.35})`;
-          ctx.beginPath();
-          ctx.moveTo(projectedCube[0].x, projectedCube[0].y);
-          ctx.lineTo(projectedCube[1].x, projectedCube[1].y);
-          ctx.lineTo(projectedCube[2].x, projectedCube[2].y);
-          ctx.lineTo(projectedCube[3].x, projectedCube[3].y);
-          ctx.closePath();
-          ctx.fill();
-
-          // Gold wireframe edges
-          ctx.strokeStyle = goldStroke;
-          ctx.lineWidth = 0.95;
-          ctx.setLineDash([3, 5]);
-          cubeEdges.forEach(([i, j]) => {
-            ctx.beginPath();
-            ctx.moveTo(projectedCube[i].x, projectedCube[i].y);
-            ctx.lineTo(projectedCube[j].x, projectedCube[j].y);
-            ctx.stroke();
-          });
-          ctx.setLineDash([]);
-        }
-
-        // =====================================================================
-        // STRUCTURE 5: 3D PYRAMID (Tetrahedron / Square Pyramid)
-        // =====================================================================
-        else if (obj.type === 'pyramid') {
-          const hoverRot = obj.hoverProgress * 0.22;
-          const currentRotX = obj.rotX + hoverRot;
-          const currentRotY = obj.rotY + hoverRot;
-
-          const pyrVertices: Point3D[] = [
-            { x: 0, y: -1.4, z: 0 }, // Apex
-            { x: -1, y: 0.9, z: -1 }, // Base 0
-            { x: 1, y: 0.9, z: -1 },  // Base 1
-            { x: 1, y: 0.9, z: 1 },   // Base 2
-            { x: -1, y: 0.9, z: 1 },  // Base 3
-          ];
-          const pyrEdges: [number, number][] = [
-            [0, 1], [0, 2], [0, 3], [0, 4], // Ribs from apex
-            [1, 2], [2, 3], [3, 4], [4, 1], // Base perimeter
-          ];
-
-          const geomScale = obj.baseSize * proj.scale;
-          const projectedPyr = pyrVertices.map((v) => {
-            const rot = rotate3D(v, currentRotX, currentRotY, obj.rotZ);
-            return { x: rot.x * geomScale, y: rot.y * geomScale };
-          });
-
-          // Translucent glass base
-          ctx.fillStyle = `rgba(34, 10, 15, ${finalAlpha * 0.35})`;
-          ctx.beginPath();
-          ctx.moveTo(projectedPyr[1].x, projectedPyr[1].y);
-          ctx.lineTo(projectedPyr[2].x, projectedPyr[2].y);
-          ctx.lineTo(projectedPyr[3].x, projectedPyr[3].y);
-          ctx.lineTo(projectedPyr[4].x, projectedPyr[4].y);
-          ctx.closePath();
-          ctx.fill();
-
-          ctx.strokeStyle = goldStroke;
-          ctx.lineWidth = 0.95;
-          ctx.setLineDash([4, 6]);
-          pyrEdges.forEach(([i, j]) => {
-            ctx.beginPath();
-            ctx.moveTo(projectedPyr[i].x, projectedPyr[i].y);
-            ctx.lineTo(projectedPyr[j].x, projectedPyr[j].y);
-            ctx.stroke();
-          });
-          ctx.setLineDash([]);
-        }
-
-        // =====================================================================
-        // STRUCTURE 6: 3D TORUS (Geometric Wireframe Ring)
-        // =====================================================================
-        else if (obj.type === 'torus') {
-          const hoverRot = obj.hoverProgress * 0.20;
-          const rx = obj.rotX + hoverRot;
-          const ry = obj.rotY + hoverRot;
-          const rz = obj.rotZ;
-          const s = obj.baseSize * proj.scale;
-
-          ctx.strokeStyle = goldStroke;
-          ctx.lineWidth = 0.9;
-
-          // 4 Meridian Circles in 3D
-          const R = 18 * (s / 30);
-          const r = 8 * (s / 30);
-
-          for (let phi = 0; phi < Math.PI; phi += Math.PI / 4) {
-            ctx.beginPath();
-            for (let theta = 0; theta <= Math.PI * 2; theta += Math.PI / 8) {
-              const x = (R + r * Math.cos(theta)) * Math.cos(phi);
-              const y = r * Math.sin(theta);
-              const z = (R + r * Math.cos(theta)) * Math.sin(phi);
-              const pt = rotate3D({ x, y, z }, rx, ry, rz);
-              if (theta === 0) ctx.moveTo(pt.x, pt.y);
-              else ctx.lineTo(pt.x, pt.y);
-            }
-            ctx.stroke();
-          }
-        }
-
-        // =====================================================================
-        // STRUCTURE 7: 3D MATHEMATICAL HELIX / SPIRAL
-        // =====================================================================
-        else if (obj.type === 'spiral') {
-          const hoverRot = obj.hoverProgress * 0.20;
-          const rx = obj.rotX + hoverRot;
-          const ry = obj.rotY + hoverRot;
-          const rz = obj.rotZ;
-          const s = obj.baseSize * proj.scale;
-
-          ctx.strokeStyle = goldStroke;
-          ctx.lineWidth = 1.0;
-          ctx.beginPath();
-
-          for (let t = 0; t <= Math.PI * 5; t += Math.PI / 10) {
-            const rad = (10 + t * 1.8) * (s / 22);
-            const x = rad * Math.cos(t);
-            const y = rad * Math.sin(t);
-            const z = (t - Math.PI * 2.5) * 5 * (s / 22);
-            const pt = rotate3D({ x, y, z }, rx, ry, rz);
-            if (t === 0) ctx.moveTo(pt.x, pt.y);
-            else ctx.lineTo(pt.x, pt.y);
-          }
-          ctx.stroke();
-        }
-
-        // =====================================================================
-        // STRUCTURE 8: 3D HARDCOVER BOOKS (MATHEMATIKA & ENGLISH)
-        // =====================================================================
-        else if (obj.type === 'book' && obj.bookWidth && obj.bookHeight && obj.bookThickness) {
+        if ((obj.archetype === 'book_math' || obj.archetype === 'book_english') && obj.bookWidth && obj.bookHeight && obj.bookThickness) {
           const bw = obj.bookWidth * proj.scale;
           const bh = obj.bookHeight * proj.scale;
           const bThick = obj.bookThickness * proj.scale;
 
           const openAngle = obj.hoverProgress * 0.08;
-          ctx.rotate(obj.rotZ + openAngle);
+          ctx.rotate(rz + openAngle);
 
-          // Subtle back cover / drop shadow
+          // Back cover drop shadow
           ctx.beginPath();
           ctx.roundRect(-bw / 2 + 2, -bh / 2 + 2, bw, bh, 3);
           ctx.fillStyle = 'rgba(5, 3, 4, 0.5)';
@@ -1680,19 +1145,328 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         }
 
         // =====================================================================
-        // STRUCTURE 9: MATHEMATICS & ENGLISH EDUCATIONAL TOKENS
+        // ARCHETYPE: 3D PARABOLA (y = x²) with 3D Axes & Vector Arrows
+        // =====================================================================
+        else if (obj.archetype === 'parabola') {
+          const s = obj.baseSize * proj.scale;
+
+          ctx.strokeStyle = goldStroke;
+          ctx.lineWidth = 1.15;
+          ctx.beginPath();
+          const pStart = rotate3D({ x: -40 * (s / 32), y: 22 * (s / 32), z: 0 }, rx, ry, rz);
+          ctx.moveTo(pStart.x, pStart.y);
+
+          for (let px = -36; px <= 40; px += 4) {
+            const py = (0.024 * px * px - 18) * (s / 32);
+            const pt = rotate3D({ x: px * (s / 32), y: py, z: 0 }, rx, ry, rz);
+            ctx.lineTo(pt.x, pt.y);
+          }
+          ctx.stroke();
+
+          // Coordinate Axes: X-axis & Y-axis with dashed intervals
+          ctx.strokeStyle = `rgba(217, 168, 63, ${finalAlpha * 0.75})`;
+          ctx.lineWidth = 0.85;
+          ctx.setLineDash([3, 5]);
+
+          const pX1 = rotate3D({ x: -48 * (s / 32), y: 0, z: 0 }, rx, ry, rz);
+          const pX2 = rotate3D({ x: 48 * (s / 32), y: 0, z: 0 }, rx, ry, rz);
+          ctx.beginPath();
+          ctx.moveTo(pX1.x, pX1.y);
+          ctx.lineTo(pX2.x, pX2.y);
+          ctx.stroke();
+
+          const pY1 = rotate3D({ x: 0, y: 24 * (s / 32), z: 0 }, rx, ry, rz);
+          const pY2 = rotate3D({ x: 0, y: -30 * (s / 32), z: 0 }, rx, ry, rz);
+          ctx.beginPath();
+          ctx.moveTo(pY1.x, pY1.y);
+          ctx.lineTo(pY2.x, pY2.y);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          // Vector Arrowhead
+          const pYTip1 = rotate3D({ x: -3 * (s / 32), y: -24 * (s / 32), z: 0 }, rx, ry, rz);
+          const pYTip2 = rotate3D({ x: 3 * (s / 32), y: -24 * (s / 32), z: 0 }, rx, ry, rz);
+          ctx.beginPath();
+          ctx.moveTo(pYTip1.x, pYTip1.y);
+          ctx.lineTo(pY2.x, pY2.y);
+          ctx.lineTo(pYTip2.x, pYTip2.y);
+          ctx.stroke();
+
+          // Formula text: y = x²
+          ctx.font = `italic 600 ${Math.max(7, Math.floor(10 * proj.scale))}px "Playfair Display", Georgia, serif`;
+          ctx.fillStyle = goldFill;
+          const pLabel = rotate3D({ x: 16 * (s / 32), y: -22 * (s / 32), z: 0 }, rx, ry, rz);
+          ctx.fillText('y = x²', pLabel.x, pLabel.y);
+        }
+
+        // =====================================================================
+        // ARCHETYPE: 3D SINUSOIDAL FUNCTION WAVE (y = sin(x))
+        // =====================================================================
+        else if (obj.archetype === 'sinewave') {
+          const s = obj.baseSize * proj.scale;
+          const waveT = elapsed * 1.8;
+
+          ctx.strokeStyle = goldStroke;
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          const pStart = rotate3D(
+            { x: -55 * (s / 36), y: 16 * Math.sin(-55 * 0.08 + waveT) * (s / 36), z: 0 },
+            rx, ry, rz
+          );
+          ctx.moveTo(pStart.x, pStart.y);
+
+          for (let px = -50; px <= 55; px += 5) {
+            const py = 16 * Math.sin(px * 0.08 + waveT) * (s / 36);
+            const pt = rotate3D({ x: px * (s / 36), y: py, z: 0 }, rx, ry, rz);
+            ctx.lineTo(pt.x, pt.y);
+          }
+          ctx.stroke();
+
+          // Baseline axis
+          ctx.strokeStyle = `rgba(217, 168, 63, ${finalAlpha * 0.65})`;
+          ctx.lineWidth = 0.8;
+          ctx.setLineDash([2, 6]);
+          const ax1 = rotate3D({ x: -62 * (s / 36), y: 0, z: 0 }, rx, ry, rz);
+          const ax2 = rotate3D({ x: 62 * (s / 36), y: 0, z: 0 }, rx, ry, rz);
+          ctx.beginPath();
+          ctx.moveTo(ax1.x, ax1.y);
+          ctx.lineTo(ax2.x, ax2.y);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          ctx.font = `italic 600 ${Math.max(7, Math.floor(9.5 * proj.scale))}px "Playfair Display", Georgia, serif`;
+          ctx.fillStyle = goldFill;
+          const pLabel = rotate3D({ x: -30 * (s / 36), y: -18 * (s / 36), z: 0 }, rx, ry, rz);
+          ctx.fillText('y = sin(x)', pLabel.x, pLabel.y);
+        }
+
+        // =====================================================================
+        // ARCHETYPE: 3D HOLOGRAPHIC PERSPECTIVE COORDINATE GRID PLANE
+        // =====================================================================
+        else if (obj.archetype === 'grid3d') {
+          const s = obj.baseSize * proj.scale;
+          const gridSize = 45 * (s / 42);
+          const step = gridSize / 3;
+
+          ctx.strokeStyle = `rgba(243, 210, 118, ${finalAlpha * 0.75})`;
+          ctx.lineWidth = 0.85;
+          ctx.setLineDash([3, 5]);
+
+          for (let gz = -gridSize; gz <= gridSize; gz += step) {
+            const p1 = rotate3D({ x: -gridSize, y: 0, z: gz }, rx, ry, rz);
+            const p2 = rotate3D({ x: gridSize, y: 0, z: gz }, rx, ry, rz);
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+
+          for (let gx = -gridSize; gx <= gridSize; gx += step) {
+            const p1 = rotate3D({ x: gx, y: 0, z: -gridSize }, rx, ry, rz);
+            const p2 = rotate3D({ x: gx, y: 0, z: gridSize }, rx, ry, rz);
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+          ctx.setLineDash([]);
+
+          const origin = rotate3D({ x: 0, y: 0, z: 0 }, rx, ry, rz);
+          const axisX = rotate3D({ x: gridSize * 1.15, y: 0, z: 0 }, rx, ry, rz);
+          const axisZ = rotate3D({ x: 0, y: 0, z: gridSize * 1.15 }, rx, ry, rz);
+
+          ctx.lineWidth = 1.1;
+          ctx.strokeStyle = goldStroke;
+          ctx.beginPath();
+          ctx.moveTo(origin.x, origin.y);
+          ctx.lineTo(axisX.x, axisX.y);
+          ctx.moveTo(origin.x, origin.y);
+          ctx.lineTo(axisZ.x, axisZ.y);
+          ctx.stroke();
+        }
+
+        // =====================================================================
+        // ARCHETYPE: 3D GLASS CUBE
+        // =====================================================================
+        else if (obj.archetype === 'cube') {
+          const cubeVertices: Point3D[] = [
+            { x: -1, y: -1, z: -1 }, { x: 1, y: -1, z: -1 },
+            { x: 1, y: 1, z: -1 }, { x: -1, y: 1, z: -1 },
+            { x: -1, y: -1, z: 1 }, { x: 1, y: -1, z: 1 },
+            { x: 1, y: 1, z: 1 }, { x: -1, y: 1, z: 1 },
+          ];
+          const cubeEdges: [number, number][] = [
+            [0, 1], [1, 2], [2, 3], [3, 0],
+            [4, 5], [5, 6], [6, 7], [7, 4],
+            [0, 4], [1, 5], [2, 6], [3, 7],
+          ];
+
+          const geomScale = obj.baseSize * proj.scale;
+          const projectedCube = cubeVertices.map((v) => {
+            const rot = rotate3D(v, rx, ry, rz);
+            return { x: rot.x * geomScale, y: rot.y * geomScale };
+          });
+
+          ctx.fillStyle = `rgba(34, 10, 15, ${finalAlpha * 0.35})`;
+          ctx.beginPath();
+          ctx.moveTo(projectedCube[0].x, projectedCube[0].y);
+          ctx.lineTo(projectedCube[1].x, projectedCube[1].y);
+          ctx.lineTo(projectedCube[2].x, projectedCube[2].y);
+          ctx.lineTo(projectedCube[3].x, projectedCube[3].y);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.strokeStyle = goldStroke;
+          ctx.lineWidth = 0.95;
+          ctx.setLineDash([3, 5]);
+          cubeEdges.forEach(([i, j]) => {
+            ctx.beginPath();
+            ctx.moveTo(projectedCube[i].x, projectedCube[i].y);
+            ctx.lineTo(projectedCube[j].x, projectedCube[j].y);
+            ctx.stroke();
+          });
+          ctx.setLineDash([]);
+        }
+
+        // =====================================================================
+        // ARCHETYPE: 3D PYRAMID (Tetrahedron)
+        // =====================================================================
+        else if (obj.archetype === 'pyramid') {
+          const pyrVertices: Point3D[] = [
+            { x: 0, y: -1.4, z: 0 },
+            { x: -1, y: 0.9, z: -1 },
+            { x: 1, y: 0.9, z: -1 },
+            { x: 1, y: 0.9, z: 1 },
+            { x: -1, y: 0.9, z: 1 },
+          ];
+          const pyrEdges: [number, number][] = [
+            [0, 1], [0, 2], [0, 3], [0, 4],
+            [1, 2], [2, 3], [3, 4], [4, 1],
+          ];
+
+          const geomScale = obj.baseSize * proj.scale;
+          const projectedPyr = pyrVertices.map((v) => {
+            const rot = rotate3D(v, rx, ry, rz);
+            return { x: rot.x * geomScale, y: rot.y * geomScale };
+          });
+
+          ctx.fillStyle = `rgba(34, 10, 15, ${finalAlpha * 0.35})`;
+          ctx.beginPath();
+          ctx.moveTo(projectedPyr[1].x, projectedPyr[1].y);
+          ctx.lineTo(projectedPyr[2].x, projectedPyr[2].y);
+          ctx.lineTo(projectedPyr[3].x, projectedPyr[3].y);
+          ctx.lineTo(projectedPyr[4].x, projectedPyr[4].y);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.strokeStyle = goldStroke;
+          ctx.lineWidth = 0.95;
+          ctx.setLineDash([4, 6]);
+          pyrEdges.forEach(([i, j]) => {
+            ctx.beginPath();
+            ctx.moveTo(projectedPyr[i].x, projectedPyr[i].y);
+            ctx.lineTo(projectedPyr[j].x, projectedPyr[j].y);
+            ctx.stroke();
+          });
+          ctx.setLineDash([]);
+        }
+
+        // =====================================================================
+        // ARCHETYPE: 3D TORUS
+        // =====================================================================
+        else if (obj.archetype === 'torus') {
+          const s = obj.baseSize * proj.scale;
+          ctx.strokeStyle = goldStroke;
+          ctx.lineWidth = 0.9;
+
+          const R = 18 * (s / 30);
+          const r = 8 * (s / 30);
+
+          for (let phi = 0; phi < Math.PI; phi += Math.PI / 4) {
+            ctx.beginPath();
+            for (let theta = 0; theta <= Math.PI * 2; theta += Math.PI / 8) {
+              const x = (R + r * Math.cos(theta)) * Math.cos(phi);
+              const y = r * Math.sin(theta);
+              const z = (R + r * Math.cos(theta)) * Math.sin(phi);
+              const pt = rotate3D({ x, y, z }, rx, ry, rz);
+              if (theta === 0) ctx.moveTo(pt.x, pt.y);
+              else ctx.lineTo(pt.x, pt.y);
+            }
+            ctx.stroke();
+          }
+        }
+
+        // =====================================================================
+        // ARCHETYPE: 3D SPIRAL / HELIX
+        // =====================================================================
+        else if (obj.archetype === 'spiral') {
+          const s = obj.baseSize * proj.scale;
+          ctx.strokeStyle = goldStroke;
+          ctx.lineWidth = 1.0;
+          ctx.beginPath();
+
+          for (let t = 0; t <= Math.PI * 5; t += Math.PI / 10) {
+            const rad = (10 + t * 1.8) * (s / 22);
+            const x = rad * Math.cos(t);
+            const y = rad * Math.sin(t);
+            const z = (t - Math.PI * 2.5) * 5 * (s / 22);
+            const pt = rotate3D({ x, y, z }, rx, ry, rz);
+            if (t === 0) ctx.moveTo(pt.x, pt.y);
+            else ctx.lineTo(pt.x, pt.y);
+          }
+          ctx.stroke();
+        }
+
+        // =====================================================================
+        // ARCHETYPE: 3D CONE
+        // =====================================================================
+        else if (obj.archetype === 'cone') {
+          const s = obj.baseSize * proj.scale;
+          ctx.strokeStyle = goldStroke;
+          ctx.lineWidth = 0.95;
+
+          const baseR = 16 * (s / 28);
+          const apexY = -22 * (s / 28);
+          const baseY = 16 * (s / 28);
+
+          // Apex point
+          const apex = rotate3D({ x: 0, y: apexY, z: 0 }, rx, ry, rz);
+
+          // Base circular loop
+          ctx.beginPath();
+          for (let a = 0; a <= Math.PI * 2; a += Math.PI / 8) {
+            const bx = baseR * Math.cos(a);
+            const bz = baseR * Math.sin(a);
+            const pt = rotate3D({ x: bx, y: baseY, z: bz }, rx, ry, rz);
+            if (a === 0) ctx.moveTo(pt.x, pt.y);
+            else ctx.lineTo(pt.x, pt.y);
+          }
+          ctx.stroke();
+
+          // Generator lines from apex to 4 base points
+          for (let a = 0; a < Math.PI * 2; a += Math.PI / 2) {
+            const bx = baseR * Math.cos(a);
+            const bz = baseR * Math.sin(a);
+            const bpt = rotate3D({ x: bx, y: baseY, z: bz }, rx, ry, rz);
+            ctx.beginPath();
+            ctx.moveTo(apex.x, apex.y);
+            ctx.lineTo(bpt.x, bpt.y);
+            ctx.stroke();
+          }
+        }
+
+        // =====================================================================
+        // ARCHETYPES: MATHEMATICS & ENGLISH TOKENS
         // =====================================================================
         else {
-          const hoverTilt = obj.hoverProgress * 0.08;
-          ctx.rotate(obj.rotZ + hoverTilt);
-
+          ctx.rotate(rz);
           const renderSize = Math.max(8, Math.floor(obj.baseSize * proj.scale));
 
-          if (obj.text === 'π' && obj.layer === 2) {
+          if (obj.archetype === 'math_pi') {
             ctx.font = `italic 600 ${renderSize}px "Playfair Display", Georgia, serif`;
             ctx.fillStyle = goldFill;
             ctx.fillText('π', 0, 0);
-          } else if (obj.text === '√x') {
+          } else if (obj.archetype === 'math_sqrt') {
             ctx.save();
             ctx.strokeStyle = goldStroke;
             ctx.lineWidth = 1.1;
@@ -1706,7 +1480,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
             ctx.fillStyle = goldFill;
             ctx.fillText('x', 0, 0);
             ctx.restore();
-          } else if (obj.text === 'ABC') {
+          } else if (obj.archetype === 'eng_abc') {
             ctx.save();
             ctx.font = `bold ${renderSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
             ctx.letterSpacing = '2px';
@@ -1715,15 +1489,11 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
             ctx.fillStyle = goldFill;
             ctx.fillText('ABC', 0, 0);
             ctx.restore();
-          } else if (obj.type === 'math_token') {
-            ctx.font = `italic 600 ${renderSize}px "Playfair Display", Georgia, serif`;
-            ctx.fillStyle = goldFill;
-            ctx.fillText(obj.text || '', 0, 0);
-          } else {
+          } else if (obj.text) {
             ctx.font = `600 ${renderSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
             ctx.fillStyle = goldFill;
             ctx.letterSpacing = `${Math.max(1, 1.8 * proj.scale)}px`;
-            ctx.fillText(obj.text || '', 0, 0);
+            ctx.fillText(obj.text, 0, 0);
           }
         }
 
