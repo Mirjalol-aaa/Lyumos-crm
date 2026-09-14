@@ -62,40 +62,71 @@ interface TravelingLightWave {
 
 type PhysicsState = 'AUTONOMOUS' | 'HOVER' | 'GRABBED' | 'THROWN' | 'MOMENTUM';
 
-// Comprehensive 23-Archetype Roster (Rich Variety: Geometric, Mathematical & Educational)
+// -----------------------------------------------------------------------------
+// 41 DIVERSE MASTER ARCHETYPES (Mathematical, Geometric, Sculptural & Educational)
+// -----------------------------------------------------------------------------
 type ArchetypeType =
-  | 'book_math'
-  | 'book_english'
+  // 1. RINGS & LOOPS
+  | 'ring_thin'
+  | 'ring_nested'
+  | 'ring_broken'
+  | 'ring_elliptical'
+  | 'ring_twisted'
+  | 'ring_double_helix'
+  | 'torus'
+  // 2. ABSTRACT 3D MATHEMATICAL SCULPTURES
+  | 'sculpture_knot'
+  | 'sculpture_saddle'
+  | 'sculpture_wave'
+  | 'sculpture_interlocking'
+  | 'sculpture_nested_shell'
+  // 3. CUBES & FRAMES
+  | 'cube_beveled'
+  | 'cube_nested'
+  | 'cube_wire'
+  // 4. POLYHEDRA & SOLIDS
+  | 'sphere'
+  | 'octahedron'
+  | 'dodecahedron'
+  | 'pyramid'
+  | 'pyramid_truncated'
+  | 'prism_hex'
+  | 'prism_tri'
+  | 'cylinder'
+  | 'cone'
+  // 5. MATHEMATICAL CURVES & 3D GRAPHS
   | 'parabola'
   | 'sinewave'
   | 'cosinewave'
-  | 'sphere'
-  | 'torus'
-  | 'nested_rings'
-  | 'cube'
-  | 'hollow_cube'
-  | 'pyramid'
-  | 'octahedron'
-  | 'cylinder'
-  | 'cone'
-  | 'prism'
-  | 'spiral'
+  | 'coord_axes'
+  | 'vector_field'
+  | 'spiral_helix'
   | 'grid3d'
+  // 6. BOOKS
+  | 'book_math'
+  | 'book_english'
+  // 7. FORMULA ACCENTS
   | 'math_pi'
-  | 'math_inf'
+  | 'math_sum'
   | 'math_sqrt'
+  | 'math_inf'
   | 'math_pyth'
-  | 'eng_abc'
-  | 'eng_aa';
+  | 'math_integral'
+  // 8. ENGLISH 3D TYPOGRAPHY
+  | 'eng_words'
+  | 'eng_letters';
 
 type PerformanceTier = 'ULTRA_LOW' | 'LOW' | 'MEDIUM' | 'HIGH';
+type DepthLayer = 'FOREGROUND' | 'MIDGROUND' | 'BACKGROUND' | 'DEEP_BACKGROUND';
 
 interface FlyingEntity3D {
   id: string;
   archetype: ArchetypeType;
+  depthLayer: DepthLayer;
   title?: string;
   text?: string;
   formula?: string;
+  subText?: string;
   // 3D Position
   x: number;
   y: number;
@@ -164,6 +195,7 @@ interface ColorLUTEntry {
   bookCoverMath: string;
   bookCoverEng: string;
   highlight: string;
+  glow: string;
 }
 
 const COLOR_LUT: ColorLUTEntry[] = Array.from({ length: 64 }, (_, i) => {
@@ -171,38 +203,39 @@ const COLOR_LUT: ColorLUTEntry[] = Array.from({ length: 64 }, (_, i) => {
   let r: number, g: number, b: number;
   if (p < 0.35) {
     const t = p / 0.35;
-    r = Math.round(38 + (88 - 38) * t);
-    g = Math.round(12 + (24 - 12) * t);
-    b = Math.round(18 + (34 - 18) * t);
+    r = Math.round(38 + (92 - 38) * t);
+    g = Math.round(12 + (26 - 12) * t);
+    b = Math.round(18 + (36 - 18) * t);
   } else if (p < 0.70) {
     const t = (p - 0.35) / 0.35;
-    r = Math.round(88 + (195 - 88) * t);
-    g = Math.round(24 + (140 - 24) * t);
-    b = Math.round(34 + (56 - 34) * t);
+    r = Math.round(92 + (205 - 92) * t);
+    g = Math.round(26 + (148 - 26) * t);
+    b = Math.round(36 + (60 - 36) * t);
   } else {
     const t = (p - 0.70) / 0.30;
-    r = Math.round(195 + (255 - 195) * t);
-    g = Math.round(140 + (238 - 140) * t);
-    b = Math.round(56 + (180 - 56) * t);
+    r = Math.round(205 + (255 - 205) * t);
+    g = Math.round(148 + (242 - 148) * t);
+    b = Math.round(60 + (185 - 60) * t);
   }
 
-  const strokeAlpha = Math.min(1.0, 0.40 + p * 0.58).toFixed(2);
-  const fillAlpha = Math.min(1.0, 0.20 + p * 0.48).toFixed(2);
+  const strokeAlpha = Math.min(1.0, 0.42 + p * 0.56).toFixed(2);
+  const fillAlpha = Math.min(1.0, 0.18 + p * 0.46).toFixed(2);
 
-  const mathR = Math.round(24 + (74 - 24) * p);
-  const mathG = Math.round(6 + (14 - 6) * p);
-  const mathB = Math.round(9 + (23 - 9) * p);
+  const mathR = Math.round(24 + (78 - 24) * p);
+  const mathG = Math.round(6 + (16 - 6) * p);
+  const mathB = Math.round(9 + (25 - 9) * p);
 
-  const engR = Math.round(8 + (28 - 8) * p);
-  const engG = Math.round(12 + (39 - 12) * p);
-  const engB = Math.round(18 + (60 - 18) * p);
+  const engR = Math.round(8 + (32 - 8) * p);
+  const engG = Math.round(12 + (44 - 12) * p);
+  const engB = Math.round(18 + (66 - 18) * p);
 
   return {
     stroke: `rgba(${r}, ${g}, ${b}, ${strokeAlpha})`,
     fill: `rgba(${Math.round(r * 0.9)}, ${Math.round(g * 0.9)}, ${Math.round(b * 0.9)}, ${fillAlpha})`,
     bookCoverMath: `rgba(${mathR}, ${mathG}, ${mathB}, 0.95)`,
     bookCoverEng: `rgba(${engR}, ${engG}, ${engB}, 0.95)`,
-    highlight: `rgba(255, 238, 180, ${Math.min(1.0, 0.5 + p * 0.5).toFixed(2)})`,
+    highlight: `rgba(255, 240, 195, ${Math.min(1.0, 0.52 + p * 0.48).toFixed(2)})`,
+    glow: `rgba(217, 168, 63, ${Math.min(1.0, 0.20 + p * 0.40).toFixed(2)})`,
   };
 });
 
@@ -339,7 +372,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
     // -------------------------------------------------------------------------
     // 2. 3D CAMERA & PERSPECTIVE PROJECTION (Zero heap allocations)
     // -------------------------------------------------------------------------
-    const fov = 440;
+    const fov = 450;
 
     const projectPoint = (
       px: number,
@@ -532,34 +565,52 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
     };
 
     // -------------------------------------------------------------------------
-    // 5. SHAPE REPETITION CONTROL & OBJECT POOLING
+    // 5. 41-ARCHETYPE NON-REPEATING MASTER SEQUENCE
     // -------------------------------------------------------------------------
-    // Strict non-repeating cycle of rich archetypes:
-    // Never consecutive duplicates! A sequence that alternates geometric, mathematical, and educational.
-    const shapeSequence: ArchetypeType[] = [
-      'book_math',
-      'parabola',
-      'torus',
-      'cube',
-      'sinewave',
-      'book_english',
-      'sphere',
-      'pyramid',
-      'nested_rings',
-      'octahedron',
-      'spiral',
-      'cylinder',
-      'math_inf',
-      'math_pi',
-      'prism',
-      'cosinewave',
-      'hollow_cube',
-      'cone',
-      'math_sqrt',
-      'math_pyth',
-      'eng_abc',
-      'eng_aa',
-      'grid3d',
+    // Strict non-repeating cycle interleaved across Categories:
+    // Math -> Geometric -> Sculpture -> Ring -> Book -> Formula -> English -> Frame
+    const masterShapeSequence: ArchetypeType[] = [
+      'book_math',             // 1. Math Book
+      'ring_thin',             // 2. Elegant Ring
+      'parabola',              // 3. Parabola y = x²
+      'sculpture_knot',        // 4. Trefoil 3D Knot
+      'octahedron',            // 5. Gemstone Octahedron
+      'book_english',          // 6. English Book
+      'ring_nested',           // 7. Double Orbital Rings
+      'sculpture_saddle',      // 8. Hyperbolic Saddle Surface
+      'math_pi',               // 9. Pi Symbol
+      'cube_nested',           // 10. Nested Cube in Cube
+      'sinewave',              // 11. Sine Wave y = sin(x)
+      'ring_broken',           // 12. Broken Arc Ring
+      'dodecahedron',          // 13. 12-sided Polyhedron
+      'eng_words',             // 14. Typography: LEARN / THINK
+      'torus',                 // 15. Classic Torus
+      'sculpture_wave',        // 16. 3D Wave Sculpture
+      'coord_axes',            // 17. 3D Coordinate Tripod
+      'sphere',                // 18. Wireframe Sphere with Equator
+      'math_inf',              // 19. Infinity Symbol ∞
+      'prism_hex',             // 20. Hexagonal Prism
+      'ring_twisted',          // 21. Mobius Twisted Ring
+      'cosinewave',            // 22. Cosine Wave y = cos(x)
+      'cube_beveled',          // 23. Beveled Solid Cube
+      'eng_letters',           // 24. Letter Glyph: A / B / C
+      'sculpture_interlocking',// 25. Two Interlocking Rings
+      'pyramid',               // 26. Tetrahedron Pyramid
+      'math_sqrt',             // 27. Radical Formula √x
+      'ring_double_helix',     // 28. Double Helix Loop
+      'vector_field',          // 29. 3D Vector Arrows
+      'cylinder',              // 30. Meridian Cylinder
+      'sculpture_nested_shell',// 31. Octahedron inside Cube Shell
+      'ring_elliptical',       // 32. Tilted Elliptical Ring
+      'cone',                  // 33. Radial Cone
+      'math_sum',              // 34. Summation Symbol ∑
+      'spiral_helix',          // 35. Archimedean Helix Spiral
+      'cube_wire',             // 36. Golden Cage Frame Cube
+      'math_pyth',             // 37. Pythagorean Theorem a²+b²=c²
+      'prism_tri',             // 38. Triangular Prism
+      'math_integral',         // 39. Calculus Integral Symbol ∫
+      'pyramid_truncated',     // 40. Truncated Obelisk
+      'grid3d',                // 41. 3D Perspective Grid
     ];
 
     const getEntityCountForTier = (tier: PerformanceTier): number => {
@@ -569,98 +620,146 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         case 'LOW':
           return 7;
         case 'MEDIUM':
-          return 10;
+          return 11;
         case 'HIGH':
-          return 14;
+          return 16;
       }
     };
 
     let targetEntityCount = getEntityCountForTier(currentTier);
 
-    const resetFlyingEntity = (ent: FlyingEntity3D, index: number) => {
-      // Guaranteed distinct shape via sequence indexing (0 repetition)
-      const archetype = shapeSequence[index % shapeSequence.length];
-      ent.archetype = archetype;
+    // English word and letter pools
+    const ENGLISH_WORDS = ['LEARN', 'THINK', 'GROW', 'ENGLISH'];
+    const ENGLISH_LETTERS = ['A', 'B', 'C', 'X', 'Y', 'Z'];
 
+    // Layer assignments: 1 Foreground, 6 Midground, 5 Background, 4 Deep Background
+    const getDepthLayer = (index: number): DepthLayer => {
+      if (index === 0) return 'FOREGROUND';
+      if (index % 4 === 1 || index % 4 === 2) return 'MIDGROUND';
+      if (index % 4 === 3) return 'BACKGROUND';
+      return 'DEEP_BACKGROUND';
+    };
+
+    const resetFlyingEntity = (ent: FlyingEntity3D, index: number) => {
+      const archetype = masterShapeSequence[index % masterShapeSequence.length];
+      ent.archetype = archetype;
+      ent.depthLayer = getDepthLayer(index);
+
+      // Trajectory distribution across 8 distinct spatial corridors
       const pIndex = index % 8;
       if (pIndex === 0) {
+        // Left -> Right diagonal drift
         ent.baseX = -width * 0.12 - Math.random() * 80;
-        ent.baseY = height * (0.05 + Math.random() * 0.25);
-        ent.baseZ = 420 + Math.random() * 180;
+        ent.baseY = height * (0.08 + Math.random() * 0.28);
+        ent.baseZ = ent.depthLayer === 'FOREGROUND' ? 160 : ent.depthLayer === 'MIDGROUND' ? 290 : 480;
         ent.vx = 0.32 + Math.random() * 0.18;
         ent.vy = 0.14 + Math.random() * 0.12;
-        ent.vz = -(0.12 + Math.random() * 0.14);
+        ent.vz = -(0.10 + Math.random() * 0.12);
       } else if (pIndex === 1) {
-        ent.baseX = width * (0.35 + Math.random() * 0.30);
+        // Top -> Bottom vertical drift
+        ent.baseX = width * (0.25 + Math.random() * 0.45);
         ent.baseY = -height * 0.12 - Math.random() * 60;
-        ent.baseZ = 320 + Math.random() * 200;
-        ent.vx = (Math.random() - 0.5) * 0.20;
+        ent.baseZ = ent.depthLayer === 'FOREGROUND' ? 180 : ent.depthLayer === 'MIDGROUND' ? 320 : 520;
+        ent.vx = (Math.random() - 0.5) * 0.18;
         ent.vy = 0.30 + Math.random() * 0.20;
         ent.vz = (Math.random() - 0.5) * 0.14;
       } else if (pIndex === 2) {
+        // Right -> Left diagonal downward drift
         ent.baseX = width * 1.12 + Math.random() * 80;
-        ent.baseY = height * (0.05 + Math.random() * 0.25);
-        ent.baseZ = 380 + Math.random() * 160;
+        ent.baseY = height * (0.08 + Math.random() * 0.28);
+        ent.baseZ = ent.depthLayer === 'FOREGROUND' ? 170 : ent.depthLayer === 'MIDGROUND' ? 310 : 500;
         ent.vx = -(0.32 + Math.random() * 0.18);
         ent.vy = 0.14 + Math.random() * 0.12;
-        ent.vz = -(0.10 + Math.random() * 0.14);
+        ent.vz = -(0.08 + Math.random() * 0.12);
       } else if (pIndex === 3) {
+        // Left -> Right horizontal glide
         ent.baseX = -width * 0.10 - Math.random() * 80;
         ent.baseY = height * (0.35 + Math.random() * 0.30);
-        ent.baseZ = 240 + Math.random() * 150;
-        ent.vx = 0.34 + Math.random() * 0.20;
+        ent.baseZ = ent.depthLayer === 'MIDGROUND' ? 260 : 440;
+        ent.vx = 0.35 + Math.random() * 0.18;
         ent.vy = (Math.random() - 0.5) * 0.12;
         ent.vz = 0.10 + Math.random() * 0.14;
       } else if (pIndex === 4) {
+        // Right -> Left horizontal glide
         ent.baseX = width * 1.10 + Math.random() * 80;
         ent.baseY = height * (0.35 + Math.random() * 0.30);
-        ent.baseZ = 220 + Math.random() * 160;
-        ent.vx = -(0.34 + Math.random() * 0.20);
+        ent.baseZ = ent.depthLayer === 'MIDGROUND' ? 250 : 450;
+        ent.vx = -(0.35 + Math.random() * 0.18);
         ent.vy = (Math.random() - 0.5) * 0.12;
-        ent.vz = 0.12 + Math.random() * 0.15;
+        ent.vz = 0.10 + Math.random() * 0.14;
       } else if (pIndex === 5) {
+        // Left -> Right upward diagonal drift
         ent.baseX = -width * 0.10 - Math.random() * 80;
-        ent.baseY = height * (0.75 + Math.random() * 0.25);
-        ent.baseZ = 300 + Math.random() * 160;
+        ent.baseY = height * (0.70 + Math.random() * 0.25);
+        ent.baseZ = ent.depthLayer === 'MIDGROUND' ? 300 : 540;
         ent.vx = 0.32 + Math.random() * 0.18;
         ent.vy = -(0.22 + Math.random() * 0.16);
         ent.vz = -(0.10 + Math.random() * 0.12);
       } else if (pIndex === 6) {
-        ent.baseX = width * (0.35 + Math.random() * 0.30);
+        // Bottom -> Top vertical drift
+        ent.baseX = width * (0.30 + Math.random() * 0.40);
         ent.baseY = height * 1.12 + Math.random() * 60;
-        ent.baseZ = 360 + Math.random() * 160;
+        ent.baseZ = ent.depthLayer === 'MIDGROUND' ? 340 : 580;
         ent.vx = (Math.random() - 0.5) * 0.18;
         ent.vy = -(0.28 + Math.random() * 0.18);
         ent.vz = (Math.random() - 0.5) * 0.12;
       } else {
+        // Right -> Left upward diagonal drift
         ent.baseX = width * 1.10 + Math.random() * 80;
-        ent.baseY = height * (0.75 + Math.random() * 0.25);
-        ent.baseZ = 260 + Math.random() * 150;
+        ent.baseY = height * (0.70 + Math.random() * 0.25);
+        ent.baseZ = ent.depthLayer === 'MIDGROUND' ? 280 : 510;
         ent.vx = -(0.32 + Math.random() * 0.18);
         ent.vy = -(0.22 + Math.random() * 0.16);
-        ent.vz = 0.10 + Math.random() * 0.15;
+        ent.vz = 0.10 + Math.random() * 0.14;
       }
 
       ent.x = ent.baseX;
       ent.y = ent.baseY;
       ent.z = ent.baseZ;
 
-      ent.curveAmpX = 25 + Math.random() * 30;
-      ent.curveAmpY = 20 + Math.random() * 25;
-      ent.curveAmpZ = 25 + Math.random() * 35;
-      ent.curveFreqX = 0.15 + Math.random() * 0.20;
-      ent.curveFreqY = 0.18 + Math.random() * 0.20;
-      ent.curveFreqZ = 0.12 + Math.random() * 0.18;
+      // 3D Harmonic Spline parameters
+      ent.curveAmpX = 22 + Math.random() * 26;
+      ent.curveAmpY = 18 + Math.random() * 24;
+      ent.curveAmpZ = 20 + Math.random() * 30;
+      ent.curveFreqX = 0.14 + Math.random() * 0.18;
+      ent.curveFreqY = 0.16 + Math.random() * 0.18;
+      ent.curveFreqZ = 0.12 + Math.random() * 0.16;
       ent.curvePhaseX = Math.random() * Math.PI * 2;
       ent.curvePhaseY = Math.random() * Math.PI * 2;
       ent.curvePhaseZ = Math.random() * Math.PI * 2;
 
+      // Compound 3D Rotation with varied axes
       ent.rotX = Math.random() * Math.PI * 2;
       ent.rotY = Math.random() * Math.PI * 2;
-      ent.rotZ = (Math.random() - 0.5) * 0.4;
-      ent.rotSpeedX = (Math.random() - 0.5) * 0.0006;
-      ent.rotSpeedY = (Math.random() - 0.5) * 0.0008;
-      ent.rotSpeedZ = (Math.random() - 0.5) * 0.0004;
+      ent.rotZ = (Math.random() - 0.5) * 0.5;
+
+      const rotProfile = index % 5;
+      if (rotProfile === 0) {
+        // Slow upright spin
+        ent.rotSpeedX = 0.0001;
+        ent.rotSpeedY = 0.0009 + Math.random() * 0.0005;
+        ent.rotSpeedZ = 0.0002;
+      } else if (rotProfile === 1) {
+        // Multi-axis compound tumble
+        ent.rotSpeedX = (Math.random() - 0.5) * 0.0007;
+        ent.rotSpeedY = (Math.random() - 0.5) * 0.0009;
+        ent.rotSpeedZ = (Math.random() - 0.5) * 0.0005;
+      } else if (rotProfile === 2) {
+        // Slow elegant tilt
+        ent.rotSpeedX = 0.0004;
+        ent.rotSpeedY = 0.0002;
+        ent.rotSpeedZ = (Math.random() - 0.5) * 0.0003;
+      } else if (rotProfile === 3) {
+        // Stationary with subtle breathing wobble
+        ent.rotSpeedX = 0.0001;
+        ent.rotSpeedY = 0.0001;
+        ent.rotSpeedZ = 0.0001;
+      } else {
+        // Moderate helical roll
+        ent.rotSpeedX = 0.0005;
+        ent.rotSpeedY = 0.0007;
+        ent.rotSpeedZ = 0.0004;
+      }
 
       ent.physicsState = 'AUTONOMOUS';
       ent.mass = 1.2;
@@ -673,10 +772,23 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       ent.throwRotVy = 0;
       ent.throwRotVz = 0;
 
-      ent.baseSize = 32;
-      ent.baseOpacity = 0.28;
+      // Base sizes and opacities calibrated by depth layer
+      if (ent.depthLayer === 'FOREGROUND') {
+        ent.baseSize = 40;
+        ent.baseOpacity = 0.36;
+      } else if (ent.depthLayer === 'MIDGROUND') {
+        ent.baseSize = 32;
+        ent.baseOpacity = 0.28;
+      } else if (ent.depthLayer === 'BACKGROUND') {
+        ent.baseSize = 24;
+        ent.baseOpacity = 0.18;
+      } else {
+        ent.baseSize = 18;
+        ent.baseOpacity = 0.12;
+      }
+
       ent.age = 0;
-      ent.lifetime = 22 + Math.random() * 16;
+      ent.lifetime = 24 + Math.random() * 16;
       ent.hoverProgress = 0;
       ent.grabProgress = 0;
       ent.proxBoost = 0;
@@ -685,17 +797,19 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       ent.title = undefined;
       ent.text = undefined;
       ent.formula = undefined;
+      ent.subText = undefined;
       ent.bookWidth = undefined;
       ent.bookHeight = undefined;
       ent.bookThickness = undefined;
       ent.coverColor = undefined;
       ent.spineColor = undefined;
 
+      // Archetype-specific customization
       if (archetype === 'book_math') {
         ent.title = 'MATEMATIKA';
-        ent.baseSize = 10;
-        ent.baseOpacity = 0.32;
-        ent.mass = 1.9;
+        ent.baseSize = 12;
+        ent.baseOpacity = 0.34;
+        ent.mass = 2.0;
         ent.bookWidth = 68;
         ent.bookHeight = 90;
         ent.bookThickness = 16;
@@ -703,9 +817,9 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         ent.spineColor = '#6B1422';
       } else if (archetype === 'book_english') {
         ent.title = 'ENGLISH';
-        ent.baseSize = 10;
-        ent.baseOpacity = 0.32;
-        ent.mass = 1.9;
+        ent.baseSize = 12;
+        ent.baseOpacity = 0.34;
+        ent.mass = 2.0;
         ent.bookWidth = 66;
         ent.bookHeight = 88;
         ent.bookThickness = 15;
@@ -713,82 +827,46 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         ent.spineColor = '#1C273C';
       } else if (archetype === 'parabola') {
         ent.formula = 'y = x²';
-        ent.baseSize = 30;
-        ent.baseOpacity = 0.30;
+        ent.baseSize = 32;
       } else if (archetype === 'sinewave') {
         ent.formula = 'y = sin(x)';
         ent.baseSize = 34;
-        ent.baseOpacity = 0.28;
       } else if (archetype === 'cosinewave') {
         ent.formula = 'y = cos(x)';
         ent.baseSize = 34;
-        ent.baseOpacity = 0.28;
-      } else if (archetype === 'sphere') {
+      } else if (archetype === 'coord_axes') {
         ent.baseSize = 30;
-        ent.baseOpacity = 0.26;
-      } else if (archetype === 'torus') {
-        ent.baseSize = 28;
-        ent.baseOpacity = 0.25;
-      } else if (archetype === 'nested_rings') {
-        ent.baseSize = 32;
-        ent.baseOpacity = 0.26;
-      } else if (archetype === 'cube') {
-        ent.baseSize = 34;
-        ent.baseOpacity = 0.26;
-      } else if (archetype === 'hollow_cube') {
-        ent.baseSize = 34;
-        ent.baseOpacity = 0.26;
-      } else if (archetype === 'pyramid') {
-        ent.baseSize = 32;
-        ent.baseOpacity = 0.26;
-      } else if (archetype === 'octahedron') {
-        ent.baseSize = 30;
-        ent.baseOpacity = 0.26;
-      } else if (archetype === 'cylinder') {
-        ent.baseSize = 28;
-        ent.baseOpacity = 0.24;
-      } else if (archetype === 'cone') {
-        ent.baseSize = 28;
-        ent.baseOpacity = 0.24;
-      } else if (archetype === 'prism') {
-        ent.baseSize = 30;
-        ent.baseOpacity = 0.24;
-      } else if (archetype === 'spiral') {
-        ent.baseSize = 24;
-        ent.baseOpacity = 0.22;
-      } else if (archetype === 'grid3d') {
-        ent.baseSize = 40;
-        ent.baseOpacity = 0.22;
       } else if (archetype === 'math_pi') {
         ent.text = 'π';
-        ent.baseSize = 36;
-        ent.baseOpacity = 0.18;
-      } else if (archetype === 'math_inf') {
-        ent.text = '∞';
-        ent.baseSize = 22;
-        ent.baseOpacity = 0.22;
+        ent.baseSize = 38;
+      } else if (archetype === 'math_sum') {
+        ent.text = '∑';
+        ent.baseSize = 34;
       } else if (archetype === 'math_sqrt') {
         ent.text = '√x';
-        ent.baseSize = 22;
-        ent.baseOpacity = 0.24;
+        ent.baseSize = 24;
+      } else if (archetype === 'math_inf') {
+        ent.text = '∞';
+        ent.baseSize = 24;
       } else if (archetype === 'math_pyth') {
         ent.text = 'a² + b² = c²';
         ent.baseSize = 16;
-        ent.baseOpacity = 0.22;
-      } else if (archetype === 'eng_abc') {
-        ent.text = 'ABC';
-        ent.baseSize = 18;
-        ent.baseOpacity = 0.24;
-      } else if (archetype === 'eng_aa') {
-        ent.text = 'Aa';
-        ent.baseSize = 20;
-        ent.baseOpacity = 0.24;
+      } else if (archetype === 'math_integral') {
+        ent.text = '∫';
+        ent.baseSize = 36;
+      } else if (archetype === 'eng_words') {
+        ent.text = ENGLISH_WORDS[index % ENGLISH_WORDS.length];
+        ent.baseSize = 16;
+      } else if (archetype === 'eng_letters') {
+        ent.text = ENGLISH_LETTERS[index % ENGLISH_LETTERS.length];
+        ent.baseSize = 26;
       }
     };
 
     const createEmptyFlyingEntity = (id: string): FlyingEntity3D => ({
       id,
-      archetype: 'cube',
+      archetype: 'ring_thin',
+      depthLayer: 'MIDGROUND',
       x: 0,
       y: 0,
       z: 300,
@@ -838,7 +916,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
     });
 
     // Maximum pool size allocated upfront (Zero array re-allocations at runtime)
-    const MAX_ENTITIES = 14;
+    const MAX_ENTITIES = 16;
     const flyingEntities: FlyingEntity3D[] = [];
     for (let i = 0; i < MAX_ENTITIES; i++) {
       const ent = createEmptyFlyingEntity(`entity-${i}`);
@@ -941,7 +1019,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         const dy = clientY - ent.projY;
         const dist = Math.sqrt(dx * dx + dy * dy);
         const hitRadius = Math.max(
-          isMobile ? 48 : 36,
+          isMobile ? 50 : 38,
           ent.baseSize * ent.projScale * 1.6,
           (ent.bookWidth || 0) * ent.projScale * 0.85,
           (ent.bookHeight || 0) * ent.projScale * 0.85
@@ -986,7 +1064,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         const dy = clientY - ent.projY;
         const dist = Math.sqrt(dx * dx + dy * dy);
         const hitRadius = Math.max(
-          isMobile ? 50 : 38,
+          isMobile ? 52 : 40,
           ent.baseSize * ent.projScale * 1.6,
           (ent.bookWidth || 0) * ent.projScale * 0.85,
           (ent.bookHeight || 0) * ent.projScale * 0.85
@@ -1119,9 +1197,9 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         case 'ULTRA_LOW':
           return 0;
         case 'LOW':
-          return 8;
+          return 10;
         case 'MEDIUM':
-          return 18;
+          return 20;
         case 'HIGH':
           return 35;
       }
@@ -1509,7 +1587,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         );
       }
 
-      // Sort depth indices (furthest to nearest)
+      // Depth sorting from furthest to nearest
       flyingEntities.slice(0, activeCount).sort((a, b) => b.z - a.z);
 
       // Render all active entities
@@ -1592,7 +1670,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           const openAngle = (obj.hoverProgress + obj.grabProgress) * 0.08;
           ctx.rotate(rz + openAngle);
 
-          // Subtle shadow in medium/high tier
           if (currentTier !== 'ULTRA_LOW' || obj.grabProgress > 0.1) {
             const shadowOffset = 2 + obj.grabProgress * 3;
             ctx.beginPath();
@@ -1633,7 +1710,630 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         }
 
         // ---------------------------------------------------------------------
-        // 2. PARABOLA (y = x²)
+        // 2. RINGS & LOOPS (Thin, Nested, Broken, Elliptical, Twisted, Helix, Torus)
+        // ---------------------------------------------------------------------
+        else if (obj.archetype === 'ring_thin') {
+          const R = obj.baseSize * obj.projScale * 0.55;
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, R, R * Math.abs(Math.cos(rx)), rz, 0, Math.PI * 2);
+          ctx.stroke();
+
+          if (currentTier !== 'ULTRA_LOW') {
+            ctx.strokeStyle = colors.highlight;
+            ctx.lineWidth = 0.7;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, R * 0.92, R * 0.92 * Math.abs(Math.cos(rx)), rz, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+        }
+
+        else if (obj.archetype === 'ring_nested') {
+          const r1 = obj.baseSize * obj.projScale * 0.55;
+          const r2 = r1 * 0.72;
+          ctx.lineWidth = 1.1;
+
+          // Outer ring
+          ctx.strokeStyle = colors.stroke;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, r1, r1 * Math.abs(Math.cos(rx)), rz, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Inner ring at tilted angle
+          ctx.strokeStyle = colors.highlight;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, r2, r2 * Math.abs(Math.sin(ry)), rz + 0.8, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        else if (obj.archetype === 'ring_broken') {
+          const R = obj.baseSize * obj.projScale * 0.52;
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, R, R * Math.abs(Math.cos(rx)), rz, 0.25 * Math.PI, 1.85 * Math.PI);
+          ctx.stroke();
+
+          // Glowing tip nodes
+          ctx.fillStyle = colors.highlight;
+          rotate3D(Math.cos(0.25 * Math.PI) * R, Math.sin(0.25 * Math.PI) * R, 0, rx, ry, rz);
+          ctx.beginPath();
+          ctx.arc(rotBuf.x, rotBuf.y, 1.6, 0, Math.PI * 2);
+          ctx.fill();
+
+          rotate3D(Math.cos(1.85 * Math.PI) * R, Math.sin(1.85 * Math.PI) * R, 0, rx, ry, rz);
+          ctx.beginPath();
+          ctx.arc(rotBuf.x, rotBuf.y, 1.6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        else if (obj.archetype === 'ring_elliptical') {
+          const a = obj.baseSize * obj.projScale * 0.60;
+          const b = a * 0.55;
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, a, b * Math.abs(Math.cos(rx)), rz + 0.4, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        else if (obj.archetype === 'ring_twisted') {
+          // 3D Mobius / Torsion Ribbon
+          const R = obj.baseSize * obj.projScale * 0.50;
+          const w = R * 0.22;
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 1.0;
+          ctx.beginPath();
+
+          const segs = currentTier === 'ULTRA_LOW' || currentTier === 'LOW' ? 12 : 20;
+          for (let step = 0; step <= segs; step++) {
+            const u = (step / segs) * Math.PI * 2;
+            const px = Math.cos(u) * (R + w * Math.cos(u / 2));
+            const py = Math.sin(u) * (R + w * Math.cos(u / 2));
+            const pz = w * Math.sin(u / 2);
+            rotate3D(px, py, pz, rx, ry, rz);
+            if (step === 0) ctx.moveTo(rotBuf.x, rotBuf.y);
+            else ctx.lineTo(rotBuf.x, rotBuf.y);
+          }
+          ctx.stroke();
+        }
+
+        else if (obj.archetype === 'ring_double_helix') {
+          const R = obj.baseSize * obj.projScale * 0.48;
+          const rH = R * 0.24;
+          ctx.lineWidth = 1.0;
+
+          const segs = currentTier === 'ULTRA_LOW' || currentTier === 'LOW' ? 14 : 22;
+          // Strand 1
+          ctx.strokeStyle = colors.stroke;
+          ctx.beginPath();
+          for (let step = 0; step <= segs; step++) {
+            const u = (step / segs) * Math.PI * 2;
+            const px = Math.cos(u) * R + Math.cos(u * 4) * rH;
+            const py = Math.sin(u) * R + Math.sin(u * 4) * rH;
+            const pz = Math.cos(u * 4) * rH;
+            rotate3D(px, py, pz, rx, ry, rz);
+            if (step === 0) ctx.moveTo(rotBuf.x, rotBuf.y);
+            else ctx.lineTo(rotBuf.x, rotBuf.y);
+          }
+          ctx.stroke();
+
+          // Strand 2
+          ctx.strokeStyle = colors.highlight;
+          ctx.beginPath();
+          for (let step = 0; step <= segs; step++) {
+            const u = (step / segs) * Math.PI * 2;
+            const px = Math.cos(u) * R - Math.cos(u * 4) * rH;
+            const py = Math.sin(u) * R - Math.sin(u * 4) * rH;
+            const pz = -Math.cos(u * 4) * rH;
+            rotate3D(px, py, pz, rx, ry, rz);
+            if (step === 0) ctx.moveTo(rotBuf.x, rotBuf.y);
+            else ctx.lineTo(rotBuf.x, rotBuf.y);
+          }
+          ctx.stroke();
+        }
+
+        else if (obj.archetype === 'torus') {
+          const R = obj.baseSize * obj.projScale * 0.50;
+          const r = R * 0.35;
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 1.1;
+
+          const segments = currentTier === 'ULTRA_LOW' || currentTier === 'LOW' ? 10 : 16;
+          for (let j = 0; j < segments; j += 2) {
+            const u = (j / segments) * Math.PI * 2;
+            const cx = Math.cos(u) * R;
+            const cy = Math.sin(u) * R;
+            ctx.beginPath();
+            for (let k = 0; k <= 8; k++) {
+              const v = (k / 8) * Math.PI * 2;
+              const px = cx + Math.cos(u) * Math.cos(v) * r;
+              const py = cy + Math.sin(u) * Math.cos(v) * r;
+              const pz = Math.sin(v) * r;
+              rotate3D(px, py, pz, rx, ry, rz);
+              if (k === 0) ctx.moveTo(rotBuf.x, rotBuf.y);
+              else ctx.lineTo(rotBuf.x, rotBuf.y);
+            }
+            ctx.stroke();
+          }
+        }
+
+        // ---------------------------------------------------------------------
+        // 3. ABSTRACT 3D MATHEMATICAL SCULPTURES (Knot, Saddle, Wave, Interlocking, Nested Shell)
+        // ---------------------------------------------------------------------
+        else if (obj.archetype === 'sculpture_knot') {
+          // 3D Trefoil Knot
+          const s = obj.baseSize * obj.projScale * 0.38;
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+
+          const segs = currentTier === 'ULTRA_LOW' || currentTier === 'LOW' ? 24 : 40;
+          for (let step = 0; step <= segs; step++) {
+            const t = (step / segs) * Math.PI * 2;
+            const px = (Math.sin(t) + 2 * Math.sin(2 * t)) * s;
+            const py = (Math.cos(t) - 2 * Math.cos(2 * t)) * s;
+            const pz = -Math.sin(3 * t) * s * 1.2;
+            rotate3D(px, py, pz, rx, ry, rz);
+            if (step === 0) ctx.moveTo(rotBuf.x, rotBuf.y);
+            else ctx.lineTo(rotBuf.x, rotBuf.y);
+          }
+          ctx.stroke();
+        }
+
+        else if (obj.archetype === 'sculpture_saddle') {
+          // Hyperbolic Paraboloid Saddle z = (x² - y²)/scale
+          const s = obj.baseSize * obj.projScale * 0.46;
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 0.9;
+
+          const steps = currentTier === 'ULTRA_LOW' || currentTier === 'LOW' ? 4 : 6;
+          for (let u = -steps; u <= steps; u += 2) {
+            const px = (u / steps) * s;
+            ctx.beginPath();
+            for (let v = -steps; v <= steps; v++) {
+              const py = (v / steps) * s;
+              const pz = (px * px - py * py) / (s * 0.9);
+              rotate3D(px, py, pz, rx, ry, rz);
+              if (v === -steps) ctx.moveTo(rotBuf.x, rotBuf.y);
+              else ctx.lineTo(rotBuf.x, rotBuf.y);
+            }
+            ctx.stroke();
+          }
+        }
+
+        else if (obj.archetype === 'sculpture_wave') {
+          // 3D Multi-rib Harmonic Wave Sculpture
+          const s = obj.baseSize * obj.projScale * 0.50;
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 1.0;
+
+          const ribs = currentTier === 'ULTRA_LOW' || currentTier === 'LOW' ? 3 : 5;
+          for (let r = -ribs; r <= ribs; r += 2) {
+            const py = (r / ribs) * s * 0.7;
+            ctx.beginPath();
+            for (let xStep = -6; xStep <= 6; xStep++) {
+              const px = (xStep / 6) * s;
+              const pz = Math.sin(px * 0.12 + r * 0.5) * 14 * (s / 32);
+              rotate3D(px, py, pz, rx, ry, rz);
+              if (xStep === -6) ctx.moveTo(rotBuf.x, rotBuf.y);
+              else ctx.lineTo(rotBuf.x, rotBuf.y);
+            }
+            ctx.stroke();
+          }
+        }
+
+        else if (obj.archetype === 'sculpture_interlocking') {
+          // Two interlocking 3D rings linked through each other
+          const R = obj.baseSize * obj.projScale * 0.42;
+          ctx.lineWidth = 1.1;
+
+          // Ring 1 (tilted on X/Y)
+          ctx.strokeStyle = colors.stroke;
+          ctx.beginPath();
+          for (let step = 0; step <= 16; step++) {
+            const u = (step / 16) * Math.PI * 2;
+            const px = Math.cos(u) * R - R * 0.35;
+            const py = Math.sin(u) * R;
+            const pz = 0;
+            rotate3D(px, py, pz, rx, ry, rz);
+            if (step === 0) ctx.moveTo(rotBuf.x, rotBuf.y);
+            else ctx.lineTo(rotBuf.x, rotBuf.y);
+          }
+          ctx.stroke();
+
+          // Ring 2 (linked orthogonally on Y/Z)
+          ctx.strokeStyle = colors.highlight;
+          ctx.beginPath();
+          for (let step = 0; step <= 16; step++) {
+            const u = (step / 16) * Math.PI * 2;
+            const px = 0;
+            const py = Math.sin(u) * R;
+            const pz = Math.cos(u) * R - R * 0.35;
+            rotate3D(px, py, pz, rx, ry, rz);
+            if (step === 0) ctx.moveTo(rotBuf.x, rotBuf.y);
+            else ctx.lineTo(rotBuf.x, rotBuf.y);
+          }
+          ctx.stroke();
+        }
+
+        else if (obj.archetype === 'sculpture_nested_shell') {
+          // Octahedron shell enclosed inside a cube frame
+          const s = obj.baseSize * obj.projScale * 0.44;
+          const vertsCube = [
+            [-s, -s, -s], [s, -s, -s], [s, s, -s], [-s, s, -s],
+            [-s, -s, s], [s, -s, s], [s, s, s], [-s, s, s],
+          ];
+          const edgesCube = [
+            [0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],
+            [0,4],[1,5],[2,6],[3,7]
+          ];
+          ctx.strokeStyle = colors.fill;
+          ctx.lineWidth = 0.8;
+          ctx.beginPath();
+          for (let e = 0; e < edgesCube.length; e++) {
+            const [v1, v2] = edgesCube[e];
+            rotate3D(vertsCube[v1][0], vertsCube[v1][1], vertsCube[v1][2], rx, ry, rz);
+            ctx.moveTo(rotBuf.x, rotBuf.y);
+            rotate3D(vertsCube[v2][0], vertsCube[v2][1], vertsCube[v2][2], rx, ry, rz);
+            ctx.lineTo(rotBuf.x, rotBuf.y);
+          }
+          ctx.stroke();
+
+          // Inner Golden Octahedron
+          const so = s * 0.75;
+          const vertsOct = [
+            [0, -so, 0], [0, so, 0],
+            [-so, 0, 0], [so, 0, 0], [0, 0, -so], [0, 0, so]
+          ];
+          const edgesOct = [
+            [0,2],[0,3],[0,4],[0,5],
+            [1,2],[1,3],[1,4],[1,5],
+            [2,4],[4,3],[3,5],[5,2]
+          ];
+          ctx.strokeStyle = colors.highlight;
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          for (let e = 0; e < edgesOct.length; e++) {
+            const [v1, v2] = edgesOct[e];
+            rotate3D(vertsOct[v1][0], vertsOct[v1][1], vertsOct[v1][2], rx, ry, rz);
+            ctx.moveTo(rotBuf.x, rotBuf.y);
+            rotate3D(vertsOct[v2][0], vertsOct[v2][1], vertsOct[v2][2], rx, ry, rz);
+            ctx.lineTo(rotBuf.x, rotBuf.y);
+          }
+          ctx.stroke();
+        }
+
+        // ---------------------------------------------------------------------
+        // 4. CUBE & FRAME SYSTEM (Beveled, Nested, Golden Cage Wire)
+        // ---------------------------------------------------------------------
+        else if (obj.archetype === 'cube_beveled' || obj.archetype === 'cube_nested' || obj.archetype === 'cube_wire') {
+          const s = obj.baseSize * obj.projScale * 0.45;
+          const verts = [
+            [-s, -s, -s], [s, -s, -s], [s, s, -s], [-s, s, -s],
+            [-s, -s, s], [s, -s, s], [s, s, s], [-s, s, s],
+          ];
+          const edges = [
+            [0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],
+            [0,4],[1,5],[2,6],[3,7]
+          ];
+
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          for (let e = 0; e < edges.length; e++) {
+            const [v1, v2] = edges[e];
+            rotate3D(verts[v1][0], verts[v1][1], verts[v1][2], rx, ry, rz);
+            ctx.moveTo(rotBuf.x, rotBuf.y);
+            rotate3D(verts[v2][0], verts[v2][1], verts[v2][2], rx, ry, rz);
+            ctx.lineTo(rotBuf.x, rotBuf.y);
+          }
+          ctx.stroke();
+
+          // If nested: inner diamond cube rotated 45 deg
+          if (obj.archetype === 'cube_nested' && currentTier !== 'ULTRA_LOW') {
+            const si = s * 0.52;
+            const innerVerts = [
+              [-si, -si, -si], [si, -si, -si], [si, si, -si], [-si, si, -si],
+              [-si, -si, si], [si, -si, si], [si, si, si], [-si, si, si],
+            ];
+            ctx.strokeStyle = colors.highlight;
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            for (let e = 0; e < edges.length; e++) {
+              const [v1, v2] = edges[e];
+              rotate3D(innerVerts[v1][0], innerVerts[v1][1], innerVerts[v1][2], rx + 0.4, ry + 0.4, rz);
+              ctx.moveTo(rotBuf.x, rotBuf.y);
+              rotate3D(innerVerts[v2][0], innerVerts[v2][1], innerVerts[v2][2], rx + 0.4, ry + 0.4, rz);
+              ctx.lineTo(rotBuf.x, rotBuf.y);
+            }
+            ctx.stroke();
+          }
+
+          // If cage wire: glowing vertex corner nodes
+          if (obj.archetype === 'cube_wire') {
+            ctx.fillStyle = colors.highlight;
+            for (let v = 0; v < verts.length; v++) {
+              rotate3D(verts[v][0], verts[v][1], verts[v][2], rx, ry, rz);
+              ctx.beginPath();
+              ctx.arc(rotBuf.x, rotBuf.y, 1.8, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+        }
+
+        // ---------------------------------------------------------------------
+        // 5. GEOMETRIC POLYHEDRA & SOLIDS (Sphere, Octahedron, Dodecahedron, Pyramids, Prisms, Cylinder, Cone)
+        // ---------------------------------------------------------------------
+        else if (obj.archetype === 'sphere') {
+          const r = obj.baseSize * obj.projScale * 0.45;
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 1.0;
+
+          // Main silhouette
+          ctx.beginPath();
+          ctx.arc(0, 0, r, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Horizontal equator ellipse
+          ctx.beginPath();
+          rotate3D(0, 0, 0, rx, ry, rz);
+          ctx.ellipse(0, 0, r, r * Math.abs(Math.cos(rx)), rz, 0, Math.PI * 2);
+          ctx.strokeStyle = colors.fill;
+          ctx.stroke();
+
+          // Vertical meridian ellipse
+          if (currentTier !== 'ULTRA_LOW') {
+            ctx.beginPath();
+            ctx.ellipse(0, 0, r * Math.abs(Math.cos(ry)), r, rz, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+        }
+
+        else if (obj.archetype === 'octahedron') {
+          const s = obj.baseSize * obj.projScale * 0.50;
+          const verts = [
+            [0, -s * 1.2, 0], [0, s * 1.2, 0],
+            [-s, 0, -s], [s, 0, -s], [s, 0, s], [-s, 0, s]
+          ];
+          const edges = [
+            [0,2],[0,3],[0,4],[0,5],
+            [1,2],[1,3],[1,4],[1,5],
+            [2,3],[3,4],[4,5],[5,2]
+          ];
+
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          for (let e = 0; e < edges.length; e++) {
+            const [v1, v2] = edges[e];
+            rotate3D(verts[v1][0], verts[v1][1], verts[v1][2], rx, ry, rz);
+            ctx.moveTo(rotBuf.x, rotBuf.y);
+            rotate3D(verts[v2][0], verts[v2][1], verts[v2][2], rx, ry, rz);
+            ctx.lineTo(rotBuf.x, rotBuf.y);
+          }
+          ctx.stroke();
+        }
+
+        else if (obj.archetype === 'dodecahedron') {
+          // 12-sided faceted geometric polyhedron
+          const s = obj.baseSize * obj.projScale * 0.42;
+          const phi = (1 + Math.sqrt(5)) / 2;
+          const a = s / phi;
+          const b = s * phi;
+          const verts = [
+            [-s, -s, -s], [s, -s, -s], [s, s, -s], [-s, s, -s],
+            [-s, -s, s], [s, -s, s], [s, s, s], [-s, s, s],
+            [0, -a, -b], [0, a, -b], [0, -a, b], [0, a, b],
+            [-a, -b, 0], [a, -b, 0], [-a, b, 0], [a, b, 0],
+            [-b, 0, -a], [b, 0, -a], [-b, 0, a], [b, 0, a]
+          ];
+          const edges = [
+            [0,8],[8,1],[1,17],[17,2],[2,9],[9,0],
+            [4,10],[10,5],[5,19],[19,6],[6,11],[11,4],
+            [12,13],[14,15],[16,18],[17,19]
+          ];
+
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 1.0;
+          ctx.beginPath();
+          for (let e = 0; e < edges.length; e++) {
+            const [v1, v2] = edges[e];
+            rotate3D(verts[v1][0], verts[v1][1], verts[v1][2], rx, ry, rz);
+            ctx.moveTo(rotBuf.x, rotBuf.y);
+            rotate3D(verts[v2][0], verts[v2][1], verts[v2][2], rx, ry, rz);
+            ctx.lineTo(rotBuf.x, rotBuf.y);
+          }
+          ctx.stroke();
+        }
+
+        else if (obj.archetype === 'pyramid') {
+          const s = obj.baseSize * obj.projScale * 0.55;
+          const verts = [
+            [0, -s * 1.1, 0],
+            [-s, s * 0.8, -s * 0.7],
+            [s, s * 0.8, -s * 0.7],
+            [0, s * 0.8, s * 0.9],
+          ];
+          const edges = [
+            [0,1],[0,2],[0,3],[1,2],[2,3],[3,1]
+          ];
+
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          for (let e = 0; e < edges.length; e++) {
+            const [v1, v2] = edges[e];
+            rotate3D(verts[v1][0], verts[v1][1], verts[v1][2], rx, ry, rz);
+            ctx.moveTo(rotBuf.x, rotBuf.y);
+            rotate3D(verts[v2][0], verts[v2][1], verts[v2][2], rx, ry, rz);
+            ctx.lineTo(rotBuf.x, rotBuf.y);
+          }
+          ctx.stroke();
+        }
+
+        else if (obj.archetype === 'pyramid_truncated') {
+          // Truncated Pyramid Obelisk
+          const sBottom = obj.baseSize * obj.projScale * 0.50;
+          const sTop = sBottom * 0.45;
+          const h = sBottom * 1.0;
+          const verts = [
+            [-sTop, -h, -sTop], [sTop, -h, -sTop], [sTop, -h, sTop], [-sTop, -h, sTop],
+            [-sBottom, h, -sBottom], [sBottom, h, -sBottom], [sBottom, h, sBottom], [-sBottom, h, sBottom],
+          ];
+          const edges = [
+            [0,1],[1,2],[2,3],[3,0],
+            [4,5],[5,6],[6,7],[7,4],
+            [0,4],[1,5],[2,6],[3,7]
+          ];
+
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          for (let e = 0; e < edges.length; e++) {
+            const [v1, v2] = edges[e];
+            rotate3D(verts[v1][0], verts[v1][1], verts[v1][2], rx, ry, rz);
+            ctx.moveTo(rotBuf.x, rotBuf.y);
+            rotate3D(verts[v2][0], verts[v2][1], verts[v2][2], rx, ry, rz);
+            ctx.lineTo(rotBuf.x, rotBuf.y);
+          }
+          ctx.stroke();
+        }
+
+        else if (obj.archetype === 'prism_hex') {
+          const r = obj.baseSize * obj.projScale * 0.45;
+          const h = r * 1.1;
+          const topVerts: Point3D[] = [];
+          const botVerts: Point3D[] = [];
+          for (let k = 0; k < 6; k++) {
+            const angle = (k / 6) * Math.PI * 2;
+            topVerts.push({ x: Math.cos(angle) * r, y: -h, z: Math.sin(angle) * r });
+            botVerts.push({ x: Math.cos(angle) * r, y: h, z: Math.sin(angle) * r });
+          }
+
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 1.1;
+
+          // Top hexagon
+          ctx.beginPath();
+          for (let k = 0; k < 6; k++) {
+            rotate3D(topVerts[k].x, topVerts[k].y, topVerts[k].z, rx, ry, rz);
+            if (k === 0) ctx.moveTo(rotBuf.x, rotBuf.y);
+            else ctx.lineTo(rotBuf.x, rotBuf.y);
+          }
+          ctx.closePath();
+          ctx.stroke();
+
+          // Bottom hexagon
+          ctx.beginPath();
+          for (let k = 0; k < 6; k++) {
+            rotate3D(botVerts[k].x, botVerts[k].y, botVerts[k].z, rx, ry, rz);
+            if (k === 0) ctx.moveTo(rotBuf.x, rotBuf.y);
+            else ctx.lineTo(rotBuf.x, rotBuf.y);
+          }
+          ctx.closePath();
+          ctx.stroke();
+
+          // Pillars
+          ctx.beginPath();
+          for (let k = 0; k < 6; k++) {
+            rotate3D(topVerts[k].x, topVerts[k].y, topVerts[k].z, rx, ry, rz);
+            ctx.moveTo(rotBuf.x, rotBuf.y);
+            rotate3D(botVerts[k].x, botVerts[k].y, botVerts[k].z, rx, ry, rz);
+            ctx.lineTo(rotBuf.x, rotBuf.y);
+          }
+          ctx.stroke();
+        }
+
+        else if (obj.archetype === 'prism_tri') {
+          const s = obj.baseSize * obj.projScale * 0.48;
+          const h = s * 0.9;
+          const verts = [
+            [-s, -h, -s * 0.6], [s, -h, -s * 0.6], [0, -h, s],
+            [-s, h, -s * 0.6], [s, h, -s * 0.6], [0, h, s],
+          ];
+          const edges = [
+            [0,1],[1,2],[2,0],
+            [3,4],[4,5],[5,3],
+            [0,3],[1,4],[2,5]
+          ];
+
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          for (let e = 0; e < edges.length; e++) {
+            const [v1, v2] = edges[e];
+            rotate3D(verts[v1][0], verts[v1][1], verts[v1][2], rx, ry, rz);
+            ctx.moveTo(rotBuf.x, rotBuf.y);
+            rotate3D(verts[v2][0], verts[v2][1], verts[v2][2], rx, ry, rz);
+            ctx.lineTo(rotBuf.x, rotBuf.y);
+          }
+          ctx.stroke();
+        }
+
+        else if (obj.archetype === 'cylinder') {
+          const r = obj.baseSize * obj.projScale * 0.35;
+          const h = r * 1.4;
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 1.1;
+
+          // Top ellipse
+          ctx.beginPath();
+          rotate3D(0, -h, 0, rx, ry, rz);
+          ctx.ellipse(rotBuf.x, rotBuf.y, r, r * Math.abs(Math.cos(rx)), rz, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Bottom ellipse
+          ctx.beginPath();
+          rotate3D(0, h, 0, rx, ry, rz);
+          ctx.ellipse(rotBuf.x, rotBuf.y, r, r * Math.abs(Math.cos(rx)), rz, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Vertical side edges
+          ctx.beginPath();
+          rotate3D(-r, -h, 0, rx, ry, rz);
+          ctx.moveTo(rotBuf.x, rotBuf.y);
+          rotate3D(-r, h, 0, rx, ry, rz);
+          ctx.lineTo(rotBuf.x, rotBuf.y);
+
+          rotate3D(r, -h, 0, rx, ry, rz);
+          ctx.moveTo(rotBuf.x, rotBuf.y);
+          rotate3D(r, h, 0, rx, ry, rz);
+          ctx.lineTo(rotBuf.x, rotBuf.y);
+          ctx.stroke();
+        }
+
+        else if (obj.archetype === 'cone') {
+          const r = obj.baseSize * obj.projScale * 0.40;
+          const h = r * 1.5;
+          ctx.strokeStyle = colors.stroke;
+          ctx.lineWidth = 1.1;
+
+          // Base ellipse
+          ctx.beginPath();
+          rotate3D(0, h * 0.5, 0, rx, ry, rz);
+          ctx.ellipse(rotBuf.x, rotBuf.y, r, r * Math.abs(Math.cos(rx)), rz, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Apex to base sides
+          rotate3D(0, -h * 0.8, 0, rx, ry, rz);
+          const apexX = rotBuf.x;
+          const apexY = rotBuf.y;
+
+          ctx.beginPath();
+          rotate3D(-r, h * 0.5, 0, rx, ry, rz);
+          ctx.moveTo(apexX, apexY);
+          ctx.lineTo(rotBuf.x, rotBuf.y);
+
+          rotate3D(r, h * 0.5, 0, rx, ry, rz);
+          ctx.moveTo(apexX, apexY);
+          ctx.lineTo(rotBuf.x, rotBuf.y);
+          ctx.stroke();
+        }
+
+        // ---------------------------------------------------------------------
+        // 6. MATHEMATICAL CURVES & 3D GRAPHS (Parabola, Sine/Cosine, Axes, Vectors, Spiral, Grid)
         // ---------------------------------------------------------------------
         else if (obj.archetype === 'parabola') {
           const s = obj.baseSize * obj.projScale;
@@ -1670,9 +2370,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           ctx.fillText('y = x²', 0, s * 0.7);
         }
 
-        // ---------------------------------------------------------------------
-        // 3. SINE & COSINE WAVES
-        // ---------------------------------------------------------------------
         else if (obj.archetype === 'sinewave' || obj.archetype === 'cosinewave') {
           const s = obj.baseSize * obj.projScale;
           const isCos = obj.archetype === 'cosinewave';
@@ -1694,292 +2391,87 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           ctx.fillText(isCos ? 'y = cos(x)' : 'y = sin(x)', 0, s * 0.7);
         }
 
-        // ---------------------------------------------------------------------
-        // 4. 3D SPHERE (Equator & Meridian Rings)
-        // ---------------------------------------------------------------------
-        else if (obj.archetype === 'sphere') {
-          const r = obj.baseSize * obj.projScale * 0.45;
-          ctx.strokeStyle = colors.stroke;
-          ctx.lineWidth = 1.0;
+        else if (obj.archetype === 'coord_axes') {
+          // 3D Coordinate Tripod X, Y, Z with Arrows
+          const s = obj.baseSize * obj.projScale * 0.8;
+          ctx.lineWidth = 1.2;
 
-          // Main silhouette
-          ctx.beginPath();
-          ctx.arc(0, 0, r, 0, Math.PI * 2);
-          ctx.stroke();
-
-          // Horizontal equator ellipse
-          ctx.beginPath();
-          rotate3D(0, 0, 0, rx, ry, rz);
-          ctx.ellipse(0, 0, r, r * Math.abs(Math.cos(rx)), rz, 0, Math.PI * 2);
-          ctx.strokeStyle = colors.fill;
-          ctx.stroke();
-
-          // Vertical meridian ellipse
-          if (currentTier !== 'ULTRA_LOW') {
-            ctx.beginPath();
-            ctx.ellipse(0, 0, r * Math.abs(Math.cos(ry)), r, rz, 0, Math.PI * 2);
-            ctx.stroke();
-          }
-        }
-
-        // ---------------------------------------------------------------------
-        // 5. 3D TORUS RING
-        // ---------------------------------------------------------------------
-        else if (obj.archetype === 'torus') {
-          const R = obj.baseSize * obj.projScale * 0.50;
-          const r = R * 0.35;
-          ctx.strokeStyle = colors.stroke;
-          ctx.lineWidth = 1.1;
-
-          const segments = currentTier === 'ULTRA_LOW' || currentTier === 'LOW' ? 10 : 16;
-          for (let j = 0; j < segments; j += 2) {
-            const u = (j / segments) * Math.PI * 2;
-            const cx = Math.cos(u) * R;
-            const cy = Math.sin(u) * R;
-            ctx.beginPath();
-            for (let k = 0; k <= 8; k++) {
-              const v = (k / 8) * Math.PI * 2;
-              const px = cx + Math.cos(u) * Math.cos(v) * r;
-              const py = cy + Math.sin(u) * Math.cos(v) * r;
-              const pz = Math.sin(v) * r;
-              rotate3D(px, py, pz, rx, ry, rz);
-              if (k === 0) ctx.moveTo(rotBuf.x, rotBuf.y);
-              else ctx.lineTo(rotBuf.x, rotBuf.y);
-            }
-            ctx.stroke();
-          }
-        }
-
-        // ---------------------------------------------------------------------
-        // 6. NESTED ORBITAL RINGS (Gyroscope)
-        // ---------------------------------------------------------------------
-        else if (obj.archetype === 'nested_rings') {
-          const r1 = obj.baseSize * obj.projScale * 0.55;
-          const r2 = r1 * 0.72;
-          ctx.lineWidth = 1.1;
-
-          // Outer ring
-          ctx.strokeStyle = colors.stroke;
-          ctx.beginPath();
-          ctx.ellipse(0, 0, r1, r1 * Math.abs(Math.cos(rx)), rz, 0, Math.PI * 2);
-          ctx.stroke();
-
-          // Inner ring at tilted angle
+          // X axis (Warm gold)
           ctx.strokeStyle = colors.highlight;
           ctx.beginPath();
-          ctx.ellipse(0, 0, r2, r2 * Math.abs(Math.sin(ry)), rz + 0.8, 0, Math.PI * 2);
+          rotate3D(0, 0, 0, rx, ry, rz);
+          ctx.moveTo(rotBuf.x, rotBuf.y);
+          rotate3D(s, 0, 0, rx, ry, rz);
+          ctx.lineTo(rotBuf.x, rotBuf.y);
           ctx.stroke();
-        }
 
-        // ---------------------------------------------------------------------
-        // 7. 3D ISOMETRIC CUBE & HOLLOW CUBE
-        // ---------------------------------------------------------------------
-        else if (obj.archetype === 'cube' || obj.archetype === 'hollow_cube') {
-          const s = obj.baseSize * obj.projScale * 0.45;
-          const verts = [
-            [-s, -s, -s], [s, -s, -s], [s, s, -s], [-s, s, -s],
-            [-s, -s, s], [s, -s, s], [s, s, s], [-s, s, s],
-          ];
-          const edges = [
-            [0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],
-            [0,4],[1,5],[2,6],[3,7]
-          ];
-
+          // Y axis (Stroke)
           ctx.strokeStyle = colors.stroke;
-          ctx.lineWidth = 1.1;
           ctx.beginPath();
-          for (let e = 0; e < edges.length; e++) {
-            const [v1, v2] = edges[e];
-            rotate3D(verts[v1][0], verts[v1][1], verts[v1][2], rx, ry, rz);
-            ctx.moveTo(rotBuf.x, rotBuf.y);
-            rotate3D(verts[v2][0], verts[v2][1], verts[v2][2], rx, ry, rz);
-            ctx.lineTo(rotBuf.x, rotBuf.y);
-          }
+          rotate3D(0, 0, 0, rx, ry, rz);
+          ctx.moveTo(rotBuf.x, rotBuf.y);
+          rotate3D(0, -s, 0, rx, ry, rz);
+          ctx.lineTo(rotBuf.x, rotBuf.y);
           ctx.stroke();
 
-          // Hollow inner cube
-          if (obj.archetype === 'hollow_cube' && currentTier !== 'ULTRA_LOW') {
-            const si = s * 0.5;
-            const innerVerts = [
-              [-si, -si, -si], [si, -si, -si], [si, si, -si], [-si, si, -si],
-              [-si, -si, si], [si, -si, si], [si, si, si], [-si, si, si],
-            ];
-            ctx.strokeStyle = colors.highlight;
-            ctx.lineWidth = 0.8;
-            ctx.beginPath();
-            for (let e = 0; e < edges.length; e++) {
-              const [v1, v2] = edges[e];
-              rotate3D(innerVerts[v1][0], innerVerts[v1][1], innerVerts[v1][2], rx, ry, rz);
-              ctx.moveTo(rotBuf.x, rotBuf.y);
-              rotate3D(innerVerts[v2][0], innerVerts[v2][1], innerVerts[v2][2], rx, ry, rz);
-              ctx.lineTo(rotBuf.x, rotBuf.y);
-            }
-            ctx.stroke();
-          }
-        }
-
-        // ---------------------------------------------------------------------
-        // 8. 3D PYRAMID (Tetrahedron)
-        // ---------------------------------------------------------------------
-        else if (obj.archetype === 'pyramid') {
-          const s = obj.baseSize * obj.projScale * 0.55;
-          const verts = [
-            [0, -s * 1.1, 0],
-            [-s, s * 0.8, -s * 0.7],
-            [s, s * 0.8, -s * 0.7],
-            [0, s * 0.8, s * 0.9],
-          ];
-          const edges = [
-            [0,1],[0,2],[0,3],[1,2],[2,3],[3,1]
-          ];
-
-          ctx.strokeStyle = colors.stroke;
-          ctx.lineWidth = 1.1;
+          // Z axis (Fill)
+          ctx.strokeStyle = colors.fill;
           ctx.beginPath();
-          for (let e = 0; e < edges.length; e++) {
-            const [v1, v2] = edges[e];
-            rotate3D(verts[v1][0], verts[v1][1], verts[v1][2], rx, ry, rz);
-            ctx.moveTo(rotBuf.x, rotBuf.y);
-            rotate3D(verts[v2][0], verts[v2][1], verts[v2][2], rx, ry, rz);
-            ctx.lineTo(rotBuf.x, rotBuf.y);
-          }
+          rotate3D(0, 0, 0, rx, ry, rz);
+          ctx.moveTo(rotBuf.x, rotBuf.y);
+          rotate3D(0, 0, s, rx, ry, rz);
+          ctx.lineTo(rotBuf.x, rotBuf.y);
           ctx.stroke();
+
+          // Labels
+          ctx.font = `bold ${Math.max(6, Math.floor(7 * obj.projScale))}px monospace`;
+          ctx.fillStyle = colors.highlight;
+          rotate3D(s * 1.15, 0, 0, rx, ry, rz);
+          ctx.fillText('X', rotBuf.x, rotBuf.y);
+          rotate3D(0, -s * 1.15, 0, rx, ry, rz);
+          ctx.fillText('Y', rotBuf.x, rotBuf.y);
         }
 
-        // ---------------------------------------------------------------------
-        // 9. 3D OCTAHEDRON (Diamond Polyhedron)
-        // ---------------------------------------------------------------------
-        else if (obj.archetype === 'octahedron') {
+        else if (obj.archetype === 'vector_field') {
+          // Clustered 3D Vector Arrows indicating velocity gradient
           const s = obj.baseSize * obj.projScale * 0.50;
-          const verts = [
-            [0, -s * 1.2, 0], // Top
-            [0, s * 1.2, 0],  // Bottom
-            [-s, 0, -s], [s, 0, -s], [s, 0, s], [-s, 0, s] // Middle 4
-          ];
-          const edges = [
-            [0,2],[0,3],[0,4],[0,5], // Top pyramid
-            [1,2],[1,3],[1,4],[1,5], // Bottom pyramid
-            [2,3],[3,4],[4,5],[5,2]  // Waist
-          ];
-
           ctx.strokeStyle = colors.stroke;
           ctx.lineWidth = 1.1;
-          ctx.beginPath();
-          for (let e = 0; e < edges.length; e++) {
-            const [v1, v2] = edges[e];
-            rotate3D(verts[v1][0], verts[v1][1], verts[v1][2], rx, ry, rz);
-            ctx.moveTo(rotBuf.x, rotBuf.y);
-            rotate3D(verts[v2][0], verts[v2][1], verts[v2][2], rx, ry, rz);
-            ctx.lineTo(rotBuf.x, rotBuf.y);
+
+          const arrows = [
+            [-s * 0.6, -s * 0.4, -s * 0.2],
+            [0, 0, 0],
+            [s * 0.6, s * 0.4, s * 0.2]
+          ];
+          for (let a = 0; a < arrows.length; a++) {
+            const [ax, ay, az] = arrows[a];
+            rotate3D(ax, ay, az, rx, ry, rz);
+            const x0 = rotBuf.x;
+            const y0 = rotBuf.y;
+            rotate3D(ax + s * 0.45, ay - s * 0.35, az + s * 0.25, rx, ry, rz);
+            const x1 = rotBuf.x;
+            const y1 = rotBuf.y;
+
+            ctx.beginPath();
+            ctx.moveTo(x0, y0);
+            ctx.lineTo(x1, y1);
+            ctx.stroke();
+
+            // Arrowhead tip
+            ctx.fillStyle = colors.highlight;
+            ctx.beginPath();
+            ctx.arc(x1, y1, 1.6, 0, Math.PI * 2);
+            ctx.fill();
           }
-          ctx.stroke();
         }
 
-        // ---------------------------------------------------------------------
-        // 10. 3D CYLINDER
-        // ---------------------------------------------------------------------
-        else if (obj.archetype === 'cylinder') {
-          const r = obj.baseSize * obj.projScale * 0.35;
-          const h = r * 1.4;
-          ctx.strokeStyle = colors.stroke;
-          ctx.lineWidth = 1.1;
-
-          // Top ellipse
-          ctx.beginPath();
-          rotate3D(0, -h, 0, rx, ry, rz);
-          ctx.ellipse(rotBuf.x, rotBuf.y, r, r * Math.abs(Math.cos(rx)), rz, 0, Math.PI * 2);
-          ctx.stroke();
-
-          // Bottom ellipse
-          ctx.beginPath();
-          rotate3D(0, h, 0, rx, ry, rz);
-          ctx.ellipse(rotBuf.x, rotBuf.y, r, r * Math.abs(Math.cos(rx)), rz, 0, Math.PI * 2);
-          ctx.stroke();
-
-          // Vertical side edges
-          ctx.beginPath();
-          rotate3D(-r, -h, 0, rx, ry, rz);
-          ctx.moveTo(rotBuf.x, rotBuf.y);
-          rotate3D(-r, h, 0, rx, ry, rz);
-          ctx.lineTo(rotBuf.x, rotBuf.y);
-
-          rotate3D(r, -h, 0, rx, ry, rz);
-          ctx.moveTo(rotBuf.x, rotBuf.y);
-          rotate3D(r, h, 0, rx, ry, rz);
-          ctx.lineTo(rotBuf.x, rotBuf.y);
-          ctx.stroke();
-        }
-
-        // ---------------------------------------------------------------------
-        // 11. 3D CONE
-        // ---------------------------------------------------------------------
-        else if (obj.archetype === 'cone') {
-          const r = obj.baseSize * obj.projScale * 0.40;
-          const h = r * 1.5;
-          ctx.strokeStyle = colors.stroke;
-          ctx.lineWidth = 1.1;
-
-          // Base ellipse
-          ctx.beginPath();
-          rotate3D(0, h * 0.5, 0, rx, ry, rz);
-          ctx.ellipse(rotBuf.x, rotBuf.y, r, r * Math.abs(Math.cos(rx)), rz, 0, Math.PI * 2);
-          ctx.stroke();
-
-          // Apex to base sides
-          rotate3D(0, -h * 0.8, 0, rx, ry, rz);
-          const apexX = rotBuf.x;
-          const apexY = rotBuf.y;
-
-          ctx.beginPath();
-          rotate3D(-r, h * 0.5, 0, rx, ry, rz);
-          ctx.moveTo(apexX, apexY);
-          ctx.lineTo(rotBuf.x, rotBuf.y);
-
-          rotate3D(r, h * 0.5, 0, rx, ry, rz);
-          ctx.moveTo(apexX, apexY);
-          ctx.lineTo(rotBuf.x, rotBuf.y);
-          ctx.stroke();
-        }
-
-        // ---------------------------------------------------------------------
-        // 12. 3D PRISM (Triangular Prism)
-        // ---------------------------------------------------------------------
-        else if (obj.archetype === 'prism') {
-          const s = obj.baseSize * obj.projScale * 0.45;
-          const h = s * 0.9;
-          const verts = [
-            [-s, -h, -s * 0.6], [s, -h, -s * 0.6], [0, -h, s],
-            [-s, h, -s * 0.6], [s, h, -s * 0.6], [0, h, s],
-          ];
-          const edges = [
-            [0,1],[1,2],[2,0], // Top triangle
-            [3,4],[4,5],[5,3], // Bottom triangle
-            [0,3],[1,4],[2,5]  // Pillars
-          ];
-
-          ctx.strokeStyle = colors.stroke;
-          ctx.lineWidth = 1.1;
-          ctx.beginPath();
-          for (let e = 0; e < edges.length; e++) {
-            const [v1, v2] = edges[e];
-            rotate3D(verts[v1][0], verts[v1][1], verts[v1][2], rx, ry, rz);
-            ctx.moveTo(rotBuf.x, rotBuf.y);
-            rotate3D(verts[v2][0], verts[v2][1], verts[v2][2], rx, ry, rz);
-            ctx.lineTo(rotBuf.x, rotBuf.y);
-          }
-          ctx.stroke();
-        }
-
-        // ---------------------------------------------------------------------
-        // 13. 3D SPIRAL / HELIX
-        // ---------------------------------------------------------------------
-        else if (obj.archetype === 'spiral') {
+        else if (obj.archetype === 'spiral_helix') {
           const s = obj.baseSize * obj.projScale;
           ctx.strokeStyle = colors.stroke;
           ctx.lineWidth = 1.1;
           ctx.beginPath();
 
-          const turns = currentTier === 'ULTRA_LOW' ? 12 : 20;
+          const turns = currentTier === 'ULTRA_LOW' ? 12 : 22;
           for (let step = 0; step <= turns; step++) {
             const theta = (step / turns) * Math.PI * 4;
             const r = (step / turns) * 20 * (s / 24);
@@ -1993,9 +2485,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           ctx.stroke();
         }
 
-        // ---------------------------------------------------------------------
-        // 14. 3D PERSPECTIVE GRID
-        // ---------------------------------------------------------------------
         else if (obj.archetype === 'grid3d') {
           const s = obj.baseSize * obj.projScale * 0.55;
           ctx.strokeStyle = colors.fill;
@@ -2016,7 +2505,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         }
 
         // ---------------------------------------------------------------------
-        // 15. MATHEMATICAL & EDUCATIONAL SYMBOLS (∞, π, √x, a²+b²=c², ABC, Aa)
+        // 7. MATHEMATICAL & EDUCATIONAL SYMBOLS (π, ∑, √x, ∞, a²+b²=c², ∫, LEARN, THINK, A, B, C)
         // ---------------------------------------------------------------------
         else if (obj.text || obj.formula) {
           const s = obj.baseSize * obj.projScale;
@@ -2028,6 +2517,12 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           ctx.textBaseline = 'middle';
           rotate3D(0, 0, 0, rx, ry, rz);
           ctx.fillText(displayTxt, rotBuf.x, rotBuf.y);
+
+          // Subtle glowing accent underlay for single symbols
+          if (isSingle && currentTier !== 'ULTRA_LOW') {
+            ctx.fillStyle = colors.highlight;
+            ctx.fillText(displayTxt, rotBuf.x + 0.5, rotBuf.y + 0.5);
+          }
         }
 
         ctx.restore();
