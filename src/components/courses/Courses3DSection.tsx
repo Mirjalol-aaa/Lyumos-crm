@@ -40,6 +40,9 @@ interface Sculpture3D {
     | 'double_helix'
     | 'coord_tripod'
     | 'vector_arrow'
+    | 'prism_3d'
+    | 'pyramid_3d'
+    | 'formula_3d'
     | 'letter_3d'
     | 'word_3d'
     | 'code_block_3d';
@@ -117,7 +120,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     setActiveCourseId(course.id);
     setTimeout(() => {
       setIsTransitioning(false);
-    }, 400);
+    }, 380);
   };
 
   const handlePrev = () => {
@@ -137,11 +140,16 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const animFrameRef = useRef<number | null>(null);
 
-  // Book 360° Showroom Turntable Physics State
+  // Book 360° Showroom Turntable Physics & 3D Tilt State
   const bookPhysicsRef = useRef({
+    // Base Turntable Angles
     rotX: -0.16, // subtle downward perspective
-    rotY: 0.42,  // initial showroom angle showing cover & spine
+    rotY: 0.42,  // showroom angle displaying cover and spine
     rotZ: -0.02,
+    // Hover 3D Tilt offsets
+    tiltX: 0,
+    tiltY: 0,
+    // Velocities
     angVx: 0,
     angVy: 0,
     isDragging: false,
@@ -151,6 +159,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     samples: [] as { x: number; y: number; time: number }[],
     isHovered: false,
     hoverScale: 1.0,
+    hoverLift: 0, // slight vertical float lift on hover
   });
 
   // Active Grab Target ('book' | sculptureId | null)
@@ -167,11 +176,11 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     targetMouseY: 0,
   });
 
-  // Theme Transition Progress Tracker
+  // Theme Tracker Ref
   const currentThemeRef = useRef<CourseVisualTheme>(theme);
   currentThemeRef.current = theme;
 
-  // Populate Custom High-End Sculptures
+  // Build Subject-Specific 3D Sculptures dynamically when Theme or Screen Size changes
   useEffect(() => {
     const isMobile = window.innerWidth < 768;
     const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
@@ -179,16 +188,16 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     const list: Sculpture3D[] = [];
 
     // =========================================================================
-    // 1. UNIVERSAL PRIMARY HERO ORBITALS (Always Present & Elegant)
+    // 1. UNIVERSAL PRIMARY HERO ORBITAL RINGS (Always Present)
     // =========================================================================
-    // A. The Grand Horizontal Brushed Gold Orbital Ring (Encircles book with depth)
+    // A. Grand Horizontal Brushed Gold Orbital Ring (Encircles book with depth)
     list.push({
       id: 'prim-ring-grand',
       type: 'ring_grand_horizontal',
       theme: 'universal',
       depthLayer: 'FOREGROUND',
       orbitRadius: 195,
-      orbitSpeed: 0.0008,
+      orbitSpeed: 0.00085,
       orbitPhase: 0.4,
       orbitInclination: 0.16,
       orbitEccentricity: 0.94,
@@ -202,14 +211,14 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       projX: 0, projY: 0, projScale: 1, projZ: 0,
     });
 
-    // B. Nested Tilted Double Ring
+    // B. Nested Tilted Double Ring (Secondary Hero Orbital)
     list.push({
       id: 'prim-ring-nested',
       type: 'ring_nested_tilted',
       theme: 'universal',
       depthLayer: 'MIDGROUND',
       orbitRadius: 240,
-      orbitSpeed: -0.00065,
+      orbitSpeed: -0.0007,
       orbitPhase: 2.5,
       orbitInclination: -0.38,
       orbitEccentricity: 0.88,
@@ -224,242 +233,316 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     });
 
     // =========================================================================
-    // 2. MATHEMATICAL SCULPTURES (Volumetric, Museum-Grade)
+    // 2. SUBJECT-SPECIFIC SCULPTURE SUITES
     // =========================================================================
-    // A. Volumetric Parabola Ribbon (y = x²) with 3D Depth
-    list.push({
-      id: 'math-parabola-volumetric',
-      type: 'parabola_volumetric',
-      label: 'y = x²',
-      theme: 'math',
-      depthLayer: 'MIDGROUND',
-      orbitRadius: 220,
-      orbitSpeed: 0.00075,
-      orbitPhase: 1.1,
-      orbitInclination: 0.32,
-      orbitEccentricity: 0.90,
-      x: 0, y: 0, z: 0,
-      rotX: 0.25, rotY: 0.45, rotZ: 0.1,
-      rotSpeedX: 0.0003, rotSpeedY: 0.0006, rotSpeedZ: 0.0002,
-      isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-      size: 38,
-      baseOpacity: 0.85,
-      transitionAlpha: theme === 'math' ? 1.0 : 0.0,
-      projX: 0, projY: 0, projScale: 1, projZ: 0,
-    });
-
-    // B. Tubular Sine Wave Ribbon (y = sin(x))
-    list.push({
-      id: 'math-sinewave-tubular',
-      type: 'sinewave_tubular',
-      label: 'y = sin(x)',
-      theme: 'math',
-      depthLayer: 'MIDGROUND',
-      orbitRadius: 250,
-      orbitSpeed: -0.0007,
-      orbitPhase: 3.7,
-      orbitInclination: -0.34,
-      orbitEccentricity: 0.86,
-      x: 0, y: 0, z: 0,
-      rotX: -0.3, rotY: 0.55, rotZ: 0.15,
-      rotSpeedX: 0.0004, rotSpeedY: 0.0006, rotSpeedZ: 0.0003,
-      isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-      size: 40,
-      baseOpacity: 0.85,
-      transitionAlpha: theme === 'math' ? 1.0 : 0.0,
-      projX: 0, projY: 0, projScale: 1, projZ: 0,
-    });
-
-    // C. Hyperbolic Saddle Surface (Parametric 3D Function Mesh z = (x²-y²)/a)
-    list.push({
-      id: 'math-saddle-surface',
-      type: 'saddle_surface',
-      theme: 'math',
-      depthLayer: 'BACKGROUND',
-      orbitRadius: 280,
-      orbitSpeed: 0.0005,
-      orbitPhase: 5.2,
-      orbitInclination: 0.42,
-      orbitEccentricity: 0.84,
-      x: 0, y: 0, z: 0,
-      rotX: 0.5, rotY: 0.3, rotZ: -0.2,
-      rotSpeedX: 0.0005, rotSpeedY: 0.0004, rotSpeedZ: 0.0002,
-      isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-      size: 36,
-      baseOpacity: 0.80,
-      transitionAlpha: theme === 'math' ? 1.0 : 0.0,
-      projX: 0, projY: 0, projScale: 1, projZ: 0,
-    });
-
-    // D. 3D Double Helix Spiral
-    list.push({
-      id: 'math-double-helix',
-      type: 'double_helix',
-      theme: 'math',
-      depthLayer: 'MIDGROUND',
-      orbitRadius: 265,
-      orbitSpeed: -0.00055,
-      orbitPhase: 2.1,
-      orbitInclination: -0.28,
-      orbitEccentricity: 0.89,
-      x: 0, y: 0, z: 0,
-      rotX: 0.3, rotY: 0.6, rotZ: 0.2,
-      rotSpeedX: 0.0006, rotSpeedY: 0.0007, rotSpeedZ: 0.0003,
-      isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-      size: 34,
-      baseOpacity: 0.80,
-      transitionAlpha: theme === 'math' ? 1.0 : 0.0,
-      projX: 0, projY: 0, projScale: 1, projZ: 0,
-    });
-
-    // E. 3D Coordinate Tripod (X, Y, Z) with Metallic Shafts
-    list.push({
-      id: 'math-coord-tripod',
-      type: 'coord_tripod',
-      label: 'XYZ',
-      theme: 'math',
-      depthLayer: 'FOREGROUND',
-      orbitRadius: 165,
-      orbitSpeed: 0.0011,
-      orbitPhase: 4.4,
-      orbitInclination: 0.22,
-      orbitEccentricity: 0.92,
-      x: 0, y: 0, z: 0,
-      rotX: 0.35, rotY: 0.4, rotZ: -0.15,
-      rotSpeedX: 0.0007, rotSpeedY: 0.0008, rotSpeedZ: 0.0004,
-      isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-      size: 26,
-      baseOpacity: 0.88,
-      transitionAlpha: theme === 'math' ? 1.0 : 0.0,
-      projX: 0, projY: 0, projScale: 1, projZ: 0,
-    });
-
-    // F. Architectural 3D Vector Arrow
-    list.push({
-      id: 'math-vector-arrow',
-      type: 'vector_arrow',
-      label: 'v⃗',
-      theme: 'math',
-      depthLayer: 'BACKGROUND',
-      orbitRadius: 295,
-      orbitSpeed: -0.00045,
-      orbitPhase: 0.8,
-      orbitInclination: -0.45,
-      orbitEccentricity: 0.85,
-      x: 0, y: 0, z: 0,
-      rotX: 0.4, rotY: 0.2, rotZ: 0.5,
-      rotSpeedX: 0.0005, rotSpeedY: 0.0004, rotSpeedZ: 0.0002,
-      isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-      size: 32,
-      baseOpacity: 0.75,
-      transitionAlpha: theme === 'math' ? 1.0 : 0.0,
-      projX: 0, projY: 0, projScale: 1, projZ: 0,
-    });
-
-    // =========================================================================
-    // 3. ENGLISH TYPOGRAPHIC 3D UNIVERSE (Volumetric Extruded Letters & Words)
-    // =========================================================================
-    const engLetters = [
-      { label: 'A', r: 165, speed: 0.0011, phase: 0.5, inc: 0.24, layer: 'FOREGROUND' as const, size: 28 },
-      { label: 'B', r: 215, speed: -0.0008, phase: 2.3, inc: -0.32, layer: 'MIDGROUND' as const, size: 25 },
-      { label: 'C', r: 250, speed: 0.0007, phase: 4.1, inc: 0.28, layer: 'MIDGROUND' as const, size: 24 },
-      { label: 'Z', r: 285, speed: -0.0005, phase: 5.6, inc: -0.35, layer: 'BACKGROUND' as const, size: 22 },
-    ];
-    engLetters.forEach((el, idx) => {
+    if (theme === 'math') {
+      // Volumetric Parabola Ribbon (y = x²)
       list.push({
-        id: `eng-letter-${idx}`,
-        type: 'letter_3d',
-        label: el.label,
-        theme: 'english',
-        depthLayer: el.layer,
-        orbitRadius: el.r,
-        orbitSpeed: el.speed,
-        orbitPhase: el.phase,
-        orbitInclination: el.inc,
+        id: 'math-parabola',
+        type: 'parabola_volumetric',
+        label: 'y = x²',
+        theme: 'math',
+        depthLayer: 'MIDGROUND',
+        orbitRadius: 220,
+        orbitSpeed: 0.00075,
+        orbitPhase: 1.1,
+        orbitInclination: 0.32,
         orbitEccentricity: 0.90,
         x: 0, y: 0, z: 0,
-        rotX: 0.2, rotY: 0.4, rotZ: 0.1,
-        rotSpeedX: 0.0006, rotSpeedY: 0.0009, rotSpeedZ: 0.0003,
+        rotX: 0.25, rotY: 0.45, rotZ: 0.1,
+        rotSpeedX: 0.0003, rotSpeedY: 0.0006, rotSpeedZ: 0.0002,
         isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: el.size,
-        baseOpacity: 0.88,
-        transitionAlpha: theme === 'english' ? 1.0 : 0.0,
+        size: 38,
+        baseOpacity: 0.85,
+        transitionAlpha: 1.0,
         projX: 0, projY: 0, projScale: 1, projZ: 0,
       });
-    });
 
-    const engWords = [
-      { label: 'LEARN', r: 235, speed: 0.00075, phase: 1.2, inc: 0.35, layer: 'MIDGROUND' as const },
-      { label: 'SPEAK', r: 260, speed: -0.00065, phase: 3.4, inc: -0.38, layer: 'MIDGROUND' as const },
-      { label: 'THINK', r: 295, speed: 0.0005, phase: 5.0, inc: 0.30, layer: 'BACKGROUND' as const },
-    ];
-    engWords.forEach((ew, idx) => {
+      // Tubular Sine Wave Ribbon (y = sin(x))
       list.push({
-        id: `eng-word-${idx}`,
-        type: 'word_3d',
-        label: ew.label,
-        theme: 'english',
-        depthLayer: ew.layer,
-        orbitRadius: ew.r,
-        orbitSpeed: ew.speed,
-        orbitPhase: ew.phase,
-        orbitInclination: ew.inc,
-        orbitEccentricity: 0.88,
+        id: 'math-sinewave',
+        type: 'sinewave_tubular',
+        label: 'y = sin(x)',
+        theme: 'math',
+        depthLayer: 'MIDGROUND',
+        orbitRadius: 250,
+        orbitSpeed: -0.0007,
+        orbitPhase: 3.7,
+        orbitInclination: -0.34,
+        orbitEccentricity: 0.86,
         x: 0, y: 0, z: 0,
-        rotX: 0.1, rotY: 0.3, rotZ: 0,
-        rotSpeedX: 0.0004, rotSpeedY: 0.0007, rotSpeedZ: 0.0002,
+        rotX: -0.3, rotY: 0.55, rotZ: 0.15,
+        rotSpeedX: 0.0004, rotSpeedY: 0.0006, rotSpeedZ: 0.0003,
         isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 14,
-        baseOpacity: 0.82,
-        transitionAlpha: theme === 'english' ? 1.0 : 0.0,
+        size: 40,
+        baseOpacity: 0.85,
+        transitionAlpha: 1.0,
         projX: 0, projY: 0, projScale: 1, projZ: 0,
       });
-    });
 
-    // =========================================================================
-    // 4. IT & CODE 3D UNIVERSE (Architectural Hexagonal & Code Constructs)
-    // =========================================================================
-    const itItems = [
-      { label: '<code/>', r: 170, speed: 0.0011, phase: 0.6, inc: 0.22, layer: 'FOREGROUND' as const },
-      { label: '{ state }', r: 225, speed: -0.0008, phase: 2.6, inc: -0.32, layer: 'MIDGROUND' as const },
-      { label: 'async/await', r: 275, speed: 0.0006, phase: 4.5, inc: 0.30, layer: 'BACKGROUND' as const },
-    ];
-    itItems.forEach((it, idx) => {
+      // Parametric 3D Saddle Surface Mesh (Hyperbolic Paraboloid)
       list.push({
-        id: `it-block-${idx}`,
-        type: 'code_block_3d',
-        label: it.label,
-        theme: 'it',
-        depthLayer: it.layer,
-        orbitRadius: it.r,
-        orbitSpeed: it.speed,
-        orbitPhase: it.phase,
-        orbitInclination: it.inc,
+        id: 'math-saddle',
+        type: 'saddle_surface',
+        theme: 'math',
+        depthLayer: 'BACKGROUND',
+        orbitRadius: 280,
+        orbitSpeed: 0.0005,
+        orbitPhase: 5.2,
+        orbitInclination: 0.42,
+        orbitEccentricity: 0.84,
+        x: 0, y: 0, z: 0,
+        rotX: 0.5, rotY: 0.3, rotZ: -0.2,
+        rotSpeedX: 0.0005, rotSpeedY: 0.0004, rotSpeedZ: 0.0002,
+        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+        size: 36,
+        baseOpacity: 0.80,
+        transitionAlpha: 1.0,
+        projX: 0, projY: 0, projScale: 1, projZ: 0,
+      });
+
+      // 3D Double Helix Spiral
+      list.push({
+        id: 'math-helix',
+        type: 'double_helix',
+        theme: 'math',
+        depthLayer: 'MIDGROUND',
+        orbitRadius: 265,
+        orbitSpeed: -0.00055,
+        orbitPhase: 2.1,
+        orbitInclination: -0.28,
         orbitEccentricity: 0.89,
         x: 0, y: 0, z: 0,
-        rotX: 0.2, rotY: 0.4, rotZ: 0.1,
-        rotSpeedX: 0.0005, rotSpeedY: 0.0008, rotSpeedZ: 0.0003,
+        rotX: 0.3, rotY: 0.6, rotZ: 0.2,
+        rotSpeedX: 0.0006, rotSpeedY: 0.0007, rotSpeedZ: 0.0003,
         isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 16,
-        baseOpacity: 0.85,
-        transitionAlpha: theme === 'it' ? 1.0 : 0.0,
+        size: 34,
+        baseOpacity: 0.80,
+        transitionAlpha: 1.0,
         projX: 0, projY: 0, projScale: 1, projZ: 0,
       });
-    });
 
-    // Device tier count optimization
-    const maxObjects = isMobile ? 6 : isTablet ? 10 : 16;
+      // 3D Coordinate Tripod (X, Y, Z)
+      list.push({
+        id: 'math-tripod',
+        type: 'coord_tripod',
+        label: 'XYZ',
+        theme: 'math',
+        depthLayer: 'FOREGROUND',
+        orbitRadius: 165,
+        orbitSpeed: 0.0011,
+        orbitPhase: 4.4,
+        orbitInclination: 0.22,
+        orbitEccentricity: 0.92,
+        x: 0, y: 0, z: 0,
+        rotX: 0.35, rotY: 0.4, rotZ: -0.15,
+        rotSpeedX: 0.0007, rotSpeedY: 0.0008, rotSpeedZ: 0.0004,
+        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+        size: 26,
+        baseOpacity: 0.88,
+        transitionAlpha: 1.0,
+        projX: 0, projY: 0, projScale: 1, projZ: 0,
+      });
+
+      // Architectural Vector Arrow
+      list.push({
+        id: 'math-vector',
+        type: 'vector_arrow',
+        label: 'v⃗',
+        theme: 'math',
+        depthLayer: 'BACKGROUND',
+        orbitRadius: 295,
+        orbitSpeed: -0.00045,
+        orbitPhase: 0.8,
+        orbitInclination: -0.45,
+        orbitEccentricity: 0.85,
+        x: 0, y: 0, z: 0,
+        rotX: 0.4, rotY: 0.2, rotZ: 0.5,
+        rotSpeedX: 0.0005, rotSpeedY: 0.0004, rotSpeedZ: 0.0002,
+        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+        size: 32,
+        baseOpacity: 0.75,
+        transitionAlpha: 1.0,
+        projX: 0, projY: 0, projScale: 1, projZ: 0,
+      });
+
+      // 3D Triangular Prism
+      list.push({
+        id: 'math-prism',
+        type: 'prism_3d',
+        theme: 'math',
+        depthLayer: 'MIDGROUND',
+        orbitRadius: 235,
+        orbitSpeed: 0.0008,
+        orbitPhase: 5.8,
+        orbitInclination: 0.38,
+        orbitEccentricity: 0.88,
+        x: 0, y: 0, z: 0,
+        rotX: 0.3, rotY: 0.5, rotZ: 0.1,
+        rotSpeedX: 0.0006, rotSpeedY: 0.0007, rotSpeedZ: 0.0003,
+        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+        size: 24,
+        baseOpacity: 0.80,
+        transitionAlpha: 1.0,
+        projX: 0, projY: 0, projScale: 1, projZ: 0,
+      });
+
+      // Floating Mathematical Formulas (π, ∑, √, ∞, f(x))
+      const mathGlyphs = [
+        { label: 'π', r: 155, speed: 0.0013, phase: 0.3, inc: 0.22, layer: 'FOREGROUND' as const },
+        { label: '∑', r: 160, speed: -0.0011, phase: 2.2, inc: -0.26, layer: 'FOREGROUND' as const },
+        { label: '√x', r: 165, speed: 0.0012, phase: 4.1, inc: 0.18, layer: 'FOREGROUND' as const },
+        { label: '∞', r: 275, speed: 0.0006, phase: 1.7, inc: 0.35, layer: 'BACKGROUND' as const },
+        { label: 'f(x)', r: 305, speed: -0.0005, phase: 4.8, inc: -0.32, layer: 'BACKGROUND' as const },
+      ];
+      mathGlyphs.forEach((mg, idx) => {
+        list.push({
+          id: `math-glyph-${idx}`,
+          type: 'formula_3d',
+          label: mg.label,
+          theme: 'math',
+          depthLayer: mg.layer,
+          orbitRadius: mg.r,
+          orbitSpeed: mg.speed,
+          orbitPhase: mg.phase,
+          orbitInclination: mg.inc,
+          orbitEccentricity: 0.92,
+          x: 0, y: 0, z: 0,
+          rotX: 0, rotY: 0, rotZ: 0,
+          rotSpeedX: 0.0007, rotSpeedY: 0.0011, rotSpeedZ: 0.0004,
+          isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+          size: mg.layer === 'FOREGROUND' ? 17 : 13,
+          baseOpacity: mg.layer === 'FOREGROUND' ? 0.88 : 0.65,
+          transitionAlpha: 1.0,
+          projX: 0, projY: 0, projScale: 1, projZ: 0,
+        });
+      });
+    } else if (theme === 'english') {
+      // Extruded 3D Letters (A, B, C, X, Y, Z)
+      const engLetters = [
+        { label: 'A', r: 165, speed: 0.0012, phase: 0.5, inc: 0.24, layer: 'FOREGROUND' as const, size: 28 },
+        { label: 'B', r: 215, speed: -0.0008, phase: 2.3, inc: -0.32, layer: 'MIDGROUND' as const, size: 25 },
+        { label: 'C', r: 250, speed: 0.0007, phase: 4.1, inc: 0.28, layer: 'MIDGROUND' as const, size: 24 },
+        { label: 'Z', r: 285, speed: -0.0005, phase: 5.6, inc: -0.35, layer: 'BACKGROUND' as const, size: 22 },
+      ];
+      engLetters.forEach((el, idx) => {
+        list.push({
+          id: `eng-letter-${idx}`,
+          type: 'letter_3d',
+          label: el.label,
+          theme: 'english',
+          depthLayer: el.layer,
+          orbitRadius: el.r,
+          orbitSpeed: el.speed,
+          orbitPhase: el.phase,
+          orbitInclination: el.inc,
+          orbitEccentricity: 0.90,
+          x: 0, y: 0, z: 0,
+          rotX: 0.2, rotY: 0.4, rotZ: 0.1,
+          rotSpeedX: 0.0006, rotSpeedY: 0.0009, rotSpeedZ: 0.0003,
+          isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+          size: el.size,
+          baseOpacity: 0.88,
+          transitionAlpha: 1.0,
+          projX: 0, projY: 0, projScale: 1, projZ: 0,
+        });
+      });
+
+      // 3D Typographic Blocks (ENGLISH, LEARN, SPEAK, THINK, GROW)
+      const engWords = [
+        { label: 'ENGLISH', r: 160, speed: 0.0011, phase: 3.8, inc: -0.22, layer: 'FOREGROUND' as const },
+        { label: 'LEARN', r: 230, speed: 0.00075, phase: 1.2, inc: 0.35, layer: 'MIDGROUND' as const },
+        { label: 'SPEAK', r: 260, speed: -0.00065, phase: 3.4, inc: -0.38, layer: 'MIDGROUND' as const },
+        { label: 'THINK', r: 290, speed: 0.00055, phase: 5.0, inc: 0.30, layer: 'BACKGROUND' as const },
+        { label: 'GROW', r: 310, speed: -0.00045, phase: 0.9, inc: -0.25, layer: 'BACKGROUND' as const },
+      ];
+      engWords.forEach((ew, idx) => {
+        list.push({
+          id: `eng-word-${idx}`,
+          type: 'word_3d',
+          label: ew.label,
+          theme: 'english',
+          depthLayer: ew.layer,
+          orbitRadius: ew.r,
+          orbitSpeed: ew.speed,
+          orbitPhase: ew.phase,
+          orbitInclination: ew.inc,
+          orbitEccentricity: 0.88,
+          x: 0, y: 0, z: 0,
+          rotX: 0.1, rotY: 0.3, rotZ: 0,
+          rotSpeedX: 0.0004, rotSpeedY: 0.0007, rotSpeedZ: 0.0002,
+          isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+          size: ew.layer === 'FOREGROUND' ? 16 : 13,
+          baseOpacity: ew.layer === 'FOREGROUND' ? 0.88 : 0.78,
+          transitionAlpha: 1.0,
+          projX: 0, projY: 0, projScale: 1, projZ: 0,
+        });
+      });
+    } else if (theme === 'it') {
+      const itItems = [
+        { label: '<dev/>', r: 165, speed: 0.0012, phase: 0.6, inc: 0.22, layer: 'FOREGROUND' as const },
+        { label: '{ state }', r: 220, speed: -0.0008, phase: 2.6, inc: -0.32, layer: 'MIDGROUND' as const },
+        { label: 'React.js', r: 250, speed: 0.0007, phase: 4.4, inc: 0.28, layer: 'MIDGROUND' as const },
+        { label: 'async/await', r: 285, speed: -0.0005, phase: 1.4, inc: -0.34, layer: 'BACKGROUND' as const },
+        { label: 'API 200 OK', r: 310, speed: 0.00045, phase: 5.1, inc: 0.30, layer: 'BACKGROUND' as const },
+      ];
+      itItems.forEach((it, idx) => {
+        list.push({
+          id: `it-block-${idx}`,
+          type: 'code_block_3d',
+          label: it.label,
+          theme: 'it',
+          depthLayer: it.layer,
+          orbitRadius: it.r,
+          orbitSpeed: it.speed,
+          orbitPhase: it.phase,
+          orbitInclination: it.inc,
+          orbitEccentricity: 0.89,
+          x: 0, y: 0, z: 0,
+          rotX: 0.2, rotY: 0.4, rotZ: 0.1,
+          rotSpeedX: 0.0005, rotSpeedY: 0.0008, rotSpeedZ: 0.0003,
+          isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+          size: it.layer === 'FOREGROUND' ? 16 : 13,
+          baseOpacity: it.layer === 'FOREGROUND' ? 0.88 : 0.75,
+          transitionAlpha: 1.0,
+          projX: 0, projY: 0, projScale: 1, projZ: 0,
+        });
+      });
+    } else {
+      // Academic / DTM / Presidential Schools
+      const acadItems = [
+        { label: '189+', r: 160, speed: 0.0012, phase: 0.5, inc: 0.24, layer: 'FOREGROUND' as const },
+        { label: '★ DTM', r: 220, speed: -0.0008, phase: 2.4, inc: -0.30, layer: 'MIDGROUND' as const },
+        { label: 'GRANT', r: 255, speed: 0.0007, phase: 4.2, inc: 0.28, layer: 'MIDGROUND' as const },
+        { label: 'Cambridge', r: 290, speed: -0.0005, phase: 1.2, inc: -0.32, layer: 'BACKGROUND' as const },
+      ];
+      acadItems.forEach((ac, idx) => {
+        list.push({
+          id: `acad-item-${idx}`,
+          type: 'word_3d',
+          label: ac.label,
+          theme: 'academic',
+          depthLayer: ac.layer,
+          orbitRadius: ac.r,
+          orbitSpeed: ac.speed,
+          orbitPhase: ac.phase,
+          orbitInclination: ac.inc,
+          orbitEccentricity: 0.90,
+          x: 0, y: 0, z: 0,
+          rotX: 0.2, rotY: 0.4, rotZ: 0.1,
+          rotSpeedX: 0.0005, rotSpeedY: 0.0008, rotSpeedZ: 0.0003,
+          isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+          size: ac.layer === 'FOREGROUND' ? 16 : 13,
+          baseOpacity: ac.layer === 'FOREGROUND' ? 0.88 : 0.75,
+          transitionAlpha: 1.0,
+          projX: 0, projY: 0, projScale: 1, projZ: 0,
+        });
+      });
+    }
+
+    // Adaptive object limit based on device capability
+    const maxObjects = isMobile ? 7 : isTablet ? 11 : 16;
     sculpturesRef.current = list.slice(0, maxObjects);
-  }, []);
-
-  // Update Transition Alpha smoothly on Theme Change
-  useEffect(() => {
-    // Keep universal rings alive; smoothly adjust subject objects
-    sculpturesRef.current.forEach((s) => {
-      if (s.theme === 'universal') {
-        s.transitionAlpha = 1.0;
-      }
-    });
   }, [theme]);
 
   // Main Canvas Render Loop
@@ -522,16 +605,21 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 
       const bookPhys = bookPhysicsRef.current;
       const cam = cameraRef.current;
-      const activeTheme = currentThemeRef.current;
 
       // Smooth Camera Mouse Parallax
       cam.mouseX += (cam.targetMouseX - cam.mouseX) * 0.05;
       cam.mouseY += (cam.targetMouseY - cam.mouseY) * 0.05;
 
       // -----------------------------------------------------------------------
-      // 1. BOOK PHYSICS & HORIZONTAL TURNTABLE MOMENTUM
+      // 1. 3D HOVER TILT & HORIZONTAL TURNTABLE MOMENTUM
       // -----------------------------------------------------------------------
+      // When not actively dragging, mouse position smoothly imparts 3D tilt (X: ±6°, Y: ±9°)
       if (!bookPhys.isDragging) {
+        const targetTiltX = -cam.mouseY * 0.11; // subtle X tilt
+        const targetTiltY = cam.mouseX * 0.16;  // subtle Y tilt
+        bookPhys.tiltX += (targetTiltX - bookPhys.tiltX) * 0.06;
+        bookPhys.tiltY += (targetTiltY - bookPhys.tiltY) * 0.06;
+
         bookPhys.rotY += bookPhys.angVy;
         bookPhys.rotX += bookPhys.angVx;
 
@@ -545,20 +633,27 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         if (Math.abs(bookPhys.angVy) < 0.0001) bookPhys.angVy = 0;
         if (Math.abs(bookPhys.angVx) < 0.0001) bookPhys.angVx = 0;
 
-        // Subtle showroom breathing when stationary (1-3px)
+        // Subtle showroom breathing when stationary
         if (bookPhys.angVy === 0 && bookPhys.angVx === 0) {
           bookPhys.rotY += Math.cos(time * 0.3) * 0.0002;
         }
+      } else {
+        // While dragging, hover tilt smoothly zeros out
+        bookPhys.tiltX *= 0.85;
+        bookPhys.tiltY *= 0.85;
       }
 
+      // Hover scale & slight vertical float lift
       const targetHoverScale = bookPhys.isHovered ? 1.025 : 1.0;
+      const targetHoverLift = bookPhys.isHovered ? -6 : 0;
       bookPhys.hoverScale += (targetHoverScale - bookPhys.hoverScale) * 0.12;
+      bookPhys.hoverLift += (targetHoverLift - bookPhys.hoverLift) * 0.10;
 
       ctx.clearRect(0, 0, width, height);
 
       const centerX = width / 2;
       const centerY = height / 2;
-      const floatY = Math.sin(time * 1.1) * 2.5;
+      const floatY = Math.sin(time * 1.1) * 2.5 + bookPhys.hoverLift;
       currentCenterX = centerX;
       currentCenterY = centerY;
       currentFloatY = floatY;
@@ -599,11 +694,6 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       for (let i = 0; i < sculptures.length; i++) {
         const sc = sculptures[i];
 
-        // Smooth transition alpha toward active theme
-        const isMatch = sc.theme === 'universal' || sc.theme === activeTheme;
-        const targetAlpha = isMatch ? 1.0 : 0.0;
-        sc.transitionAlpha += (targetAlpha - sc.transitionAlpha) * 0.08;
-
         if (!sc.isGrabbed) {
           sc.orbitPhase += sc.orbitSpeed;
           sc.rotX += sc.spinVx + sc.rotSpeedX;
@@ -643,7 +733,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       // -----------------------------------------------------------------------
       for (let i = 0; i < sculptures.length; i++) {
         const sc = sculptures[i];
-        if (sc.projZ < 10 && sc.transitionAlpha > 0.02) {
+        if (sc.projZ < 10) {
           renderSculpture(ctx, sc, lightX, lightY, lightZ);
         }
       }
@@ -662,32 +752,29 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       const bh = isCompact ? 235 : 290; // Cover height
       const bThick = isCompact ? 36 : 46; // Total thickness
 
-      // Overhang: Hardcover extends beyond pages by 4px on top/bottom/right
-      const overhang = 4.5;
-      const pageW = bw - overhang;
-      const pageH = bh - overhang * 2;
-      const pageThick = bThick - 6;
+      const overhang = 4.5; // Overhang beyond page block
 
       const hw = bw / 2;
       const hh = bh / 2;
       const ht = bThick / 2;
 
-      // Realistic Ground Contact Shadow
-      const shadowGrad = ctx.createRadialGradient(0, hh + 44, 8, 0, hh + 44, hw * 1.6);
+      // Realistic Ground Contact Shadow (broadens & darkens on hover)
+      const shadowExpand = bookPhys.isHovered ? 1.15 : 1.0;
+      const shadowGrad = ctx.createRadialGradient(0, hh + 44, 8, 0, hh + 44, hw * 1.6 * shadowExpand);
       shadowGrad.addColorStop(0, 'rgba(4, 2, 3, 0.88)');
       shadowGrad.addColorStop(0.55, 'rgba(4, 2, 3, 0.32)');
       shadowGrad.addColorStop(1, 'rgba(4, 2, 3, 0)');
       ctx.fillStyle = shadowGrad;
       ctx.beginPath();
-      ctx.ellipse(0, hh + 44, hw * 1.35, 22, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, hh + 44, hw * 1.35 * shadowExpand, 22 * shadowExpand, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Rotation angles
-      const rx = bookPhys.rotX;
-      const ry = bookPhys.rotY;
+      // Effective Rotation angles (Turntable + 3D Hover Tilt)
+      const rx = bookPhys.rotX + bookPhys.tiltX;
+      const ry = bookPhys.rotY + bookPhys.tiltY;
       const rz = bookPhys.rotZ;
 
-      // Vertices of Front Cover Plate (z = +ht, slightly thicker than pages)
+      // Vertices of Front Cover Plate (z = +ht)
       const coverFrontVerts = [
         [-hw, -hh, ht], [hw, -hh, ht], [hw, hh, ht], [-hw, hh, ht],
         [-hw, -hh, ht - 3], [hw, -hh, ht - 3], [hw, hh, ht - 3], [-hw, hh, ht - 3],
@@ -697,8 +784,8 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         [-hw, -hh, -ht + 3], [hw, -hh, -ht + 3], [hw, hh, -ht + 3], [-hw, hh, -ht + 3],
         [-hw, -hh, -ht], [hw, -hh, -ht], [hw, hh, -ht], [-hw, hh, -ht],
       ];
-      // Vertices of Recessed Stratified Ivory Page Block (indented by overhang)
-      const pageLeft = -hw + 6; // starts just inside the spine
+      // Vertices of Recessed Stratified Ivory Page Block
+      const pageLeft = -hw + 6;
       const pageRight = hw - overhang;
       const pageTop = -hh + overhang;
       const pageBottom = hh - overhang;
@@ -721,7 +808,8 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         return { x: rotBuf.x, y: rotBuf.y, z: rotBuf.z };
       });
 
-      // Shading Colors by Active Theme
+      // Palette by Active Theme
+      const activeTheme = currentThemeRef.current;
       let coverTopColor = '#340b15';
       let coverBotColor = '#130307';
       let spineColor = '#4e0e1e';
@@ -764,9 +852,10 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 
       const topNormalZ = (cf1.x - cf0.x) * (projCoverBack[0].y - cf0.y) - (cf1.y - cf0.y) * (projCoverBack[0].x - cf0.x);
 
-      // Light alignment factor for specular sheen
+      // Light alignment factor for specular sheen (boosted by hover spotlight)
       const lightDot = (Math.cos(ry) * lightX + Math.sin(ry) * lightZ) / 220;
-      const specHighlight = Math.max(0, Math.min(1, 0.5 + lightDot * 0.5));
+      const hoverLightBoost = bookPhys.isHovered ? 0.25 : 0;
+      const specHighlight = Math.max(0, Math.min(1, 0.5 + lightDot * 0.5 + hoverLightBoost));
 
       // 1. Back Cover Plate (if facing camera)
       if (frontNormalZ < 0) {
@@ -890,17 +979,17 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         ctx.fillStyle = coverGrad;
         ctx.fill();
 
-        // Dynamic Specular Highlight Gleam
-        if (specHighlight > 0.35) {
+        // Dynamic Specular Highlight & Warm Light Spread
+        if (specHighlight > 0.3) {
           const specGrad = ctx.createRadialGradient(
             cf0.x * 0.4 + projCoverFront[2].x * 0.6,
             cf0.y * 0.4 + projCoverFront[2].y * 0.6,
             10,
             cf0.x * 0.4 + projCoverFront[2].x * 0.6,
             cf0.y * 0.4 + projCoverFront[2].y * 0.6,
-            hw * 1.1
+            hw * 1.2
           );
-          specGrad.addColorStop(0, `rgba(255, 240, 195, ${0.20 * specHighlight})`);
+          specGrad.addColorStop(0, `rgba(255, 240, 195, ${0.22 * specHighlight})`);
           specGrad.addColorStop(1, 'rgba(255, 240, 195, 0)');
           ctx.fillStyle = specGrad;
           ctx.fill();
@@ -967,6 +1056,12 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
           ctx.fillText('READ', -hw * 0.52, -hh * 0.12);
           ctx.fillText('SPEAK', hw * 0.52, -hh * 0.12);
           ctx.fillText('THINK', 0, hh * 0.18);
+        } else if (activeTheme === 'it') {
+          ctx.font = 'bold 9px monospace';
+          ctx.fillStyle = 'rgba(244, 210, 122, 0.45)';
+          ctx.fillText('<dev/>', -hw * 0.52, -hh * 0.12);
+          ctx.fillText('{ state }', hw * 0.52, -hh * 0.12);
+          ctx.fillText('async', 0, hh * 0.18);
         }
 
         // Emblem Seal
@@ -1015,7 +1110,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       // -----------------------------------------------------------------------
       for (let i = 0; i < sculptures.length; i++) {
         const sc = sculptures[i];
-        if (sc.projZ >= 10 && sc.transitionAlpha > 0.02) {
+        if (sc.projZ >= 10) {
           renderSculpture(ctx, sc, lightX, lightY, lightZ);
         }
       }
@@ -1034,7 +1129,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 
       const hoverScale = sc.isHovered || sc.isGrabbed ? 1.25 : 1.0;
       c.scale(sc.projScale * hoverScale, sc.projScale * hoverScale);
-      c.globalAlpha = sc.baseOpacity * sc.transitionAlpha;
+      c.globalAlpha = sc.baseOpacity;
 
       // Rotate around local orientation
       c.rotate(sc.rotZ);
@@ -1104,7 +1199,6 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       // C. Volumetric Parabola Ribbon (y = x² with 3D Depth)
       // -----------------------------------------------------------------------
       else if (sc.type === 'parabola_volumetric') {
-        // Front curve
         c.beginPath();
         for (let px = -sc.size; px <= sc.size; px += 3) {
           const py = 0.045 * px * px - 16;
@@ -1115,7 +1209,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         c.strokeStyle = '#F4D27A';
         c.stroke();
 
-        // Extruded Depth Curve (offset by 4px down-right)
+        // Extruded Depth Curve
         c.beginPath();
         for (let px = -sc.size; px <= sc.size; px += 3) {
           const py = 0.045 * px * px - 16 + 5;
@@ -1237,7 +1331,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         c.strokeStyle = '#F4D27A';
         c.beginPath(); c.moveTo(0, 0); c.lineTo(s, 0); c.stroke();
 
-        // Y Axis (Burgundy / Red tint)
+        // Y Axis (Burgundy / Gold tint)
         c.strokeStyle = '#D9A93A';
         c.beginPath(); c.moveTo(0, 0); c.lineTo(0, -s); c.stroke();
 
@@ -1278,7 +1372,53 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       }
 
       // -----------------------------------------------------------------------
-      // I. Extruded Volumetric 3D Letters (A, B, C, Z)
+      // I. 3D Triangular Prism
+      // -----------------------------------------------------------------------
+      else if (sc.type === 'prism_3d') {
+        const s = sc.size;
+        c.lineWidth = 1.2;
+        c.strokeStyle = '#F4D27A';
+        c.beginPath();
+        c.moveTo(0, -s * 0.7);
+        c.lineTo(s * 0.6, s * 0.5);
+        c.lineTo(-s * 0.6, s * 0.5);
+        c.closePath();
+        c.stroke();
+
+        // Rear offset triangle
+        c.beginPath();
+        c.moveTo(4, -s * 0.7 - 4);
+        c.lineTo(s * 0.6 + 4, s * 0.5 - 4);
+        c.lineTo(-s * 0.6 + 4, s * 0.5 - 4);
+        c.closePath();
+        c.strokeStyle = 'rgba(217, 169, 58, 0.45)';
+        c.stroke();
+
+        // Connecting lines
+        c.beginPath();
+        c.moveTo(0, -s * 0.7); c.lineTo(4, -s * 0.7 - 4);
+        c.moveTo(s * 0.6, s * 0.5); c.lineTo(s * 0.6 + 4, s * 0.5 - 4);
+        c.moveTo(-s * 0.6, s * 0.5); c.lineTo(-s * 0.6 + 4, s * 0.5 - 4);
+        c.stroke();
+      }
+
+      // -----------------------------------------------------------------------
+      // J. Floating Mathematical Formulas (π, ∑, √, ∞, f(x))
+      // -----------------------------------------------------------------------
+      else if (sc.type === 'formula_3d') {
+        const fontSz = Math.round(sc.size * 1.2);
+        c.font = `bold ${fontSz}px serif`;
+        c.textAlign = 'center';
+        c.textBaseline = 'middle';
+
+        c.fillStyle = 'rgba(20, 6, 10, 0.75)';
+        c.fillText(sc.label || '', 2, 2);
+        c.fillStyle = '#F4D27A';
+        c.fillText(sc.label || '', 0, 0);
+      }
+
+      // -----------------------------------------------------------------------
+      // K. Extruded Volumetric 3D Letters (A, B, C, Z)
       // -----------------------------------------------------------------------
       else if (sc.type === 'letter_3d') {
         const fontSz = Math.round(sc.size * 1.3);
@@ -1299,7 +1439,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       }
 
       // -----------------------------------------------------------------------
-      // J. 3D Typographic Word Blocks
+      // L. 3D Typographic Word Blocks
       // -----------------------------------------------------------------------
       else if (sc.type === 'word_3d') {
         const fontSz = Math.round(sc.size);
@@ -1307,7 +1447,6 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         c.textAlign = 'center';
         c.textBaseline = 'middle';
 
-        // Background Plate
         const textMetrics = c.measureText(sc.label || '');
         const tw = textMetrics.width + 12;
         const th = fontSz + 8;
@@ -1324,7 +1463,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       }
 
       // -----------------------------------------------------------------------
-      // K. 3D Code Block Constructs
+      // M. 3D Code Block Constructs
       // -----------------------------------------------------------------------
       else if (sc.type === 'code_block_3d') {
         const fontSz = Math.round(sc.size);
@@ -1363,7 +1502,6 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       let grabbedScId: string | null = null;
       for (let i = sculptures.length - 1; i >= 0; i--) {
         const sc = sculptures[i];
-        if (sc.transitionAlpha < 0.2) continue;
         const dx = px - sc.projX;
         const dy = py - sc.projY;
         const hitRadius = Math.max(sc.size * sc.projScale * 1.3, 26);
@@ -1411,7 +1549,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       const px = e.clientX - rect.left;
       const py = e.clientY - rect.top;
 
-      // Update Mouse Parallax
+      // Update Mouse Parallax & 3D Tilt Coordinates
       const normX = (px - width / 2) / (width / 2);
       const normY = (py - height / 2) / (height / 2);
       cameraRef.current.targetMouseX = normX;
@@ -1456,7 +1594,6 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       let hoveredSc = false;
       for (let i = 0; i < sculptures.length; i++) {
         const sc = sculptures[i];
-        if (sc.transitionAlpha < 0.2) continue;
         const distSq = (px - sc.projX) ** 2 + (py - sc.projY) ** 2;
         const hitRadius = Math.max(sc.size * sc.projScale * 1.3, 26);
         if (distSq < hitRadius * hitRadius) {
@@ -1533,19 +1670,23 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       style={{ touchAction: 'pan-y' }}
     >
       {/* -----------------------------------------------------------------------
-          TOP HEADER: Badge & Luxury Title
+          TOP SECTION HERO: Luxury Visual Introduction
           ----------------------------------------------------------------------- */}
-      <div className="text-center max-w-3xl mx-auto space-y-4 mb-14">
+      <div className="text-center max-w-3xl mx-auto space-y-3 mb-12">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#16090D] border border-[#D9A93A]/40 text-xs font-bold uppercase tracking-widest text-[#D9A93A] shadow-lg shadow-[#D9A93A]/10">
           <Sparkles className="h-3.5 w-3.5" />
-          <span>LUMOS 3D Ekotizimi</span>
+          <span>LUMOS ILMIY MAKTABI</span>
         </div>
 
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE] tracking-tight">
-          Bizning <span className="text-[#D9A93A]">kurslarimiz</span>
+          KURSLAR
         </h2>
 
-        <p className="text-xs sm:text-sm text-[#A9A3A0] leading-relaxed max-w-2xl mx-auto">
+        <p className="text-base sm:text-lg lg:text-xl font-luxury-serif italic text-[#F4D27A] font-medium">
+          “Kelajagingiz uchun bilimni tanlang.”
+        </p>
+
+        <p className="text-xs sm:text-sm text-[#A9A3A0] leading-relaxed max-w-2xl mx-auto pt-1">
           Har bir yo‘nalish uchun xalqaro standartlarga asoslangan mukammal o‘quv dasturlari va interaktiv 3D ta’lim muhiti.
         </p>
       </div>
@@ -1574,7 +1715,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       </div>
 
       {/* -----------------------------------------------------------------------
-          MAIN 3D LABORATORY SHOWROOM STAGE
+          MAIN 3D EDUCATION GALLERY SHOWROOM STAGE
           ----------------------------------------------------------------------- */}
       <div className="relative rounded-3xl bg-gradient-to-b from-[#18080E]/90 via-[#100407]/95 to-[#0A0204] border border-[#D9A93A]/30 p-6 sm:p-8 lg:p-12 shadow-[0_20px_60px_rgba(0,0,0,0.85)] overflow-hidden">
         {/* Subtle Ambient Radial Lighting in Background */}
@@ -1585,7 +1726,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
           {/* LEFT COLUMN: Active Course Information & Specifications */}
           <div
             className={`lg:col-span-6 space-y-5 transition-all duration-300 ${
-              isTransitioning ? 'opacity-40 translate-y-2' : 'opacity-100 translate-y-0'
+              isTransitioning ? 'opacity-30 translate-y-2' : 'opacity-100 translate-y-0'
             }`}
           >
             {/* Top Meta: Category & Level */}
