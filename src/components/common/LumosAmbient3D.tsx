@@ -60,12 +60,27 @@ interface TravelingLightWave {
   cycleCount: number;
 }
 
-interface ArtDirectedObject3D {
+// Type of Mathematical / Geometric / Educational Entity in 3D Space
+type Math3DType =
+  | 'parabola'
+  | 'sinewave'
+  | 'grid3d'
+  | 'cube'
+  | 'pyramid'
+  | 'torus'
+  | 'spiral'
+  | 'cone'
+  | 'book'
+  | 'math_token'
+  | 'english_token';
+
+interface Math3DObject {
   id: string;
-  layer: 2 | 3 | 5; // Layer 2: Distant World, Layer 3: Main Environment, Layer 5: Atmosphere
-  type: 'math' | 'english' | 'book' | 'geometry';
+  type: Math3DType;
+  layer: 2 | 3 | 5; // Layer 2: Distant, Layer 3: Mid/Main, Layer 5: Near
   title?: string;
   text?: string;
+  formula?: string;
   x: number;
   y: number;
   z: number;
@@ -94,8 +109,6 @@ interface ArtDirectedObject3D {
   bookThickness?: number;
   coverColor?: string;
   spineColor?: string;
-  // Geometry specific
-  geomType?: 'cube' | 'octahedron' | 'ring' | 'prism';
 }
 
 // -----------------------------------------------------------------------------
@@ -147,7 +160,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
     };
     window.addEventListener('resize', handleResize, { passive: true });
 
-    // Smooth Mouse Tracking (Screen coordinates for physical hover, normalized for parallax)
+    // Smooth Mouse Tracking
     const handleMouseMove = (e: MouseEvent) => {
       const halfW = window.innerWidth / 2;
       const halfH = window.innerHeight / 2;
@@ -244,10 +257,8 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
 
     // -------------------------------------------------------------------------
     // 3. 5 LARGE INVISIBLE MOVING SOFT LIGHT SOURCES
-    // Continuous 3D multi-frequency Lissajous paths across the environment
     // -------------------------------------------------------------------------
     const virtualLights: VirtualLight3D[] = [
-      // Light 1: Hero Rim Light (Sweeps organically around the rear of laptop visual)
       {
         id: 'hero-rim',
         x: width * 0.72,
@@ -267,7 +278,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         centerY: height * 0.38,
         centerZ: 280,
       },
-      // Light 2: Mathematics Light (Drifts across upper-left, lighting π & Math book)
       {
         id: 'math-light',
         x: width * 0.20,
@@ -287,7 +297,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         centerY: height * 0.28,
         centerZ: 320,
       },
-      // Light 3: English Light (Drifts across mid-right, lighting English book & ABC)
       {
         id: 'english-light',
         x: width * 0.84,
@@ -307,7 +316,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         centerY: height * 0.58,
         centerZ: 290,
       },
-      // Light 4: Deep Cosmic Light (Drifts in deep background Z = 600)
       {
         id: 'deep-cosmic',
         x: width * 0.50,
@@ -327,7 +335,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         centerY: height * 0.18,
         centerZ: 600,
       },
-      // Light 5: Lower Arena Light (Sweeps across bottom space)
       {
         id: 'lower-arena',
         x: width * 0.35,
@@ -351,13 +358,8 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
 
     // -------------------------------------------------------------------------
     // 4. SIGNATURE LUMOS EFFECT: TRAVELING GOLDEN LIGHT WAVE (8–14 seconds)
-    // A soft golden wavefront sweeping through the 3D space, illuminating objects
     // -------------------------------------------------------------------------
     const generateWaveTrajectory = (cycle: number): TravelingLightWave => {
-      // Alternate trajectories across cycles:
-      // Cycle 0: Left flank -> curves behind headline -> behind laptop -> right flank
-      // Cycle 1: Top left diagonal -> sweeping center -> bottom right
-      // Cycle 2: Bottom left -> upward curve behind hero -> top right
       const mode = cycle % 3;
       let p0: Point3D, p1: Point3D, p2: Point3D, p3: Point3D;
 
@@ -379,7 +381,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       }
 
       return {
-        duration: 11.5, // 11.5 seconds per wave
+        duration: 11.5,
         p0,
         p1,
         p2,
@@ -423,7 +425,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         }
       }
 
-      // Proximity to traveling light wave
       let waveBoost = 0;
       if (waveState.active) {
         const wdx = x - waveState.currentPos.x;
@@ -433,7 +434,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         const wradSq = waveState.radius * waveState.radius;
         if (wdistSq < wradSq) {
           const wfalloff = 1 - Math.sqrt(wdistSq) / waveState.radius;
-          waveBoost = Math.sin(wfalloff * Math.PI) * 0.45; // Smooth bell-curve boost
+          waveBoost = Math.sin(wfalloff * Math.PI) * 0.45;
         }
       }
 
@@ -444,132 +445,223 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
     };
 
     // -------------------------------------------------------------------------
-    // 5. ART-DIRECTED 3D OBJECTS (Sparse, physical, controlled roster)
+    // 5. 3D MATHEMATICAL SPACE: ART-DIRECTED OBJECTS & STRUCTURES
+    // Parabolas, Sine waves, 3D grids, Cubes, Pyramids, Toruses, Spirals & Books
     // -------------------------------------------------------------------------
-    const artObjects: ArtDirectedObject3D[] = [
-      // === LAYER 2: DISTANT WORLD (Very faint, large, slow drift) ===
+    const mathObjects: Math3DObject[] = [
+      // 1. 3D PARABOLA (y = x²) with 3D coordinate axes & vector arrowheads (Upper-Left)
       {
-        id: 'dist-pi',
-        layer: 2,
-        type: 'math',
-        text: 'π',
-        x: width * 0.15,
-        y: height * 0.18,
-        z: 640,
-        vx: 0.025,
-        vy: 0.012,
-        vz: 0.015,
-        baseSize: 42,
-        baseOpacity: 0.06,
-        rotX: 0,
-        rotY: 0,
-        rotZ: -0.05,
-        rotSpeedX: 0,
-        rotSpeedY: 0,
-        rotSpeedZ: 0.00008,
-        wavePhase: 0.5,
-        waveSpeed: 0.00035,
-        waveAmp: 7,
-        zPhase: 0.2,
-        zSpeed: 0.0003,
-        zAmp: 35,
-        hoverProgress: 0,
-        mobileVisible: true,
-      },
-      {
-        id: 'dist-sum',
-        layer: 2,
-        type: 'math',
-        text: '∑',
-        x: width * 0.88,
-        y: height * 0.14,
-        z: 620,
-        vx: -0.02,
-        vy: 0.01,
-        vz: -0.012,
-        baseSize: 38,
-        baseOpacity: 0.05,
-        rotX: 0,
-        rotY: 0,
-        rotZ: 0.04,
-        rotSpeedX: 0,
-        rotSpeedY: 0,
-        rotSpeedZ: -0.00008,
-        wavePhase: 1.8,
-        waveSpeed: 0.0004,
-        waveAmp: 6,
-        zPhase: 1.4,
-        zSpeed: 0.00035,
-        zAmp: 30,
-        hoverProgress: 0,
-        mobileVisible: false,
-      },
-      {
-        id: 'dist-learn',
-        layer: 2,
-        type: 'english',
-        text: 'LEARN',
-        x: width * 0.16,
-        y: height * 0.86,
-        z: 590,
-        vx: 0.022,
-        vy: -0.014,
-        vz: 0.018,
-        baseSize: 30,
-        baseOpacity: 0.05,
-        rotX: 0,
-        rotY: 0,
-        rotZ: 0.02,
-        rotSpeedX: 0,
-        rotSpeedY: 0,
-        rotSpeedZ: 0.00007,
-        wavePhase: 2.7,
-        waveSpeed: 0.00035,
-        waveAmp: 6,
-        zPhase: 2.5,
-        zSpeed: 0.0003,
-        zAmp: 32,
-        hoverProgress: 0,
-        mobileVisible: false,
-      },
-      {
-        id: 'dist-fx',
-        layer: 2,
-        type: 'math',
-        text: 'f(x)',
-        x: width * 0.84,
-        y: height * 0.84,
-        z: 650,
-        vx: -0.025,
-        vy: -0.01,
-        vz: -0.015,
+        id: 'math-parabola-1',
+        type: 'parabola',
+        layer: 3,
+        formula: 'y = x²',
+        x: width * 0.18,
+        y: height * 0.22,
+        z: 280,
+        vx: 0.016,
+        vy: 0.008,
+        vz: 0.012,
         baseSize: 32,
-        baseOpacity: 0.055,
-        rotX: 0,
-        rotY: 0,
-        rotZ: -0.03,
-        rotSpeedX: 0,
-        rotSpeedY: 0,
-        rotSpeedZ: -0.00008,
-        wavePhase: 3.9,
+        baseOpacity: 0.28,
+        rotX: 0.35,
+        rotY: 0.40,
+        rotZ: -0.08,
+        rotSpeedX: 0.00012,
+        rotSpeedY: 0.00015,
+        rotSpeedZ: 0.00008,
+        wavePhase: 0.6,
         waveSpeed: 0.0004,
-        waveAmp: 6,
-        zPhase: 3.1,
+        waveAmp: 8,
+        zPhase: 0.8,
         zSpeed: 0.0003,
         zAmp: 35,
         hoverProgress: 0,
         mobileVisible: true,
       },
 
-      // === LAYER 3: MAIN ENVIRONMENT (Intentionally placed with large negative space) ===
-      // 1. 3D Hardcover Book: MATHEMATICS (Floating lower-left flank)
+      // 2. 3D SINUSOIDAL WAVE (y = sin(x)) with flowing phase & tick marks (Right Mid-Space)
+      {
+        id: 'math-sinewave-1',
+        type: 'sinewave',
+        layer: 3,
+        formula: 'y = sin(x)',
+        x: width * 0.82,
+        y: height * 0.68,
+        z: 290,
+        vx: -0.015,
+        vy: -0.010,
+        vz: -0.014,
+        baseSize: 36,
+        baseOpacity: 0.26,
+        rotX: -0.28,
+        rotY: 0.32,
+        rotZ: 0.06,
+        rotSpeedX: -0.0001,
+        rotSpeedY: 0.00012,
+        rotSpeedZ: -0.00008,
+        wavePhase: 1.8,
+        waveSpeed: 0.00045,
+        waveAmp: 8,
+        zPhase: 2.1,
+        zSpeed: 0.00035,
+        zAmp: 30,
+        hoverProgress: 0,
+        mobileVisible: true,
+      },
+
+      // 3. 3D HOLOGRAPHIC COORDINATE GRID PLANE (Tilted CAD Perspective Grid, Lower-Left)
+      {
+        id: 'math-grid3d-1',
+        type: 'grid3d',
+        layer: 3,
+        x: width * 0.14,
+        y: height * 0.78,
+        z: 320,
+        vx: 0.012,
+        vy: -0.008,
+        vz: 0.010,
+        baseSize: 42,
+        baseOpacity: 0.20,
+        rotX: 0.95, // Steep perspective tilt
+        rotY: -0.35,
+        rotZ: 0.12,
+        rotSpeedX: 0.00005,
+        rotSpeedY: 0.00008,
+        rotSpeedZ: 0.00005,
+        wavePhase: 3.2,
+        waveSpeed: 0.0003,
+        waveAmp: 6,
+        zPhase: 1.4,
+        zSpeed: 0.00025,
+        zAmp: 25,
+        hoverProgress: 0,
+        mobileVisible: false,
+      },
+
+      // 4. 3D GLASS CUBE (Dark glass facets, thin gold edges, Mid-Left space)
+      {
+        id: 'geom-cube-1',
+        type: 'cube',
+        layer: 3,
+        x: width * 0.08,
+        y: height * 0.44,
+        z: 250,
+        vx: 0.016,
+        vy: 0.010,
+        vz: 0.018,
+        baseSize: 38,
+        baseOpacity: 0.24,
+        rotX: 0.35,
+        rotY: 0.45,
+        rotZ: 0.20,
+        rotSpeedX: 0.00018,
+        rotSpeedY: 0.00024,
+        rotSpeedZ: 0.00010,
+        wavePhase: 0.7,
+        waveSpeed: 0.00045,
+        waveAmp: 8,
+        zPhase: 1.1,
+        zSpeed: 0.00035,
+        zAmp: 32,
+        hoverProgress: 0,
+        mobileVisible: true,
+      },
+
+      // 5. 3D PYRAMID (Tetrahedron with gold ribs and translucent base, Upper-Right)
+      {
+        id: 'geom-pyramid-1',
+        type: 'pyramid',
+        layer: 3,
+        x: width * 0.86,
+        y: height * 0.18,
+        z: 270,
+        vx: -0.016,
+        vy: 0.011,
+        vz: -0.015,
+        baseSize: 34,
+        baseOpacity: 0.24,
+        rotX: 0.40,
+        rotY: -0.38,
+        rotZ: 0.15,
+        rotSpeedX: 0.00015,
+        rotSpeedY: -0.00020,
+        rotSpeedZ: 0.00008,
+        wavePhase: 2.5,
+        waveSpeed: 0.0004,
+        waveAmp: 7,
+        zPhase: 3.2,
+        zSpeed: 0.0003,
+        zAmp: 28,
+        hoverProgress: 0,
+        mobileVisible: false,
+      },
+
+      // 6. 3D TORUS (Gold wireframe longitude and latitude loops, Lower-Right)
+      {
+        id: 'geom-torus-1',
+        type: 'torus',
+        layer: 3,
+        x: width * 0.74,
+        y: height * 0.86,
+        z: 290,
+        vx: -0.014,
+        vy: -0.009,
+        vz: 0.012,
+        baseSize: 30,
+        baseOpacity: 0.22,
+        rotX: 0.65,
+        rotY: 0.25,
+        rotZ: -0.20,
+        rotSpeedX: 0.00014,
+        rotSpeedY: 0.00018,
+        rotSpeedZ: 0.00012,
+        wavePhase: 4.1,
+        waveSpeed: 0.0004,
+        waveAmp: 7,
+        zPhase: 0.4,
+        zSpeed: 0.0003,
+        zAmp: 30,
+        hoverProgress: 0,
+        mobileVisible: false,
+      },
+
+      // 7. 3D MATHEMATICAL HELIX / SPIRAL (Twisting in space, Center-Top depth)
+      {
+        id: 'math-spiral-1',
+        type: 'spiral',
+        layer: 3,
+        x: width * 0.50,
+        y: height * 0.10,
+        z: 340,
+        vx: 0.014,
+        vy: 0.008,
+        vz: -0.012,
+        baseSize: 22,
+        baseOpacity: 0.20,
+        rotX: 0.30,
+        rotY: 0.50,
+        rotZ: 0.20,
+        rotSpeedX: 0.00012,
+        rotSpeedY: 0.00022,
+        rotSpeedZ: 0.00010,
+        wavePhase: 1.5,
+        waveSpeed: 0.00045,
+        waveAmp: 6,
+        zPhase: 2.8,
+        zSpeed: 0.00035,
+        zAmp: 25,
+        hoverProgress: 0,
+        mobileVisible: false,
+      },
+
+      // 8. 3D HARDCOVER BOOK: MATHEMATIKA (Floating lower-left flank)
       {
         id: 'book-math',
-        layer: 3,
         type: 'book',
+        layer: 3,
         title: 'MATHEMATIKA',
-        x: width * 0.12,
-        y: height * 0.64,
+        x: width * 0.11,
+        y: height * 0.62,
         z: 210,
         vx: 0.018,
         vy: -0.012,
@@ -596,14 +688,15 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         hoverProgress: 0,
         mobileVisible: true,
       },
-      // 2. 3D Hardcover Book: ENGLISH (Floating upper-right flank)
+
+      // 9. 3D HARDCOVER BOOK: ENGLISH (Floating upper-right flank)
       {
         id: 'book-english',
-        layer: 3,
         type: 'book',
+        layer: 3,
         title: 'ENGLISH',
-        x: width * 0.88,
-        y: height * 0.26,
+        x: width * 0.90,
+        y: height * 0.30,
         z: 230,
         vx: -0.018,
         vy: 0.014,
@@ -630,107 +723,51 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         hoverProgress: 0,
         mobileVisible: false,
       },
-      // 3. 3D Glass Cube (Mid-left negative space)
+
+      // 10. DISTANT GIANT π (Distant World Z=640)
       {
-        id: 'geom-cube',
-        layer: 3,
-        type: 'geometry',
-        geomType: 'cube',
-        x: width * 0.08,
-        y: height * 0.36,
-        z: 260,
-        vx: 0.016,
-        vy: 0.01,
-        vz: 0.018,
+        id: 'dist-pi',
+        type: 'math_token',
+        layer: 2,
+        text: 'π',
+        x: width * 0.15,
+        y: height * 0.18,
+        z: 640,
+        vx: 0.022,
+        vy: 0.010,
+        vz: 0.014,
         baseSize: 42,
-        baseOpacity: 0.17,
-        rotX: 0.35,
-        rotY: 0.45,
-        rotZ: 0.20,
-        rotSpeedX: 0.00018,
-        rotSpeedY: 0.00025,
-        rotSpeedZ: 0.00010,
-        wavePhase: 0.7,
-        waveSpeed: 0.00045,
-        waveAmp: 8,
-        zPhase: 1.1,
-        zSpeed: 0.00035,
-        zAmp: 32,
-        hoverProgress: 0,
-        mobileVisible: false,
-      },
-      // 4. 3D Octahedron / Transparent Prism (Mid-right negative space)
-      {
-        id: 'geom-octa',
-        layer: 3,
-        type: 'geometry',
-        geomType: 'octahedron',
-        x: width * 0.92,
-        y: height * 0.66,
-        z: 250,
-        vx: -0.015,
-        vy: -0.011,
-        vz: -0.016,
-        baseSize: 40,
-        baseOpacity: 0.17,
-        rotX: 0.40,
-        rotY: -0.48,
-        rotZ: 0.22,
-        rotSpeedX: 0.00016,
-        rotSpeedY: -0.00022,
-        rotSpeedZ: 0.00009,
-        wavePhase: 2.9,
-        waveSpeed: 0.0005,
-        waveAmp: 8,
-        zPhase: 3.4,
-        zSpeed: 0.00035,
-        zAmp: 30,
-        hoverProgress: 0,
-        mobileVisible: false,
-      },
-      // 5. Mathematical Form: √x (Vector metallic square root, upper-left space)
-      {
-        id: 'math-sqrt',
-        layer: 3,
-        type: 'math',
-        text: '√x',
-        x: width * 0.28,
-        y: height * 0.16,
-        z: 290,
-        vx: -0.018,
-        vy: 0.009,
-        vz: 0.012,
-        baseSize: 19,
-        baseOpacity: 0.17,
+        baseOpacity: 0.065,
         rotX: 0,
         rotY: 0,
-        rotZ: 0.04,
+        rotZ: -0.05,
         rotSpeedX: 0,
         rotSpeedY: 0,
         rotSpeedZ: 0.00008,
-        wavePhase: 3.1,
-        waveSpeed: 0.0004,
+        wavePhase: 0.5,
+        waveSpeed: 0.00035,
         waveAmp: 7,
-        zPhase: 0.9,
+        zPhase: 0.2,
         zSpeed: 0.0003,
-        zAmp: 24,
+        zAmp: 35,
         hoverProgress: 0,
         mobileVisible: true,
       },
-      // 6. Mathematical Form: a² + b² = c² (Central-top space)
+
+      // 11. FORMULA: a² + b² = c² (Central-top space)
       {
         id: 'math-pyth',
+        type: 'math_token',
         layer: 3,
-        type: 'math',
         text: 'a² + b² = c²',
-        x: width * 0.52,
-        y: height * 0.12,
-        z: 320,
+        x: width * 0.65,
+        y: height * 0.14,
+        z: 310,
         vx: 0.014,
         vy: 0.007,
         vz: -0.014,
         baseSize: 15,
-        baseOpacity: 0.16,
+        baseOpacity: 0.18,
         rotX: 0,
         rotY: 0,
         rotZ: -0.02,
@@ -746,49 +783,51 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         hoverProgress: 0,
         mobileVisible: false,
       },
-      // 7. Mathematical Form: x² (Floating gold typography, right upper space)
+
+      // 12. FORMULA: √x (Vector metallic square root, upper-left)
       {
-        id: 'math-x2',
+        id: 'math-sqrt',
+        type: 'math_token',
         layer: 3,
-        type: 'math',
-        text: 'x²',
-        x: width * 0.68,
+        text: '√x',
+        x: width * 0.32,
         y: height * 0.16,
-        z: 280,
-        vx: -0.016,
-        vy: -0.008,
-        vz: 0.015,
-        baseSize: 20,
-        baseOpacity: 0.17,
+        z: 290,
+        vx: -0.018,
+        vy: 0.009,
+        vz: 0.012,
+        baseSize: 19,
+        baseOpacity: 0.18,
         rotX: 0,
         rotY: 0,
-        rotZ: 0.05,
+        rotZ: 0.04,
         rotSpeedX: 0,
         rotSpeedY: 0,
         rotSpeedZ: 0.00008,
-        wavePhase: 1.4,
-        waveSpeed: 0.00045,
+        wavePhase: 3.1,
+        waveSpeed: 0.0004,
         waveAmp: 7,
-        zPhase: 4.1,
-        zSpeed: 0.00035,
-        zAmp: 28,
+        zPhase: 0.9,
+        zSpeed: 0.0003,
+        zAmp: 24,
         hoverProgress: 0,
         mobileVisible: true,
       },
-      // 8. Mathematical Form: ∞ (Infinity, lower central space)
+
+      // 13. FORMULA: ∞ (Infinity, lower space)
       {
         id: 'math-inf',
+        type: 'math_token',
         layer: 3,
-        type: 'math',
         text: '∞',
-        x: width * 0.58,
-        y: height * 0.88,
-        z: 270,
+        x: width * 0.52,
+        y: height * 0.90,
+        z: 280,
         vx: 0.02,
         vy: -0.008,
         vz: -0.012,
-        baseSize: 21,
-        baseOpacity: 0.16,
+        baseSize: 22,
+        baseOpacity: 0.17,
         rotX: 0,
         rotY: 0,
         rotZ: 0.03,
@@ -804,20 +843,21 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         hoverProgress: 0,
         mobileVisible: false,
       },
-      // 9. English 3D Block: ABC (Physical block, mid-left)
+
+      // 14. ENGLISH 3D BLOCK: ABC (Physical block, mid-left)
       {
         id: 'eng-abc',
+        type: 'english_token',
         layer: 3,
-        type: 'english',
         text: 'ABC',
         x: width * 0.14,
-        y: height * 0.46,
+        y: height * 0.52,
         z: 250,
         vx: 0.016,
         vy: -0.010,
         vz: 0.014,
         baseSize: 16,
-        baseOpacity: 0.18,
+        baseOpacity: 0.20,
         rotX: 0.12,
         rotY: -0.16,
         rotZ: -0.04,
@@ -833,49 +873,21 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         hoverProgress: 0,
         mobileVisible: true,
       },
-      // 10. English Token: Aa (Upper-left space)
-      {
-        id: 'eng-aa',
-        layer: 3,
-        type: 'english',
-        text: 'Aa',
-        x: width * 0.34,
-        y: height * 0.22,
-        z: 310,
-        vx: -0.014,
-        vy: 0.008,
-        vz: -0.012,
-        baseSize: 17,
-        baseOpacity: 0.16,
-        rotX: 0,
-        rotY: 0,
-        rotZ: 0.04,
-        rotSpeedX: 0,
-        rotSpeedY: 0,
-        rotSpeedZ: -0.00008,
-        wavePhase: 3.6,
-        waveSpeed: 0.00035,
-        waveAmp: 6,
-        zPhase: 2.2,
-        zSpeed: 0.0003,
-        zAmp: 24,
-        hoverProgress: 0,
-        mobileVisible: false,
-      },
-      // 11. English Block: Speak (Right flank)
+
+      // 15. ENGLISH TOKEN: PRACTICE / SPEAK (Right flank)
       {
         id: 'eng-speak',
+        type: 'english_token',
         layer: 3,
-        type: 'english',
-        text: 'SPEAK',
-        x: width * 0.76,
-        y: height * 0.74,
+        text: 'PRACTICE',
+        x: width * 0.80,
+        y: height * 0.80,
         z: 270,
         vx: -0.016,
         vy: -0.009,
         vz: 0.014,
-        baseSize: 13,
-        baseOpacity: 0.16,
+        baseSize: 12,
+        baseOpacity: 0.17,
         rotX: 0.05,
         rotY: 0.12,
         rotZ: 0.02,
@@ -891,40 +903,9 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         hoverProgress: 0,
         mobileVisible: false,
       },
-
-      // === LAYER 5: FOREGROUND (Only 1 rare close subtle token) ===
-      {
-        id: 'near-tri',
-        layer: 5,
-        type: 'geometry',
-        geomType: 'ring',
-        x: width * 0.94,
-        y: height * 0.86,
-        z: 110,
-        vx: -0.02,
-        vy: -0.012,
-        vz: 0.01,
-        baseSize: 22,
-        baseOpacity: 0.20,
-        rotX: 0.25,
-        rotY: 0.35,
-        rotZ: 0.1,
-        rotSpeedX: 0.00015,
-        rotSpeedY: 0.0002,
-        rotSpeedZ: 0.0001,
-        wavePhase: 1.2,
-        waveSpeed: 0.0005,
-        waveAmp: 8,
-        zPhase: 1.9,
-        zSpeed: 0.0004,
-        zAmp: 20,
-        hoverProgress: 0,
-        mobileVisible: false,
-      },
     ];
 
-    // Filter for mobile if necessary
-    const activeObjects = isMobile ? artObjects.filter((o) => o.mobileVisible) : artObjects;
+    const activeObjects = isMobile ? mathObjects.filter((o) => o.mobileVisible) : mathObjects;
 
     // -------------------------------------------------------------------------
     // 6. ATMOSPHERIC DUST PARTICLES (Light-reactive motes)
@@ -948,29 +929,24 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
 
     // -------------------------------------------------------------------------
     // 7. INVISIBLE SAFE ZONES: Dynamic Alpha Attenuation
-    // Guarantees zero obstruction over headline, text, CTAs, and laptop
     // -------------------------------------------------------------------------
     const computeSafeZoneFactor = (projX: number, projY: number): number => {
-      // Safe Zone 1, 2, 3: Hero Headline, Description, CTAs (Left Column)
       const textLeft = width * 0.05;
       const textRight = width * 0.49;
       const textTop = height * 0.14;
       const textBottom = height * 0.62;
 
-      // Safe Zone 4: Main 3D Laptop UI (Right Column)
       const laptopLeft = width * 0.52;
       const laptopRight = width * 0.95;
       const laptopTop = height * 0.18;
       const laptopBottom = height * 0.78;
 
-      // Header Safe Zone (Pristine navigation area)
       if (projY < height * 0.10) {
         return Math.max(0.02, (projY / (height * 0.10)) * 0.4);
       }
 
       const margin = 45;
 
-      // Inside hero text area
       if (
         projX >= textLeft - margin &&
         projX <= textRight + margin &&
@@ -983,7 +959,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         return Math.max(0.03, 1.0 - (depth / margin) * 0.97);
       }
 
-      // Inside laptop area
       if (
         projX >= laptopLeft - margin &&
         projX <= laptopRight + margin &&
@@ -1012,7 +987,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       lastTime = now;
       const elapsed = (now - startTimeRef.current) / 1000;
 
-      // Signature "Knowledge Awakening" Initial Reveal (2.5s)
       const revealProgress = prefersReducedMotion
         ? 1.0
         : Math.min(1.0, Math.pow(elapsed / 2.5, 1.6));
@@ -1023,7 +997,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       const revealBooks = Math.min(1.0, Math.max(0, (elapsed - 1.4) / 1.0));
       const revealCore = Math.min(1.0, Math.max(0, (elapsed - 1.7) / 0.9));
 
-      // FPS Monitoring & Dynamic Frame Budgeting
+      // FPS Monitoring
       frameCount++;
       fpsAccumulator += 1 / (dt || 0.016);
       if (frameCount >= 60) {
@@ -1039,13 +1013,12 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
 
       ctx.clearRect(0, 0, width, height);
 
-      // Smooth Camera Floating Drift (Autonomous perpetual motion)
+      // Smooth Camera Floating Drift
       const camX = prefersReducedMotion ? 0 : Math.sin(elapsed * 0.14) * 14;
       const camY = prefersReducedMotion ? 0 : Math.cos(elapsed * 0.11) * 10;
       const camZ = prefersReducedMotion ? 0 : Math.sin(elapsed * 0.16) * 18;
 
-      // Mouse Parallax with Subtle Sensitivity (5–12% max)
-      // Completely disabled on touch/mobile
+      // Mouse Parallax (Disabled on mobile)
       const mouseFactor = prefersReducedMotion || isMobile ? 0 : 0.04;
       mouseRef.current.currentX +=
         (mouseRef.current.targetX - mouseRef.current.currentX) * mouseFactor;
@@ -1062,7 +1035,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       const scrollDepthShift = Math.min(120, scrollRef.current.currentY * 0.08);
 
       // -----------------------------------------------------------------------
-      // UPDATE & RENDER TRAVELING GOLDEN LIGHT WAVE (8–14s)
+      // TRAVELING GOLDEN LIGHT WAVE (8–14s)
       // -----------------------------------------------------------------------
       const waveCycleTime = (elapsed % waveState.duration) / waveState.duration;
       const currentCycleCount = Math.floor(elapsed / waveState.duration);
@@ -1077,7 +1050,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         waveCycleTime
       );
 
-      // Draw soft traveling wavefront aura
       const projWave = project(
         waveState.currentPos,
         camX,
@@ -1088,7 +1060,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       );
       if (projWave.scale > 0 && !isLowPerformance) {
         const waveAuraSize = spriteWaveAura.width * projWave.scale * 1.6;
-        // Bell envelope for entry & exit fade
         const waveFade = Math.sin(waveCycleTime * Math.PI);
         ctx.globalAlpha = 0.45 * waveFade * revealProgress;
         ctx.drawImage(
@@ -1102,7 +1073,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       }
 
       // -----------------------------------------------------------------------
-      // UPDATE & RENDER 5 VIRTUAL MOVING LIGHTS
+      // 5 VIRTUAL MOVING LIGHTS
       // -----------------------------------------------------------------------
       virtualLights.forEach((vl) => {
         if (!prefersReducedMotion) {
@@ -1112,7 +1083,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           vl.z = vl.centerZ + Math.sin(vl.phase * vl.freqZ) * vl.orbitRz;
         }
 
-        // Draw soft ambient light aura
         const projLight = project(
           { x: vl.x, y: vl.y, z: vl.z },
           camX,
@@ -1136,7 +1106,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       ctx.globalAlpha = 1.0;
 
       // -----------------------------------------------------------------------
-      // LAYER 1: DEEP BACKGROUND (Faint coordinate lines & dark burgundy haze)
+      // LAYER 1: DEEP BACKGROUND (Faint coordinate grid lines)
       // -----------------------------------------------------------------------
       if (!isLowPerformance && !isMobile) {
         ctx.save();
@@ -1144,14 +1114,12 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         ctx.lineWidth = 0.8;
         ctx.setLineDash([2, 8]);
 
-        // Faint horizontal coordinate lines
         for (let y = height * 0.16; y <= height * 0.84; y += height * 0.22) {
           ctx.beginPath();
           ctx.moveTo(width * 0.08, y);
           ctx.lineTo(width * 0.92, y);
           ctx.stroke();
         }
-        // Faint vertical coordinate lines
         for (let x = width * 0.16; x <= width * 0.84; x += width * 0.24) {
           ctx.beginPath();
           ctx.moveTo(x, height * 0.12);
@@ -1164,7 +1132,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
 
       // -----------------------------------------------------------------------
       // LAYER 4: HERO DEPTH (Architectural Incomplete Rings Behind Laptop)
-      // 3 thin curved rings at different depths, center void preserves laptop contrast
       // -----------------------------------------------------------------------
       const coreCenter3D: Point3D = {
         x: width * 0.72,
@@ -1191,7 +1158,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         );
         const coreAlpha = (0.75 + lightBoost * 0.35 + waveBoost * 0.40) * revealCore;
 
-        // Incomplete Arc 1: Thin architectural circle (subtends 210°, passes behind laptop)
+        // Incomplete Arc 1: Thin architectural circle
         const r1 = 180 * projCore.scale;
         ctx.save();
         ctx.rotate(prefersReducedMotion ? 0.3 : elapsed * 0.030);
@@ -1202,7 +1169,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         ctx.stroke();
         ctx.restore();
 
-        // Incomplete Arc 2: Tilted 3D Mathematical Curve (tilted 25°, subtends 160°)
+        // Incomplete Arc 2: Tilted 3D Mathematical Curve
         const r2x = 260 * projCore.scale;
         const r2y = 150 * projCore.scale;
         ctx.save();
@@ -1233,62 +1200,10 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       }
 
       // -----------------------------------------------------------------------
-      // 3 ORGANIC GOLDEN LIGHT RIBBONS
-      // Flowing streams of warm light crossing the scene
-      // -----------------------------------------------------------------------
-      if (!isLowPerformance && !isMobile) {
-        // Ribbon 1: Curves behind laptop and fades into darkness
-        const ribbon1Y = height * 0.36 + Math.sin(elapsed * 0.28) * 20 + parallaxY * 0.2;
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(0, ribbon1Y);
-        for (let x = 0; x <= width; x += 40) {
-          const wave =
-            Math.sin(x * 0.0022 + elapsed * 0.45) * 24 +
-            Math.cos(x * 0.0035 - elapsed * 0.32) * 14;
-          ctx.lineTo(x, ribbon1Y + wave);
-        }
-        const grad1 = ctx.createLinearGradient(0, ribbon1Y - 20, width, ribbon1Y + 20);
-        grad1.addColorStop(0, 'rgba(217, 168, 63, 0)');
-        grad1.addColorStop(0.3, `rgba(217, 168, 63, ${0.045 * revealProgress})`);
-        grad1.addColorStop(0.7, `rgba(255, 235, 170, ${0.065 * revealProgress})`);
-        grad1.addColorStop(1, 'rgba(217, 168, 63, 0)');
-        ctx.strokeStyle = grad1;
-        ctx.lineWidth = 1.1;
-        ctx.setLineDash([8, 14]);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.restore();
-
-        // Ribbon 2: Asymmetric lower curve crossing behind bottom space
-        const ribbon2Y = height * 0.76 + Math.cos(elapsed * 0.22) * 18 + parallaxY * 0.15;
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(width * 0.05, ribbon2Y);
-        for (let x = width * 0.05; x <= width * 0.95; x += 45) {
-          const wave =
-            Math.cos(x * 0.0028 - elapsed * 0.4) * 20 +
-            Math.sin(x * 0.0042 + elapsed * 0.25) * 12;
-          ctx.lineTo(x, ribbon2Y + wave);
-        }
-        const grad2 = ctx.createLinearGradient(0, ribbon2Y - 15, width, ribbon2Y + 15);
-        grad2.addColorStop(0, 'rgba(217, 168, 63, 0)');
-        grad2.addColorStop(0.5, `rgba(243, 210, 118, ${0.04 * revealProgress})`);
-        grad2.addColorStop(1, 'rgba(217, 168, 63, 0)');
-        ctx.strokeStyle = grad2;
-        ctx.lineWidth = 0.95;
-        ctx.setLineDash([6, 12]);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.restore();
-      }
-
-      // -----------------------------------------------------------------------
-      // ART-DIRECTED OBJECTS RENDERING (Layers 2, 3, 5)
-      // Depth sorting: Render furthest objects first
+      // 3D MATHEMATICAL STRUCTURES & OBJECTS RENDERING
       // -----------------------------------------------------------------------
       activeObjects.forEach((obj) => {
-        // Continuous autonomous 3D movement (even if cursor is static)
+        // Continuous autonomous 3D movement through space
         if (!prefersReducedMotion) {
           obj.x += obj.vx;
           obj.y += obj.vy;
@@ -1300,23 +1215,24 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           obj.rotZ += obj.rotSpeedZ;
         }
 
-        // Dynamic 3D depth oscillation & non-repeating wrap-around
+        // Dynamic 3D depth oscillation ($Z$-depth through-space movement)
         const dynamicZ = obj.z + Math.sin(obj.zPhase) * obj.zAmp;
 
-        if (obj.y < -70) {
-          obj.y = height + 60;
+        // Boundary wrap & smooth re-entry
+        if (obj.y < -80) {
+          obj.y = height + 70;
           obj.x = Math.random() * width;
         }
-        if (obj.y > height + 70) {
-          obj.y = -60;
+        if (obj.y > height + 80) {
+          obj.y = -70;
           obj.x = Math.random() * width;
         }
-        if (obj.x < -90) {
-          obj.x = width + 80;
+        if (obj.x < -100) {
+          obj.x = width + 90;
           obj.y = Math.random() * height;
         }
-        if (obj.x > width + 90) {
-          obj.x = -80;
+        if (obj.x > width + 100) {
+          obj.x = -90;
           obj.y = Math.random() * height;
         }
 
@@ -1349,17 +1265,22 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           const dxCursor = mouseRef.current.screenX - proj.x;
           const dyCursor = mouseRef.current.screenY - proj.y;
           const cursorDist = Math.sqrt(dxCursor * dxCursor + dyCursor * dyCursor);
-          isHovered = cursorDist < 65;
+          isHovered = cursorDist < 75;
         }
         const targetHover = isHovered ? 1.0 : 0.0;
         obj.hoverProgress += (targetHover - obj.hoverProgress) * 0.08;
 
-        // Layer-based sequential reveal factor
+        // Layer reveal factor
         let staggerFactor = revealProgress;
-        if (obj.type === 'math') staggerFactor = revealMath;
-        else if (obj.type === 'english') staggerFactor = revealEnglish;
-        else if (obj.type === 'book') staggerFactor = revealBooks;
-        else if (obj.type === 'geometry') staggerFactor = revealGeom;
+        if (obj.type === 'parabola' || obj.type === 'sinewave' || obj.type === 'math_token') {
+          staggerFactor = revealMath;
+        } else if (obj.type === 'cube' || obj.type === 'pyramid' || obj.type === 'torus' || obj.type === 'spiral' || obj.type === 'grid3d') {
+          staggerFactor = revealGeom;
+        } else if (obj.type === 'book') {
+          staggerFactor = revealBooks;
+        } else if (obj.type === 'english_token') {
+          staggerFactor = revealEnglish;
+        }
 
         const totalIllum = lightBoost * 0.35 + waveBoost * 0.45;
         const finalAlpha =
@@ -1368,18 +1289,348 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           safeFactor *
           staggerFactor;
 
-        if (finalAlpha < 0.015) return;
+        if (finalAlpha < 0.012) return;
 
         ctx.save();
         ctx.translate(proj.x, proj.y);
 
-        // --- RENDER TYPE: 3D HARDCOVER BOOK (MATHEMATIKA or ENGLISH) ---
-        if (obj.type === 'book' && obj.bookWidth && obj.bookHeight && obj.bookThickness) {
+        // Dynamic warm gold coloration
+        let goldStroke = `rgba(243, 210, 118, ${(finalAlpha + totalIllum * 0.4) * 0.95})`;
+        let goldFill = `rgba(217, 168, 63, ${finalAlpha * 0.85})`;
+        if (dynamicZ < 260) {
+          goldStroke = `rgba(255, 235, 170, ${(finalAlpha + totalIllum * 0.5) * 1.0})`;
+          goldFill = `rgba(255, 245, 215, ${finalAlpha * 0.95})`;
+        } else if (dynamicZ > 500) {
+          goldStroke = `rgba(195, 150, 55, ${finalAlpha * 0.75})`;
+          goldFill = `rgba(185, 140, 50, ${finalAlpha * 0.65})`;
+        }
+
+        // =====================================================================
+        // STRUCTURE 1: 3D PARABOLA (y = x²) with 3D Axes & Vector Arrows
+        // =====================================================================
+        if (obj.type === 'parabola') {
+          const hoverRot = obj.hoverProgress * 0.20;
+          const rx = obj.rotX + hoverRot;
+          const ry = obj.rotY + hoverRot;
+          const rz = obj.rotZ;
+
+          const s = obj.baseSize * proj.scale;
+
+          // Parabola curve points: y = a * x^2
+          ctx.strokeStyle = goldStroke;
+          ctx.lineWidth = 1.15;
+          ctx.beginPath();
+          const pStart = rotate3D({ x: -40 * (s / 32), y: 22 * (s / 32), z: 0 }, rx, ry, rz);
+          ctx.moveTo(pStart.x, pStart.y);
+
+          for (let px = -36; px <= 40; px += 4) {
+            const py = (0.024 * px * px - 18) * (s / 32);
+            const pt = rotate3D({ x: px * (s / 32), y: py, z: 0 }, rx, ry, rz);
+            ctx.lineTo(pt.x, pt.y);
+          }
+          ctx.stroke();
+
+          // Coordinate Axes: X-axis [-48, 48] and Y-axis [-30, 24] with vector arrows
+          ctx.strokeStyle = `rgba(217, 168, 63, ${finalAlpha * 0.75})`;
+          ctx.lineWidth = 0.85;
+          ctx.setLineDash([3, 5]);
+
+          // X-Axis
+          const pX1 = rotate3D({ x: -48 * (s / 32), y: 0, z: 0 }, rx, ry, rz);
+          const pX2 = rotate3D({ x: 48 * (s / 32), y: 0, z: 0 }, rx, ry, rz);
+          ctx.beginPath();
+          ctx.moveTo(pX1.x, pX1.y);
+          ctx.lineTo(pX2.x, pX2.y);
+          ctx.stroke();
+
+          // Y-Axis
+          const pY1 = rotate3D({ x: 0, y: 24 * (s / 32), z: 0 }, rx, ry, rz);
+          const pY2 = rotate3D({ x: 0, y: -30 * (s / 32), z: 0 }, rx, ry, rz);
+          ctx.beginPath();
+          ctx.moveTo(pY1.x, pY1.y);
+          ctx.lineTo(pY2.x, pY2.y);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          // Vector Arrowhead on Y-Axis
+          const pYTip1 = rotate3D({ x: -3 * (s / 32), y: -24 * (s / 32), z: 0 }, rx, ry, rz);
+          const pYTip2 = rotate3D({ x: 3 * (s / 32), y: -24 * (s / 32), z: 0 }, rx, ry, rz);
+          ctx.beginPath();
+          ctx.moveTo(pYTip1.x, pYTip1.y);
+          ctx.lineTo(pY2.x, pY2.y);
+          ctx.lineTo(pYTip2.x, pYTip2.y);
+          ctx.stroke();
+
+          // Formula text: y = x²
+          ctx.font = `italic 600 ${Math.max(7, Math.floor(10 * proj.scale))}px "Playfair Display", Georgia, serif`;
+          ctx.fillStyle = goldFill;
+          const pLabel = rotate3D({ x: 16 * (s / 32), y: -22 * (s / 32), z: 0 }, rx, ry, rz);
+          ctx.fillText('y = x²', pLabel.x, pLabel.y);
+        }
+
+        // =====================================================================
+        // STRUCTURE 2: 3D SINUSOIDAL FUNCTION WAVE (y = sin(x))
+        // =====================================================================
+        else if (obj.type === 'sinewave') {
+          const hoverRot = obj.hoverProgress * 0.18;
+          const rx = obj.rotX + hoverRot;
+          const ry = obj.rotY + hoverRot;
+          const rz = obj.rotZ;
+
+          const s = obj.baseSize * proj.scale;
+          const waveT = elapsed * 1.8;
+
+          // Wave Points
+          ctx.strokeStyle = goldStroke;
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          const pStart = rotate3D(
+            { x: -55 * (s / 36), y: 16 * Math.sin(-55 * 0.08 + waveT) * (s / 36), z: 0 },
+            rx, ry, rz
+          );
+          ctx.moveTo(pStart.x, pStart.y);
+
+          for (let px = -50; px <= 55; px += 5) {
+            const py = 16 * Math.sin(px * 0.08 + waveT) * (s / 36);
+            const pt = rotate3D({ x: px * (s / 36), y: py, z: 0 }, rx, ry, rz);
+            ctx.lineTo(pt.x, pt.y);
+          }
+          ctx.stroke();
+
+          // Horizontal baseline axis with tick marks
+          ctx.strokeStyle = `rgba(217, 168, 63, ${finalAlpha * 0.65})`;
+          ctx.lineWidth = 0.8;
+          ctx.setLineDash([2, 6]);
+          const ax1 = rotate3D({ x: -62 * (s / 36), y: 0, z: 0 }, rx, ry, rz);
+          const ax2 = rotate3D({ x: 62 * (s / 36), y: 0, z: 0 }, rx, ry, rz);
+          ctx.beginPath();
+          ctx.moveTo(ax1.x, ax1.y);
+          ctx.lineTo(ax2.x, ax2.y);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          // Formula Label: y = sin(x)
+          ctx.font = `italic 600 ${Math.max(7, Math.floor(9.5 * proj.scale))}px "Playfair Display", Georgia, serif`;
+          ctx.fillStyle = goldFill;
+          const pLabel = rotate3D({ x: -30 * (s / 36), y: -18 * (s / 36), z: 0 }, rx, ry, rz);
+          ctx.fillText('y = sin(x)', pLabel.x, pLabel.y);
+        }
+
+        // =====================================================================
+        // STRUCTURE 3: 3D HOLOGRAPHIC PERSPECTIVE COORDINATE GRID PLANE
+        // =====================================================================
+        else if (obj.type === 'grid3d') {
+          const hoverRot = obj.hoverProgress * 0.15;
+          const rx = obj.rotX + hoverRot;
+          const ry = obj.rotY + hoverRot;
+          const rz = obj.rotZ;
+
+          const s = obj.baseSize * proj.scale;
+          const gridSize = 45 * (s / 42);
+          const step = gridSize / 3;
+
+          ctx.strokeStyle = `rgba(243, 210, 118, ${finalAlpha * 0.75})`;
+          ctx.lineWidth = 0.85;
+          ctx.setLineDash([3, 5]);
+
+          // Longitudinal grid lines along X
+          for (let gz = -gridSize; gz <= gridSize; gz += step) {
+            const p1 = rotate3D({ x: -gridSize, y: 0, z: gz }, rx, ry, rz);
+            const p2 = rotate3D({ x: gridSize, y: 0, z: gz }, rx, ry, rz);
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+
+          // Latitudinal grid lines along Z
+          for (let gx = -gridSize; gx <= gridSize; gx += step) {
+            const p1 = rotate3D({ x: gx, y: 0, z: -gridSize }, rx, ry, rz);
+            const p2 = rotate3D({ x: gx, y: 0, z: gridSize }, rx, ry, rz);
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+          ctx.setLineDash([]);
+
+          // 3D Axis indicator vectors (X in gold, Z in lighter gold)
+          const origin = rotate3D({ x: 0, y: 0, z: 0 }, rx, ry, rz);
+          const axisX = rotate3D({ x: gridSize * 1.15, y: 0, z: 0 }, rx, ry, rz);
+          const axisZ = rotate3D({ x: 0, y: 0, z: gridSize * 1.15 }, rx, ry, rz);
+
+          ctx.lineWidth = 1.1;
+          ctx.strokeStyle = goldStroke;
+          ctx.beginPath();
+          ctx.moveTo(origin.x, origin.y);
+          ctx.lineTo(axisX.x, axisX.y);
+          ctx.moveTo(origin.x, origin.y);
+          ctx.lineTo(axisZ.x, axisZ.y);
+          ctx.stroke();
+        }
+
+        // =====================================================================
+        // STRUCTURE 4: 3D GLASS CUBE
+        // =====================================================================
+        else if (obj.type === 'cube') {
+          const hoverRot = obj.hoverProgress * 0.25;
+          const currentRotX = obj.rotX + hoverRot;
+          const currentRotY = obj.rotY + hoverRot;
+
+          const cubeVertices: Point3D[] = [
+            { x: -1, y: -1, z: -1 }, { x: 1, y: -1, z: -1 },
+            { x: 1, y: 1, z: -1 }, { x: -1, y: 1, z: -1 },
+            { x: -1, y: -1, z: 1 }, { x: 1, y: -1, z: 1 },
+            { x: 1, y: 1, z: 1 }, { x: -1, y: 1, z: 1 },
+          ];
+          const cubeEdges: [number, number][] = [
+            [0, 1], [1, 2], [2, 3], [3, 0],
+            [4, 5], [5, 6], [6, 7], [7, 4],
+            [0, 4], [1, 5], [2, 6], [3, 7],
+          ];
+
+          const geomScale = obj.baseSize * proj.scale;
+          const projectedCube = cubeVertices.map((v) => {
+            const rot = rotate3D(v, currentRotX, currentRotY, obj.rotZ);
+            return { x: rot.x * geomScale, y: rot.y * geomScale };
+          });
+
+          // Translucent glass face tint
+          ctx.fillStyle = `rgba(34, 10, 15, ${finalAlpha * 0.35})`;
+          ctx.beginPath();
+          ctx.moveTo(projectedCube[0].x, projectedCube[0].y);
+          ctx.lineTo(projectedCube[1].x, projectedCube[1].y);
+          ctx.lineTo(projectedCube[2].x, projectedCube[2].y);
+          ctx.lineTo(projectedCube[3].x, projectedCube[3].y);
+          ctx.closePath();
+          ctx.fill();
+
+          // Gold wireframe edges
+          ctx.strokeStyle = goldStroke;
+          ctx.lineWidth = 0.95;
+          ctx.setLineDash([3, 5]);
+          cubeEdges.forEach(([i, j]) => {
+            ctx.beginPath();
+            ctx.moveTo(projectedCube[i].x, projectedCube[i].y);
+            ctx.lineTo(projectedCube[j].x, projectedCube[j].y);
+            ctx.stroke();
+          });
+          ctx.setLineDash([]);
+        }
+
+        // =====================================================================
+        // STRUCTURE 5: 3D PYRAMID (Tetrahedron / Square Pyramid)
+        // =====================================================================
+        else if (obj.type === 'pyramid') {
+          const hoverRot = obj.hoverProgress * 0.22;
+          const currentRotX = obj.rotX + hoverRot;
+          const currentRotY = obj.rotY + hoverRot;
+
+          const pyrVertices: Point3D[] = [
+            { x: 0, y: -1.4, z: 0 }, // Apex
+            { x: -1, y: 0.9, z: -1 }, // Base 0
+            { x: 1, y: 0.9, z: -1 },  // Base 1
+            { x: 1, y: 0.9, z: 1 },   // Base 2
+            { x: -1, y: 0.9, z: 1 },  // Base 3
+          ];
+          const pyrEdges: [number, number][] = [
+            [0, 1], [0, 2], [0, 3], [0, 4], // Ribs from apex
+            [1, 2], [2, 3], [3, 4], [4, 1], // Base perimeter
+          ];
+
+          const geomScale = obj.baseSize * proj.scale;
+          const projectedPyr = pyrVertices.map((v) => {
+            const rot = rotate3D(v, currentRotX, currentRotY, obj.rotZ);
+            return { x: rot.x * geomScale, y: rot.y * geomScale };
+          });
+
+          // Translucent glass base
+          ctx.fillStyle = `rgba(34, 10, 15, ${finalAlpha * 0.35})`;
+          ctx.beginPath();
+          ctx.moveTo(projectedPyr[1].x, projectedPyr[1].y);
+          ctx.lineTo(projectedPyr[2].x, projectedPyr[2].y);
+          ctx.lineTo(projectedPyr[3].x, projectedPyr[3].y);
+          ctx.lineTo(projectedPyr[4].x, projectedPyr[4].y);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.strokeStyle = goldStroke;
+          ctx.lineWidth = 0.95;
+          ctx.setLineDash([4, 6]);
+          pyrEdges.forEach(([i, j]) => {
+            ctx.beginPath();
+            ctx.moveTo(projectedPyr[i].x, projectedPyr[i].y);
+            ctx.lineTo(projectedPyr[j].x, projectedPyr[j].y);
+            ctx.stroke();
+          });
+          ctx.setLineDash([]);
+        }
+
+        // =====================================================================
+        // STRUCTURE 6: 3D TORUS (Geometric Wireframe Ring)
+        // =====================================================================
+        else if (obj.type === 'torus') {
+          const hoverRot = obj.hoverProgress * 0.20;
+          const rx = obj.rotX + hoverRot;
+          const ry = obj.rotY + hoverRot;
+          const rz = obj.rotZ;
+          const s = obj.baseSize * proj.scale;
+
+          ctx.strokeStyle = goldStroke;
+          ctx.lineWidth = 0.9;
+
+          // 4 Meridian Circles in 3D
+          const R = 18 * (s / 30);
+          const r = 8 * (s / 30);
+
+          for (let phi = 0; phi < Math.PI; phi += Math.PI / 4) {
+            ctx.beginPath();
+            for (let theta = 0; theta <= Math.PI * 2; theta += Math.PI / 8) {
+              const x = (R + r * Math.cos(theta)) * Math.cos(phi);
+              const y = r * Math.sin(theta);
+              const z = (R + r * Math.cos(theta)) * Math.sin(phi);
+              const pt = rotate3D({ x, y, z }, rx, ry, rz);
+              if (theta === 0) ctx.moveTo(pt.x, pt.y);
+              else ctx.lineTo(pt.x, pt.y);
+            }
+            ctx.stroke();
+          }
+        }
+
+        // =====================================================================
+        // STRUCTURE 7: 3D MATHEMATICAL HELIX / SPIRAL
+        // =====================================================================
+        else if (obj.type === 'spiral') {
+          const hoverRot = obj.hoverProgress * 0.20;
+          const rx = obj.rotX + hoverRot;
+          const ry = obj.rotY + hoverRot;
+          const rz = obj.rotZ;
+          const s = obj.baseSize * proj.scale;
+
+          ctx.strokeStyle = goldStroke;
+          ctx.lineWidth = 1.0;
+          ctx.beginPath();
+
+          for (let t = 0; t <= Math.PI * 5; t += Math.PI / 10) {
+            const rad = (10 + t * 1.8) * (s / 22);
+            const x = rad * Math.cos(t);
+            const y = rad * Math.sin(t);
+            const z = (t - Math.PI * 2.5) * 5 * (s / 22);
+            const pt = rotate3D({ x, y, z }, rx, ry, rz);
+            if (t === 0) ctx.moveTo(pt.x, pt.y);
+            else ctx.lineTo(pt.x, pt.y);
+          }
+          ctx.stroke();
+        }
+
+        // =====================================================================
+        // STRUCTURE 8: 3D HARDCOVER BOOKS (MATHEMATIKA & ENGLISH)
+        // =====================================================================
+        else if (obj.type === 'book' && obj.bookWidth && obj.bookHeight && obj.bookThickness) {
           const bw = obj.bookWidth * proj.scale;
           const bh = obj.bookHeight * proj.scale;
           const bThick = obj.bookThickness * proj.scale;
 
-          // 3D Hover physical reaction: Cover opens 5 degrees!
           const openAngle = obj.hoverProgress * 0.08;
           ctx.rotate(obj.rotZ + openAngle);
 
@@ -1389,7 +1640,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           ctx.fillStyle = 'rgba(5, 3, 4, 0.5)';
           ctx.fill();
 
-          // Stacked Book Pages Texture (White/Ivory layered page edge)
+          // Stacked Book Pages Texture
           ctx.fillStyle = `rgba(235, 222, 195, ${finalAlpha * 0.85})`;
           ctx.fillRect(-bw / 2 + bw - bThick * 0.35, -bh / 2 + 2, bThick * 0.35, bh - 4);
 
@@ -1400,7 +1651,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           ctx.globalAlpha = finalAlpha * 0.95;
           ctx.fill();
 
-          // Gold Double Hairline Border with light highlight
+          // Gold Double Hairline Border
           ctx.strokeStyle = `rgba(255, 235, 170, ${(finalAlpha + totalIllum * 0.5) * 0.9})`;
           ctx.lineWidth = 1.1;
           ctx.stroke();
@@ -1412,7 +1663,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           ctx.lineWidth = 0.6;
           ctx.stroke();
 
-          // 3D Spine Line with leather ribbed highlights
+          // 3D Spine Line
           ctx.beginPath();
           ctx.moveTo(-bw / 2 + bThick * 0.45, -bh / 2);
           ctx.lineTo(-bw / 2 + bThick * 0.45, bh / 2);
@@ -1428,106 +1679,22 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           ctx.fillText(obj.title || '', 0, 4);
         }
 
-        // --- RENDER TYPE: 3D GLASS GEOMETRY (Cube, Octahedron, Ring) ---
-        else if (obj.type === 'geometry') {
-          // Hover physical reaction: Rotates 15 degrees to reveal another shaded facet
-          const hoverRot = obj.hoverProgress * 0.25;
-          const currentRotX = obj.rotX + hoverRot;
-          const currentRotY = obj.rotY + hoverRot;
-
-          if (obj.geomType === 'cube') {
-            const cubeVertices: Point3D[] = [
-              { x: -1, y: -1, z: -1 }, { x: 1, y: -1, z: -1 },
-              { x: 1, y: 1, z: -1 }, { x: -1, y: 1, z: -1 },
-              { x: -1, y: -1, z: 1 }, { x: 1, y: -1, z: 1 },
-              { x: 1, y: 1, z: 1 }, { x: -1, y: 1, z: 1 },
-            ];
-            const cubeEdges: [number, number][] = [
-              [0, 1], [1, 2], [2, 3], [3, 0],
-              [4, 5], [5, 6], [6, 7], [7, 4],
-              [0, 4], [1, 5], [2, 6], [3, 7],
-            ];
-
-            const geomScale = obj.baseSize * proj.scale;
-            const projectedCube = cubeVertices.map((v) => {
-              const rot = rotate3D(v, currentRotX, currentRotY, obj.rotZ);
-              return { x: rot.x * geomScale, y: rot.y * geomScale };
-            });
-
-            ctx.strokeStyle = `rgba(243, 210, 118, ${(finalAlpha + totalIllum * 0.4) * 0.9})`;
-            ctx.lineWidth = 0.95;
-            ctx.setLineDash([3, 5]);
-            cubeEdges.forEach(([i, j]) => {
-              ctx.beginPath();
-              ctx.moveTo(projectedCube[i].x, projectedCube[i].y);
-              ctx.lineTo(projectedCube[j].x, projectedCube[j].y);
-              ctx.stroke();
-            });
-            ctx.setLineDash([]);
-          } else if (obj.geomType === 'octahedron') {
-            const octaVertices: Point3D[] = [
-              { x: 0, y: -1.3, z: 0 }, { x: 0, y: 1.3, z: 0 },
-              { x: -1, y: 0, z: 0 }, { x: 1, y: 0, z: 0 },
-              { x: 0, y: 0, z: -1 }, { x: 0, y: 0, z: 1 },
-            ];
-            const octaEdges: [number, number][] = [
-              [0, 2], [0, 3], [0, 4], [0, 5],
-              [1, 2], [1, 3], [1, 4], [1, 5],
-              [2, 4], [4, 3], [3, 5], [5, 2],
-            ];
-
-            const geomScale = obj.baseSize * proj.scale;
-            const projectedOcta = octaVertices.map((v) => {
-              const rot = rotate3D(v, currentRotX, currentRotY, obj.rotZ);
-              return { x: rot.x * geomScale, y: rot.y * geomScale };
-            });
-
-            ctx.strokeStyle = `rgba(255, 235, 170, ${(finalAlpha + totalIllum * 0.4) * 0.9})`;
-            ctx.lineWidth = 0.95;
-            ctx.setLineDash([4, 6]);
-            octaEdges.forEach(([i, j]) => {
-              ctx.beginPath();
-              ctx.moveTo(projectedOcta[i].x, projectedOcta[i].y);
-              ctx.lineTo(projectedOcta[j].x, projectedOcta[j].y);
-              ctx.stroke();
-            });
-            ctx.setLineDash([]);
-          } else if (obj.geomType === 'ring') {
-            const ringR = obj.baseSize * proj.scale;
-            ctx.rotate(obj.rotZ + hoverRot);
-            ctx.beginPath();
-            ctx.ellipse(0, 0, ringR, ringR * 0.38, 0, 0, Math.PI * 2);
-            ctx.strokeStyle = `rgba(243, 210, 118, ${finalAlpha * 0.85})`;
-            ctx.lineWidth = 1.0;
-            ctx.stroke();
-          }
-        }
-
-        // --- RENDER TYPE: MATHEMATICS & ENGLISH SYMBOLS ---
+        // =====================================================================
+        // STRUCTURE 9: MATHEMATICS & ENGLISH EDUCATIONAL TOKENS
+        // =====================================================================
         else {
-          // Hover physical reaction: Rotates slightly in 3D
           const hoverTilt = obj.hoverProgress * 0.08;
           ctx.rotate(obj.rotZ + hoverTilt);
 
           const renderSize = Math.max(8, Math.floor(obj.baseSize * proj.scale));
 
-          // Physical light warmth modulation
-          let colorStr = `rgba(225, 180, 75, ${finalAlpha})`;
-          if (dynamicZ < 250) {
-            colorStr = `rgba(255, 240, 190, ${finalAlpha})`;
-          } else if (dynamicZ > 500) {
-            colorStr = `rgba(185, 140, 50, ${finalAlpha})`;
-          }
-
-          // Special 3D glass facet styling for π
           if (obj.text === 'π' && obj.layer === 2) {
             ctx.font = `italic 600 ${renderSize}px "Playfair Display", Georgia, serif`;
-            ctx.fillStyle = colorStr;
+            ctx.fillStyle = goldFill;
             ctx.fillText('π', 0, 0);
           } else if (obj.text === '√x') {
-            // Precise vector metallic square root
             ctx.save();
-            ctx.strokeStyle = colorStr;
+            ctx.strokeStyle = goldStroke;
             ctx.lineWidth = 1.1;
             ctx.beginPath();
             ctx.moveTo(-renderSize * 0.6, 2);
@@ -1536,27 +1703,25 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
             ctx.lineTo(renderSize * 0.6, -renderSize * 0.6);
             ctx.stroke();
             ctx.font = `italic 600 ${Math.floor(renderSize * 0.85)}px "Playfair Display", Georgia, serif`;
-            ctx.fillStyle = colorStr;
+            ctx.fillStyle = goldFill;
             ctx.fillText('x', 0, 0);
             ctx.restore();
           } else if (obj.text === 'ABC') {
-            // 3D Letter block with subtle isometric bevel
             ctx.save();
             ctx.font = `bold ${renderSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
             ctx.letterSpacing = '2px';
-            // Subtle 3D shadow facet
             ctx.fillStyle = `rgba(34, 10, 15, ${finalAlpha * 0.7})`;
             ctx.fillText('ABC', 1.5, 1.5);
-            ctx.fillStyle = colorStr;
+            ctx.fillStyle = goldFill;
             ctx.fillText('ABC', 0, 0);
             ctx.restore();
-          } else if (obj.type === 'math') {
+          } else if (obj.type === 'math_token') {
             ctx.font = `italic 600 ${renderSize}px "Playfair Display", Georgia, serif`;
-            ctx.fillStyle = colorStr;
+            ctx.fillStyle = goldFill;
             ctx.fillText(obj.text || '', 0, 0);
           } else {
             ctx.font = `600 ${renderSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-            ctx.fillStyle = colorStr;
+            ctx.fillStyle = goldFill;
             ctx.letterSpacing = `${Math.max(1, 1.8 * proj.scale)}px`;
             ctx.fillText(obj.text || '', 0, 0);
           }
@@ -1576,7 +1741,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           p.phase += p.pulseSpeed;
         }
 
-        // Wrap around
         if (p.y < -30) {
           p.y = height + 25;
           p.x = Math.random() * width;
@@ -1589,7 +1753,6 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         const proj = project(p, camX, camY, camZ + scrollDepthShift, parallaxX, parallaxY);
         if (proj.scale <= 0) return;
 
-        // Dust motes illuminate when light or wave passes near them
         const { lightBoost, waveBoost } = getIlluminationBoost(p.x, p.y, p.z);
         const pulse = 0.8 + 0.2 * Math.sin(p.phase);
         const pAlpha =
