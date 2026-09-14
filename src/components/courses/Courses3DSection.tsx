@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   BookOpen,
   Clock,
@@ -29,30 +29,29 @@ type CourseVisualTheme = 'math' | 'english' | 'it' | 'academic';
 type PerformanceTier = 'ULTRA_LOW' | 'LOW' | 'MEDIUM' | 'HIGH';
 type DepthLayer = 'FOREGROUND' | 'MIDGROUND' | 'BACKGROUND' | 'DEEP_BACKGROUND';
 
-interface SatelliteObject3D {
+interface Sculpture3D {
   id: string;
   type:
-    | 'ring_horizontal'
-    | 'ring_nested'
-    | 'ring_elliptical'
-    | 'parabola'
-    | 'sinewave'
-    | 'knot'
-    | 'helix'
-    | 'axes'
-    | 'octahedron'
-    | 'formula'
-    | 'letter'
-    | 'word'
-    | 'code';
+    | 'ring_grand_horizontal'
+    | 'ring_nested_tilted'
+    | 'parabola_volumetric'
+    | 'sinewave_tubular'
+    | 'saddle_surface'
+    | 'double_helix'
+    | 'coord_tripod'
+    | 'vector_arrow'
+    | 'letter_3d'
+    | 'word_3d'
+    | 'code_block_3d';
   label?: string;
+  theme: CourseVisualTheme | 'universal';
   depthLayer: DepthLayer;
   // 3D Orbital Coordinates
   orbitRadius: number;
   orbitSpeed: number;
   orbitPhase: number;
-  orbitInclination: number; // orbital tilt in radians
-  orbitEccentricity: number; // elliptical squashing
+  orbitInclination: number;
+  orbitEccentricity: number;
   // Local Coordinates
   x: number;
   y: number;
@@ -64,14 +63,16 @@ interface SatelliteObject3D {
   rotSpeedX: number;
   rotSpeedY: number;
   rotSpeedZ: number;
-  // Physics & Interaction State
+  // Physics & Grab State
   isHovered: boolean;
   isGrabbed: boolean;
   spinVx: number;
   spinVy: number;
   size: number;
   baseOpacity: number;
-  // Cached Screen Projections for Hit-Testing & Sorting
+  // Dynamic Transition Opacity
+  transitionAlpha: number;
+  // Projected Screen Coordinates
   projX: number;
   projY: number;
   projScale: number;
@@ -100,7 +101,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     return INITIAL_COURSES.findIndex((c) => c.id === activeCourse.id);
   }, [activeCourse]);
 
-  // Determine Course Theme for 3D Laboratory
+  // Determine Course Theme for 3D Art-Direction
   const theme: CourseVisualTheme = useMemo(() => {
     const title = activeCourse.title.toLowerCase();
     const cat = (activeCourse.category || '').toLowerCase();
@@ -130,16 +131,16 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
   };
 
   // ---------------------------------------------------------------------------
-  // 3D CANVAS & UNIFIED MATHEMATICAL LABORATORY ENGINE
+  // 3D CANVAS & VOLUMETRIC ART-DIRECTED LABORATORY ENGINE
   // ---------------------------------------------------------------------------
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const animFrameRef = useRef<number | null>(null);
 
-  // Book 360° Turntable Physics State
+  // Book 360° Showroom Turntable Physics State
   const bookPhysicsRef = useRef({
     rotX: -0.16, // subtle downward perspective
-    rotY: 0.38,  // initial showroom angle
+    rotY: 0.42,  // initial showroom angle showing cover & spine
     rotZ: -0.02,
     angVx: 0,
     angVy: 0,
@@ -152,13 +153,13 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     hoverScale: 1.0,
   });
 
-  // Active Grab Target ('book' | satelliteId | null)
+  // Active Grab Target ('book' | sculptureId | null)
   const activeGrabTargetRef = useRef<string | null>(null);
 
-  // Satellites Collection Ref
-  const satellitesRef = useRef<SatelliteObject3D[]>([]);
+  // Sculptures Collection Ref
+  const sculpturesRef = useRef<Sculpture3D[]>([]);
 
-  // Mouse Parallax & Camera Drift Ref
+  // Camera & Mouse Parallax Ref
   const cameraRef = useRef({
     mouseX: 0,
     mouseY: 0,
@@ -166,387 +167,299 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     targetMouseY: 0,
   });
 
-  // Dynamic Performance Tier
-  const tierRef = useRef<PerformanceTier>('HIGH');
+  // Theme Transition Progress Tracker
+  const currentThemeRef = useRef<CourseVisualTheme>(theme);
+  currentThemeRef.current = theme;
 
-  // Populate Satellites depending on Theme & Device Tier
+  // Populate Custom High-End Sculptures
   useEffect(() => {
     const isMobile = window.innerWidth < 768;
     const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
-    tierRef.current = isMobile ? 'LOW' : isTablet ? 'MEDIUM' : 'HIGH';
 
-    const list: SatelliteObject3D[] = [];
+    const list: Sculpture3D[] = [];
 
     // =========================================================================
-    // 1. PRIMARY ORBITAL RINGS (Hero Satellites - Always Present)
+    // 1. UNIVERSAL PRIMARY HERO ORBITALS (Always Present & Elegant)
     // =========================================================================
-    // A. Main Grand Horizontal Orbital Ring (Directly encircling the book)
+    // A. The Grand Horizontal Brushed Gold Orbital Ring (Encircles book with depth)
     list.push({
-      id: 'prim-ring-main',
-      type: 'ring_horizontal',
+      id: 'prim-ring-grand',
+      type: 'ring_grand_horizontal',
+      theme: 'universal',
       depthLayer: 'FOREGROUND',
-      orbitRadius: 185,
-      orbitSpeed: 0.0009,
+      orbitRadius: 195,
+      orbitSpeed: 0.0008,
       orbitPhase: 0.4,
-      orbitInclination: 0.18, // slightly tilted horizontal
+      orbitInclination: 0.16,
       orbitEccentricity: 0.94,
       x: 0, y: 0, z: 0,
       rotX: 0.35, rotY: 0, rotZ: 0,
-      rotSpeedX: 0.0003, rotSpeedY: 0.0008, rotSpeedZ: 0.0002,
+      rotSpeedX: 0.0002, rotSpeedY: 0.0006, rotSpeedZ: 0.0002,
       isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-      size: 190,
-      baseOpacity: 0.90,
+      size: 195,
+      baseOpacity: 0.92,
+      transitionAlpha: 1.0,
       projX: 0, projY: 0, projScale: 1, projZ: 0,
     });
 
-    // B. Nested Double Tilted Ring (Secondary Hero Orbital)
+    // B. Nested Tilted Double Ring
     list.push({
       id: 'prim-ring-nested',
-      type: 'ring_nested',
+      type: 'ring_nested_tilted',
+      theme: 'universal',
       depthLayer: 'MIDGROUND',
-      orbitRadius: 230,
-      orbitSpeed: -0.0007,
-      orbitPhase: 2.3,
-      orbitInclination: -0.42,
+      orbitRadius: 240,
+      orbitSpeed: -0.00065,
+      orbitPhase: 2.5,
+      orbitInclination: -0.38,
       orbitEccentricity: 0.88,
       x: 0, y: 0, z: 0,
       rotX: -0.4, rotY: 0.3, rotZ: 0.2,
-      rotSpeedX: 0.0005, rotSpeedY: -0.0006, rotSpeedZ: 0.0003,
+      rotSpeedX: 0.0004, rotSpeedY: -0.0005, rotSpeedZ: 0.0002,
       isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-      size: 42,
+      size: 46,
       baseOpacity: 0.85,
+      transitionAlpha: 1.0,
       projX: 0, projY: 0, projScale: 1, projZ: 0,
     });
 
-    // C. Elliptical Counter-Orbiting Loop
+    // =========================================================================
+    // 2. MATHEMATICAL SCULPTURES (Volumetric, Museum-Grade)
+    // =========================================================================
+    // A. Volumetric Parabola Ribbon (y = x²) with 3D Depth
     list.push({
-      id: 'prim-ring-elliptical',
-      type: 'ring_elliptical',
+      id: 'math-parabola-volumetric',
+      type: 'parabola_volumetric',
+      label: 'y = x²',
+      theme: 'math',
       depthLayer: 'MIDGROUND',
-      orbitRadius: 265,
-      orbitSpeed: 0.0006,
-      orbitPhase: 4.8,
-      orbitInclination: 0.52,
-      orbitEccentricity: 0.82,
+      orbitRadius: 220,
+      orbitSpeed: 0.00075,
+      orbitPhase: 1.1,
+      orbitInclination: 0.32,
+      orbitEccentricity: 0.90,
       x: 0, y: 0, z: 0,
-      rotX: 0.5, rotY: -0.2, rotZ: 0.1,
-      rotSpeedX: 0.0004, rotSpeedY: 0.0007, rotSpeedZ: 0.0002,
+      rotX: 0.25, rotY: 0.45, rotZ: 0.1,
+      rotSpeedX: 0.0003, rotSpeedY: 0.0006, rotSpeedZ: 0.0002,
       isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
       size: 38,
+      baseOpacity: 0.85,
+      transitionAlpha: theme === 'math' ? 1.0 : 0.0,
+      projX: 0, projY: 0, projScale: 1, projZ: 0,
+    });
+
+    // B. Tubular Sine Wave Ribbon (y = sin(x))
+    list.push({
+      id: 'math-sinewave-tubular',
+      type: 'sinewave_tubular',
+      label: 'y = sin(x)',
+      theme: 'math',
+      depthLayer: 'MIDGROUND',
+      orbitRadius: 250,
+      orbitSpeed: -0.0007,
+      orbitPhase: 3.7,
+      orbitInclination: -0.34,
+      orbitEccentricity: 0.86,
+      x: 0, y: 0, z: 0,
+      rotX: -0.3, rotY: 0.55, rotZ: 0.15,
+      rotSpeedX: 0.0004, rotSpeedY: 0.0006, rotSpeedZ: 0.0003,
+      isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+      size: 40,
+      baseOpacity: 0.85,
+      transitionAlpha: theme === 'math' ? 1.0 : 0.0,
+      projX: 0, projY: 0, projScale: 1, projZ: 0,
+    });
+
+    // C. Hyperbolic Saddle Surface (Parametric 3D Function Mesh z = (x²-y²)/a)
+    list.push({
+      id: 'math-saddle-surface',
+      type: 'saddle_surface',
+      theme: 'math',
+      depthLayer: 'BACKGROUND',
+      orbitRadius: 280,
+      orbitSpeed: 0.0005,
+      orbitPhase: 5.2,
+      orbitInclination: 0.42,
+      orbitEccentricity: 0.84,
+      x: 0, y: 0, z: 0,
+      rotX: 0.5, rotY: 0.3, rotZ: -0.2,
+      rotSpeedX: 0.0005, rotSpeedY: 0.0004, rotSpeedZ: 0.0002,
+      isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+      size: 36,
       baseOpacity: 0.80,
+      transitionAlpha: theme === 'math' ? 1.0 : 0.0,
+      projX: 0, projY: 0, projScale: 1, projZ: 0,
+    });
+
+    // D. 3D Double Helix Spiral
+    list.push({
+      id: 'math-double-helix',
+      type: 'double_helix',
+      theme: 'math',
+      depthLayer: 'MIDGROUND',
+      orbitRadius: 265,
+      orbitSpeed: -0.00055,
+      orbitPhase: 2.1,
+      orbitInclination: -0.28,
+      orbitEccentricity: 0.89,
+      x: 0, y: 0, z: 0,
+      rotX: 0.3, rotY: 0.6, rotZ: 0.2,
+      rotSpeedX: 0.0006, rotSpeedY: 0.0007, rotSpeedZ: 0.0003,
+      isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+      size: 34,
+      baseOpacity: 0.80,
+      transitionAlpha: theme === 'math' ? 1.0 : 0.0,
+      projX: 0, projY: 0, projScale: 1, projZ: 0,
+    });
+
+    // E. 3D Coordinate Tripod (X, Y, Z) with Metallic Shafts
+    list.push({
+      id: 'math-coord-tripod',
+      type: 'coord_tripod',
+      label: 'XYZ',
+      theme: 'math',
+      depthLayer: 'FOREGROUND',
+      orbitRadius: 165,
+      orbitSpeed: 0.0011,
+      orbitPhase: 4.4,
+      orbitInclination: 0.22,
+      orbitEccentricity: 0.92,
+      x: 0, y: 0, z: 0,
+      rotX: 0.35, rotY: 0.4, rotZ: -0.15,
+      rotSpeedX: 0.0007, rotSpeedY: 0.0008, rotSpeedZ: 0.0004,
+      isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+      size: 26,
+      baseOpacity: 0.88,
+      transitionAlpha: theme === 'math' ? 1.0 : 0.0,
+      projX: 0, projY: 0, projScale: 1, projZ: 0,
+    });
+
+    // F. Architectural 3D Vector Arrow
+    list.push({
+      id: 'math-vector-arrow',
+      type: 'vector_arrow',
+      label: 'v⃗',
+      theme: 'math',
+      depthLayer: 'BACKGROUND',
+      orbitRadius: 295,
+      orbitSpeed: -0.00045,
+      orbitPhase: 0.8,
+      orbitInclination: -0.45,
+      orbitEccentricity: 0.85,
+      x: 0, y: 0, z: 0,
+      rotX: 0.4, rotY: 0.2, rotZ: 0.5,
+      rotSpeedX: 0.0005, rotSpeedY: 0.0004, rotSpeedZ: 0.0002,
+      isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+      size: 32,
+      baseOpacity: 0.75,
+      transitionAlpha: theme === 'math' ? 1.0 : 0.0,
       projX: 0, projY: 0, projScale: 1, projZ: 0,
     });
 
     // =========================================================================
-    // 2. MATHEMATICAL SCULPTURES (Midground & Foreground)
+    // 3. ENGLISH TYPOGRAPHIC 3D UNIVERSE (Volumetric Extruded Letters & Words)
     // =========================================================================
-    if (theme === 'math') {
-      // 3D Parabola y = x²
+    const engLetters = [
+      { label: 'A', r: 165, speed: 0.0011, phase: 0.5, inc: 0.24, layer: 'FOREGROUND' as const, size: 28 },
+      { label: 'B', r: 215, speed: -0.0008, phase: 2.3, inc: -0.32, layer: 'MIDGROUND' as const, size: 25 },
+      { label: 'C', r: 250, speed: 0.0007, phase: 4.1, inc: 0.28, layer: 'MIDGROUND' as const, size: 24 },
+      { label: 'Z', r: 285, speed: -0.0005, phase: 5.6, inc: -0.35, layer: 'BACKGROUND' as const, size: 22 },
+    ];
+    engLetters.forEach((el, idx) => {
       list.push({
-        id: 'math-parabola',
-        type: 'parabola',
-        label: 'y = x²',
-        depthLayer: 'MIDGROUND',
-        orbitRadius: 210,
-        orbitSpeed: 0.0008,
-        orbitPhase: 1.1,
-        orbitInclination: 0.35,
+        id: `eng-letter-${idx}`,
+        type: 'letter_3d',
+        label: el.label,
+        theme: 'english',
+        depthLayer: el.layer,
+        orbitRadius: el.r,
+        orbitSpeed: el.speed,
+        orbitPhase: el.phase,
+        orbitInclination: el.inc,
         orbitEccentricity: 0.90,
         x: 0, y: 0, z: 0,
-        rotX: 0.2, rotY: 0.4, rotZ: 0,
-        rotSpeedX: 0.0004, rotSpeedY: 0.0006, rotSpeedZ: 0.0002,
+        rotX: 0.2, rotY: 0.4, rotZ: 0.1,
+        rotSpeedX: 0.0006, rotSpeedY: 0.0009, rotSpeedZ: 0.0003,
         isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 32,
-        baseOpacity: 0.80,
+        size: el.size,
+        baseOpacity: 0.88,
+        transitionAlpha: theme === 'english' ? 1.0 : 0.0,
         projX: 0, projY: 0, projScale: 1, projZ: 0,
       });
+    });
 
-      // 3D Sine Wave Ribbon y = sin(x)
+    const engWords = [
+      { label: 'LEARN', r: 235, speed: 0.00075, phase: 1.2, inc: 0.35, layer: 'MIDGROUND' as const },
+      { label: 'SPEAK', r: 260, speed: -0.00065, phase: 3.4, inc: -0.38, layer: 'MIDGROUND' as const },
+      { label: 'THINK', r: 295, speed: 0.0005, phase: 5.0, inc: 0.30, layer: 'BACKGROUND' as const },
+    ];
+    engWords.forEach((ew, idx) => {
       list.push({
-        id: 'math-sinewave',
-        type: 'sinewave',
-        label: 'y = sin(x)',
-        depthLayer: 'MIDGROUND',
-        orbitRadius: 245,
-        orbitSpeed: -0.0007,
-        orbitPhase: 3.6,
-        orbitInclination: -0.32,
-        orbitEccentricity: 0.86,
+        id: `eng-word-${idx}`,
+        type: 'word_3d',
+        label: ew.label,
+        theme: 'english',
+        depthLayer: ew.layer,
+        orbitRadius: ew.r,
+        orbitSpeed: ew.speed,
+        orbitPhase: ew.phase,
+        orbitInclination: ew.inc,
+        orbitEccentricity: 0.88,
         x: 0, y: 0, z: 0,
-        rotX: -0.3, rotY: 0.5, rotZ: 0.1,
-        rotSpeedX: 0.0005, rotSpeedY: 0.0007, rotSpeedZ: 0.0003,
+        rotX: 0.1, rotY: 0.3, rotZ: 0,
+        rotSpeedX: 0.0004, rotSpeedY: 0.0007, rotSpeedZ: 0.0002,
         isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 34,
-        baseOpacity: 0.78,
+        size: 14,
+        baseOpacity: 0.82,
+        transitionAlpha: theme === 'english' ? 1.0 : 0.0,
         projX: 0, projY: 0, projScale: 1, projZ: 0,
       });
+    });
 
-      // 3D Coordinate Tripod (X, Y, Z)
+    // =========================================================================
+    // 4. IT & CODE 3D UNIVERSE (Architectural Hexagonal & Code Constructs)
+    // =========================================================================
+    const itItems = [
+      { label: '<code/>', r: 170, speed: 0.0011, phase: 0.6, inc: 0.22, layer: 'FOREGROUND' as const },
+      { label: '{ state }', r: 225, speed: -0.0008, phase: 2.6, inc: -0.32, layer: 'MIDGROUND' as const },
+      { label: 'async/await', r: 275, speed: 0.0006, phase: 4.5, inc: 0.30, layer: 'BACKGROUND' as const },
+    ];
+    itItems.forEach((it, idx) => {
       list.push({
-        id: 'math-axes',
-        type: 'axes',
-        label: 'XYZ',
-        depthLayer: 'MIDGROUND',
-        orbitRadius: 225,
-        orbitSpeed: 0.0006,
-        orbitPhase: 5.4,
-        orbitInclination: 0.45,
+        id: `it-block-${idx}`,
+        type: 'code_block_3d',
+        label: it.label,
+        theme: 'it',
+        depthLayer: it.layer,
+        orbitRadius: it.r,
+        orbitSpeed: it.speed,
+        orbitPhase: it.phase,
+        orbitInclination: it.inc,
         orbitEccentricity: 0.89,
         x: 0, y: 0, z: 0,
-        rotX: 0.4, rotY: 0.3, rotZ: -0.2,
-        rotSpeedX: 0.0006, rotSpeedY: 0.0005, rotSpeedZ: 0.0003,
+        rotX: 0.2, rotY: 0.4, rotZ: 0.1,
+        rotSpeedX: 0.0005, rotSpeedY: 0.0008, rotSpeedZ: 0.0003,
         isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 28,
-        baseOpacity: 0.82,
+        size: 16,
+        baseOpacity: 0.85,
+        transitionAlpha: theme === 'it' ? 1.0 : 0.0,
         projX: 0, projY: 0, projScale: 1, projZ: 0,
       });
+    });
 
-      // 3D Trefoil Knot Sculpture
-      list.push({
-        id: 'math-knot',
-        type: 'knot',
-        depthLayer: 'MIDGROUND',
-        orbitRadius: 285,
-        orbitSpeed: 0.0005,
-        orbitPhase: 2.8,
-        orbitInclination: 0.28,
-        orbitEccentricity: 0.85,
-        x: 0, y: 0, z: 0,
-        rotX: 0.3, rotY: 0.7, rotZ: 0.4,
-        rotSpeedX: 0.0004, rotSpeedY: 0.0005, rotSpeedZ: 0.0002,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 30,
-        baseOpacity: 0.75,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
+    // Device tier count optimization
+    const maxObjects = isMobile ? 6 : isTablet ? 10 : 16;
+    sculpturesRef.current = list.slice(0, maxObjects);
+  }, []);
 
-      // 3D Spiral Helix
-      list.push({
-        id: 'math-helix',
-        type: 'helix',
-        depthLayer: 'BACKGROUND',
-        orbitRadius: 295,
-        orbitSpeed: -0.0005,
-        orbitPhase: 4.5,
-        orbitInclination: -0.40,
-        orbitEccentricity: 0.87,
-        x: 0, y: 0, z: 0,
-        rotX: -0.4, rotY: 0.4, rotZ: 0.2,
-        rotSpeedX: 0.0004, rotSpeedY: 0.0006, rotSpeedZ: 0.0003,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 30,
-        baseOpacity: 0.70,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-
-      // Gemstone Octahedron Polyhedron
-      list.push({
-        id: 'math-octahedron',
-        type: 'octahedron',
-        depthLayer: 'MIDGROUND',
-        orbitRadius: 255,
-        orbitSpeed: 0.0007,
-        orbitPhase: 0.6,
-        orbitInclination: -0.30,
-        orbitEccentricity: 0.91,
-        x: 0, y: 0, z: 0,
-        rotX: 0.5, rotY: 0.5, rotZ: 0.2,
-        rotSpeedX: 0.0006, rotSpeedY: 0.0008, rotSpeedZ: 0.0004,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 24,
-        baseOpacity: 0.80,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-
-      // Subtle Formulas (Inner & Background)
-      const mathFormulas = [
-        { label: 'π', r: 155, speed: 0.0012, phase: 0.2, inc: 0.22, layer: 'FOREGROUND' as const },
-        { label: '∫', r: 165, speed: -0.0011, phase: 2.1, inc: -0.28, layer: 'FOREGROUND' as const },
-        { label: '√x', r: 160, speed: 0.0010, phase: 4.1, inc: 0.16, layer: 'FOREGROUND' as const },
-        { label: '∑', r: 270, speed: 0.0006, phase: 1.5, inc: 0.38, layer: 'BACKGROUND' as const },
-        { label: '∞', r: 290, speed: -0.0005, phase: 3.8, inc: -0.34, layer: 'BACKGROUND' as const },
-        { label: 'f(x)', r: 310, speed: 0.0004, phase: 5.7, inc: 0.25, layer: 'BACKGROUND' as const },
-      ];
-
-      mathFormulas.forEach((f, idx) => {
-        list.push({
-          id: `formula-${idx}`,
-          type: 'formula',
-          label: f.label,
-          depthLayer: f.layer,
-          orbitRadius: f.r,
-          orbitSpeed: f.speed,
-          orbitPhase: f.phase,
-          orbitInclination: f.inc,
-          orbitEccentricity: 0.92,
-          x: 0, y: 0, z: 0,
-          rotX: 0, rotY: 0, rotZ: 0,
-          rotSpeedX: 0.0006, rotSpeedY: 0.001, rotSpeedZ: 0.0004,
-          isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-          size: f.layer === 'FOREGROUND' ? 17 : 13,
-          baseOpacity: f.layer === 'FOREGROUND' ? 0.85 : 0.65,
-          projX: 0, projY: 0, projScale: 1, projZ: 0,
-        });
-      });
-    } else if (theme === 'english') {
-      // 3D English Typography Glyphs & Sparse Inspiring Words
-      const engLetters = [
-        { label: 'A', r: 155, speed: 0.0013, phase: 0.3, inc: 0.2 },
-        { label: 'B', r: 165, speed: -0.0011, phase: 2.2, inc: -0.26 },
-        { label: 'C', r: 160, speed: 0.0012, phase: 4.0, inc: 0.22 },
-        { label: 'Z', r: 275, speed: 0.0006, phase: 1.6, inc: 0.32 },
-      ];
-      engLetters.forEach((el, idx) => {
-        list.push({
-          id: `eng-letter-${idx}`,
-          type: 'letter',
-          label: el.label,
-          depthLayer: 'FOREGROUND',
-          orbitRadius: el.r,
-          orbitSpeed: el.speed,
-          orbitPhase: el.phase,
-          orbitInclination: el.inc,
-          orbitEccentricity: 0.92,
-          x: 0, y: 0, z: 0,
-          rotX: 0, rotY: 0, rotZ: 0,
-          rotSpeedX: 0.0008, rotSpeedY: 0.0012, rotSpeedZ: 0.0004,
-          isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-          size: 18,
-          baseOpacity: 0.85,
-          projX: 0, projY: 0, projScale: 1, projZ: 0,
-        });
-      });
-
-      const engWords = [
-        { label: 'LEARN', r: 220, speed: 0.0008, phase: 1.0, inc: 0.35, layer: 'MIDGROUND' as const },
-        { label: 'SPEAK', r: 240, speed: -0.0007, phase: 3.3, inc: -0.38, layer: 'MIDGROUND' as const },
-        { label: 'THINK', r: 250, speed: 0.0007, phase: 5.1, inc: 0.30, layer: 'MIDGROUND' as const },
-        { label: 'GROW', r: 285, speed: -0.0005, phase: 2.6, inc: -0.28, layer: 'BACKGROUND' as const },
-        { label: 'GLOBAL', r: 310, speed: 0.0004, phase: 4.8, inc: 0.32, layer: 'BACKGROUND' as const },
-      ];
-      engWords.forEach((ew, idx) => {
-        list.push({
-          id: `eng-word-${idx}`,
-          type: 'word',
-          label: ew.label,
-          depthLayer: ew.layer,
-          orbitRadius: ew.r,
-          orbitSpeed: ew.speed,
-          orbitPhase: ew.phase,
-          orbitInclination: ew.inc,
-          orbitEccentricity: 0.88,
-          x: 0, y: 0, z: 0,
-          rotX: 0, rotY: 0, rotZ: 0,
-          rotSpeedX: 0.0005, rotSpeedY: 0.0009, rotSpeedZ: 0.0003,
-          isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-          size: 13,
-          baseOpacity: ew.layer === 'MIDGROUND' ? 0.78 : 0.60,
-          projX: 0, projY: 0, projScale: 1, projZ: 0,
-        });
-      });
-
-      // English Sculpture: Gemstone Octahedron
-      list.push({
-        id: 'eng-octahedron',
-        type: 'octahedron',
-        depthLayer: 'MIDGROUND',
-        orbitRadius: 260,
-        orbitSpeed: 0.0007,
-        orbitPhase: 0.8,
-        orbitInclination: -0.32,
-        orbitEccentricity: 0.90,
-        x: 0, y: 0, z: 0,
-        rotX: 0.4, rotY: 0.6, rotZ: 0.2,
-        rotSpeedX: 0.0006, rotSpeedY: 0.0008, rotSpeedZ: 0.0003,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 26,
-        baseOpacity: 0.80,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-    } else if (theme === 'it') {
-      const itItems = [
-        { label: '<code/>', r: 155, speed: 0.0013, phase: 0.4, inc: 0.22, layer: 'FOREGROUND' as const },
-        { label: '{ ... }', r: 165, speed: -0.0011, phase: 2.3, inc: -0.28, layer: 'FOREGROUND' as const },
-        { label: '01', r: 160, speed: 0.0012, phase: 4.2, inc: 0.18, layer: 'FOREGROUND' as const },
-        { label: 'React', r: 220, speed: 0.0008, phase: 1.2, inc: 0.35, layer: 'MIDGROUND' as const },
-        { label: 'async', r: 240, speed: -0.0007, phase: 3.4, inc: -0.38, layer: 'MIDGROUND' as const },
-        { label: 'API', r: 285, speed: 0.0005, phase: 2.4, inc: 0.30, layer: 'BACKGROUND' as const },
-      ];
-      itItems.forEach((it, idx) => {
-        list.push({
-          id: `it-${idx}`,
-          type: 'code',
-          label: it.label,
-          depthLayer: it.layer,
-          orbitRadius: it.r,
-          orbitSpeed: it.speed,
-          orbitPhase: it.phase,
-          orbitInclination: it.inc,
-          orbitEccentricity: 0.90,
-          x: 0, y: 0, z: 0,
-          rotX: 0, rotY: 0, rotZ: 0,
-          rotSpeedX: 0.0006, rotSpeedY: 0.001, rotSpeedZ: 0.0004,
-          isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-          size: it.layer === 'FOREGROUND' ? 16 : 13,
-          baseOpacity: it.layer === 'FOREGROUND' ? 0.85 : 0.65,
-          projX: 0, projY: 0, projScale: 1, projZ: 0,
-        });
-      });
-      // Octahedron
-      list.push({
-        id: 'it-octahedron',
-        type: 'octahedron',
-        depthLayer: 'MIDGROUND',
-        orbitRadius: 260,
-        orbitSpeed: 0.0007,
-        orbitPhase: 0.8,
-        orbitInclination: -0.32,
-        orbitEccentricity: 0.90,
-        x: 0, y: 0, z: 0,
-        rotX: 0.4, rotY: 0.6, rotZ: 0.2,
-        rotSpeedX: 0.0006, rotSpeedY: 0.0008, rotSpeedZ: 0.0003,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 26,
-        baseOpacity: 0.80,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-    } else {
-      // Academic / DTM / Presidential Schools
-      const acadItems = [
-        { label: '189+', r: 155, speed: 0.0013, phase: 0.4, inc: 0.22, layer: 'FOREGROUND' as const },
-        { label: '★', r: 165, speed: -0.0011, phase: 2.3, inc: -0.28, layer: 'FOREGROUND' as const },
-        { label: 'DTM', r: 220, speed: 0.0008, phase: 1.2, inc: 0.35, layer: 'MIDGROUND' as const },
-        { label: 'GRANT', r: 240, speed: -0.0007, phase: 3.4, inc: -0.38, layer: 'MIDGROUND' as const },
-        { label: 'IQ', r: 285, speed: 0.0005, phase: 2.4, inc: 0.30, layer: 'BACKGROUND' as const },
-      ];
-      acadItems.forEach((ac, idx) => {
-        list.push({
-          id: `acad-${idx}`,
-          type: 'formula',
-          label: ac.label,
-          depthLayer: ac.layer,
-          orbitRadius: ac.r,
-          orbitSpeed: ac.speed,
-          orbitPhase: ac.phase,
-          orbitInclination: ac.inc,
-          orbitEccentricity: 0.90,
-          x: 0, y: 0, z: 0,
-          rotX: 0, rotY: 0, rotZ: 0,
-          rotSpeedX: 0.0006, rotSpeedY: 0.001, rotSpeedZ: 0.0004,
-          isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-          size: ac.layer === 'FOREGROUND' ? 16 : 13,
-          baseOpacity: ac.layer === 'FOREGROUND' ? 0.85 : 0.65,
-          projX: 0, projY: 0, projScale: 1, projZ: 0,
-        });
-      });
-    }
-
-    // Filter count according to mobile / low-end capability tier
-    let maxAllowed = 18;
-    if (isMobile) maxAllowed = 7;
-    else if (isTablet) maxAllowed = 11;
-
-    satellitesRef.current = list.slice(0, maxAllowed);
+  // Update Transition Alpha smoothly on Theme Change
+  useEffect(() => {
+    // Keep universal rings alive; smoothly adjust subject objects
+    sculpturesRef.current.forEach((s) => {
+      if (s.theme === 'universal') {
+        s.transitionAlpha = 1.0;
+      }
+    });
   }, [theme]);
 
   // Main Canvas Render Loop
@@ -578,7 +491,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     updateSize();
     window.addEventListener('resize', updateSize, { passive: true });
 
-    // 3D rotation buffer (Zero GC allocation)
+    // 3D vector rotation buffer (Zero GC allocation)
     const rotBuf = { x: 0, y: 0, z: 0 };
     const rotate3D = (px: number, py: number, pz: number, rx: number, ry: number, rz: number) => {
       const cosY = Math.cos(ry);
@@ -609,8 +522,9 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 
       const bookPhys = bookPhysicsRef.current;
       const cam = cameraRef.current;
+      const activeTheme = currentThemeRef.current;
 
-      // Camera Mouse Parallax Smoothing
+      // Smooth Camera Mouse Parallax
       cam.mouseX += (cam.targetMouseX - cam.mouseX) * 0.05;
       cam.mouseY += (cam.targetMouseY - cam.mouseY) * 0.05;
 
@@ -621,23 +535,22 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         bookPhys.rotY += bookPhys.angVy;
         bookPhys.rotX += bookPhys.angVx;
 
-        // Friction damping
+        // Realistic friction damping
         bookPhys.angVy *= 0.965;
         bookPhys.angVx *= 0.965;
 
-        // Strict vertical pitch clamping (turntable freedom, no tumbling)
+        // Clamped pitch (turntable freedom, no tumbling)
         bookPhys.rotX = Math.max(-0.25, Math.min(0.25, bookPhys.rotX));
 
         if (Math.abs(bookPhys.angVy) < 0.0001) bookPhys.angVy = 0;
         if (Math.abs(bookPhys.angVx) < 0.0001) bookPhys.angVx = 0;
 
-        // Subtle autonomous breathing when stationary (1-3px float)
+        // Subtle showroom breathing when stationary (1-3px)
         if (bookPhys.angVy === 0 && bookPhys.angVx === 0) {
-          bookPhys.rotY += Math.cos(time * 0.35) * 0.00025;
+          bookPhys.rotY += Math.cos(time * 0.3) * 0.0002;
         }
       }
 
-      // Smooth hover scale transition
       const targetHoverScale = bookPhys.isHovered ? 1.025 : 1.0;
       bookPhys.hoverScale += (targetHoverScale - bookPhys.hoverScale) * 0.12;
 
@@ -645,36 +558,33 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 
       const centerX = width / 2;
       const centerY = height / 2;
-
-      // Anchored vertical breathing float (1–3px)
-      const floatY = Math.sin(time * 1.2) * 2.5;
+      const floatY = Math.sin(time * 1.1) * 2.5;
       currentCenterX = centerX;
       currentCenterY = centerY;
       currentFloatY = floatY;
 
       // -----------------------------------------------------------------------
-      // 2. ATMOSPHERIC STUDIO LIGHTING & DEEP BACKGROUND
+      // 2. TRAVELING WARM GOLD KEY LIGHT SOURCE
       // -----------------------------------------------------------------------
-      // Traveling Warm Gold Studio Key Light
-      const lightAngle = time * 0.35;
-      const lightX = Math.cos(lightAngle) * 220;
-      const lightY = Math.sin(lightAngle * 0.7) * 90 - 40;
-      const lightZ = Math.sin(lightAngle) * 180;
+      const lightAngle = time * 0.32;
+      const lightX = Math.cos(lightAngle) * 240;
+      const lightY = Math.sin(lightAngle * 0.7) * 90 - 45;
+      const lightZ = Math.sin(lightAngle) * 200;
 
-      // Subtle 3D Coordinate Grid Floor (Deep Background)
+      // Subtle Atmospheric 3D Coordinate Grid Floor (Deep Background)
       ctx.save();
       ctx.translate(centerX, centerY + 140);
       ctx.strokeStyle = 'rgba(217, 169, 58, 0.04)';
       ctx.lineWidth = 1;
-      for (let gx = -180; gx <= 180; gx += 45) {
+      for (let gx = -200; gx <= 200; gx += 50) {
         ctx.beginPath();
-        ctx.moveTo(gx * 0.6, -20);
-        ctx.lineTo(gx * 1.4, 60);
+        ctx.moveTo(gx * 0.55, -22);
+        ctx.lineTo(gx * 1.45, 65);
         ctx.stroke();
       }
-      for (let gz = 0; gz <= 60; gz += 20) {
-        const factor = gz / 60;
-        const span = 110 + factor * 140;
+      for (let gz = 0; gz <= 65; gz += 22) {
+        const factor = gz / 65;
+        const span = 115 + factor * 155;
         ctx.beginPath();
         ctx.moveTo(-span, gz);
         ctx.lineTo(span, gz);
@@ -683,179 +593,200 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       ctx.restore();
 
       // -----------------------------------------------------------------------
-      // 3. SATELLITE ORBIT EVOLUTION & 3D PROJECTION
+      // 3. UPDATE SCULPTURES & DEPTH PROJECTION
       // -----------------------------------------------------------------------
-      const satellites = satellitesRef.current;
-      for (let i = 0; i < satellites.length; i++) {
-        const sat = satellites[i];
+      const sculptures = sculpturesRef.current;
+      for (let i = 0; i < sculptures.length; i++) {
+        const sc = sculptures[i];
 
-        // Orbit progression (pauses only when actively dragged)
-        if (!sat.isGrabbed) {
-          sat.orbitPhase += sat.orbitSpeed;
-          sat.rotX += sat.spinVx + sat.rotSpeedX;
-          sat.rotY += sat.spinVy + sat.rotSpeedY;
-          sat.rotZ += sat.rotSpeedZ;
+        // Smooth transition alpha toward active theme
+        const isMatch = sc.theme === 'universal' || sc.theme === activeTheme;
+        const targetAlpha = isMatch ? 1.0 : 0.0;
+        sc.transitionAlpha += (targetAlpha - sc.transitionAlpha) * 0.08;
 
-          sat.spinVx *= 0.965;
-          sat.spinVy *= 0.965;
+        if (!sc.isGrabbed) {
+          sc.orbitPhase += sc.orbitSpeed;
+          sc.rotX += sc.spinVx + sc.rotSpeedX;
+          sc.rotY += sc.spinVy + sc.rotSpeedY;
+          sc.rotZ += sc.rotSpeedZ;
+
+          sc.spinVx *= 0.965;
+          sc.spinVy *= 0.965;
         }
 
         // Elliptical inclined orbit coordinates
-        const baseOrbX = Math.cos(sat.orbitPhase) * sat.orbitRadius;
-        const baseOrbY = Math.sin(sat.orbitPhase) * sat.orbitRadius * sat.orbitEccentricity;
+        const baseOrbX = Math.cos(sc.orbitPhase) * sc.orbitRadius;
+        const baseOrbY = Math.sin(sc.orbitPhase) * sc.orbitRadius * sc.orbitEccentricity;
         const baseOrbZ = 0;
 
         // Apply orbital inclination
-        const cosInc = Math.cos(sat.orbitInclination);
-        const sinInc = Math.sin(sat.orbitInclination);
+        const cosInc = Math.cos(sc.orbitInclination);
+        const sinInc = Math.sin(sc.orbitInclination);
         const inclinedY = baseOrbY * cosInc - baseOrbZ * sinInc;
         const inclinedZ = baseOrbY * sinInc + baseOrbZ * cosInc;
 
-        sat.x = baseOrbX;
-        sat.y = inclinedY;
-        sat.z = inclinedZ;
+        sc.x = baseOrbX;
+        sc.y = inclinedY;
+        sc.z = inclinedZ;
 
-        // Perspective projection
-        const perspective = 540 / (540 + sat.z + 80);
-        // Parallax depth shift based on depth layer
-        const layerParallax = sat.depthLayer === 'FOREGROUND' ? 12 : sat.depthLayer === 'MIDGROUND' ? 6 : 2;
-        sat.projX = centerX + sat.x * perspective + cam.mouseX * layerParallax;
-        sat.projY = centerY + sat.y * perspective + floatY * 0.4 + cam.mouseY * layerParallax;
-        sat.projScale = perspective;
-        sat.projZ = sat.z;
+        // 3D perspective projection
+        const perspective = 540 / (540 + sc.z + 80);
+        const layerParallax = sc.depthLayer === 'FOREGROUND' ? 12 : sc.depthLayer === 'MIDGROUND' ? 6 : 2;
+        sc.projX = centerX + sc.x * perspective + cam.mouseX * layerParallax;
+        sc.projY = centerY + sc.y * perspective + floatY * 0.4 + cam.mouseY * layerParallax;
+        sc.projScale = perspective;
+        sc.projZ = sc.z;
       }
 
       // -----------------------------------------------------------------------
-      // 4. RENDER BACKGROUND SATELLITES (z < 0: Behind Book)
+      // 4. RENDER BACKGROUND SCULPTURES (z < 0: Behind Book)
       // -----------------------------------------------------------------------
-      for (let i = 0; i < satellites.length; i++) {
-        const sat = satellites[i];
-        if (sat.projZ < 10) {
-          renderSatellite(ctx, sat, lightX, lightY);
+      for (let i = 0; i < sculptures.length; i++) {
+        const sc = sculptures[i];
+        if (sc.projZ < 10 && sc.transitionAlpha > 0.02) {
+          renderSculpture(ctx, sc, lightX, lightY, lightZ);
         }
       }
 
       // -----------------------------------------------------------------------
-      // 5. RENDER 360° HERO 3D BOOK (The Showroom Centerpiece)
+      // 5. RENDER VOLUMETRIC 3D HERO BOOK (Anchored Showroom Masterpiece)
       // -----------------------------------------------------------------------
       ctx.save();
       const bookParallax = 8;
       ctx.translate(centerX + cam.mouseX * bookParallax, centerY + floatY + cam.mouseY * bookParallax);
       ctx.scale(bookPhys.hoverScale, bookPhys.hoverScale);
 
-      // Book Dimensions
+      // Book Dimensions: Realistic Textbook Proportions with Overhanging Hardcover
       const isCompact = width < 480;
-      const bw = isCompact ? 170 : 215;
-      const bh = isCompact ? 230 : 285;
-      const bThick = isCompact ? 34 : 44;
+      const bw = isCompact ? 175 : 220; // Cover width
+      const bh = isCompact ? 235 : 290; // Cover height
+      const bThick = isCompact ? 36 : 46; // Total thickness
+
+      // Overhang: Hardcover extends beyond pages by 4px on top/bottom/right
+      const overhang = 4.5;
+      const pageW = bw - overhang;
+      const pageH = bh - overhang * 2;
+      const pageThick = bThick - 6;
 
       const hw = bw / 2;
       const hh = bh / 2;
       const ht = bThick / 2;
 
-      // Studio Ground Shadow
-      const shadowGrad = ctx.createRadialGradient(0, hh + 45, 10, 0, hh + 45, hw * 1.6);
-      shadowGrad.addColorStop(0, 'rgba(5, 3, 4, 0.85)');
-      shadowGrad.addColorStop(0.55, 'rgba(5, 3, 4, 0.35)');
-      shadowGrad.addColorStop(1, 'rgba(5, 3, 4, 0)');
+      // Realistic Ground Contact Shadow
+      const shadowGrad = ctx.createRadialGradient(0, hh + 44, 8, 0, hh + 44, hw * 1.6);
+      shadowGrad.addColorStop(0, 'rgba(4, 2, 3, 0.88)');
+      shadowGrad.addColorStop(0.55, 'rgba(4, 2, 3, 0.32)');
+      shadowGrad.addColorStop(1, 'rgba(4, 2, 3, 0)');
       ctx.fillStyle = shadowGrad;
       ctx.beginPath();
-      ctx.ellipse(0, hh + 45, hw * 1.35, 24, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, hh + 44, hw * 1.35, 22, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Current Rotation Angles
+      // Rotation angles
       const rx = bookPhys.rotX;
       const ry = bookPhys.rotY;
       const rz = bookPhys.rotZ;
 
-      // Vertices in local space:
-      // Front cover: z = +ht (0: top-left, 1: top-right, 2: bottom-right, 3: bottom-left)
-      // Back cover:  z = -ht (4: top-left, 5: top-right, 6: bottom-right, 7: bottom-left)
-      const verts = [
+      // Vertices of Front Cover Plate (z = +ht, slightly thicker than pages)
+      const coverFrontVerts = [
         [-hw, -hh, ht], [hw, -hh, ht], [hw, hh, ht], [-hw, hh, ht],
+        [-hw, -hh, ht - 3], [hw, -hh, ht - 3], [hw, hh, ht - 3], [-hw, hh, ht - 3],
+      ];
+      // Vertices of Back Cover Plate (z = -ht)
+      const coverBackVerts = [
+        [-hw, -hh, -ht + 3], [hw, -hh, -ht + 3], [hw, hh, -ht + 3], [-hw, hh, -ht + 3],
         [-hw, -hh, -ht], [hw, -hh, -ht], [hw, hh, -ht], [-hw, hh, -ht],
       ];
+      // Vertices of Recessed Stratified Ivory Page Block (indented by overhang)
+      const pageLeft = -hw + 6; // starts just inside the spine
+      const pageRight = hw - overhang;
+      const pageTop = -hh + overhang;
+      const pageBottom = hh - overhang;
+      const pageVerts = [
+        [pageLeft, pageTop, ht - 3], [pageRight, pageTop, ht - 3], [pageRight, pageBottom, ht - 3], [pageLeft, pageBottom, ht - 3],
+        [pageLeft, pageTop, -ht + 3], [pageRight, pageTop, -ht + 3], [pageRight, pageBottom, -ht + 3], [pageLeft, pageBottom, -ht + 3],
+      ];
 
-      const proj = verts.map((v) => {
+      // Projected vertex sets
+      const projCoverFront = coverFrontVerts.map((v) => {
+        rotate3D(v[0], v[1], v[2], rx, ry, rz);
+        return { x: rotBuf.x, y: rotBuf.y, z: rotBuf.z };
+      });
+      const projCoverBack = coverBackVerts.map((v) => {
+        rotate3D(v[0], v[1], v[2], rx, ry, rz);
+        return { x: rotBuf.x, y: rotBuf.y, z: rotBuf.z };
+      });
+      const projPages = pageVerts.map((v) => {
         rotate3D(v[0], v[1], v[2], rx, ry, rz);
         return { x: rotBuf.x, y: rotBuf.y, z: rotBuf.z };
       });
 
-      // Palette by Theme
-      let coverTop = '#340b15';
-      let coverBot = '#150308';
-      let spineColor = '#4a0e1e';
+      // Shading Colors by Active Theme
+      let coverTopColor = '#340b15';
+      let coverBotColor = '#130307';
+      let spineColor = '#4e0e1e';
       let bookTitle = 'MATHEMATICS';
       let subTitle = 'LUMOS ACADEMY';
 
-      if (theme === 'english') {
-        coverTop = '#141E32';
-        coverBot = '#080C16';
-        spineColor = '#1F2E4A';
+      if (activeTheme === 'english') {
+        coverTopColor = '#141E32';
+        coverBotColor = '#070B14';
+        spineColor = '#1D2D48';
         bookTitle = 'ENGLISH';
         subTitle = 'IELTS & GRAMMAR';
-      } else if (theme === 'it') {
-        coverTop = '#12251D';
-        coverBot = '#06120D';
-        spineColor = '#1B382C';
+      } else if (activeTheme === 'it') {
+        coverTopColor = '#10241A';
+        coverBotColor = '#05100B';
+        spineColor = '#173627';
         bookTitle = 'FRONTEND IT';
-        subTitle = 'CODE & SYSTEMS';
-      } else if (theme === 'academic') {
-        coverTop = '#32101B';
-        coverBot = '#120409';
-        spineColor = '#4D1829';
+        subTitle = 'CODE & TECH';
+      } else if (activeTheme === 'academic') {
+        coverTopColor = '#30101A';
+        coverBotColor = '#100308';
+        spineColor = '#4A1627';
         bookTitle = 'DTM & GRANT';
         subTitle = 'AKADEMIK BLOK';
       }
 
       // Normal computations for backface culling & realistic illumination
-      const fv01x = proj[1].x - proj[0].x;
-      const fv01y = proj[1].y - proj[0].y;
-      const fv03x = proj[3].x - proj[0].x;
-      const fv03y = proj[3].y - proj[0].y;
-      const frontNormalZ = fv01x * fv03y - fv01y * fv03x;
+      const cf0 = projCoverFront[0];
+      const cf1 = projCoverFront[1];
+      const cf3 = projCoverFront[3];
+      const frontNormalZ = (cf1.x - cf0.x) * (cf3.y - cf0.y) - (cf1.y - cf0.y) * (cf3.x - cf0.x);
 
-      const sv04x = proj[4].x - proj[0].x;
-      const sv04y = proj[4].y - proj[0].y;
-      const spineNormalZ = sv04x * fv03y - sv04y * fv03x;
+      const spineNormalZ = (projCoverBack[0].x - cf0.x) * (cf3.y - cf0.y) - (projCoverBack[0].y - cf0.y) * (cf3.x - cf0.x);
 
-      const pv15x = proj[5].x - proj[1].x;
-      const pv15y = proj[5].y - proj[1].y;
-      const pv12x = proj[2].x - proj[1].x;
-      const pv12y = proj[2].y - proj[1].y;
-      const pagesNormalZ = pv15x * pv12y - pv15y * pv12x;
+      const p1 = projPages[1];
+      const p5 = projPages[5];
+      const p2 = projPages[2];
+      const p6 = projPages[6];
+      const pagesRightNormalZ = (p5.x - p1.x) * (p2.y - p1.y) - (p5.y - p1.y) * (p2.x - p1.x);
 
-      const topNormalZ = fv01x * sv04y - fv01y * sv04x;
+      const topNormalZ = (cf1.x - cf0.x) * (projCoverBack[0].y - cf0.y) - (cf1.y - cf0.y) * (projCoverBack[0].x - cf0.x);
 
-      const bv32x = proj[2].x - proj[3].x;
-      const bv32y = proj[2].y - proj[3].y;
-      const bv37x = proj[7].x - proj[3].x;
-      const bv37y = proj[7].y - proj[3].y;
-      const bottomNormalZ = bv32x * bv37y - bv32y * bv37x;
+      // Light alignment factor for specular sheen
+      const lightDot = (Math.cos(ry) * lightX + Math.sin(ry) * lightZ) / 220;
+      const specHighlight = Math.max(0, Math.min(1, 0.5 + lightDot * 0.5));
 
-      // Specular light angle alignment
-      const lightDotBook = (Math.cos(ry) * lightX + Math.sin(ry) * lightZ) / 200;
-      const lightHighlight = Math.max(0, Math.min(1, 0.5 + lightDotBook * 0.5));
-
-      // 1. Back Cover (if facing camera)
+      // 1. Back Cover Plate (if facing camera)
       if (frontNormalZ < 0) {
         ctx.beginPath();
-        ctx.moveTo(proj[4].x, proj[4].y);
-        ctx.lineTo(proj[5].x, proj[5].y);
-        ctx.lineTo(proj[6].x, proj[6].y);
-        ctx.lineTo(proj[7].x, proj[7].y);
+        ctx.moveTo(projCoverBack[4].x, projCoverBack[4].y);
+        ctx.lineTo(projCoverBack[5].x, projCoverBack[5].y);
+        ctx.lineTo(projCoverBack[6].x, projCoverBack[6].y);
+        ctx.lineTo(projCoverBack[7].x, projCoverBack[7].y);
         ctx.closePath();
-        ctx.fillStyle = coverBot;
+        ctx.fillStyle = coverBotColor;
         ctx.fill();
         ctx.strokeStyle = '#D9A93A';
         ctx.lineWidth = 1.3;
         ctx.stroke();
 
         // Embossed Back Seal
-        const backMidX = (proj[4].x + proj[5].x + proj[6].x + proj[7].x) / 4;
-        const backMidY = (proj[4].y + proj[5].y + proj[6].y + proj[7].y) / 4;
+        const bmx = (projCoverBack[4].x + projCoverBack[5].x + projCoverBack[6].x + projCoverBack[7].x) / 4;
+        const bmy = (projCoverBack[4].y + projCoverBack[5].y + projCoverBack[6].y + projCoverBack[7].y) / 4;
         ctx.save();
-        ctx.translate(backMidX, backMidY);
+        ctx.translate(bmx, bmy);
         ctx.beginPath();
         ctx.arc(0, 0, 24, 0, Math.PI * 2);
         ctx.strokeStyle = 'rgba(217, 169, 58, 0.55)';
@@ -867,126 +798,115 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         ctx.restore();
       }
 
-      // 2. Spine (Left edge)
+      // 2. Curved Spine Plate (Left edge)
       if (spineNormalZ > 0) {
         ctx.beginPath();
-        ctx.moveTo(proj[0].x, proj[0].y);
-        ctx.lineTo(proj[4].x, proj[4].y);
-        ctx.lineTo(proj[7].x, proj[7].y);
-        ctx.lineTo(proj[3].x, proj[3].y);
+        ctx.moveTo(cf0.x, cf0.y);
+        ctx.lineTo(projCoverBack[4].x, projCoverBack[4].y);
+        ctx.lineTo(projCoverBack[7].x, projCoverBack[7].y);
+        ctx.lineTo(cf3.x, cf3.y);
         ctx.closePath();
-        const spineGrad = ctx.createLinearGradient(proj[0].x, proj[0].y, proj[7].x, proj[7].y);
+        const spineGrad = ctx.createLinearGradient(cf0.x, cf0.y, projCoverBack[7].x, projCoverBack[7].y);
         spineGrad.addColorStop(0, spineColor);
-        spineGrad.addColorStop(1, '#0C0305');
+        spineGrad.addColorStop(1, '#0B0204');
         ctx.fillStyle = spineGrad;
         ctx.fill();
         ctx.strokeStyle = '#F4D27A';
         ctx.lineWidth = 1.3;
         ctx.stroke();
 
-        // Spine Gold Rib Lines
-        ctx.strokeStyle = 'rgba(244, 210, 122, 0.65)';
-        ctx.lineWidth = 1.1;
-        ctx.beginPath();
-        const sTop1X = proj[0].x * 0.75 + proj[3].x * 0.25;
-        const sTop1Y = proj[0].y * 0.75 + proj[3].y * 0.25;
-        const sTop2X = proj[4].x * 0.75 + proj[7].x * 0.25;
-        const sTop2Y = proj[4].y * 0.75 + proj[7].y * 0.25;
-        ctx.moveTo(sTop1X, sTop1Y);
-        ctx.lineTo(sTop2X, sTop2Y);
-
-        const sBot1X = proj[0].x * 0.25 + proj[3].x * 0.75;
-        const sBot1Y = proj[0].y * 0.25 + proj[3].y * 0.75;
-        const sBot2X = proj[4].x * 0.25 + proj[7].x * 0.75;
-        const sBot2Y = proj[4].y * 0.25 + proj[7].y * 0.75;
-        ctx.moveTo(sBot1X, sBot1Y);
-        ctx.lineTo(sBot2X, sBot2Y);
-        ctx.stroke();
+        // 3D Horizontal Gold Rib Ridges on Spine
+        ctx.strokeStyle = 'rgba(244, 210, 122, 0.7)';
+        ctx.lineWidth = 1.2;
+        for (let rib = 1; rib <= 4; rib++) {
+          const rat = rib / 5;
+          const r1x = cf0.x * (1 - rat) + cf3.x * rat;
+          const r1y = cf0.y * (1 - rat) + cf3.y * rat;
+          const r2x = projCoverBack[4].x * (1 - rat) + projCoverBack[7].x * rat;
+          const r2y = projCoverBack[4].y * (1 - rat) + projCoverBack[7].y * rat;
+          ctx.beginPath();
+          ctx.moveTo(r1x, r1y);
+          ctx.lineTo(r2x, r2y);
+          ctx.stroke();
+        }
       }
 
-      // 3. Right Pages Block (Layered Ivory Pages)
-      if (pagesNormalZ > 0) {
+      // 3. Recessed Stratified Ivory Page Block (Right Side)
+      if (pagesRightNormalZ > 0) {
         ctx.beginPath();
-        ctx.moveTo(proj[1].x, proj[1].y);
-        ctx.lineTo(proj[5].x, proj[5].y);
-        ctx.lineTo(proj[6].x, proj[6].y);
-        ctx.lineTo(proj[2].x, proj[2].y);
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p5.x, p5.y);
+        ctx.lineTo(p6.x, p6.y);
+        ctx.lineTo(p2.x, p2.y);
         ctx.closePath();
-        const pageGrad = ctx.createLinearGradient(proj[1].x, proj[1].y, proj[6].x, proj[6].y);
-        pageGrad.addColorStop(0, 'rgba(248, 244, 235, 0.98)');
-        pageGrad.addColorStop(0.5, 'rgba(224, 215, 198, 0.94)');
-        pageGrad.addColorStop(1, 'rgba(182, 170, 150, 0.90)');
+        const pageGrad = ctx.createLinearGradient(p1.x, p1.y, p6.x, p6.y);
+        pageGrad.addColorStop(0, 'rgba(250, 246, 238, 0.98)');
+        pageGrad.addColorStop(0.5, 'rgba(226, 218, 202, 0.94)');
+        pageGrad.addColorStop(1, 'rgba(180, 168, 146, 0.90)');
         ctx.fillStyle = pageGrad;
         ctx.fill();
         ctx.strokeStyle = 'rgba(217, 169, 58, 0.4)';
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        // Individual page stratification lines
-        ctx.strokeStyle = 'rgba(140, 128, 108, 0.35)';
-        for (let l = 1; l <= 3; l++) {
-          const rat = l / 4;
+        // Visible paper stratification lines with depth
+        ctx.strokeStyle = 'rgba(135, 124, 104, 0.35)';
+        for (let l = 1; l <= 4; l++) {
+          const rat = l / 5;
           ctx.beginPath();
-          ctx.moveTo(proj[1].x * (1 - rat) + proj[5].x * rat, proj[1].y * (1 - rat) + proj[5].y * rat);
-          ctx.lineTo(proj[2].x * (1 - rat) + proj[6].x * rat, proj[2].y * (1 - rat) + proj[6].y * rat);
+          ctx.moveTo(p1.x * (1 - rat) + p5.x * rat, p1.y * (1 - rat) + p5.y * rat);
+          ctx.lineTo(p2.x * (1 - rat) + p6.x * rat, p2.y * (1 - rat) + p6.y * rat);
           ctx.stroke();
         }
       }
 
-      // 4. Top Pages Block
+      // 4. Recessed Top Pages Block
       if (topNormalZ > 0) {
         ctx.beginPath();
-        ctx.moveTo(proj[0].x, proj[0].y);
-        ctx.lineTo(proj[1].x, proj[1].y);
-        ctx.lineTo(proj[5].x, proj[5].y);
-        ctx.lineTo(proj[4].x, proj[4].y);
+        ctx.moveTo(projPages[0].x, projPages[0].y);
+        ctx.lineTo(projPages[1].x, projPages[1].y);
+        ctx.lineTo(projPages[5].x, projPages[5].y);
+        ctx.lineTo(projPages[4].x, projPages[4].y);
         ctx.closePath();
-        ctx.fillStyle = 'rgba(235, 228, 214, 0.95)';
+        ctx.fillStyle = 'rgba(238, 232, 218, 0.95)';
         ctx.fill();
         ctx.strokeStyle = 'rgba(217, 169, 58, 0.35)';
         ctx.stroke();
       }
 
-      // 5. Bottom Pages Block
-      if (bottomNormalZ > 0) {
-        ctx.beginPath();
-        ctx.moveTo(proj[3].x, proj[3].y);
-        ctx.lineTo(proj[2].x, proj[2].y);
-        ctx.lineTo(proj[6].x, proj[6].y);
-        ctx.lineTo(proj[7].x, proj[7].y);
-        ctx.closePath();
-        ctx.fillStyle = 'rgba(198, 188, 172, 0.95)';
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(217, 169, 58, 0.35)';
-        ctx.stroke();
-      }
-
-      // 6. Front Cover Face (The Grand Masterpiece)
+      // 5. Front Cover Plate (The Grand Masterpiece)
       if (frontNormalZ > 0) {
         ctx.beginPath();
-        ctx.moveTo(proj[0].x, proj[0].y);
-        ctx.lineTo(proj[1].x, proj[1].y);
-        ctx.lineTo(proj[2].x, proj[2].y);
-        ctx.lineTo(proj[3].x, proj[3].y);
+        ctx.moveTo(cf0.x, cf0.y);
+        ctx.lineTo(cf1.x, cf1.y);
+        ctx.lineTo(projCoverFront[2].x, projCoverFront[2].y);
+        ctx.lineTo(cf3.x, cf3.y);
         ctx.closePath();
 
-        const coverGrad = ctx.createLinearGradient(proj[0].x, proj[0].y, proj[2].x, proj[2].y);
-        coverGrad.addColorStop(0, coverTop);
-        coverGrad.addColorStop(0.65, coverBot);
-        coverGrad.addColorStop(1, '#080204');
+        const coverGrad = ctx.createLinearGradient(cf0.x, cf0.y, projCoverFront[2].x, projCoverFront[2].y);
+        coverGrad.addColorStop(0, coverTopColor);
+        coverGrad.addColorStop(0.65, coverBotColor);
+        coverGrad.addColorStop(1, '#070204');
         ctx.fillStyle = coverGrad;
         ctx.fill();
 
-        // Warm Gold Specular Highlight Gleam
-        if (lightHighlight > 0.4) {
-          const specGrad = ctx.createRadialGradient(proj[0].x * 0.4 + proj[2].x * 0.6, proj[0].y * 0.4 + proj[2].y * 0.6, 10, proj[0].x * 0.4 + proj[2].x * 0.6, proj[0].y * 0.4 + proj[2].y * 0.6, hw);
-          specGrad.addColorStop(0, `rgba(255, 238, 185, ${0.18 * lightHighlight})`);
-          specGrad.addColorStop(1, 'rgba(255, 238, 185, 0)');
+        // Dynamic Specular Highlight Gleam
+        if (specHighlight > 0.35) {
+          const specGrad = ctx.createRadialGradient(
+            cf0.x * 0.4 + projCoverFront[2].x * 0.6,
+            cf0.y * 0.4 + projCoverFront[2].y * 0.6,
+            10,
+            cf0.x * 0.4 + projCoverFront[2].x * 0.6,
+            cf0.y * 0.4 + projCoverFront[2].y * 0.6,
+            hw * 1.1
+          );
+          specGrad.addColorStop(0, `rgba(255, 240, 195, ${0.20 * specHighlight})`);
+          specGrad.addColorStop(1, 'rgba(255, 240, 195, 0)');
           ctx.fillStyle = specGrad;
           ctx.fill();
         }
 
-        // Gold Rim
+        // Gold Rim & Bevel Line
         ctx.strokeStyle = '#F4D27A';
         ctx.lineWidth = 1.4;
         ctx.stroke();
@@ -994,22 +914,22 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         // Inner Embossed Gold Line Frame
         const inScale = 0.88;
         ctx.beginPath();
-        ctx.moveTo(proj[0].x * inScale, proj[0].y * inScale);
-        ctx.lineTo(proj[1].x * inScale, proj[1].y * inScale);
-        ctx.lineTo(proj[2].x * inScale, proj[2].y * inScale);
-        ctx.lineTo(proj[3].x * inScale, proj[3].y * inScale);
+        ctx.moveTo(cf0.x * inScale, cf0.y * inScale);
+        ctx.lineTo(cf1.x * inScale, cf1.y * inScale);
+        ctx.lineTo(projCoverFront[2].x * inScale, projCoverFront[2].y * inScale);
+        ctx.lineTo(cf3.x * inScale, cf3.y * inScale);
         ctx.closePath();
         ctx.strokeStyle = 'rgba(244, 210, 122, 0.45)';
         ctx.lineWidth = 0.9;
         ctx.stroke();
 
         // Front Cover Typography & Emblem
-        const faceMidX = (proj[0].x + proj[1].x + proj[2].x + proj[3].x) / 4;
-        const faceMidY = (proj[0].y + proj[1].y + proj[2].y + proj[3].y) / 4;
+        const faceMidX = (cf0.x + cf1.x + projCoverFront[2].x + cf3.x) / 4;
+        const faceMidY = (cf0.y + cf1.y + projCoverFront[2].y + cf3.y) / 4;
 
         ctx.save();
         ctx.translate(faceMidX, faceMidY);
-        const skewAngle = Math.atan2(proj[1].y - proj[0].y, proj[1].x - proj[0].x);
+        const skewAngle = Math.atan2(cf1.y - cf0.y, cf1.x - cf0.x);
         ctx.rotate(skewAngle);
 
         // Subtitle
@@ -1033,14 +953,20 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         ctx.fillStyle = '#F4D27A';
         ctx.fillText(bookTitle, 0.5, -hh * 0.08 + 0.5);
 
-        // Subtle Mathematical Engravings on Cover (π, ∫, √, x², f(x))
-        if (theme === 'math') {
+        // Subtle Embossed Symbols by Theme
+        if (activeTheme === 'math') {
           ctx.font = 'italic 10px serif';
           ctx.fillStyle = 'rgba(244, 210, 122, 0.45)';
           ctx.fillText('π', -hw * 0.55, -hh * 0.12);
           ctx.fillText('∫', hw * 0.55, -hh * 0.12);
           ctx.fillText('√x', -hw * 0.52, hh * 0.18);
           ctx.fillText('x²', hw * 0.52, hh * 0.18);
+        } else if (activeTheme === 'english') {
+          ctx.font = 'bold 9px sans-serif';
+          ctx.fillStyle = 'rgba(244, 210, 122, 0.45)';
+          ctx.fillText('READ', -hw * 0.52, -hh * 0.12);
+          ctx.fillText('SPEAK', hw * 0.52, -hh * 0.12);
+          ctx.fillText('THINK', 0, hh * 0.18);
         }
 
         // Emblem Seal
@@ -1057,17 +983,17 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 
         ctx.font = 'bold 12px monospace';
         ctx.fillStyle = '#F4D27A';
-        const sealGlyph = theme === 'math' ? '∑ π' : theme === 'english' ? 'EN' : theme === 'it' ? '< / >' : '★ DTM';
+        const sealGlyph = activeTheme === 'math' ? '∑ π' : activeTheme === 'english' ? 'EN' : activeTheme === 'it' ? '< / >' : '★ DTM';
         ctx.fillText(sealGlyph, 0, hh * 0.28 + 4);
 
         ctx.restore();
 
         // Draped Silk Ribbon Bookmark (Warm Gold)
         ctx.beginPath();
-        const rTopX = proj[0].x * 0.45 + proj[1].x * 0.55;
-        const rTopY = proj[0].y * 0.45 + proj[1].y * 0.55;
-        const rBotX = proj[3].x * 0.42 + proj[2].x * 0.58;
-        const rBotY = proj[3].y * 0.42 + proj[2].y * 0.58 + 26;
+        const rTopX = cf0.x * 0.45 + cf1.x * 0.55;
+        const rTopY = cf0.y * 0.45 + cf1.y * 0.55;
+        const rBotX = cf3.x * 0.42 + projCoverFront[2].x * 0.58;
+        const rBotY = cf3.y * 0.42 + projCoverFront[2].x * 0.58 + 26;
         ctx.moveTo(rTopX, rTopY);
         ctx.quadraticCurveTo(rTopX + 8, (rTopY + rBotY) / 2, rBotX, rBotY);
         ctx.lineTo(rBotX - 7, rBotY - 5);
@@ -1085,12 +1011,12 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       ctx.restore();
 
       // -----------------------------------------------------------------------
-      // 6. RENDER FOREGROUND SATELLITES (z >= 0: In Front of Book)
+      // 6. RENDER FOREGROUND SCULPTURES (z >= 0: In Front of Book)
       // -----------------------------------------------------------------------
-      for (let i = 0; i < satellites.length; i++) {
-        const sat = satellites[i];
-        if (sat.projZ >= 10) {
-          renderSatellite(ctx, sat, lightX, lightY);
+      for (let i = 0; i < sculptures.length; i++) {
+        const sc = sculptures[i];
+        if (sc.projZ >= 10 && sc.transitionAlpha > 0.02) {
+          renderSculpture(ctx, sc, lightX, lightY, lightZ);
         }
       }
 
@@ -1100,61 +1026,59 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     animFrameRef.current = requestAnimationFrame(render);
 
     // -------------------------------------------------------------------------
-    // HELPER: RENDER SATELLITE OBJECT WITH STUDIO LIGHTING
+    // HELPER: RENDER HIGH-END VOLUMETRIC SCULPTURE
     // -------------------------------------------------------------------------
-    function renderSatellite(c: CanvasRenderingContext2D, sat: SatelliteObject3D, lx: number, ly: number) {
+    function renderSculpture(c: CanvasRenderingContext2D, sc: Sculpture3D, lx: number, ly: number, lz: number) {
       c.save();
-      c.translate(sat.projX, sat.projY);
+      c.translate(sc.projX, sc.projY);
 
-      const hoverScale = sat.isHovered || sat.isGrabbed ? 1.25 : 1.0;
-      c.scale(sat.projScale * hoverScale, sat.projScale * hoverScale);
+      const hoverScale = sc.isHovered || sc.isGrabbed ? 1.25 : 1.0;
+      c.scale(sc.projScale * hoverScale, sc.projScale * hoverScale);
+      c.globalAlpha = sc.baseOpacity * sc.transitionAlpha;
 
-      // Rotate around local axis
-      c.rotate(sat.rotZ);
+      // Rotate around local orientation
+      c.rotate(sc.rotZ);
 
-      // Gold Halo on Hover
-      if (sat.isHovered || sat.isGrabbed) {
+      // Gold Glow Halo on Hover / Grab
+      if (sc.isHovered || sc.isGrabbed) {
         c.fillStyle = 'rgba(217, 169, 58, 0.28)';
         c.beginPath();
-        c.arc(0, 0, sat.size * 1.5, 0, Math.PI * 2);
+        c.arc(0, 0, sc.size * 1.5, 0, Math.PI * 2);
         c.fill();
       }
 
-      c.strokeStyle = sat.isHovered ? '#FFFFFF' : '#F4D27A';
-      c.fillStyle = sat.isHovered ? '#FFFFFF' : '#F4D27A';
-      c.lineWidth = sat.isHovered ? 1.6 : 1.1;
+      c.strokeStyle = sc.isHovered ? '#FFFFFF' : '#F4D27A';
+      c.fillStyle = sc.isHovered ? '#FFFFFF' : '#F4D27A';
+      c.lineWidth = sc.isHovered ? 1.6 : 1.2;
 
-      // 1. Text / Formula / Glyph Elements
-      if (
-        sat.type === 'formula' ||
-        sat.type === 'letter' ||
-        sat.type === 'word' ||
-        sat.type === 'code'
-      ) {
-        c.font = `bold ${Math.round(sat.size)}px monospace`;
-        c.textAlign = 'center';
-        c.textBaseline = 'middle';
-        c.fillText(sat.label || '', 0, 0);
-      }
-
-      // 2. Grand Horizontal Brushed Gold Orbital Ring
-      else if (sat.type === 'ring_horizontal') {
+      // -----------------------------------------------------------------------
+      // A. The Grand Horizontal Brushed Gold Orbital Ring
+      // -----------------------------------------------------------------------
+      if (sc.type === 'ring_grand_horizontal') {
+        // Outer Beveled Ellipse
         c.beginPath();
-        c.ellipse(0, 0, sat.size, sat.size * 0.32, sat.rotX, 0, Math.PI * 2);
-        c.lineWidth = 2.2;
+        c.ellipse(0, 0, sc.size, sc.size * 0.32, sc.rotX, 0, Math.PI * 2);
+        c.lineWidth = 2.4;
         c.strokeStyle = '#D9A93A';
         c.stroke();
 
-        // Subtle Coordinate Tick Marks along the Ring
+        // Inner Concentric Bevel
+        c.beginPath();
+        c.ellipse(0, 0, sc.size - 5, (sc.size - 5) * 0.32, sc.rotX, 0, Math.PI * 2);
         c.lineWidth = 1.0;
-        c.strokeStyle = 'rgba(244, 210, 122, 0.6)';
-        for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
-          const cosA = Math.cos(a + sat.rotY);
-          const sinA = Math.sin(a + sat.rotY);
-          const rx1 = cosA * (sat.size - 4);
-          const ry1 = sinA * (sat.size - 4) * 0.32;
-          const rx2 = cosA * (sat.size + 4);
-          const ry2 = sinA * (sat.size + 4) * 0.32;
+        c.strokeStyle = 'rgba(244, 210, 122, 0.45)';
+        c.stroke();
+
+        // Coordinate Tick Marks
+        c.lineWidth = 1.0;
+        c.strokeStyle = 'rgba(244, 210, 122, 0.65)';
+        for (let a = 0; a < Math.PI * 2; a += Math.PI / 6) {
+          const cosA = Math.cos(a + sc.rotY);
+          const sinA = Math.sin(a + sc.rotY);
+          const rx1 = cosA * (sc.size - 5);
+          const ry1 = sinA * (sc.size - 5) * 0.32;
+          const rx2 = cosA * (sc.size + 5);
+          const ry2 = sinA * (sc.size + 5) * 0.32;
           c.beginPath();
           c.moveTo(rx1, ry1);
           c.lineTo(rx2, ry2);
@@ -1162,99 +1086,265 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         }
       }
 
-      // 3. Nested Double Ring
-      else if (sat.type === 'ring_nested') {
+      // -----------------------------------------------------------------------
+      // B. Nested Tilted Double Ring
+      // -----------------------------------------------------------------------
+      else if (sc.type === 'ring_nested_tilted') {
         c.beginPath();
-        c.ellipse(0, 0, sat.size, sat.size * 0.5, sat.rotY, 0, Math.PI * 2);
+        c.ellipse(0, 0, sc.size, sc.size * 0.5, sc.rotY, 0, Math.PI * 2);
         c.stroke();
 
         c.beginPath();
-        c.ellipse(0, 0, sat.size * 0.72, sat.size * 0.36, sat.rotY + 0.3, 0, Math.PI * 2);
+        c.ellipse(0, 0, sc.size * 0.72, sc.size * 0.36, sc.rotY + 0.35, 0, Math.PI * 2);
         c.strokeStyle = 'rgba(217, 169, 58, 0.65)';
         c.stroke();
       }
 
-      // 4. Elliptical Loop
-      else if (sat.type === 'ring_elliptical') {
+      // -----------------------------------------------------------------------
+      // C. Volumetric Parabola Ribbon (y = x² with 3D Depth)
+      // -----------------------------------------------------------------------
+      else if (sc.type === 'parabola_volumetric') {
+        // Front curve
         c.beginPath();
-        c.ellipse(0, 0, sat.size, sat.size * 0.38, sat.rotX + sat.rotY, 0, Math.PI * 2);
-        c.stroke();
-      }
-
-      // 5. Parabola Curve y = x²
-      else if (sat.type === 'parabola') {
-        c.beginPath();
-        for (let px = -sat.size; px <= sat.size; px += 3) {
-          const py = (0.045 * px * px - 14);
-          if (px === -sat.size) c.moveTo(px, py);
+        for (let px = -sc.size; px <= sc.size; px += 3) {
+          const py = 0.045 * px * px - 16;
+          if (px === -sc.size) c.moveTo(px, py);
           else c.lineTo(px, py);
         }
+        c.lineWidth = 2.0;
+        c.strokeStyle = '#F4D27A';
         c.stroke();
+
+        // Extruded Depth Curve (offset by 4px down-right)
+        c.beginPath();
+        for (let px = -sc.size; px <= sc.size; px += 3) {
+          const py = 0.045 * px * px - 16 + 5;
+          if (px === -sc.size) c.moveTo(px + 3, py);
+          else c.lineTo(px + 3, py);
+        }
+        c.lineWidth = 1.0;
+        c.strokeStyle = 'rgba(217, 169, 58, 0.45)';
+        c.stroke();
+
+        // Cross-linking rungs for volumetric look
+        for (let rx = -sc.size; rx <= sc.size; rx += sc.size / 2) {
+          const ry1 = 0.045 * rx * rx - 16;
+          c.beginPath();
+          c.moveTo(rx, ry1);
+          c.lineTo(rx + 3, ry1 + 5);
+          c.stroke();
+        }
       }
 
-      // 6. Sine Wave Ribbon
-      else if (sat.type === 'sinewave') {
+      // -----------------------------------------------------------------------
+      // D. Tubular Sine Wave Ribbon (y = sin(x))
+      // -----------------------------------------------------------------------
+      else if (sc.type === 'sinewave_tubular') {
         c.beginPath();
-        for (let px = -sat.size; px <= sat.size; px += 3) {
-          const py = Math.sin(px * 0.16 + sat.rotY) * 11;
-          if (px === -sat.size) c.moveTo(px, py);
+        for (let px = -sc.size; px <= sc.size; px += 3) {
+          const py = Math.sin(px * 0.16 + sc.rotY) * 12;
+          if (px === -sc.size) c.moveTo(px, py);
           else c.lineTo(px, py);
         }
-        c.stroke();
-      }
-
-      // 7. Coordinate Tripod (X, Y, Z)
-      else if (sat.type === 'axes') {
-        c.beginPath();
-        c.moveTo(0, 0); c.lineTo(sat.size, 0);
-        c.moveTo(0, 0); c.lineTo(0, -sat.size);
-        c.moveTo(0, 0); c.lineTo(-sat.size * 0.65, sat.size * 0.65);
+        c.lineWidth = 2.0;
+        c.strokeStyle = '#F4D27A';
         c.stroke();
 
-        // Little axis labels
-        c.font = '8px monospace';
-        c.fillText('x', sat.size + 4, 2);
-        c.fillText('y', 2, -sat.size - 4);
-        c.fillText('z', -sat.size * 0.65 - 6, sat.size * 0.65 + 6);
-      }
-
-      // 8. Trefoil Knot
-      else if (sat.type === 'knot') {
+        // Secondary thickness line
         c.beginPath();
-        for (let t = 0; t <= Math.PI * 2; t += 0.18) {
-          const kx = (Math.sin(t) + 2 * Math.sin(2 * t)) * (sat.size * 0.32);
-          const ky = (Math.cos(t) - 2 * Math.cos(2 * t)) * (sat.size * 0.32);
-          if (t === 0) c.moveTo(kx, ky);
-          else c.lineTo(kx, ky);
+        for (let px = -sc.size; px <= sc.size; px += 3) {
+          const py = Math.sin(px * 0.16 + sc.rotY) * 12 + 4;
+          if (px === -sc.size) c.moveTo(px + 2, py);
+          else c.lineTo(px + 2, py);
         }
+        c.lineWidth = 1.0;
+        c.strokeStyle = 'rgba(217, 169, 58, 0.45)';
         c.stroke();
       }
 
-      // 9. Spiral Helix
-      else if (sat.type === 'helix') {
-        c.beginPath();
-        for (let step = 0; step <= 18; step++) {
-          const theta = (step / 18) * Math.PI * 4;
-          const r = (step / 18) * sat.size;
-          const hx = Math.cos(theta) * r;
-          const hy = Math.sin(theta) * r * 0.45;
-          if (step === 0) c.moveTo(hx, hy);
-          else c.lineTo(hx, hy);
+      // -----------------------------------------------------------------------
+      // E. Parametric 3D Saddle Surface Mesh (Hyperbolic Paraboloid)
+      // -----------------------------------------------------------------------
+      else if (sc.type === 'saddle_surface') {
+        const span = sc.size * 0.7;
+        const steps = 4;
+        c.strokeStyle = 'rgba(244, 210, 122, 0.65)';
+        c.lineWidth = 1.0;
+
+        for (let i = -steps; i <= steps; i++) {
+          const u = (i / steps) * span;
+          c.beginPath();
+          for (let j = -steps; j <= steps; j++) {
+            const v = (j / steps) * span;
+            const z = (u * u - v * v) * 0.02;
+            const px = u + z * 0.4;
+            const py = v - z * 0.3;
+            if (j === -steps) c.moveTo(px, py);
+            else c.lineTo(px, py);
+          }
+          c.stroke();
         }
-        c.stroke();
+        for (let j = -steps; j <= steps; j++) {
+          const v = (j / steps) * span;
+          c.beginPath();
+          for (let i = -steps; i <= steps; i++) {
+            const u = (i / steps) * span;
+            const z = (u * u - v * v) * 0.02;
+            const px = u + z * 0.4;
+            const py = v - z * 0.3;
+            if (i === -steps) c.moveTo(px, py);
+            else c.lineTo(px, py);
+          }
+          c.stroke();
+        }
       }
 
-      // 10. Gemstone Octahedron
-      else if (sat.type === 'octahedron') {
-        const os = sat.size * 0.8;
+      // -----------------------------------------------------------------------
+      // F. 3D Double Helix
+      // -----------------------------------------------------------------------
+      else if (sc.type === 'double_helix') {
+        const steps = 14;
+        const hSpan = sc.size;
+        for (let i = 0; i <= steps; i++) {
+          const t = (i / steps) * Math.PI * 3 + sc.rotY;
+          const y = (i / steps - 0.5) * hSpan * 1.5;
+          const x1 = Math.cos(t) * sc.size * 0.45;
+          const x2 = Math.cos(t + Math.PI) * sc.size * 0.45;
+
+          // Helix rungs
+          c.beginPath();
+          c.moveTo(x1, y);
+          c.lineTo(x2, y);
+          c.strokeStyle = 'rgba(217, 169, 58, 0.4)';
+          c.lineWidth = 0.8;
+          c.stroke();
+
+          // Helix nodes
+          c.fillStyle = '#F4D27A';
+          c.beginPath(); c.arc(x1, y, 1.8, 0, Math.PI * 2); c.fill();
+          c.beginPath(); c.arc(x2, y, 1.8, 0, Math.PI * 2); c.fill();
+        }
+      }
+
+      // -----------------------------------------------------------------------
+      // G. 3D Coordinate Tripod (X, Y, Z)
+      // -----------------------------------------------------------------------
+      else if (sc.type === 'coord_tripod') {
+        const s = sc.size;
+        c.lineWidth = 1.6;
+
+        // X Axis (Gold)
+        c.strokeStyle = '#F4D27A';
+        c.beginPath(); c.moveTo(0, 0); c.lineTo(s, 0); c.stroke();
+
+        // Y Axis (Burgundy / Red tint)
+        c.strokeStyle = '#D9A93A';
+        c.beginPath(); c.moveTo(0, 0); c.lineTo(0, -s); c.stroke();
+
+        // Z Axis (Champagne)
+        c.strokeStyle = '#FFE7A3';
+        c.beginPath(); c.moveTo(0, 0); c.lineTo(-s * 0.65, s * 0.65); c.stroke();
+
+        // Small Origin Cube
+        c.strokeRect(-2, -2, 4, 4);
+
+        // Labels
+        c.font = 'bold 8px monospace';
+        c.fillStyle = '#F4D27A';
+        c.fillText('X', s + 4, 2);
+        c.fillText('Y', 2, -s - 4);
+        c.fillText('Z', -s * 0.65 - 6, s * 0.65 + 6);
+      }
+
+      // -----------------------------------------------------------------------
+      // H. Architectural Vector Arrow
+      // -----------------------------------------------------------------------
+      else if (sc.type === 'vector_arrow') {
+        const s = sc.size;
+        c.lineWidth = 1.8;
         c.beginPath();
-        c.moveTo(0, -os); c.lineTo(os * 0.85, 0); c.lineTo(0, os); c.lineTo(-os * 0.85, 0); c.closePath();
+        c.moveTo(-s * 0.7, s * 0.5);
+        c.lineTo(s * 0.7, -s * 0.5);
         c.stroke();
+
+        // 3D Arrowhead Pyramid
         c.beginPath();
-        c.moveTo(-os * 0.85, 0); c.lineTo(os * 0.85, 0);
-        c.moveTo(0, -os); c.lineTo(0, os);
+        c.moveTo(s * 0.7, -s * 0.5);
+        c.lineTo(s * 0.4, -s * 0.5 - 6);
+        c.lineTo(s * 0.5 + 4, -s * 0.2);
+        c.closePath();
+        c.fillStyle = '#F4D27A';
+        c.fill();
+      }
+
+      // -----------------------------------------------------------------------
+      // I. Extruded Volumetric 3D Letters (A, B, C, Z)
+      // -----------------------------------------------------------------------
+      else if (sc.type === 'letter_3d') {
+        const fontSz = Math.round(sc.size * 1.3);
+        c.font = `900 ${fontSz}px "Playfair Display", serif`;
+        c.textAlign = 'center';
+        c.textBaseline = 'middle';
+
+        // Extruded 3D Shadow Layers
+        c.fillStyle = 'rgba(20, 6, 10, 0.75)';
+        c.fillText(sc.label || '', 3, 3);
+        c.fillStyle = '#6E1624';
+        c.fillText(sc.label || '', 2, 2);
+        c.fillStyle = '#D9A93A';
+        c.fillText(sc.label || '', 1, 1);
+        // Front Face
+        c.fillStyle = '#F4D27A';
+        c.fillText(sc.label || '', 0, 0);
+      }
+
+      // -----------------------------------------------------------------------
+      // J. 3D Typographic Word Blocks
+      // -----------------------------------------------------------------------
+      else if (sc.type === 'word_3d') {
+        const fontSz = Math.round(sc.size);
+        c.font = `bold ${fontSz}px -apple-system, sans-serif`;
+        c.textAlign = 'center';
+        c.textBaseline = 'middle';
+
+        // Background Plate
+        const textMetrics = c.measureText(sc.label || '');
+        const tw = textMetrics.width + 12;
+        const th = fontSz + 8;
+        c.fillStyle = 'rgba(18, 6, 10, 0.85)';
         c.strokeStyle = 'rgba(217, 169, 58, 0.5)';
+        c.lineWidth = 1;
+        c.beginPath();
+        c.roundRect(-tw / 2, -th / 2, tw, th, 4);
+        c.fill();
         c.stroke();
+
+        c.fillStyle = '#F4D27A';
+        c.fillText(sc.label || '', 0, 0);
+      }
+
+      // -----------------------------------------------------------------------
+      // K. 3D Code Block Constructs
+      // -----------------------------------------------------------------------
+      else if (sc.type === 'code_block_3d') {
+        const fontSz = Math.round(sc.size);
+        c.font = `bold ${fontSz}px monospace`;
+        c.textAlign = 'center';
+        c.textBaseline = 'middle';
+
+        c.fillStyle = 'rgba(10, 20, 14, 0.85)';
+        c.strokeStyle = 'rgba(217, 169, 58, 0.5)';
+        c.lineWidth = 1;
+        const tm = c.measureText(sc.label || '');
+        const cw = tm.width + 12;
+        const ch = fontSz + 8;
+        c.beginPath();
+        c.roundRect(-cw / 2, -ch / 2, cw, ch, 4);
+        c.fill();
+        c.stroke();
+
+        c.fillStyle = '#F4D27A';
+        c.fillText(sc.label || '', 0, 0);
       }
 
       c.restore();
@@ -1268,25 +1358,26 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       const px = e.clientX - rect.left;
       const py = e.clientY - rect.top;
 
-      const satellites = satellitesRef.current;
-      // Check Satellites first (hit radius 28px)
-      let grabbedSatId: string | null = null;
-      for (let i = satellites.length - 1; i >= 0; i--) {
-        const sat = satellites[i];
-        const dx = px - sat.projX;
-        const dy = py - sat.projY;
-        const hitRadius = Math.max(sat.size * sat.projScale * 1.3, 24);
+      const sculptures = sculpturesRef.current;
+      // Check Sculptures first (hit radius 28px)
+      let grabbedScId: string | null = null;
+      for (let i = sculptures.length - 1; i >= 0; i--) {
+        const sc = sculptures[i];
+        if (sc.transitionAlpha < 0.2) continue;
+        const dx = px - sc.projX;
+        const dy = py - sc.projY;
+        const hitRadius = Math.max(sc.size * sc.projScale * 1.3, 26);
         if (dx * dx + dy * dy < hitRadius * hitRadius) {
-          grabbedSatId = sat.id;
-          sat.isGrabbed = true;
-          sat.spinVx = 0;
-          sat.spinVy = 0;
+          grabbedScId = sc.id;
+          sc.isGrabbed = true;
+          sc.spinVx = 0;
+          sc.spinVy = 0;
           break;
         }
       }
 
-      if (grabbedSatId) {
-        activeGrabTargetRef.current = grabbedSatId;
+      if (grabbedScId) {
+        activeGrabTargetRef.current = grabbedScId;
         bookPhysicsRef.current.lastPointerX = e.clientX;
         bookPhysicsRef.current.lastPointerY = e.clientY;
         bookPhysicsRef.current.lastTime = performance.now();
@@ -1350,28 +1441,29 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
           bookPhysicsRef.current.rotX += dy * 0.003;
           bookPhysicsRef.current.rotX = Math.max(-0.25, Math.min(0.25, bookPhysicsRef.current.rotX));
         } else {
-          // Satellite local rotation
-          const sat = satellitesRef.current.find((s) => s.id === activeTarget);
-          if (sat) {
-            sat.rotY += dx * 0.015;
-            sat.rotX += dy * 0.015;
+          // Sculpture local rotation
+          const sc = sculpturesRef.current.find((s) => s.id === activeTarget);
+          if (sc) {
+            sc.rotY += dx * 0.015;
+            sc.rotX += dy * 0.015;
           }
         }
         return;
       }
 
       // Hover Hit-testing
-      const satellites = satellitesRef.current;
-      let hoveredSat = false;
-      for (let i = 0; i < satellites.length; i++) {
-        const sat = satellites[i];
-        const distSq = (px - sat.projX) ** 2 + (py - sat.projY) ** 2;
-        const hitRadius = Math.max(sat.size * sat.projScale * 1.3, 24);
+      const sculptures = sculpturesRef.current;
+      let hoveredSc = false;
+      for (let i = 0; i < sculptures.length; i++) {
+        const sc = sculptures[i];
+        if (sc.transitionAlpha < 0.2) continue;
+        const distSq = (px - sc.projX) ** 2 + (py - sc.projY) ** 2;
+        const hitRadius = Math.max(sc.size * sc.projScale * 1.3, 26);
         if (distSq < hitRadius * hitRadius) {
-          sat.isHovered = true;
-          hoveredSat = true;
+          sc.isHovered = true;
+          hoveredSc = true;
         } else {
-          sat.isHovered = false;
+          sc.isHovered = false;
         }
       }
 
@@ -1380,7 +1472,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       const isOverBook = cdx * cdx + cdy * cdy < 130 * 130;
       bookPhysicsRef.current.isHovered = isOverBook;
 
-      canvas.style.cursor = isOverBook || hoveredSat ? 'grab' : 'default';
+      canvas.style.cursor = isOverBook || hoveredSc ? 'grab' : 'default';
     };
 
     const handlePointerUp = (e: PointerEvent) => {
@@ -1404,11 +1496,11 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         bookPhysicsRef.current.angVy = calculatedVx * 0.0075;
         bookPhysicsRef.current.angVx = calculatedVy * 0.0025;
       } else {
-        const sat = satellitesRef.current.find((s) => s.id === activeTarget);
-        if (sat) {
-          sat.isGrabbed = false;
-          sat.spinVy = calculatedVx * 0.012;
-          sat.spinVx = calculatedVy * 0.012;
+        const sc = sculpturesRef.current.find((s) => s.id === activeTarget);
+        if (sc) {
+          sc.isGrabbed = false;
+          sc.spinVy = calculatedVx * 0.012;
+          sc.spinVx = calculatedVy * 0.012;
         }
       }
 
@@ -1431,7 +1523,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       canvas.removeEventListener('pointercancel', handlePointerUp);
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, [theme]);
+  }, []);
 
   return (
     <section
