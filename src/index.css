@@ -556,3 +556,21 @@ body {
       0.01ms !important;
   }
 }
+
+/* --------------------------------------------------------------------------
+   LUMOS 3D OBJECT INTERACTION SHIELD (Touch & Drag Protection)
+   -------------------------------------------------------------------------- */
+html.lumos-grabbing-3d,
+html.lumos-grabbing-3d * {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+}
+
+.lumos-3d-canvas {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  touch-action: pan-y;
+}

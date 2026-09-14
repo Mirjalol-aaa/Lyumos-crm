@@ -183,21 +183,41 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
     const isMobile = window.innerWidth < 768;
     const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+    
+    // Performance optimized DPR: limit to 1.25 on mobile, 1.75 on desktop
+    let dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1.25 : 1.75);
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    ctx.scale(dpr, dpr);
 
     const handleResize = () => {
       if (!canvas) return;
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+      width = window.innerWidth;
+      height = window.innerHeight;
+      const currentIsMobile = window.innerWidth < 768;
+      dpr = Math.min(window.devicePixelRatio || 1, currentIsMobile ? 1.25 : 1.75);
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      ctx.scale(dpr, dpr);
     };
     window.addEventListener('resize', handleResize, { passive: true });
 
-    // Scroll Tracking
+    // High-performance scroll tracking with active scroll state detection
+    let isScrolling = false;
+    let scrollTimeout: any = null;
+
     const handleScroll = () => {
       scrollRef.current.targetY = window.scrollY;
+      isScrolling = true;
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        isScrolling = false;
+      }, 140);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
 
@@ -756,7 +776,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       };
     };
 
-    const targetEntityCount = isMobile ? 6 : isTablet ? 9 : 12;
+    const targetEntityCount = isMobile ? 7 : isTablet ? 9 : 12;
     const flyingEntities: FlyingEntity3D[] = [];
 
     for (let i = 0; i < targetEntityCount; i++) {
@@ -778,8 +798,12 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       y: -9999,
       isDown: false,
       pointerId: -1,
+      capturedTarget: null as Element | null,
       grabOffsetX: 0,
       grabOffsetY: 0,
+      initialDownX: 0,
+      initialDownY: 0,
+      isDragConfirmed: false,
       grabbedEntity: null as FlyingEntity3D | null,
       hoveredEntity: null as FlyingEntity3D | null,
       history: [] as { x: number; y: number; time: number }[],
@@ -793,19 +817,15 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       return !!target.closest('button, a, input, textarea, select, [role="button"], nav, header');
     };
 
-    // Helper to safely enable/disable text selection during active 3D grab
+    // Helper to safely toggle text selection shield during active 3D grab
     const setSelectionShield = (active: boolean) => {
       if (active) {
         window.getSelection()?.removeAllRanges();
-        document.documentElement.style.userSelect = 'none';
-        document.documentElement.style.webkitUserSelect = 'none';
-        document.body.style.userSelect = 'none';
-        document.body.style.webkitUserSelect = 'none';
+        document.documentElement.classList.add('lumos-grabbing-3d');
+        document.body.classList.add('lumos-grabbing-3d');
       } else {
-        document.documentElement.style.userSelect = '';
-        document.documentElement.style.webkitUserSelect = '';
-        document.body.style.userSelect = '';
-        document.body.style.webkitUserSelect = '';
+        document.documentElement.classList.remove('lumos-grabbing-3d');
+        document.body.classList.remove('lumos-grabbing-3d');
       }
     };
 
@@ -831,8 +851,14 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
 
       // If currently holding an object:
       if (pointerRef.grabbedEntity) {
+        // Confirm real drag after 5px dead-zone movement
+        const moveDist = Math.hypot(clientX - pointerRef.initialDownX, clientY - pointerRef.initialDownY);
+        if (moveDist > 5) {
+          pointerRef.isDragConfirmed = true;
+        }
+
         document.body.style.cursor = 'grabbing';
-        // Prevent accidental text selection or mobile pull-to-scroll while carrying
+        // Prevent accidental mobile scroll / pull-to-refresh while carrying
         e.preventDefault();
         return;
       }
@@ -844,7 +870,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         return;
       }
 
-      // Hit-testing against projected 3D objects with accurate bounds (only 3D object is interactive)
+      // Hit-testing against projected 3D objects with accurate bounds
       let foundHover: FlyingEntity3D | null = null;
       let minDistance = 9999;
 
@@ -864,10 +890,10 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         const dy = clientY - proj.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
         const hitRadius = Math.max(
-          38,
+          isMobile ? 48 : 38,
           ent.baseSize * proj.scale * 1.6,
-          (ent.bookWidth || 0) * proj.scale * 0.8,
-          (ent.bookHeight || 0) * proj.scale * 0.8
+          (ent.bookWidth || 0) * proj.scale * 0.85,
+          (ent.bookHeight || 0) * proj.scale * 0.85
         );
 
         if (dist < hitRadius && dist < minDistance) {
@@ -893,6 +919,9 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       const clientY = e.clientY;
       pointerRef.x = clientX;
       pointerRef.y = clientY;
+      pointerRef.initialDownX = clientX;
+      pointerRef.initialDownY = clientY;
+      pointerRef.isDragConfirmed = false;
       pointerRef.history = [{ x: clientX, y: clientY, time: performance.now() }];
 
       // Hit test specifically against 3D objects
@@ -915,10 +944,10 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         const dy = clientY - proj.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
         const hitRadius = Math.max(
-          40,
+          isMobile ? 50 : 40,
           ent.baseSize * proj.scale * 1.6,
-          (ent.bookWidth || 0) * proj.scale * 0.8,
-          (ent.bookHeight || 0) * proj.scale * 0.8
+          (ent.bookWidth || 0) * proj.scale * 0.85,
+          (ent.bookHeight || 0) * proj.scale * 0.85
         );
 
         if (dist < hitRadius && dist < minDistance) {
@@ -948,11 +977,11 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         pointerRef.grabOffsetX = clientX - proj.x;
         pointerRef.grabOffsetY = clientY - proj.y;
 
-        // Pointer Capture on canvas
-        if (canvas) {
+        // Pointer capture on the actual target element (safe across iOS Safari and Android Chrome)
+        if (e.target && e.target instanceof Element) {
           try {
-            canvas.style.pointerEvents = 'auto';
-            canvas.setPointerCapture(e.pointerId);
+            e.target.setPointerCapture(e.pointerId);
+            pointerRef.capturedTarget = e.target;
           } catch (err) {}
         }
 
@@ -974,7 +1003,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         // Consider pointer motion within the last 100ms before release
         const recentPoints = history.filter(p => now - p.time <= 100);
 
-        if (recentPoints.length >= 2) {
+        if (recentPoints.length >= 2 && pointerRef.isDragConfirmed) {
           const first = recentPoints[0];
           const last = recentPoints[recentPoints.length - 1];
           const dt = (last.time - first.time) / 1000;
@@ -1012,11 +1041,11 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         ent.physicsState = screenSpeed > 0.5 ? 'THROWN' : 'MOMENTUM';
 
         // Release pointer capture
-        if (canvas && pointerRef.pointerId !== -1) {
+        if (pointerRef.capturedTarget && pointerRef.pointerId !== -1) {
           try {
-            canvas.releasePointerCapture(pointerRef.pointerId);
+            pointerRef.capturedTarget.releasePointerCapture(pointerRef.pointerId);
           } catch (err) {}
-          canvas.style.pointerEvents = 'none';
+          pointerRef.capturedTarget = null;
         }
 
         // Restore normal text selection
@@ -1025,7 +1054,15 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
         pointerRef.grabbedEntity = null;
         pointerRef.isDown = false;
         pointerRef.pointerId = -1;
+        pointerRef.isDragConfirmed = false;
         document.body.style.cursor = pointerRef.hoveredEntity ? 'grab' : 'default';
+      }
+    };
+
+    // Touch scroll protection: prevent mobile scroll ONLY while actively dragging a 3D object
+    const handleTouchMove = (e: TouchEvent) => {
+      if (pointerRef.grabbedEntity) {
+        e.preventDefault();
       }
     };
 
@@ -1048,6 +1085,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
     window.addEventListener('pointerdown', handlePointerDown, { passive: false });
     window.addEventListener('pointerup', handlePointerUp, { passive: true });
     window.addEventListener('pointercancel', handlePointerUp, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
     window.addEventListener('blur', () => handlePointerUp());
     document.addEventListener('selectstart', handleSelectStart, { capture: true });
     document.addEventListener('dragstart', handleDragStart, { capture: true });
@@ -1214,7 +1252,8 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       // -----------------------------------------------------------------------
       // 5 VIRTUAL MOVING LIGHTS
       // -----------------------------------------------------------------------
-      virtualLights.forEach((vl) => {
+      if (!isMobile || !isScrolling) {
+        virtualLights.forEach((vl) => {
         if (!prefersReducedMotion) {
           vl.phase += vl.speed;
           vl.x = vl.centerX + Math.cos(vl.phase * vl.freqX) * vl.orbitRx;
@@ -1242,7 +1281,8 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
           );
         }
       });
-      ctx.globalAlpha = 1.0;
+        ctx.globalAlpha = 1.0;
+      }
 
       // -----------------------------------------------------------------------
       // LAYER 1: DEEP BACKGROUND (Faint coordinate grid lines)
@@ -1336,8 +1376,10 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       }
 
       // -----------------------------------------------------------------------
-      // OBJECT-TO-OBJECT MUTUAL PROXIMITY INTERACTION
+      // OBJECT-TO-OBJECT MUTUAL PROXIMITY INTERACTION (Skipped during mobile scroll for 60 FPS)
       // -----------------------------------------------------------------------
+      if (!isScrolling) {
+
       for (let i = 0; i < flyingEntities.length; i++) {
         flyingEntities[i].proxBoost = 0;
       }
@@ -1357,6 +1399,8 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
             b.proxBoost = Math.max(b.proxBoost, mutualBoost);
           }
         }
+      }
+
       }
 
       // -----------------------------------------------------------------------
@@ -2114,6 +2158,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       window.removeEventListener('pointerdown', handlePointerDown);
       window.removeEventListener('pointerup', handlePointerUp);
       window.removeEventListener('pointercancel', handlePointerUp);
+      window.removeEventListener('touchmove', handleTouchMove);
       document.removeEventListener('selectstart', handleSelectStart, { capture: true } as any);
       document.removeEventListener('dragstart', handleDragStart, { capture: true } as any);
       setSelectionShield(false);      if (animFrameIdRef.current) {
