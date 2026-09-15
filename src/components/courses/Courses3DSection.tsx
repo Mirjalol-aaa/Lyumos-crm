@@ -248,196 +248,173 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     // 2. SUBJECT-SPECIFIC SCULPTURE SUITES
     // =========================================================================
     if (theme === 'math') {
-      // Volumetric Parabola Ribbon (y = x²) - Delicate architectural curve
+      // -----------------------------------------------------------------------
+      // 2-RASM 100% VISUAL MATCH: Floating Mathematical Objects & 3D Symbols
+      // -----------------------------------------------------------------------
+      // 1. 3D Floating Gold π (2-Rasm: Right of Book)
       list.push({
-        id: 'math-parabola',
-        type: 'parabola_volumetric',
-        label: 'y = x²',
-        theme: 'math',
-        depthLayer: 'MIDGROUND',
-        orbitRadius: 110,
-        orbitSpeed: 0.00075,
-        orbitPhase: 1.1,
-        orbitInclination: 0.26,
-        orbitEccentricity: 0.90,
-        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-        mass: 0.85, damping: 0.958,
-        rotX: 0.2, rotY: 0.4, rotZ: 0.1,
-        rotSpeedX: 0.0003, rotSpeedY: 0.0005, rotSpeedZ: 0.0002,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 18,
-        baseOpacity: 0.82,
-        transitionAlpha: 1.0,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-
-      // Tubular Sine Wave Ribbon (y = sin(x))
-      list.push({
-        id: 'math-sinewave',
-        type: 'sinewave_tubular',
-        label: 'y = sin(x)',
-        theme: 'math',
-        depthLayer: 'MIDGROUND',
-        orbitRadius: 125,
-        orbitSpeed: -0.00065,
-        orbitPhase: 3.7,
-        orbitInclination: -0.28,
-        orbitEccentricity: 0.86,
-        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-        mass: 0.85, damping: 0.958,
-        rotX: -0.25, rotY: 0.45, rotZ: 0.12,
-        rotSpeedX: 0.0004, rotSpeedY: 0.0005, rotSpeedZ: 0.0002,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 18,
-        baseOpacity: 0.82,
-        transitionAlpha: 1.0,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-
-      // Parametric 3D Saddle Surface Mesh (Hyperbolic Paraboloid)
-      list.push({
-        id: 'math-saddle',
-        type: 'saddle_surface',
-        theme: 'math',
-        depthLayer: 'BACKGROUND',
-        orbitRadius: 135,
-        orbitSpeed: 0.0005,
-        orbitPhase: 5.2,
-        orbitInclination: 0.35,
-        orbitEccentricity: 0.84,
-        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-        mass: 0.85, damping: 0.958,
-        rotX: 0.4, rotY: 0.3, rotZ: -0.15,
-        rotSpeedX: 0.0004, rotSpeedY: 0.0003, rotSpeedZ: 0.0002,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 15,
-        baseOpacity: 0.78,
-        transitionAlpha: 1.0,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-
-      // 3D Double Helix Spiral
-      list.push({
-        id: 'math-helix',
-        type: 'double_helix',
-        theme: 'math',
-        depthLayer: 'MIDGROUND',
-        orbitRadius: 120,
-        orbitSpeed: -0.00055,
-        orbitPhase: 2.1,
-        orbitInclination: -0.24,
-        orbitEccentricity: 0.89,
-        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-        mass: 0.85, damping: 0.958,
-        rotX: 0.25, rotY: 0.5, rotZ: 0.15,
-        rotSpeedX: 0.0005, rotSpeedY: 0.0006, rotSpeedZ: 0.0002,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 16,
-        baseOpacity: 0.78,
-        transitionAlpha: 1.0,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-
-      // 3D Coordinate Tripod (X, Y, Z)
-      list.push({
-        id: 'math-tripod',
-        type: 'coord_tripod',
-        label: 'XYZ',
+        id: 'math-pi',
+        type: 'formula_3d',
+        label: 'π',
         theme: 'math',
         depthLayer: 'FOREGROUND',
-        orbitRadius: 95,
-        orbitSpeed: 0.00095,
-        orbitPhase: 4.4,
-        orbitInclination: 0.18,
+        orbitRadius: 106,
+        orbitSpeed: 0.0009,
+        orbitPhase: 0.35,
+        orbitInclination: 0.16,
         orbitEccentricity: 0.92,
         x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-        mass: 0.80, damping: 0.955,
-        rotX: 0.3, rotY: 0.35, rotZ: -0.1,
+        mass: 0.60, damping: 0.950,
+        rotX: 0.1, rotY: 0.2, rotZ: 0,
+        rotSpeedX: 0.0004, rotSpeedY: 0.0006, rotSpeedZ: 0.0002,
+        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+        size: 16,
+        baseOpacity: 0.95,
+        transitionAlpha: 1.0,
+        projX: 0, projY: 0, projScale: 1, projZ: 0,
+      });
+
+      // 2. 3D Floating Gold ∫ Integral Symbol (2-Rasm: Left of Book)
+      list.push({
+        id: 'math-integral',
+        type: 'formula_3d',
+        label: '∫',
+        theme: 'math',
+        depthLayer: 'FOREGROUND',
+        orbitRadius: 104,
+        orbitSpeed: -0.00085,
+        orbitPhase: 3.3,
+        orbitInclination: -0.18,
+        orbitEccentricity: 0.88,
+        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
+        mass: 0.60, damping: 0.950,
+        rotX: 0.1, rotY: -0.2, rotZ: 0,
+        rotSpeedX: 0.0003, rotSpeedY: -0.0005, rotSpeedZ: 0.0002,
+        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+        size: 18,
+        baseOpacity: 0.92,
+        transitionAlpha: 1.0,
+        projX: 0, projY: 0, projScale: 1, projZ: 0,
+      });
+
+      // 3. 3D Floating Gold x² (2-Rasm: Bottom Right of Book)
+      list.push({
+        id: 'math-x2',
+        type: 'formula_3d',
+        label: 'x²',
+        theme: 'math',
+        depthLayer: 'FOREGROUND',
+        orbitRadius: 112,
+        orbitSpeed: 0.00075,
+        orbitPhase: 5.6,
+        orbitInclination: 0.22,
+        orbitEccentricity: 0.90,
+        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
+        mass: 0.60, damping: 0.950,
+        rotX: 0.15, rotY: 0.3, rotZ: 0,
+        rotSpeedX: 0.0004, rotSpeedY: 0.0005, rotSpeedZ: 0.0002,
+        size: 14,
+        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+        baseOpacity: 0.90,
+        transitionAlpha: 1.0,
+        projX: 0, projY: 0, projScale: 1, projZ: 0,
+      });
+
+      // 4. 3D Wireframe Icosahedron / Sacred Geometry Polyhedron (2-Rasm: Top Right)
+      list.push({
+        id: 'math-polyhedron',
+        type: 'pyramid_3d',
+        theme: 'math',
+        depthLayer: 'MIDGROUND',
+        orbitRadius: 126,
+        orbitSpeed: 0.00065,
+        orbitPhase: 1.6,
+        orbitInclination: 0.28,
+        orbitEccentricity: 0.88,
+        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
+        mass: 0.85, damping: 0.958,
+        rotX: 0.3, rotY: 0.5, rotZ: 0.2,
         rotSpeedX: 0.0005, rotSpeedY: 0.0006, rotSpeedZ: 0.0003,
         isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 13,
+        size: 17,
         baseOpacity: 0.85,
         transitionAlpha: 1.0,
         projX: 0, projY: 0, projScale: 1, projZ: 0,
       });
 
-      // Architectural Vector Arrow
+      // 5. 3D Wireframe Pyramid / Prism (2-Rasm: Right)
+      list.push({
+        id: 'math-pyramid',
+        type: 'prism_3d',
+        theme: 'math',
+        depthLayer: 'MIDGROUND',
+        orbitRadius: 122,
+        orbitSpeed: -0.0006,
+        orbitPhase: 4.8,
+        orbitInclination: -0.25,
+        orbitEccentricity: 0.86,
+        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
+        mass: 0.85, damping: 0.958,
+        rotX: 0.25, rotY: 0.4, rotZ: 0.1,
+        rotSpeedX: 0.0004, rotSpeedY: 0.0005, rotSpeedZ: 0.0002,
+        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+        size: 16,
+        baseOpacity: 0.85,
+        transitionAlpha: 1.0,
+        projX: 0, projY: 0, projScale: 1, projZ: 0,
+      });
+
+      // 6. 3D Volumetric Wave / Saddle Mesh (2-Rasm: Left)
+      list.push({
+        id: 'math-saddle',
+        type: 'saddle_surface',
+        theme: 'math',
+        depthLayer: 'MIDGROUND',
+        orbitRadius: 118,
+        orbitSpeed: 0.00055,
+        orbitPhase: 2.7,
+        orbitInclination: 0.24,
+        orbitEccentricity: 0.85,
+        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
+        mass: 0.85, damping: 0.958,
+        rotX: 0.35, rotY: 0.3, rotZ: -0.15,
+        rotSpeedX: 0.0004, rotSpeedY: 0.0004, rotSpeedZ: 0.0002,
+        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+        size: 15,
+        baseOpacity: 0.80,
+        transitionAlpha: 1.0,
+        projX: 0, projY: 0, projScale: 1, projZ: 0,
+      });
+
+      // 7. 3D Coordinate Curve & Vector Arrow (2-Rasm: Left)
       list.push({
         id: 'math-vector',
         type: 'vector_arrow',
         label: 'v⃗',
         theme: 'math',
         depthLayer: 'BACKGROUND',
-        orbitRadius: 130,
-        orbitSpeed: -0.00045,
-        orbitPhase: 0.8,
-        orbitInclination: -0.38,
+        orbitRadius: 128,
+        orbitSpeed: -0.0005,
+        orbitPhase: 0.9,
+        orbitInclination: -0.32,
         orbitEccentricity: 0.85,
         x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
         mass: 0.80, damping: 0.955,
-        rotX: 0.3, rotY: 0.2, rotZ: 0.4,
-        rotSpeedX: 0.0004, rotSpeedY: 0.0003, rotSpeedZ: 0.0002,
+        rotX: 0.3, rotY: 0.2, rotZ: 0.3,
+        rotSpeedX: 0.0003, rotSpeedY: 0.0003, rotSpeedZ: 0.0002,
         isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 15,
-        baseOpacity: 0.72,
+        size: 14,
+        baseOpacity: 0.75,
         transitionAlpha: 1.0,
         projX: 0, projY: 0, projScale: 1, projZ: 0,
       });
 
-      // 3D Triangular Prism
-      list.push({
-        id: 'math-prism',
-        type: 'prism_3d',
-        theme: 'math',
-        depthLayer: 'MIDGROUND',
-        orbitRadius: 235,
-        orbitSpeed: 0.0008,
-        orbitPhase: 5.8,
-        orbitInclination: 0.38,
-        orbitEccentricity: 0.88,
-        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-        mass: 0.85, damping: 0.958,
-        rotX: 0.3, rotY: 0.5, rotZ: 0.1,
-        rotSpeedX: 0.0006, rotSpeedY: 0.0007, rotSpeedZ: 0.0003,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 24,
-        baseOpacity: 0.80,
-        transitionAlpha: 1.0,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-
-      // 3D Faceted Octahedron / Polyhedral Pyramid
-      list.push({
-        id: 'math-octahedron',
-        type: 'pyramid_3d',
-        theme: 'math',
-        depthLayer: 'BACKGROUND',
-        orbitRadius: 290,
-        orbitSpeed: -0.0006,
-        orbitPhase: 3.2,
-        orbitInclination: -0.36,
-        orbitEccentricity: 0.86,
-        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-        mass: 0.90, damping: 0.960,
-        rotX: 0.4, rotY: 0.6, rotZ: 0.2,
-        rotSpeedX: 0.0008, rotSpeedY: 0.0007, rotSpeedZ: 0.0004,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 26,
-        baseOpacity: 0.78,
-        transitionAlpha: 1.0,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-
-      // Floating Mathematical Formulas (π, ∑, ∫, √x, x², f(x), y=sin(x), a²+b²=c²)
+      // Floating Mathematical Formulas (√, f(x), ∑, a²+b²=c²)
       const mathGlyphs = [
-        { label: 'π', r: 92, speed: 0.0012, phase: 0.3, inc: 0.18, layer: 'FOREGROUND' as const, size: 13 },
-        { label: '∑', r: 96, speed: -0.0010, phase: 2.2, inc: -0.20, layer: 'FOREGROUND' as const, size: 13 },
-        { label: '∫', r: 104, speed: 0.0009, phase: 3.6, inc: 0.16, layer: 'FOREGROUND' as const, size: 14 },
-        { label: '√x', r: 108, speed: -0.0008, phase: 4.8, inc: -0.15, layer: 'FOREGROUND' as const, size: 12 },
-        { label: 'x²', r: 122, speed: 0.0007, phase: 1.2, inc: 0.24, layer: 'MIDGROUND' as const, size: 12 },
-        { label: 'f(x)', r: 132, speed: -0.0006, phase: 5.4, inc: -0.22, layer: 'MIDGROUND' as const, size: 12 },
-        { label: 'a²+b²=c²', r: 140, speed: 0.00045, phase: 2.8, inc: 0.22, layer: 'BACKGROUND' as const, size: 11 },
-        { label: '∞', r: 145, speed: -0.0004, phase: 0.7, inc: -0.25, layer: 'BACKGROUND' as const, size: 12 },
+        { label: '√x', r: 96, speed: -0.0008, phase: 4.2, inc: -0.16, layer: 'FOREGROUND' as const, size: 12 },
+        { label: 'f(x)', r: 122, speed: 0.00065, phase: 1.1, inc: 0.22, layer: 'MIDGROUND' as const, size: 12 },
+        { label: '∑', r: 130, speed: -0.00055, phase: 5.2, inc: -0.20, layer: 'MIDGROUND' as const, size: 12 },
+        { label: 'a²+b²=c²', r: 138, speed: 0.00045, phase: 2.3, inc: 0.22, layer: 'BACKGROUND' as const, size: 11 },
       ];
       mathGlyphs.forEach((mg, idx) => {
         list.push({
@@ -717,26 +694,38 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       const lightY = Math.sin(lightAngle * 0.7) * 90 - 45;
       const lightZ = Math.sin(lightAngle) * 200;
 
-      // Subtle Atmospheric 3D Coordinate Grid Floor (Deep Background)
+      // Subtle Atmospheric 3D Coordinate Grid Floor & Golden Bokeh Particles (2-Rasm)
       ctx.save();
-      ctx.translate(centerX, centerY + 140);
+      ctx.translate(centerX, centerY + 125);
       ctx.strokeStyle = 'rgba(217, 169, 58, 0.04)';
       ctx.lineWidth = 1;
-      for (let gx = -200; gx <= 200; gx += 50) {
+      for (let gx = -160; gx <= 160; gx += 40) {
         ctx.beginPath();
-        ctx.moveTo(gx * 0.55, -22);
-        ctx.lineTo(gx * 1.45, 65);
+        ctx.moveTo(gx * 0.55, -18);
+        ctx.lineTo(gx * 1.35, 55);
         ctx.stroke();
       }
-      for (let gz = 0; gz <= 65; gz += 22) {
-        const factor = gz / 65;
-        const span = 115 + factor * 155;
+      for (let gz = 0; gz <= 55; gz += 18) {
+        const factor = gz / 55;
+        const span = 95 + factor * 125;
         ctx.beginPath();
         ctx.moveTo(-span, gz);
         ctx.lineTo(span, gz);
         ctx.stroke();
       }
       ctx.restore();
+
+      // Atmospheric Golden Bokeh Particles (2-Rasm)
+      for (let p = 0; p < 10; p++) {
+        const bx = Math.sin(time * 0.35 + p * 1.4) * (width * 0.36);
+        const by = Math.cos(time * 0.28 + p * 1.1) * (height * 0.34);
+        const br = (p % 3 === 0 ? 2.2 : 1.4) * (1 + Math.sin(time + p) * 0.25);
+        const bAlpha = 0.20 + 0.18 * Math.sin(time * 1.2 + p);
+        ctx.fillStyle = `rgba(244, 210, 122, ${bAlpha})`;
+        ctx.beginPath();
+        ctx.arc(centerX + bx, centerY + by, br, 0, Math.PI * 2);
+        ctx.fill();
+      }
 
       // -----------------------------------------------------------------------
       // 3. UPDATE SCULPTURES & DEPTH PROJECTION (PHYSICAL GRAB, DRAG & THROW)
@@ -847,16 +836,77 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       const rx = Math.max(-0.05, Math.min(0.05, bookPhys.tiltX));
       const rz = 0; // Strictly 0: absolute horizontal stability
 
-      // Realistic Ground Contact Shadow: dynamically scales with rotated book footprint
-      const effW = (Math.abs(hw * Math.cos(ry)) + Math.abs(ht * Math.sin(ry))) * 1.35;
-      const shadowExpand = bookPhys.isHovered ? 1.12 : 1.0;
-      const shadowGrad = ctx.createRadialGradient(0, hh + 28, 4, 0, hh + 28, effW * shadowExpand);
-      shadowGrad.addColorStop(0, 'rgba(4, 2, 3, 0.85)');
-      shadowGrad.addColorStop(0.55, 'rgba(4, 2, 3, 0.28)');
-      shadowGrad.addColorStop(1, 'rgba(4, 2, 3, 0)');
-      ctx.fillStyle = shadowGrad;
+      // -----------------------------------------------------------------------
+      // 2-RASM MULTI-TIERED LUXURY CIRCULAR BRONZE-GOLD PEDESTAL (PODIUM)
+      // -----------------------------------------------------------------------
+      const pedY = hh + 26;
+      const effW = (Math.abs(hw * Math.cos(ry)) + Math.abs(ht * Math.sin(ry))) * 1.25;
+
+      // Floor Contact Radial Glow & Ambient Shadow
+      const floorGlow = ctx.createRadialGradient(0, pedY + 16, 6, 0, pedY + 16, 175);
+      floorGlow.addColorStop(0, 'rgba(217, 169, 58, 0.32)');
+      floorGlow.addColorStop(0.35, 'rgba(84, 18, 28, 0.40)');
+      floorGlow.addColorStop(0.7, 'rgba(8, 2, 4, 0.85)');
+      floorGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = floorGlow;
       ctx.beginPath();
-      ctx.ellipse(0, hh + 28, effW * shadowExpand, 13 * shadowExpand, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, pedY + 16, 165, 34, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Pedestal Tier 3 (Base Plinth): Radius 125, Height 8
+      ctx.fillStyle = '#180A08';
+      ctx.beginPath();
+      ctx.ellipse(0, pedY + 12, 125, 24, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#5E2B12';
+      ctx.lineWidth = 1.0;
+      ctx.stroke();
+
+      // Pedestal Tier 2 (Middle Beveled Ring): Radius 104, Height 7 with Metallic Bronze Shimmer
+      const t2Grad = ctx.createLinearGradient(-104, 0, 104, 0);
+      t2Grad.addColorStop(0, '#2A1009');
+      t2Grad.addColorStop(0.2, '#5A2A12');
+      t2Grad.addColorStop(0.5, '#B88232');
+      t2Grad.addColorStop(0.8, '#5A2A12');
+      t2Grad.addColorStop(1, '#2A1009');
+      ctx.fillStyle = t2Grad;
+      ctx.beginPath();
+      ctx.ellipse(0, pedY + 6, 104, 20, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#D9A93A';
+      ctx.lineWidth = 1.1;
+      ctx.stroke();
+
+      // Pedestal Tier 1 (Top Stage Disc): Radius 85 with Radiant Golden Surface Reflection
+      const t1Grad = ctx.createRadialGradient(0, pedY, 4, 0, pedY, 85);
+      t1Grad.addColorStop(0, '#FFF2C6');
+      t1Grad.addColorStop(0.25, '#D9A93A');
+      t1Grad.addColorStop(0.65, '#5A2A12');
+      t1Grad.addColorStop(1, '#1A0B08');
+      ctx.fillStyle = t1Grad;
+      ctx.beginPath();
+      ctx.ellipse(0, pedY, 85, 17, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#FFEAA7';
+      ctx.lineWidth = 1.3;
+      ctx.stroke();
+
+      // Inner Concentric Gold Groove
+      ctx.beginPath();
+      ctx.ellipse(0, pedY, 74, 14, 0, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(217, 169, 58, 0.55)';
+      ctx.lineWidth = 0.7;
+      ctx.stroke();
+
+      // Dynamic Book Contact Shadow on Top of Pedestal
+      const shadowExpand = bookPhys.isHovered ? 1.08 : 1.0;
+      const bookShadow = ctx.createRadialGradient(0, pedY - 2, 3, 0, pedY - 2, effW * shadowExpand);
+      bookShadow.addColorStop(0, 'rgba(4, 2, 3, 0.82)');
+      bookShadow.addColorStop(0.6, 'rgba(4, 2, 3, 0.25)');
+      bookShadow.addColorStop(1, 'rgba(4, 2, 3, 0)');
+      ctx.fillStyle = bookShadow;
+      ctx.beginPath();
+      ctx.ellipse(0, pedY - 2, effW * shadowExpand, 10 * shadowExpand, 0, 0, Math.PI * 2);
       ctx.fill();
 
       // Vertices of Front Cover Plate (z = +ht, centered around origin)
@@ -1104,65 +1154,122 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         const skewAngle = Math.atan2(cf1.y - cf0.y, cf1.x - cf0.x);
         ctx.rotate(skewAngle);
 
-        // Subtitle
-        ctx.font = 'bold 9px -apple-system, sans-serif';
-        ctx.fillStyle = 'rgba(244, 210, 122, 0.9)';
+        // ---------------------------------------------------------------------
+        // 2-RASM EXACT FRONT COVER EMBOSSED GOLD ARTWORK
+        // ---------------------------------------------------------------------
         ctx.textAlign = 'center';
-        ctx.fillText(subTitle, 0, -hh * 0.42);
 
-        // Gold Divider
-        ctx.strokeStyle = 'rgba(217, 169, 58, 0.6)';
-        ctx.lineWidth = 0.8;
-        ctx.beginPath();
-        ctx.moveTo(-45, -hh * 0.32);
-        ctx.lineTo(45, -hh * 0.32);
-        ctx.stroke();
-
-        // Main Golden Book Title
-        ctx.font = '900 19px "Playfair Display", serif';
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillText(bookTitle, 0, -hh * 0.08);
+        // 1. Embossed Gold Royal Crown Emblem (2-Rasm Top Center)
+        ctx.strokeStyle = '#F4D27A';
         ctx.fillStyle = '#F4D27A';
-        ctx.fillText(bookTitle, 0.5, -hh * 0.08 + 0.5);
+        ctx.lineWidth = 1.0;
+        const crW = 12;
+        const crY = -hh * 0.44;
+        ctx.beginPath();
+        ctx.moveTo(-crW, crY + 5);
+        ctx.lineTo(-crW * 0.65, crY - 2);
+        ctx.lineTo(-crW * 0.25, crY + 2);
+        ctx.lineTo(0, crY - 4);
+        ctx.lineTo(crW * 0.25, crY + 2);
+        ctx.lineTo(crW * 0.65, crY - 2);
+        ctx.lineTo(crW, crY + 5);
+        ctx.closePath();
+        ctx.stroke();
+        [-crW * 0.65, 0, crW * 0.65].forEach((px) => {
+          ctx.beginPath();
+          ctx.arc(px, crY - (px === 0 ? 5.5 : 3.5), 1.1, 0, Math.PI * 2);
+          ctx.fill();
+        });
 
-        // Subtle Embossed Symbols by Theme
+        // 2. LUMOS Wordmark (below crown)
+        ctx.font = 'bold 10px "Playfair Display", serif';
+        ctx.fillStyle = 'rgba(244, 210, 122, 0.95)';
+        ctx.fillText('LUMOS', 0, -hh * 0.33);
+
+        // 3. Main Golden Book Title (MATHEMATICS)
+        ctx.font = '900 16px "Playfair Display", serif';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText(bookTitle, 0, -hh * 0.19);
+        ctx.fillStyle = '#F4D27A';
+        ctx.fillText(bookTitle, 0.4, -hh * 0.19 + 0.4);
+
         if (activeTheme === 'math') {
-          ctx.font = 'italic 10px serif';
-          ctx.fillStyle = 'rgba(244, 210, 122, 0.45)';
-          ctx.fillText('π', -hw * 0.55, -hh * 0.12);
-          ctx.fillText('∫', hw * 0.55, -hh * 0.12);
-          ctx.fillText('√x', -hw * 0.52, hh * 0.18);
-          ctx.fillText('x²', hw * 0.52, hh * 0.18);
+          // 4. Mathematical Notation Row 1: π   ∫   √
+          ctx.font = 'italic bold 13px "Playfair Display", serif';
+          ctx.fillStyle = '#F4D27A';
+          ctx.fillText('π', -hw * 0.44, -hh * 0.04);
+          ctx.font = '16px serif';
+          ctx.fillText('∫', 0, -hh * 0.04);
+          ctx.font = 'italic 13px serif';
+          ctx.fillText('√', hw * 0.44, -hh * 0.04);
+
+          // 5. Mathematical Notation Row 2: x²   f(x)
+          ctx.font = 'italic 12px serif';
+          ctx.fillStyle = '#F4D27A';
+          ctx.fillText('x²', -hw * 0.32, hh * 0.09);
+          ctx.fillText('f(x)', hw * 0.32, hh * 0.09);
+
+          // 6. Sacred Geometry Icosahedron / Polyhedral Watermark Emblem (2-Rasm Bottom)
+          ctx.save();
+          ctx.translate(0, hh * 0.26);
+          ctx.strokeStyle = 'rgba(244, 210, 122, 0.72)';
+          ctx.lineWidth = 0.8;
+          const rGeo = 15;
+          // Outer hexagon
+          ctx.beginPath();
+          for (let a = 0; a < 6; a++) {
+            const ang = (a * Math.PI) / 3;
+            const hx = Math.cos(ang) * rGeo;
+            const hy = Math.sin(ang) * rGeo;
+            if (a === 0) ctx.moveTo(hx, hy);
+            else ctx.lineTo(hx, hy);
+          }
+          ctx.closePath();
+          ctx.stroke();
+
+          // Interlocking sacred triangle
+          ctx.beginPath();
+          for (let a = 0; a < 3; a++) {
+            const ang = (a * Math.PI * 2) / 3 - Math.PI / 6;
+            const tx = Math.cos(ang) * rGeo * 0.88;
+            const ty = Math.sin(ang) * rGeo * 0.88;
+            if (a === 0) ctx.moveTo(tx, ty);
+            else ctx.lineTo(tx, ty);
+          }
+          ctx.closePath();
+          ctx.stroke();
+
+          // Radial diagonal facets to vertices
+          for (let a = 0; a < 6; a++) {
+            const ang = (a * Math.PI) / 3;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(Math.cos(ang) * rGeo, Math.sin(ang) * rGeo);
+            ctx.stroke();
+          }
+          ctx.restore();
         } else if (activeTheme === 'english') {
           ctx.font = 'bold 9px sans-serif';
-          ctx.fillStyle = 'rgba(244, 210, 122, 0.45)';
-          ctx.fillText('READ', -hw * 0.52, -hh * 0.12);
-          ctx.fillText('SPEAK', hw * 0.52, -hh * 0.12);
-          ctx.fillText('THINK', 0, hh * 0.18);
-        } else if (activeTheme === 'it') {
-          ctx.font = 'bold 9px monospace';
-          ctx.fillStyle = 'rgba(244, 210, 122, 0.45)';
-          ctx.fillText('<dev/>', -hw * 0.52, -hh * 0.12);
-          ctx.fillText('{ state }', hw * 0.52, -hh * 0.12);
-          ctx.fillText('async', 0, hh * 0.18);
+          ctx.fillStyle = 'rgba(244, 210, 122, 0.55)';
+          ctx.fillText('READ', -hw * 0.44, -hh * 0.02);
+          ctx.fillText('SPEAK', hw * 0.44, -hh * 0.02);
+          ctx.fillText('THINK', 0, hh * 0.12);
+
+          // English Academy Seal
+          ctx.strokeStyle = '#F4D27A';
+          ctx.lineWidth = 1.0;
+          ctx.beginPath(); ctx.arc(0, hh * 0.26, 17, 0, Math.PI * 2); ctx.stroke();
+          ctx.font = 'bold 11px monospace';
+          ctx.fillStyle = '#F4D27A';
+          ctx.fillText('EN', 0, hh * 0.26 + 3.5);
+        } else {
+          ctx.strokeStyle = '#F4D27A';
+          ctx.lineWidth = 1.0;
+          ctx.beginPath(); ctx.arc(0, hh * 0.26, 17, 0, Math.PI * 2); ctx.stroke();
+          ctx.font = 'bold 10px monospace';
+          ctx.fillStyle = '#F4D27A';
+          ctx.fillText('★ DTM', 0, hh * 0.26 + 3.5);
         }
-
-        // Emblem Seal
-        ctx.strokeStyle = '#F4D27A';
-        ctx.lineWidth = 1.0;
-        ctx.beginPath();
-        ctx.arc(0, hh * 0.28, 22, 0, Math.PI * 2);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(0, hh * 0.28, 18, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(217, 169, 58, 0.5)';
-        ctx.stroke();
-
-        ctx.font = 'bold 12px monospace';
-        ctx.fillStyle = '#F4D27A';
-        const sealGlyph = activeTheme === 'math' ? '∑ π' : activeTheme === 'english' ? 'EN' : activeTheme === 'it' ? '< / >' : '★ DTM';
-        ctx.fillText(sealGlyph, 0, hh * 0.28 + 4);
 
         ctx.restore();
 
@@ -1830,35 +1937,35 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     <section
       id="courses"
       ref={containerRef}
-      className="relative py-20 lg:py-28 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto z-10 select-none"
+      className="relative py-2 sm:py-3 lg:py-4 px-3 sm:px-5 lg:px-6 max-w-[1360px] mx-auto min-h-screen lg:h-screen lg:max-h-[960px] flex flex-col justify-center z-10 select-none"
       style={{ touchAction: 'pan-y' }}
     >
       {/* -----------------------------------------------------------------------
-          TOP SECTION HERO: Luxury Visual Introduction
+          TOP SECTION HERO: Luxury Visual Introduction (Compact for 100vh Single Screen)
           ----------------------------------------------------------------------- */}
-      <div className="text-center max-w-3xl mx-auto space-y-3 mb-12">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#16090D] border border-[#D9A93A]/40 text-xs font-bold uppercase tracking-widest text-[#D9A93A] shadow-lg shadow-[#D9A93A]/10">
-          <Sparkles className="h-3.5 w-3.5" />
+      <div className="text-center max-w-3xl mx-auto space-y-1 mb-2 sm:mb-2.5">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#16090D] border border-[#D9A93A]/40 text-[11px] font-bold uppercase tracking-widest text-[#D9A93A] shadow-md shadow-[#D9A93A]/10">
+          <Sparkles className="h-3 w-3" />
           <span>LUMOS ILMIY MAKTABI</span>
         </div>
 
-        <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury-serif font-black text-[#F7F4EE] tracking-tight">
+        <h2 className="text-2xl sm:text-3xl font-luxury-serif font-black text-[#F7F4EE] tracking-tight">
           KURSLAR
         </h2>
 
-        <p className="text-base sm:text-lg lg:text-xl font-luxury-serif italic text-[#F4D27A] font-medium">
+        <p className="text-xs sm:text-sm font-luxury-serif italic text-[#F4D27A] font-medium">
           “Kelajagingiz uchun bilimni tanlang.”
         </p>
 
-        <p className="text-xs sm:text-sm text-[#A9A3A0] leading-relaxed max-w-2xl mx-auto pt-1">
+        <p className="text-[11px] sm:text-xs text-[#A9A3A0] leading-normal max-w-2xl mx-auto">
           Har bir yo‘nalish uchun xalqaro standartlarga asoslangan mukammal o‘quv dasturlari va interaktiv 3D ta’lim muhiti.
         </p>
       </div>
 
       {/* -----------------------------------------------------------------------
-          COURSE CATEGORY SELECTOR PILLS
+          COURSE CATEGORY SELECTOR PILLS (Compact for 100vh Fit)
           ----------------------------------------------------------------------- */}
-      <div className="flex items-center justify-center gap-2 sm:gap-3 flex-wrap mb-10">
+      <div className="flex items-center justify-center gap-1.5 sm:gap-2 flex-wrap mb-2 sm:mb-3">
         {INITIAL_COURSES.map((course) => {
           const isSelected = course.id === activeCourse.id;
           return (
@@ -1866,9 +1973,9 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
               key={course.id}
               type="button"
               onClick={() => handleSelectCourse(course)}
-              className={`px-4 sm:px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-300 cursor-pointer flex items-center gap-2 border ${
+              className={`px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-300 cursor-pointer flex items-center gap-1.5 border ${
                 isSelected
-                  ? 'bg-gradient-to-r from-[#D9A93A] via-[#F4D27A] to-[#D9A93A] text-[#0A0708] border-[#FFF2C6]/50 shadow-[0_4px_20px_rgba(217,169,58,0.35)] scale-105'
+                  ? 'bg-gradient-to-r from-[#D9A93A] via-[#F4D27A] to-[#D9A93A] text-[#0A0708] border-[#FFF2C6]/50 shadow-[0_3px_14px_rgba(217,169,58,0.35)] scale-102'
                   : 'bg-[#120609]/80 text-[#BDB5B0] border-[#D9A93A]/25 hover:border-[#D9A93A]/60 hover:text-[#F7F4EE]'
               }`}
             >
@@ -1879,18 +1986,18 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       </div>
 
       {/* -----------------------------------------------------------------------
-          MAIN 3D EDUCATION GALLERY SHOWROOM STAGE
+          MAIN 3D EDUCATION GALLERY SHOWROOM STAGE (Streamlined for 100vh)
           ----------------------------------------------------------------------- */}
-      <div className="relative rounded-3xl bg-gradient-to-b from-[#18080E]/90 via-[#100407]/95 to-[#0A0204] border border-[#D9A93A]/30 p-6 sm:p-8 lg:p-12 shadow-[0_20px_60px_rgba(0,0,0,0.85)] overflow-hidden">
+      <div className="relative rounded-2xl lg:rounded-3xl bg-gradient-to-b from-[#18080E]/95 via-[#100407]/95 to-[#0A0204] border border-[#D9A93A]/30 p-4 sm:p-5 lg:p-6 shadow-[0_15px_50px_rgba(0,0,0,0.85)] overflow-hidden">
         {/* Subtle Ambient Radial Lighting in Background */}
         <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-radial from-[#D9A93A]/12 to-transparent blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-radial from-[#4A0E1A]/20 to-transparent blur-3xl pointer-events-none" />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-7 items-center relative z-10">
           {/* LEFT COLUMN: Active Course Information & Specifications */}
           <div
-            className={`lg:col-span-6 space-y-5 transition-all duration-300 ${
-              isTransitioning ? 'opacity-30 translate-y-2' : 'opacity-100 translate-y-0'
+            className={`lg:col-span-6 space-y-2.5 sm:space-y-3 transition-all duration-300 ${
+              isTransitioning ? 'opacity-30 translate-y-1' : 'opacity-100 translate-y-0'
             }`}
           >
             {/* Top Meta: Category & Level */}
@@ -1928,47 +2035,47 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
             </div>
 
             {/* Course Title */}
-            <h3 className="text-2xl sm:text-3xl lg:text-4xl font-luxury-serif font-black text-[#F7F4EE] tracking-tight">
+            <h3 className="text-xl sm:text-2xl lg:text-3xl font-luxury-serif font-black text-[#F7F4EE] tracking-tight">
               {activeCourse.title}
             </h3>
 
             {/* Description */}
-            <p className="text-sm sm:text-base text-[#BDB5B0] leading-relaxed font-normal">
+            <p className="text-xs sm:text-[13px] text-[#BDB5B0] leading-snug font-normal line-clamp-2">
               {activeCourse.description}
             </p>
 
-            {/* Key Specifications Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 py-4 border-y border-[#D9A93A]/20">
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-xl bg-[#D9A93A]/10 border border-[#D9A93A]/25 flex items-center justify-center text-[#D9A93A] shrink-0">
-                  <Clock className="h-4 w-4" />
+            {/* Key Specifications Grid (Compact Row for 100vh) */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 py-2.5 border-y border-[#D9A93A]/20">
+              <div className="flex items-center gap-2.5">
+                <div className="h-7 w-7 rounded-lg bg-[#D9A93A]/10 border border-[#D9A93A]/25 flex items-center justify-center text-[#D9A93A] shrink-0">
+                  <Clock className="h-3.5 w-3.5" />
                 </div>
                 <div>
-                  <span className="text-[10px] text-[#A9A3A0] font-semibold uppercase block">Davomiyligi</span>
+                  <span className="text-[9px] text-[#A9A3A0] font-semibold uppercase block">Davomiyligi</span>
                   <span className="text-xs font-bold text-[#F7F4EE]">
                     {activeCourse.durationMonths} oy ({activeCourse.lessonsCount} dars)
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-xl bg-[#D9A93A]/10 border border-[#D9A93A]/25 flex items-center justify-center text-[#D9A93A] shrink-0">
-                  <Calendar className="h-4 w-4" />
+              <div className="flex items-center gap-2.5">
+                <div className="h-7 w-7 rounded-lg bg-[#D9A93A]/10 border border-[#D9A93A]/25 flex items-center justify-center text-[#D9A93A] shrink-0">
+                  <Calendar className="h-3.5 w-3.5" />
                 </div>
                 <div>
-                  <span className="text-[10px] text-[#A9A3A0] font-semibold uppercase block">Dars Grafigi</span>
+                  <span className="text-[9px] text-[#A9A3A0] font-semibold uppercase block">Dars Grafigi</span>
                   <span className="text-xs font-bold text-[#F7F4EE] line-clamp-1">
                     {(activeCourse.schedule || '').split('(')[0] || 'Haftada 3 kun'}
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-xl bg-[#D9A93A]/10 border border-[#D9A93A]/25 flex items-center justify-center text-[#D9A93A] shrink-0">
-                  <GraduationCap className="h-4 w-4" />
+              <div className="flex items-center gap-2.5">
+                <div className="h-7 w-7 rounded-lg bg-[#D9A93A]/10 border border-[#D9A93A]/25 flex items-center justify-center text-[#D9A93A] shrink-0">
+                  <GraduationCap className="h-3.5 w-3.5" />
                 </div>
                 <div>
-                  <span className="text-[10px] text-[#A9A3A0] font-semibold uppercase block">Ustoz</span>
+                  <span className="text-[9px] text-[#A9A3A0] font-semibold uppercase block">Ustoz</span>
                   <span className="text-xs font-bold text-[#F7F4EE] line-clamp-1">
                     {activeCourse.instructor || 'Yetakchi ustoz'}
                   </span>
@@ -1976,39 +2083,39 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
               </div>
             </div>
 
-            {/* Syllabus Preview */}
-            <div className="space-y-2 pt-1">
-              <span className="text-xs font-bold text-[#D9A93A] tracking-wide uppercase flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5" />
+            {/* Syllabus Preview (2 Columns of Topics from 2-Rasm) */}
+            <div className="space-y-1.5 pt-0.5">
+              <span className="text-[11px] font-bold text-[#D9A93A] tracking-wide uppercase flex items-center gap-1.5">
+                <Sparkles className="h-3 w-3" />
                 <span>O‘quv dasturidan asosiy mavzular:</span>
               </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#E8E1D9]">
-                {(activeCourse.syllabus || []).slice(0, 4).map((topic, idx) => (
-                  <div key={idx} className="flex items-start gap-2">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-[#D9A93A] shrink-0 mt-0.5" />
-                    <span className="line-clamp-1 leading-snug">{topic}</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px] text-[#E8E1D9]">
+                {(activeCourse.syllabus || []).slice(0, 6).map((topic, idx) => (
+                  <div key={idx} className="flex items-start gap-1.5">
+                    <CheckCircle2 className="h-3 w-3 text-[#D9A93A] shrink-0 mt-0.5" />
+                    <span className="line-clamp-1 leading-tight">{topic}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Pricing & CTA Buttons */}
-            <div className="pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+            <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <span className="text-[11px] uppercase font-bold text-[#A9A3A0] block">Oylik to‘lov</span>
-                <span className="text-2xl sm:text-3xl font-luxury-serif font-black text-[#F4D27A]">
+                <span className="text-[10px] uppercase font-bold text-[#A9A3A0] block">Oylik to‘lov</span>
+                <span className="text-xl sm:text-2xl font-luxury-serif font-black text-[#F4D27A]">
                   {formatMoney(activeCourse.pricePerMonth)}
                 </span>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 {/* Secondary CTA: Full Syllabus */}
                 <button
                   type="button"
                   onClick={() => onOpenDetails(activeCourse)}
-                  className="px-6 py-3.5 rounded-full border border-[#D9A93A]/40 bg-[#16090D]/80 hover:bg-[#D9A93A]/15 hover:border-[#F4D27A] text-xs font-bold text-[#F7F4EE] hover:text-[#FFE7A3] transition-all duration-300 flex items-center gap-2 cursor-pointer shadow-[inset_0_1px_2px_rgba(255,255,255,0.06)]"
+                  className="px-4 sm:px-5 py-2.5 rounded-full border border-[#D9A93A]/40 bg-[#16090D]/80 hover:bg-[#D9A93A]/15 hover:border-[#F4D27A] text-xs font-bold text-[#F7F4EE] hover:text-[#FFE7A3] transition-all duration-300 flex items-center gap-1.5 cursor-pointer shadow-[inset_0_1px_2px_rgba(255,255,255,0.06)]"
                 >
-                  <BookOpen className="h-4 w-4 text-[#D9A93A]" />
+                  <BookOpen className="h-3.5 w-3.5 text-[#D9A93A]" />
                   <span>Batafsil dastur</span>
                 </button>
 
@@ -2016,31 +2123,31 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
                 <button
                   type="button"
                   onClick={() => onOpenRegister(activeCourse.title)}
-                  className="px-7 py-3.5 rounded-full text-xs font-black text-[#0B0808] bg-gradient-to-r from-[#D9A93A] via-[#F4D27A] to-[#D9A93A] hover:brightness-110 shadow-[0_6px_25px_rgba(217,169,58,0.4)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 flex items-center gap-2 cursor-pointer border border-[#FFF2C6]/40"
+                  className="px-5 sm:px-6 py-2.5 rounded-full text-xs font-black text-[#0B0808] bg-gradient-to-r from-[#D9A93A] via-[#F4D27A] to-[#D9A93A] hover:brightness-110 shadow-[0_4px_18px_rgba(217,169,58,0.4)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 flex items-center gap-1.5 cursor-pointer border border-[#FFF2C6]/40"
                 >
                   <span>Guruhga yozilish</span>
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               </div>
             </div>
 
             {/* Diagnostic Test Link */}
             {onOpenDiagnostic && (
-              <div className="pt-2">
+              <div className="pt-1">
                 <button
                   type="button"
                   onClick={onOpenDiagnostic}
-                  className="text-xs font-bold text-[#D9A93A] hover:text-[#F4D27A] hover:underline flex items-center gap-1.5 cursor-pointer transition-colors"
+                  className="text-[11px] font-bold text-[#D9A93A] hover:text-[#F4D27A] hover:underline flex items-center gap-1.5 cursor-pointer transition-colors"
                 >
                   <span>Qaysi kurs sizga mos kelishini aniqlash uchun bepul diagnostik test topshiring</span>
-                  <ArrowRight className="h-3 w-3" />
+                  <ArrowRight className="h-2.5 w-2.5" />
                 </button>
               </div>
             )}
           </div>
 
-          {/* RIGHT COLUMN: Grand Interactive 3D World Stage */}
-          <div className="lg:col-span-6 relative w-full aspect-square max-w-[560px] mx-auto flex items-center justify-center select-none">
+          {/* RIGHT COLUMN: Grand Interactive 3D World Stage (Sized for 100vh Fit) */}
+          <div className="lg:col-span-6 relative w-full aspect-square max-h-[350px] sm:max-h-[380px] lg:max-h-[410px] mx-auto flex items-center justify-center select-none">
             {/* Ambient Behind-Glow */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="w-[88%] h-[88%] rounded-full bg-radial from-[#D9A93A]/22 via-[#4A0E17]/28 to-transparent blur-3xl" />
