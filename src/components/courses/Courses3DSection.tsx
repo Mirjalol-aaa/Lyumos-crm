@@ -8,12 +8,8 @@ import {
   ChevronRight,
   CheckCircle2,
   Sparkles,
-  Award,
-  Layers,
   GraduationCap,
-  RotateCw,
-  Compass,
-  Atom,
+  Info,
 } from 'lucide-react';
 import { Course } from '../../types/admin';
 import { INITIAL_COURSES } from '../../data/coursesData';
@@ -26,71 +22,6 @@ interface Courses3DSectionProps {
 }
 
 type CourseVisualTheme = 'math' | 'english' | 'it' | 'academic';
-type PerformanceTier = 'ULTRA_LOW' | 'LOW' | 'MEDIUM' | 'HIGH';
-type DepthLayer = 'FOREGROUND' | 'MIDGROUND' | 'BACKGROUND' | 'DEEP_BACKGROUND';
-
-interface Sculpture3D {
-  id: string;
-  type:
-    | 'ring_grand_horizontal'
-    | 'ring_nested_tilted'
-    | 'parabola_volumetric'
-    | 'sinewave_tubular'
-    | 'saddle_surface'
-    | 'double_helix'
-    | 'coord_tripod'
-    | 'vector_arrow'
-    | 'prism_3d'
-    | 'pyramid_3d'
-    | 'formula_3d'
-    | 'letter_3d'
-    | 'word_3d'
-    | 'code_block_3d';
-  label?: string;
-  theme: CourseVisualTheme | 'universal';
-  depthLayer: DepthLayer;
-  // 3D Orbital Coordinates
-  orbitRadius: number;
-  orbitSpeed: number;
-  orbitPhase: number;
-  orbitInclination: number;
-  orbitEccentricity: number;
-  // Local Coordinates
-  x: number;
-  y: number;
-  z: number;
-  // Physics, Anchors, Mass & Grab-and-Carry State
-  anchorX: number;
-  anchorY: number;
-  anchorZ: number;
-  vx: number;
-  vy: number;
-  currentOrbX: number;
-  currentOrbY: number;
-  mass?: number;
-  damping?: number;
-  // Local Rotations
-  rotX: number;
-  rotY: number;
-  rotZ: number;
-  rotSpeedX: number;
-  rotSpeedY: number;
-  rotSpeedZ: number;
-  // Physics & Grab State
-  isHovered: boolean;
-  isGrabbed: boolean;
-  spinVx: number;
-  spinVy: number;
-  size: number;
-  baseOpacity: number;
-  // Dynamic Transition Opacity
-  transitionAlpha: number;
-  // Projected Screen Coordinates
-  projX: number;
-  projY: number;
-  projScale: number;
-  projZ: number;
-}
 
 export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
   onOpenDetails,
@@ -99,8 +30,13 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 }) => {
   const { formatMoney } = useI18n();
 
-  // Active course state
-  const [activeCourseId, setActiveCourseId] = useState<string>(INITIAL_COURSES[0].id);
+  // Active course state (defaulting to Matematika as in reference image)
+  const [activeCourseId, setActiveCourseId] = useState<string>(() => {
+    const mathCourse = INITIAL_COURSES.find(
+      (c) => c.title.toLowerCase().includes('matematika') || c.category.toLowerCase().includes('matematika')
+    );
+    return mathCourse ? mathCourse.id : INITIAL_COURSES[0].id;
+  });
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
 
   const activeCourse = useMemo(() => {
@@ -130,7 +66,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     setActiveCourseId(course.id);
     setTimeout(() => {
       setIsTransitioning(false);
-    }, 380);
+    }, 320);
   };
 
   const handlePrev = () => {
@@ -144,453 +80,40 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
   };
 
   // ---------------------------------------------------------------------------
-  // 3D CANVAS & VOLUMETRIC ART-DIRECTED LABORATORY ENGINE
+  // 3D CANVAS: MATHEMATICAL UNIVERSE (100% MATCH TO REFERENCE IMAGE)
   // ---------------------------------------------------------------------------
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const animFrameRef = useRef<number | null>(null);
 
-  // Book 360° Showroom Turntable Physics & Pure Y-Axis Rotation State
+  // Book Showroom Turntable Angle & Autonomous Spin
   const bookPhysicsRef = useRef({
-    // Base Turntable Angles: Pure Y-axis showroom orientation around central vertical axis
-    rotX: 0,     // Strictly 0 for pure horizontal rotation (no tumbling or wobbling)
-    rotY: 0.38,  // Initial showroom angle
-    rotZ: 0,     // Strictly 0
-    // Hover 3D Micro-Tilt offsets (strictly clamped)
-    tiltX: 0,
-    tiltY: 0,
-    // Velocities
-    angVx: 0,
-    angVy: 0,
-    isDragging: false,
-    lastPointerX: 0,
-    lastPointerY: 0,
-    lastTime: 0,
-    samples: [] as { x: number; y: number; time: number }[],
-    isHovered: false,
+    rotY: -0.48, // Initial showroom angle (~ -28 deg to match reference image)
+    angVy: 0.0016, // Slow autonomous rotation
+    targetHoverScale: 1.0,
     hoverScale: 1.0,
-    hoverLift: 0, // slight vertical float lift on hover
-  });
-
-  // Active Grab Target ('book' | sculptureId | null)
-  const activeGrabTargetRef = useRef<string | null>(null);
-
-  // Sculptures Collection Ref
-  const sculpturesRef = useRef<Sculpture3D[]>([]);
-
-  // Camera & Mouse Parallax Ref
-  const cameraRef = useRef({
+    isHovered: false,
     mouseX: 0,
     mouseY: 0,
-    targetMouseX: 0,
-    targetMouseY: 0,
   });
 
-  // Theme Tracker Ref
   const currentThemeRef = useRef<CourseVisualTheme>(theme);
   currentThemeRef.current = theme;
 
-  // Build Subject-Specific 3D Sculptures dynamically when Theme or Screen Size changes
-  useEffect(() => {
-    const isMobile = window.innerWidth < 768;
-    const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
-
-    const list: Sculpture3D[] = [];
-
-    // =========================================================================
-    // 1. UNIVERSAL PRIMARY HERO ORBITAL RINGS (Thin, Elegant, Jewelry-like)
-    // =========================================================================
-    // A. Grand Horizontal Brushed Gold Orbital Ring (Delicately frames the book)
-    list.push({
-      id: 'prim-ring-grand',
-      type: 'ring_grand_horizontal',
-      theme: 'universal',
-      depthLayer: 'FOREGROUND',
-      orbitRadius: 118,
-      orbitSpeed: 0.00075,
-      orbitPhase: 0.4,
-      orbitInclination: 0.14,
-      orbitEccentricity: 0.94,
-      x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-      mass: 1.1, damping: 0.965,
-      rotX: 0.28, rotY: 0, rotZ: 0,
-      rotSpeedX: 0.0002, rotSpeedY: 0.0005, rotSpeedZ: 0.0002,
-      isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-      size: 118,
-      baseOpacity: 0.90,
-      transitionAlpha: 1.0,
-      projX: 0, projY: 0, projScale: 1, projZ: 0,
-    });
-
-    // B. Nested Tilted Double Ring (Secondary Orbital Frame)
-    list.push({
-      id: 'prim-ring-nested',
-      type: 'ring_nested_tilted',
-      theme: 'universal',
-      depthLayer: 'MIDGROUND',
-      orbitRadius: 80,
-      orbitSpeed: -0.00065,
-      orbitPhase: 2.5,
-      orbitInclination: -0.32,
-      orbitEccentricity: 0.88,
-      x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-      mass: 0.95, damping: 0.962,
-      rotX: -0.35, rotY: 0.3, rotZ: 0.15,
-      rotSpeedX: 0.0003, rotSpeedY: -0.0004, rotSpeedZ: 0.0002,
-      isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-      size: 26,
-      baseOpacity: 0.82,
-      transitionAlpha: 1.0,
-      projX: 0, projY: 0, projScale: 1, projZ: 0,
-    });
-
-    // =========================================================================
-    // 2. SUBJECT-SPECIFIC SCULPTURE SUITES
-    // =========================================================================
-    if (theme === 'math') {
-      // -----------------------------------------------------------------------
-      // 2-RASM 100% VISUAL MATCH: Floating Mathematical Objects & 3D Symbols
-      // -----------------------------------------------------------------------
-      // 1. 3D Floating Gold π (2-Rasm: Right of Book)
-      list.push({
-        id: 'math-pi',
-        type: 'formula_3d',
-        label: 'π',
-        theme: 'math',
-        depthLayer: 'FOREGROUND',
-        orbitRadius: 106,
-        orbitSpeed: 0.0009,
-        orbitPhase: 0.35,
-        orbitInclination: 0.16,
-        orbitEccentricity: 0.92,
-        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-        mass: 0.60, damping: 0.950,
-        rotX: 0.1, rotY: 0.2, rotZ: 0,
-        rotSpeedX: 0.0004, rotSpeedY: 0.0006, rotSpeedZ: 0.0002,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 16,
-        baseOpacity: 0.95,
-        transitionAlpha: 1.0,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-
-      // 2. 3D Floating Gold ∫ Integral Symbol (2-Rasm: Left of Book)
-      list.push({
-        id: 'math-integral',
-        type: 'formula_3d',
-        label: '∫',
-        theme: 'math',
-        depthLayer: 'FOREGROUND',
-        orbitRadius: 104,
-        orbitSpeed: -0.00085,
-        orbitPhase: 3.3,
-        orbitInclination: -0.18,
-        orbitEccentricity: 0.88,
-        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-        mass: 0.60, damping: 0.950,
-        rotX: 0.1, rotY: -0.2, rotZ: 0,
-        rotSpeedX: 0.0003, rotSpeedY: -0.0005, rotSpeedZ: 0.0002,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 18,
-        baseOpacity: 0.92,
-        transitionAlpha: 1.0,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-
-      // 3. 3D Floating Gold x² (2-Rasm: Bottom Right of Book)
-      list.push({
-        id: 'math-x2',
-        type: 'formula_3d',
-        label: 'x²',
-        theme: 'math',
-        depthLayer: 'FOREGROUND',
-        orbitRadius: 112,
-        orbitSpeed: 0.00075,
-        orbitPhase: 5.6,
-        orbitInclination: 0.22,
-        orbitEccentricity: 0.90,
-        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-        mass: 0.60, damping: 0.950,
-        rotX: 0.15, rotY: 0.3, rotZ: 0,
-        rotSpeedX: 0.0004, rotSpeedY: 0.0005, rotSpeedZ: 0.0002,
-        size: 14,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        baseOpacity: 0.90,
-        transitionAlpha: 1.0,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-
-      // 4. 3D Wireframe Icosahedron / Sacred Geometry Polyhedron (2-Rasm: Top Right)
-      list.push({
-        id: 'math-polyhedron',
-        type: 'pyramid_3d',
-        theme: 'math',
-        depthLayer: 'MIDGROUND',
-        orbitRadius: 126,
-        orbitSpeed: 0.00065,
-        orbitPhase: 1.6,
-        orbitInclination: 0.28,
-        orbitEccentricity: 0.88,
-        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-        mass: 0.85, damping: 0.958,
-        rotX: 0.3, rotY: 0.5, rotZ: 0.2,
-        rotSpeedX: 0.0005, rotSpeedY: 0.0006, rotSpeedZ: 0.0003,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 17,
-        baseOpacity: 0.85,
-        transitionAlpha: 1.0,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-
-      // 5. 3D Wireframe Pyramid / Prism (2-Rasm: Right)
-      list.push({
-        id: 'math-pyramid',
-        type: 'prism_3d',
-        theme: 'math',
-        depthLayer: 'MIDGROUND',
-        orbitRadius: 122,
-        orbitSpeed: -0.0006,
-        orbitPhase: 4.8,
-        orbitInclination: -0.25,
-        orbitEccentricity: 0.86,
-        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-        mass: 0.85, damping: 0.958,
-        rotX: 0.25, rotY: 0.4, rotZ: 0.1,
-        rotSpeedX: 0.0004, rotSpeedY: 0.0005, rotSpeedZ: 0.0002,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 16,
-        baseOpacity: 0.85,
-        transitionAlpha: 1.0,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-
-      // 6. 3D Volumetric Wave / Saddle Mesh (2-Rasm: Left)
-      list.push({
-        id: 'math-saddle',
-        type: 'saddle_surface',
-        theme: 'math',
-        depthLayer: 'MIDGROUND',
-        orbitRadius: 118,
-        orbitSpeed: 0.00055,
-        orbitPhase: 2.7,
-        orbitInclination: 0.24,
-        orbitEccentricity: 0.85,
-        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-        mass: 0.85, damping: 0.958,
-        rotX: 0.35, rotY: 0.3, rotZ: -0.15,
-        rotSpeedX: 0.0004, rotSpeedY: 0.0004, rotSpeedZ: 0.0002,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 15,
-        baseOpacity: 0.80,
-        transitionAlpha: 1.0,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-
-      // 7. 3D Coordinate Curve & Vector Arrow (2-Rasm: Left)
-      list.push({
-        id: 'math-vector',
-        type: 'vector_arrow',
-        label: 'v⃗',
-        theme: 'math',
-        depthLayer: 'BACKGROUND',
-        orbitRadius: 128,
-        orbitSpeed: -0.0005,
-        orbitPhase: 0.9,
-        orbitInclination: -0.32,
-        orbitEccentricity: 0.85,
-        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-        mass: 0.80, damping: 0.955,
-        rotX: 0.3, rotY: 0.2, rotZ: 0.3,
-        rotSpeedX: 0.0003, rotSpeedY: 0.0003, rotSpeedZ: 0.0002,
-        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 14,
-        baseOpacity: 0.75,
-        transitionAlpha: 1.0,
-        projX: 0, projY: 0, projScale: 1, projZ: 0,
-      });
-
-      // Floating Mathematical Formulas (√, f(x), ∑, a²+b²=c²)
-      const mathGlyphs = [
-        { label: '√x', r: 96, speed: -0.0008, phase: 4.2, inc: -0.16, layer: 'FOREGROUND' as const, size: 12 },
-        { label: 'f(x)', r: 122, speed: 0.00065, phase: 1.1, inc: 0.22, layer: 'MIDGROUND' as const, size: 12 },
-        { label: '∑', r: 130, speed: -0.00055, phase: 5.2, inc: -0.20, layer: 'MIDGROUND' as const, size: 12 },
-        { label: 'a²+b²=c²', r: 138, speed: 0.00045, phase: 2.3, inc: 0.22, layer: 'BACKGROUND' as const, size: 11 },
-      ];
-      mathGlyphs.forEach((mg, idx) => {
-        list.push({
-          id: `math-glyph-${idx}`,
-          type: 'formula_3d',
-          label: mg.label,
-          theme: 'math',
-          depthLayer: mg.layer,
-          orbitRadius: mg.r,
-          orbitSpeed: mg.speed,
-          orbitPhase: mg.phase,
-          orbitInclination: mg.inc,
-          orbitEccentricity: 0.92,
-          x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-          mass: 0.55, damping: 0.948,
-          rotX: 0, rotY: 0, rotZ: 0,
-          rotSpeedX: 0.0007, rotSpeedY: 0.0011, rotSpeedZ: 0.0004,
-          isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-          size: mg.size,
-          baseOpacity: mg.layer === 'FOREGROUND' ? 0.90 : mg.layer === 'MIDGROUND' ? 0.80 : 0.65,
-          transitionAlpha: 1.0,
-          projX: 0, projY: 0, projScale: 1, projZ: 0,
-        });
-      });
-    } else if (theme === 'english') {
-      // Extruded 3D Letters (A, B, C, X, Y, Z)
-      const engLetters = [
-        { label: 'A', r: 96, speed: 0.0011, phase: 0.5, inc: 0.18, layer: 'FOREGROUND' as const, size: 16 },
-        { label: 'B', r: 112, speed: -0.00075, phase: 2.3, inc: -0.24, layer: 'MIDGROUND' as const, size: 15 },
-        { label: 'C', r: 125, speed: 0.00065, phase: 4.1, inc: 0.22, layer: 'MIDGROUND' as const, size: 14 },
-        { label: 'X', r: 132, speed: 0.00055, phase: 1.5, inc: 0.25, layer: 'MIDGROUND' as const, size: 14 },
-        { label: 'Y', r: 138, speed: -0.00045, phase: 3.2, inc: -0.20, layer: 'BACKGROUND' as const, size: 13 },
-        { label: 'Z', r: 144, speed: -0.0004, phase: 5.6, inc: -0.26, layer: 'BACKGROUND' as const, size: 13 },
-        { label: '“ ”', r: 104, speed: 0.0009, phase: 4.7, inc: 0.16, layer: 'FOREGROUND' as const, size: 15 },
-      ];
-      engLetters.forEach((el, idx) => {
-        list.push({
-          id: `eng-letter-${idx}`,
-          type: 'letter_3d',
-          label: el.label,
-          theme: 'english',
-          depthLayer: el.layer,
-          orbitRadius: el.r,
-          orbitSpeed: el.speed,
-          orbitPhase: el.phase,
-          orbitInclination: el.inc,
-          orbitEccentricity: 0.90,
-          x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-          rotX: 0.2, rotY: 0.4, rotZ: 0.1,
-          rotSpeedX: 0.0006, rotSpeedY: 0.0009, rotSpeedZ: 0.0003,
-          isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-          size: el.size,
-          baseOpacity: 0.88,
-          transitionAlpha: 1.0,
-          projX: 0, projY: 0, projScale: 1, projZ: 0,
-        });
-      });
-
-      // 3D Typographic Blocks (ENGLISH, LEARN, SPEAK, THINK, GROW)
-      const engWords = [
-        { label: 'ENGLISH', r: 102, speed: 0.0010, phase: 3.8, inc: -0.18, layer: 'FOREGROUND' as const },
-        { label: 'LEARN', r: 118, speed: 0.0007, phase: 1.2, inc: 0.25, layer: 'MIDGROUND' as const },
-        { label: 'SPEAK', r: 128, speed: -0.0006, phase: 3.4, inc: -0.28, layer: 'MIDGROUND' as const },
-        { label: 'THINK', r: 136, speed: 0.0005, phase: 5.0, inc: 0.22, layer: 'BACKGROUND' as const },
-        { label: 'GROW', r: 144, speed: -0.0004, phase: 0.9, inc: -0.20, layer: 'BACKGROUND' as const },
-      ];
-      engWords.forEach((ew, idx) => {
-        list.push({
-          id: `eng-word-${idx}`,
-          type: 'word_3d',
-          label: ew.label,
-          theme: 'english',
-          depthLayer: ew.layer,
-          orbitRadius: ew.r,
-          orbitSpeed: ew.speed,
-          orbitPhase: ew.phase,
-          orbitInclination: ew.inc,
-          orbitEccentricity: 0.88,
-          x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-          rotX: 0.1, rotY: 0.3, rotZ: 0,
-          rotSpeedX: 0.0004, rotSpeedY: 0.0007, rotSpeedZ: 0.0002,
-          isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-          size: ew.layer === 'FOREGROUND' ? 16 : 13,
-          baseOpacity: ew.layer === 'FOREGROUND' ? 0.88 : 0.78,
-          transitionAlpha: 1.0,
-          projX: 0, projY: 0, projScale: 1, projZ: 0,
-        });
-      });
-    } else if (theme === 'it') {
-      const itItems = [
-        { label: '<dev/>', r: 102, speed: 0.0011, phase: 0.6, inc: 0.18, layer: 'FOREGROUND' as const },
-        { label: '{ state }', r: 118, speed: -0.00075, phase: 2.6, inc: -0.24, layer: 'MIDGROUND' as const },
-        { label: 'React.js', r: 128, speed: 0.00065, phase: 4.4, inc: 0.22, layer: 'MIDGROUND' as const },
-        { label: 'async/await', r: 136, speed: -0.0005, phase: 1.4, inc: -0.25, layer: 'BACKGROUND' as const },
-        { label: 'API 200 OK', r: 144, speed: 0.0004, phase: 5.1, inc: 0.22, layer: 'BACKGROUND' as const },
-      ];
-      itItems.forEach((it, idx) => {
-        list.push({
-          id: `it-block-${idx}`,
-          type: 'code_block_3d',
-          label: it.label,
-          theme: 'it',
-          depthLayer: it.layer,
-          orbitRadius: it.r,
-          orbitSpeed: it.speed,
-          orbitPhase: it.phase,
-          orbitInclination: it.inc,
-          orbitEccentricity: 0.89,
-          x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-          rotX: 0.2, rotY: 0.4, rotZ: 0.1,
-          rotSpeedX: 0.0005, rotSpeedY: 0.0008, rotSpeedZ: 0.0003,
-          isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-          size: it.layer === 'FOREGROUND' ? 16 : 13,
-          baseOpacity: it.layer === 'FOREGROUND' ? 0.88 : 0.75,
-          transitionAlpha: 1.0,
-          projX: 0, projY: 0, projScale: 1, projZ: 0,
-        });
-      });
-    } else {
-      // Academic / DTM / Presidential Schools
-      const acadItems = [
-        { label: '189+', r: 100, speed: 0.0011, phase: 0.5, inc: 0.18, layer: 'FOREGROUND' as const },
-        { label: '★ DTM', r: 116, speed: -0.00075, phase: 2.4, inc: -0.22, layer: 'MIDGROUND' as const },
-        { label: 'GRANT', r: 128, speed: 0.00065, phase: 4.2, inc: 0.22, layer: 'MIDGROUND' as const },
-        { label: 'Cambridge', r: 138, speed: -0.00045, phase: 1.2, inc: -0.25, layer: 'BACKGROUND' as const },
-      ];
-      acadItems.forEach((ac, idx) => {
-        list.push({
-          id: `acad-item-${idx}`,
-          type: 'word_3d',
-          label: ac.label,
-          theme: 'academic',
-          depthLayer: ac.layer,
-          orbitRadius: ac.r,
-          orbitSpeed: ac.speed,
-          orbitPhase: ac.phase,
-          orbitInclination: ac.inc,
-          orbitEccentricity: 0.90,
-          x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-          rotX: 0.2, rotY: 0.4, rotZ: 0.1,
-          rotSpeedX: 0.0005, rotSpeedY: 0.0008, rotSpeedZ: 0.0003,
-          isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-          size: ac.layer === 'FOREGROUND' ? 16 : 13,
-          baseOpacity: ac.layer === 'FOREGROUND' ? 0.88 : 0.75,
-          transitionAlpha: 1.0,
-          projX: 0, projY: 0, projScale: 1, projZ: 0,
-        });
-      });
-    }
-
-    // Adaptive object limit based on device capability
-    const maxObjects = isMobile ? 7 : isTablet ? 11 : 16;
-    sculpturesRef.current = list.slice(0, maxObjects);
-  }, [theme]);
-
-  // Main Canvas Render Loop
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
-    let width = 600;
-    let height = 600;
-    let currentCenterX = 300;
-    let currentCenterY = 300;
-    let currentFloatY = 0;
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    let width = 720;
+    let height = 620;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2.0);
 
     const updateSize = () => {
       const rect = canvas.parentElement?.getBoundingClientRect();
       if (rect && rect.width > 0) {
         width = rect.width;
         height = rect.height;
-        currentCenterX = width / 2;
-        currentCenterY = height / 2;
         canvas.width = Math.round(width * dpr);
         canvas.height = Math.round(height * dpr);
         ctx.scale(dpr, dpr);
@@ -599,7 +122,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     updateSize();
     window.addEventListener('resize', updateSize, { passive: true });
 
-    // 3D vector rotation buffer (Zero GC allocation)
+    // 3D vector rotation buffer
     const rotBuf = { x: 0, y: 0, z: 0 };
     const rotate3D = (px: number, py: number, pz: number, rx: number, ry: number, rz: number) => {
       const cosY = Math.cos(ry);
@@ -629,297 +152,245 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       time += dt;
 
       const bookPhys = bookPhysicsRef.current;
-      const cam = cameraRef.current;
 
-      // Smooth Camera Mouse Parallax
-      cam.mouseX += (cam.targetMouseX - cam.mouseX) * 0.05;
-      cam.mouseY += (cam.targetMouseY - cam.mouseY) * 0.05;
+      // Autonomous horizontal rotation around central vertical axis
+      bookPhys.rotY += bookPhys.angVy;
 
-      // -----------------------------------------------------------------------
-      // 1. 3D HOVER TILT, CONTINUOUS 360° AUTONOMOUS ROTATION & INERTIA BLEND
-      // -----------------------------------------------------------------------
-      // Continuous, slow, elegant showroom rotation speed (~0.10 rad/s = 0.0016 rad/frame)
-      const baseAutoSpin = 0.0016;
-
-      if (!bookPhys.isDragging) {
-        const targetTiltX = -cam.mouseY * 0.11; // subtle X tilt
-        const targetTiltY = cam.mouseX * 0.16;  // subtle Y tilt
-        bookPhys.tiltX += (targetTiltX - bookPhys.tiltX) * 0.06;
-        bookPhys.tiltY += (targetTiltY - bookPhys.tiltY) * 0.06;
-
-        // Inertia decay with heavy book mass (mass = 2.4 => friction = 0.975)
-        if (Math.abs(bookPhys.angVy) > baseAutoSpin * 1.4) {
-          bookPhys.angVy *= 0.975;
-        } else {
-          // Seamlessly blend back into continuous slow showroom rotation in current direction
-          const targetDir = bookPhys.angVy < -0.0001 ? -1 : 1;
-          const targetSpin = targetDir * baseAutoSpin;
-          bookPhys.angVy += (targetSpin - bookPhys.angVy) * 0.035;
-        }
-
-        bookPhys.rotY += bookPhys.angVy;
-
-        // Pure horizontal stability: rotX and rotZ strictly 0
-        bookPhys.rotX = 0;
-        bookPhys.rotZ = 0;
-        bookPhys.angVx = 0;
-      } else {
-        // While dragging, hover tilt smoothly zeros out and user has 100% control
-        bookPhys.tiltX *= 0.85;
-        bookPhys.tiltY *= 0.85;
-      }
-
-      // Hover scale & slight vertical float lift
-      const targetHoverScale = bookPhys.isHovered ? 1.025 : 1.0;
-      const targetHoverLift = bookPhys.isHovered ? -6 : 0;
-      bookPhys.hoverScale += (targetHoverScale - bookPhys.hoverScale) * 0.12;
-      bookPhys.hoverLift += (targetHoverLift - bookPhys.hoverLift) * 0.10;
+      // Hover scale smooth lerp
+      bookPhys.hoverScale += (bookPhys.targetHoverScale - bookPhys.hoverScale) * 0.1;
 
       ctx.clearRect(0, 0, width, height);
 
-      const centerX = width / 2;
-      const centerY = height / 2;
-      const floatY = Math.sin(time * 1.1) * 2.5 + bookPhys.hoverLift;
-      // Cinematic Camera Push-In / Pull-Back Breathing (Cycle ~36s)
-      const cameraBreathing = 1.0 + Math.sin(time * 0.17) * 0.035;
-      currentCenterX = centerX;
-      currentCenterY = centerY;
-      currentFloatY = floatY;
+      const centerX = width * 0.50;
+      const centerY = height * 0.48;
+      const floatY = Math.sin(time * 1.2) * 3.5;
+      const cameraBreathing = 1.0 + Math.sin(time * 0.22) * 0.025;
 
       // -----------------------------------------------------------------------
-      // 2. TRAVELING WARM GOLD KEY LIGHT SOURCE
+      // 1. VOLUMETRIC WARM GOLD KEY LIGHT SOURCE
       // -----------------------------------------------------------------------
-      const lightAngle = time * 0.32;
-      const lightX = Math.cos(lightAngle) * 240;
-      const lightY = Math.sin(lightAngle * 0.7) * 90 - 45;
-      const lightZ = Math.sin(lightAngle) * 200;
+      const lightAngle = time * 0.28;
+      const lightX = Math.cos(lightAngle) * 260;
+      const lightY = Math.sin(lightAngle * 0.7) * 90 - 50;
+      const lightZ = Math.sin(lightAngle) * 220;
 
-      // Subtle Atmospheric 3D Coordinate Grid Floor & Golden Bokeh Particles (2-Rasm)
-      ctx.save();
-      ctx.translate(centerX, centerY + 125);
-      ctx.strokeStyle = 'rgba(217, 169, 58, 0.04)';
-      ctx.lineWidth = 1;
-      for (let gx = -160; gx <= 160; gx += 40) {
-        ctx.beginPath();
-        ctx.moveTo(gx * 0.55, -18);
-        ctx.lineTo(gx * 1.35, 55);
-        ctx.stroke();
-      }
-      for (let gz = 0; gz <= 55; gz += 18) {
-        const factor = gz / 55;
-        const span = 95 + factor * 125;
-        ctx.beginPath();
-        ctx.moveTo(-span, gz);
-        ctx.lineTo(span, gz);
-        ctx.stroke();
-      }
-      ctx.restore();
+      // Ambient Behind-Book Glow
+      const bgGlow = ctx.createRadialGradient(centerX + 20, centerY - 10, 10, centerX + 20, centerY - 10, 260);
+      bgGlow.addColorStop(0, 'rgba(217, 169, 58, 0.18)');
+      bgGlow.addColorStop(0.35, 'rgba(110, 22, 36, 0.15)');
+      bgGlow.addColorStop(0.7, 'rgba(18, 6, 10, 0.4)');
+      bgGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = bgGlow;
+      ctx.beginPath();
+      ctx.arc(centerX + 20, centerY - 10, 260, 0, Math.PI * 2);
+      ctx.fill();
 
-      // Atmospheric Golden Bokeh Particles (2-Rasm)
-      for (let p = 0; p < 10; p++) {
-        const bx = Math.sin(time * 0.35 + p * 1.4) * (width * 0.36);
-        const by = Math.cos(time * 0.28 + p * 1.1) * (height * 0.34);
-        const br = (p % 3 === 0 ? 2.2 : 1.4) * (1 + Math.sin(time + p) * 0.25);
-        const bAlpha = 0.20 + 0.18 * Math.sin(time * 1.2 + p);
+      // Atmospheric Golden Bokeh Particles
+      for (let p = 0; p < 14; p++) {
+        const bx = Math.sin(time * 0.32 + p * 1.35) * (width * 0.44);
+        const by = Math.cos(time * 0.26 + p * 1.15) * (height * 0.42);
+        const br = (p % 3 === 0 ? 2.4 : 1.5) * (1 + Math.sin(time * 0.8 + p) * 0.3);
+        const bAlpha = 0.18 + 0.16 * Math.sin(time * 1.1 + p);
         ctx.fillStyle = `rgba(244, 210, 122, ${bAlpha})`;
         ctx.beginPath();
         ctx.arc(centerX + bx, centerY + by, br, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      // -----------------------------------------------------------------------
-      // 3. UPDATE SCULPTURES & DEPTH PROJECTION (PHYSICAL GRAB, DRAG & THROW)
-      // -----------------------------------------------------------------------
-      const sculptures = sculpturesRef.current;
-      for (let i = 0; i < sculptures.length; i++) {
-        const sc = sculptures[i];
-
-        // Autonomous rotation when not grabbed
-        if (!sc.isGrabbed) {
-          sc.orbitPhase += sc.orbitSpeed;
-          sc.rotX += sc.spinVx + sc.rotSpeedX;
-          sc.rotY += sc.spinVy + sc.rotSpeedY;
-          sc.rotZ += sc.rotSpeedZ;
-
-          sc.spinVx *= 0.965;
-          sc.spinVy *= 0.965;
-        }
-
-        // Elliptical inclined orbit offsets around anchor
-        const baseOrbX = Math.cos(sc.orbitPhase) * sc.orbitRadius;
-        const baseOrbY = Math.sin(sc.orbitPhase) * sc.orbitRadius * sc.orbitEccentricity;
-        const cosInc = Math.cos(sc.orbitInclination);
-        const sinInc = Math.sin(sc.orbitInclination);
-        const inclinedY = baseOrbY * cosInc;
-        const inclinedZ = baseOrbY * sinInc;
-
-        sc.currentOrbX = baseOrbX;
-        sc.currentOrbY = inclinedY;
-
-        if (sc.isGrabbed) {
-          // Object position (x, y) is directly locked to user drag
-          sc.z = sc.anchorZ + inclinedZ;
-        } else {
-          // Throw momentum & damping physics
-          const speed = Math.hypot(sc.vx, sc.vy);
-          if (speed > 0.03) {
-            sc.x += sc.vx;
-            sc.y += sc.vy;
-            const damp = sc.damping || 0.962;
-            sc.vx *= damp; // mass-scaled momentum damping
-            sc.vy *= damp;
-            // Continuously sync anchor so object settles naturally at new location
-            sc.anchorX = sc.x - baseOrbX;
-            sc.anchorY = sc.y - inclinedY;
-
-            // Soft boundaries: bounce gently if near canvas bounds
-            const boundX = width * 0.46;
-            const boundY = height * 0.46;
-            if (sc.x < -boundX) { sc.x = -boundX; sc.vx = Math.abs(sc.vx) * 0.55; }
-            if (sc.x > boundX) { sc.x = boundX; sc.vx = -Math.abs(sc.vx) * 0.55; }
-            if (sc.y < -boundY) { sc.y = -boundY; sc.vy = Math.abs(sc.vy) * 0.55; }
-            if (sc.y > boundY) { sc.y = boundY; sc.vy = -Math.abs(sc.vy) * 0.55; }
-          } else {
-            sc.vx = 0;
-            sc.vy = 0;
-            // Autonomous orbit around its persistent anchor
-            sc.x = sc.anchorX + baseOrbX;
-            sc.y = sc.anchorY + inclinedY;
-          }
-          sc.z = sc.anchorZ + inclinedZ;
-        }
-
-        // 3D perspective projection
-        const perspective = (540 / (540 + sc.z + 80)) * cameraBreathing;
-        const layerParallax = sc.depthLayer === 'FOREGROUND' ? 12 : sc.depthLayer === 'MIDGROUND' ? 6 : 2;
-        sc.projX = centerX + sc.x * perspective + cam.mouseX * layerParallax;
-        sc.projY = centerY + sc.y * perspective + floatY * 0.4 + cam.mouseY * layerParallax;
-        sc.projScale = perspective;
-        sc.projZ = sc.z;
-      }
+      // Sweeping Curved Golden Light Arc (Top in Reference Image)
+      ctx.save();
+      ctx.beginPath();
+      const arcCenterX = centerX + 45;
+      const arcCenterY = centerY - 155 + floatY * 0.4;
+      ctx.ellipse(arcCenterX, arcCenterY, 130, 48, -0.22, Math.PI * 0.85, Math.PI * 1.75);
+      const arcGrad = ctx.createLinearGradient(arcCenterX - 100, arcCenterY, arcCenterX + 100, arcCenterY);
+      arcGrad.addColorStop(0, 'rgba(217, 169, 58, 0)');
+      arcGrad.addColorStop(0.5, 'rgba(255, 246, 220, 0.65)');
+      arcGrad.addColorStop(1, 'rgba(217, 169, 58, 0)');
+      ctx.strokeStyle = arcGrad;
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+      ctx.restore();
 
       // -----------------------------------------------------------------------
-      // 4. RENDER BACKGROUND SCULPTURES (z < 0: Behind Book) & RING BACK HALF
+      // 2. RENDER BACK HALF OF GRAND INSCRIBED ORBITAL RING (BEHIND BOOK)
       // -----------------------------------------------------------------------
-      for (let i = 0; i < sculptures.length; i++) {
-        const sc = sculptures[i];
-        if (sc.type === 'ring_grand_horizontal') {
-          renderSculpture(ctx, sc, lightX, lightY, lightZ, 'back');
-        } else if (sc.projZ < 10) {
-          renderSculpture(ctx, sc, lightX, lightY, lightZ, 'all');
-        }
-      }
+      const ringRadius = 138;
+      const ringTiltX = 0.48; // ~28 deg tilt matching reference
+      const ringRotY = time * 0.06;
+
+      ctx.save();
+      ctx.translate(centerX, centerY + floatY * 0.5);
+      // Back half: angles PI to 2*PI
+      drawGrandInscribedRing(ctx, ringRadius, ringTiltX, ringRotY, 'back');
+      // Secondary tilted nested ring
+      drawNestedTiltedRing(ctx, 92, -0.38, -time * 0.08, 'back');
+      ctx.restore();
 
       // -----------------------------------------------------------------------
-      // 5. RENDER VOLUMETRIC 3D HERO BOOK (Anchored Showroom Masterpiece)
+      // 3. BACKGROUND MATHEMATICAL OBJECTS (Z < 0)
       // -----------------------------------------------------------------------
       ctx.save();
-      const bookParallax = 8;
-      ctx.translate(centerX + cam.mouseX * bookParallax, centerY + floatY + cam.mouseY * bookParallax);
-      ctx.scale(bookPhys.hoverScale * cameraBreathing, bookPhys.hoverScale * cameraBreathing);
+      ctx.translate(centerX, centerY + floatY);
 
-      // Book Dimensions: Exact Golden Ratio (width : height : depth ≈ 1.00 : 1.35 : 0.18)
-      const isCompact = width < 480;
-      const bw = isCompact ? 140 : 175; // Cover width (100% Hero Scale)
-      const bh = Math.round(bw * 1.35); // Cover height (~236px)
-      const bThick = Math.round(bw * 0.18); // Thickness (~32px)
+      // A. Sine Wave along Coordinate Axes (Top-Left in Reference Image)
+      drawCoordinateSineWave(ctx, -145, -75, time);
 
-      const overhang = 4.0; // Hardcover overhanging lip beyond page block
+      // B. 3D Wireframe Icosahedron / Polyhedron (Left in Reference Image)
+      drawWireframeIcosahedron(ctx, -135, 22, 24, time * 0.4);
 
+      // C. Small Golden Sphere (Left of Book)
+      drawGlossyGoldSphere(ctx, -85, -60, 6.5);
+
+      // D. 3D Floating Double Helix / Spiral (Right in Reference Image)
+      drawDoubleHelix(ctx, 155, -55, 22, time);
+
+      // E. 3D Parametric Saddle Surface Mesh (Right in Reference Image)
+      drawSaddleMesh(ctx, 175, 30, 24, time * 0.35);
+
+      // F. Small Golden Sphere (Near Saddle)
+      drawGlossyGoldSphere(ctx, 122, -45, 5.5);
+
+      // G. 3D Wireframe Pyramid / Cone (Bottom Right in Reference Image)
+      drawWireframePyramid(ctx, 185, 145, 24, time * 0.3);
+
+      // H. Floating Mathematical Formulas:
+      // Pi (Top-Right in Reference Image)
+      drawGlowingFormula(ctx, 115, -135, 'π', 28, '#F4D27A');
+      // Small sphere near Pi
+      drawGlossyGoldSphere(ctx, 130, -95, 6.0);
+      // Integral (Bottom-Left in Reference Image)
+      drawGlowingFormula(ctx, -125, 95, '∫', 32, '#F4D27A');
+      // a² + b² = c² (Right in Reference Image)
+      drawGlowingFormula(ctx, 160, 95, 'a² + b² = c²', 14, '#EAE4DC');
+      // Sigma (Right below formula in Reference Image)
+      drawGlowingFormula(ctx, 160, 140, '∑', 22, '#F4D27A');
+
+      ctx.restore();
+
+      // -----------------------------------------------------------------------
+      // 4. MULTI-TIERED CIRCULAR BRONZE-GOLD PEDESTAL (UNDER BOOK)
+      // -----------------------------------------------------------------------
+      ctx.save();
+      ctx.translate(centerX, centerY + floatY);
+
+      const bw = 172;
+      const bh = Math.round(bw * 1.35); // 232px
+      const bThick = 32;
       const hw = bw / 2;
       const hh = bh / 2;
       const ht = bThick / 2;
 
-      // Pure Horizontal Showroom Turntable Rotation (Y-axis only around exact central vertical axis)
-      const ry = bookPhys.rotY;
-      // Clamped micro-tilt from mouse hover (strictly limited to ±3 degrees = ±0.05 rad)
-      const rx = Math.max(-0.05, Math.min(0.05, bookPhys.tiltX));
-      const rz = 0; // Strictly 0: absolute horizontal stability
+      const pedY = hh + 28;
 
-      // -----------------------------------------------------------------------
-      // 2-RASM MULTI-TIERED LUXURY CIRCULAR BRONZE-GOLD PEDESTAL (PODIUM)
-      // -----------------------------------------------------------------------
-      const pedY = hh + 26;
-      const effW = (Math.abs(hw * Math.cos(ry)) + Math.abs(ht * Math.sin(ry))) * 1.25;
-
-      // Floor Contact Radial Glow & Ambient Shadow
-      const floorGlow = ctx.createRadialGradient(0, pedY + 16, 6, 0, pedY + 16, 175);
-      floorGlow.addColorStop(0, 'rgba(217, 169, 58, 0.32)');
-      floorGlow.addColorStop(0.35, 'rgba(84, 18, 28, 0.40)');
-      floorGlow.addColorStop(0.7, 'rgba(8, 2, 4, 0.85)');
+      // Floor Contact Glow & Drop Shadow
+      const floorGlow = ctx.createRadialGradient(0, pedY + 16, 8, 0, pedY + 16, 185);
+      floorGlow.addColorStop(0, 'rgba(217, 169, 58, 0.36)');
+      floorGlow.addColorStop(0.35, 'rgba(92, 20, 32, 0.45)');
+      floorGlow.addColorStop(0.7, 'rgba(8, 2, 4, 0.90)');
       floorGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = floorGlow;
       ctx.beginPath();
-      ctx.ellipse(0, pedY + 16, 165, 34, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, pedY + 16, 175, 36, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Pedestal Tier 3 (Base Plinth): Radius 125, Height 8
-      ctx.fillStyle = '#180A08';
+      // Pedestal Tier 3 (Base Plinth): Radius 138, Height 10
+      ctx.fillStyle = '#160806';
       ctx.beginPath();
-      ctx.ellipse(0, pedY + 12, 125, 24, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, pedY + 14, 138, 26, 0, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = '#5E2B12';
-      ctx.lineWidth = 1.0;
+      ctx.strokeStyle = '#6E3214';
+      ctx.lineWidth = 1.2;
       ctx.stroke();
 
-      // Pedestal Tier 2 (Middle Beveled Ring): Radius 104, Height 7 with Metallic Bronze Shimmer
-      const t2Grad = ctx.createLinearGradient(-104, 0, 104, 0);
+      // Pedestal Tier 2 (Middle Beveled Ring): Radius 116, Height 8
+      const t2Grad = ctx.createLinearGradient(-116, 0, 116, 0);
       t2Grad.addColorStop(0, '#2A1009');
-      t2Grad.addColorStop(0.2, '#5A2A12');
-      t2Grad.addColorStop(0.5, '#B88232');
-      t2Grad.addColorStop(0.8, '#5A2A12');
+      t2Grad.addColorStop(0.25, '#683315');
+      t2Grad.addColorStop(0.5, '#C99238');
+      t2Grad.addColorStop(0.75, '#683315');
       t2Grad.addColorStop(1, '#2A1009');
       ctx.fillStyle = t2Grad;
       ctx.beginPath();
-      ctx.ellipse(0, pedY + 6, 104, 20, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, pedY + 7, 116, 22, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.strokeStyle = '#D9A93A';
-      ctx.lineWidth = 1.1;
+      ctx.lineWidth = 1.2;
       ctx.stroke();
 
-      // Pedestal Tier 1 (Top Stage Disc): Radius 85 with Radiant Golden Surface Reflection
-      const t1Grad = ctx.createRadialGradient(0, pedY, 4, 0, pedY, 85);
-      t1Grad.addColorStop(0, '#FFF2C6');
-      t1Grad.addColorStop(0.25, '#D9A93A');
-      t1Grad.addColorStop(0.65, '#5A2A12');
+      // Pedestal Tier 1 (Top Stage Platform Disc): Radius 96
+      const t1Grad = ctx.createRadialGradient(0, pedY, 4, 0, pedY, 96);
+      t1Grad.addColorStop(0, '#FFF6DC');
+      t1Grad.addColorStop(0.28, '#D9A93A');
+      t1Grad.addColorStop(0.68, '#5E2B12');
       t1Grad.addColorStop(1, '#1A0B08');
       ctx.fillStyle = t1Grad;
       ctx.beginPath();
-      ctx.ellipse(0, pedY, 85, 17, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, pedY, 96, 18, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.strokeStyle = '#FFEAA7';
-      ctx.lineWidth = 1.3;
+      ctx.lineWidth = 1.4;
       ctx.stroke();
 
-      // Inner Concentric Gold Groove
+      // Inner Concentric Gold Ring Groove
       ctx.beginPath();
-      ctx.ellipse(0, pedY, 74, 14, 0, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(217, 169, 58, 0.55)';
-      ctx.lineWidth = 0.7;
+      ctx.ellipse(0, pedY, 82, 15, 0, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(217, 169, 58, 0.65)';
+      ctx.lineWidth = 0.8;
       ctx.stroke();
 
       // Dynamic Book Contact Shadow on Top of Pedestal
-      const shadowExpand = bookPhys.isHovered ? 1.08 : 1.0;
-      const bookShadow = ctx.createRadialGradient(0, pedY - 2, 3, 0, pedY - 2, effW * shadowExpand);
-      bookShadow.addColorStop(0, 'rgba(4, 2, 3, 0.82)');
-      bookShadow.addColorStop(0.6, 'rgba(4, 2, 3, 0.25)');
+      const effW = (Math.abs(hw * Math.cos(bookPhys.rotY)) + Math.abs(ht * Math.sin(bookPhys.rotY))) * 1.25;
+      const bookShadow = ctx.createRadialGradient(0, pedY - 2, 4, 0, pedY - 2, effW * 1.1);
+      bookShadow.addColorStop(0, 'rgba(4, 2, 3, 0.85)');
+      bookShadow.addColorStop(0.6, 'rgba(4, 2, 3, 0.3)');
       bookShadow.addColorStop(1, 'rgba(4, 2, 3, 0)');
       ctx.fillStyle = bookShadow;
       ctx.beginPath();
-      ctx.ellipse(0, pedY - 2, effW * shadowExpand, 10 * shadowExpand, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, pedY - 2, effW * 1.1, 11, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Vertices of Front Cover Plate (z = +ht, centered around origin)
+      // -----------------------------------------------------------------------
+      // FLOATING PARCHMENT MANUSCRIPT PAGES (AT PEDESTAL BASE)
+      // -----------------------------------------------------------------------
+      // Paper 1: Floating open manuscript under book / behind gold sphere
+      drawCurledParchment(ctx, -48, pedY - 14, 38, 26, -0.22);
+      // Paper 2: Floating curled parchment page on right side
+      drawCurledParchment(ctx, 64, pedY - 10, 32, 22, 0.32);
+
+      // -----------------------------------------------------------------------
+      // FOREGROUND GLOSSY METALLIC GOLD SPHERE (THE ORB ON PEDESTAL RIM)
+      // -----------------------------------------------------------------------
+      // In Reference Image: large shiny gold sphere sitting on front-left pedestal rim!
+      drawGlossyGoldSphere(ctx, -72, pedY + 8, 22);
+
+      ctx.restore();
+
+      // -----------------------------------------------------------------------
+      // 5. RENDER THE HERO 3D TEXTBOOK (100% 2-RASM ARTWORK)
+      // -----------------------------------------------------------------------
+      ctx.save();
+      ctx.translate(centerX, centerY + floatY);
+      ctx.scale(bookPhys.hoverScale * cameraBreathing, bookPhys.hoverScale * cameraBreathing);
+
+      // Book Angles: Y-axis rotation + slight backward pitch to match reference camera
+      const ry = bookPhys.rotY;
+      const rx = 0.08; // ~4.5 deg backward pitch
+      const rz = 0;
+
+      const overhang = 4.0;
+
+      // Vertices of Front Cover Plate (z = +ht)
       const coverFrontVerts = [
         [-hw, -hh, ht], [hw, -hh, ht], [hw, hh, ht], [-hw, hh, ht],
         [-hw, -hh, ht - 3], [hw, -hh, ht - 3], [hw, hh, ht - 3], [-hw, hh, ht - 3],
       ];
-      // Vertices of Back Cover Plate (z = -ht, centered around origin)
+      // Vertices of Back Cover Plate (z = -ht)
       const coverBackVerts = [
         [-hw, -hh, -ht + 3], [hw, -hh, -ht + 3], [hw, hh, -ht + 3], [-hw, hh, -ht + 3],
         [-hw, -hh, -ht], [hw, -hh, -ht], [hw, hh, -ht], [-hw, hh, -ht],
       ];
-      // Vertices of Recessed Stratified Ivory Page Block (inset by overhang)
+      // Vertices of Recessed Stratified Ivory Page Block
       const pageLeft = -hw + 5;
       const pageRight = hw - overhang;
       const pageTop = -hh + overhang;
@@ -929,50 +400,20 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         [pageLeft, pageTop, -ht + 3], [pageRight, pageTop, -ht + 3], [pageRight, pageBottom, -ht + 3], [pageLeft, pageBottom, -ht + 3],
       ];
 
-      // Projected vertex sets with true 3D perspective foreshortening
       const projectVert = (v: number[]) => {
         rotate3D(v[0], v[1], v[2], rx, ry, rz);
-        const persp = 520 / (520 + rotBuf.z);
+        const persp = 540 / (540 + rotBuf.z);
         return { x: rotBuf.x * persp, y: rotBuf.y * persp, z: rotBuf.z };
       };
+
       const projCoverFront = coverFrontVerts.map(projectVert);
       const projCoverBack = coverBackVerts.map(projectVert);
       const projPages = pageVerts.map(projectVert);
 
-      // Palette by Active Theme
-      const activeTheme = currentThemeRef.current;
-      let coverTopColor = '#340b15';
-      let coverBotColor = '#130307';
-      let spineColor = '#4e0e1e';
-      let bookTitle = 'MATHEMATICS';
-      let subTitle = 'LUMOS ACADEMY';
-
-      if (activeTheme === 'english') {
-        coverTopColor = '#141E32';
-        coverBotColor = '#070B14';
-        spineColor = '#1D2D48';
-        bookTitle = 'ENGLISH';
-        subTitle = 'IELTS & GRAMMAR';
-      } else if (activeTheme === 'it') {
-        coverTopColor = '#10241A';
-        coverBotColor = '#05100B';
-        spineColor = '#173627';
-        bookTitle = 'FRONTEND IT';
-        subTitle = 'CODE & TECH';
-      } else if (activeTheme === 'academic') {
-        coverTopColor = '#30101A';
-        coverBotColor = '#100308';
-        spineColor = '#4A1627';
-        bookTitle = 'DTM & GRANT';
-        subTitle = 'AKADEMIK BLOK';
-      }
-
-      // Normal computations for backface culling & realistic illumination
       const cf0 = projCoverFront[0];
       const cf1 = projCoverFront[1];
       const cf3 = projCoverFront[3];
       const frontNormalZ = (cf1.x - cf0.x) * (cf3.y - cf0.y) - (cf1.y - cf0.y) * (cf3.x - cf0.x);
-
       const spineNormalZ = (projCoverBack[0].x - cf0.x) * (cf3.y - cf0.y) - (projCoverBack[0].y - cf0.y) * (cf3.x - cf0.x);
 
       const p1 = projPages[1];
@@ -980,15 +421,33 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       const p2 = projPages[2];
       const p6 = projPages[6];
       const pagesRightNormalZ = (p5.x - p1.x) * (p2.y - p1.y) - (p5.y - p1.y) * (p2.x - p1.x);
-
       const topNormalZ = (cf1.x - cf0.x) * (projCoverBack[0].y - cf0.y) - (cf1.y - cf0.y) * (projCoverBack[0].x - cf0.x);
 
-      // Light alignment factor for specular sheen (boosted by hover spotlight)
-      const lightDot = (Math.cos(ry) * lightX + Math.sin(ry) * lightZ) / 220;
-      const hoverLightBoost = bookPhys.isHovered ? 0.25 : 0;
-      const specHighlight = Math.max(0, Math.min(1, 0.5 + lightDot * 0.5 + hoverLightBoost));
+      // Theme Palette
+      const activeTheme = currentThemeRef.current;
+      let coverTopColor = '#380B15';
+      let coverBotColor = '#140307';
+      let spineColor = '#500E20';
+      let bookTitle = 'MATHEMATICS';
 
-      // 1. Back Cover Plate (if facing camera)
+      if (activeTheme === 'english') {
+        coverTopColor = '#141E32';
+        coverBotColor = '#070B14';
+        spineColor = '#1D2D48';
+        bookTitle = 'ENGLISH';
+      } else if (activeTheme === 'it') {
+        coverTopColor = '#10241A';
+        coverBotColor = '#05100B';
+        spineColor = '#173627';
+        bookTitle = 'FRONTEND IT';
+      } else if (activeTheme === 'academic') {
+        coverTopColor = '#30101A';
+        coverBotColor = '#100308';
+        spineColor = '#4A1627';
+        bookTitle = 'DTM & GRANT';
+      }
+
+      // 1. Back Cover Plate
       if (frontNormalZ < 0) {
         ctx.beginPath();
         ctx.moveTo(projCoverBack[4].x, projCoverBack[4].y);
@@ -1001,24 +460,9 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         ctx.strokeStyle = '#D9A93A';
         ctx.lineWidth = 1.3;
         ctx.stroke();
-
-        // Embossed Back Seal
-        const bmx = (projCoverBack[4].x + projCoverBack[5].x + projCoverBack[6].x + projCoverBack[7].x) / 4;
-        const bmy = (projCoverBack[4].y + projCoverBack[5].y + projCoverBack[6].y + projCoverBack[7].y) / 4;
-        ctx.save();
-        ctx.translate(bmx, bmy);
-        ctx.beginPath();
-        ctx.arc(0, 0, 24, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(217, 169, 58, 0.55)';
-        ctx.stroke();
-        ctx.font = 'bold 9px monospace';
-        ctx.fillStyle = '#F4D27A';
-        ctx.textAlign = 'center';
-        ctx.fillText('LUMOS', 0, 3);
-        ctx.restore();
       }
 
-      // 2. Curved Spine Plate (Left edge)
+      // 2. Curved Spine Plate (Left edge in Reference Image)
       if (spineNormalZ > 0) {
         ctx.beginPath();
         ctx.moveTo(cf0.x, cf0.y);
@@ -1035,9 +479,9 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         ctx.lineWidth = 1.3;
         ctx.stroke();
 
-        // 3D Horizontal Gold Rib Ridges on Spine
-        ctx.strokeStyle = 'rgba(244, 210, 122, 0.7)';
-        ctx.lineWidth = 1.2;
+        // 4 Raised Gold Horizontal Ribs on Spine
+        ctx.strokeStyle = 'rgba(244, 210, 122, 0.85)';
+        ctx.lineWidth = 1.3;
         for (let rib = 1; rib <= 4; rib++) {
           const rat = rib / 5;
           const r1x = cf0.x * (1 - rat) + cf3.x * rat;
@@ -1049,9 +493,23 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
           ctx.lineTo(r2x, r2y);
           ctx.stroke();
         }
+
+        // Spine Vertical Gold Title Text
+        const spineMidX = (cf0.x + projCoverBack[4].x + projCoverBack[7].x + cf3.x) / 4;
+        const spineMidY = (cf0.y + projCoverBack[4].y + projCoverBack[7].y + cf3.y) / 4;
+        ctx.save();
+        ctx.translate(spineMidX, spineMidY);
+        const spineAngle = Math.atan2(cf3.y - cf0.y, cf3.x - cf0.x);
+        ctx.rotate(spineAngle - Math.PI / 2);
+        ctx.font = 'bold 9px "Playfair Display", serif';
+        ctx.fillStyle = 'rgba(244, 210, 122, 0.8)';
+        ctx.textAlign = 'center';
+        ctx.letterSpacing = '2px';
+        ctx.fillText('MATHEMATICS', 0, 3);
+        ctx.restore();
       }
 
-      // 3. Recessed Stratified Ivory Page Block (Right Side)
+      // 3. Recessed Stratified Ivory Page Block (Right Edge)
       if (pagesRightNormalZ > 0) {
         ctx.beginPath();
         ctx.moveTo(p1.x, p1.y);
@@ -1069,7 +527,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        // Visible paper stratification lines with depth
+        // Individual paper stratification lines
         ctx.strokeStyle = 'rgba(135, 124, 104, 0.35)';
         for (let l = 1; l <= 4; l++) {
           const rat = l / 5;
@@ -1094,7 +552,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         ctx.stroke();
       }
 
-      // 5. Front Cover Plate (The Grand Masterpiece)
+      // 5. Front Cover Plate (100% 2-Rasm Artwork)
       if (frontNormalZ > 0) {
         ctx.beginPath();
         ctx.moveTo(cf0.x, cf0.y);
@@ -1110,25 +568,23 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         ctx.fillStyle = coverGrad;
         ctx.fill();
 
-        // Physical Multi-Tier Warm Light Spread (dark -> burgundy -> warm gold -> champagne)
-        const lightSpotX = cf0.x * 0.35 + projCoverFront[2].x * 0.65;
-        const lightSpotY = cf0.y * 0.35 + projCoverFront[2].y * 0.65;
+        // Subtle specular highlight sheen on front cover
         const specGrad = ctx.createRadialGradient(
-          lightSpotX,
-          lightSpotY,
+          cf0.x * 0.4 + projCoverFront[2].x * 0.6,
+          cf0.y * 0.4 + projCoverFront[2].y * 0.6,
           6,
-          lightSpotX,
-          lightSpotY,
-          hw * 1.35
+          cf0.x * 0.4 + projCoverFront[2].x * 0.6,
+          cf0.y * 0.4 + projCoverFront[2].y * 0.6,
+          hw * 1.3
         );
-        specGrad.addColorStop(0, `rgba(255, 244, 212, ${0.30 * specHighlight})`);
-        specGrad.addColorStop(0.35, `rgba(217, 169, 58, ${0.18 * specHighlight})`);
-        specGrad.addColorStop(0.7, `rgba(110, 22, 36, ${0.10 * specHighlight})`);
+        specGrad.addColorStop(0, 'rgba(255, 244, 212, 0.35)');
+        specGrad.addColorStop(0.35, 'rgba(217, 169, 58, 0.18)');
+        specGrad.addColorStop(0.7, 'rgba(110, 22, 36, 0.10)');
         specGrad.addColorStop(1, 'rgba(5, 1, 2, 0)');
         ctx.fillStyle = specGrad;
         ctx.fill();
 
-        // Gold Rim & Bevel Line
+        // Outer Gold Bevel Rim
         ctx.strokeStyle = '#F4D27A';
         ctx.lineWidth = 1.4;
         ctx.stroke();
@@ -1145,7 +601,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         ctx.lineWidth = 0.9;
         ctx.stroke();
 
-        // Front Cover Typography & Emblem
+        // Front Cover Typography & Emblem Artwork
         const faceMidX = (cf0.x + cf1.x + projCoverFront[2].x + cf3.x) / 4;
         const faceMidY = (cf0.y + cf1.y + projCoverFront[2].y + cf3.y) / 4;
 
@@ -1154,12 +610,9 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         const skewAngle = Math.atan2(cf1.y - cf0.y, cf1.x - cf0.x);
         ctx.rotate(skewAngle);
 
-        // ---------------------------------------------------------------------
-        // 2-RASM EXACT FRONT COVER EMBOSSED GOLD ARTWORK
-        // ---------------------------------------------------------------------
         ctx.textAlign = 'center';
 
-        // 1. Embossed Gold Royal Crown Emblem (2-Rasm Top Center)
+        // 1. Embossed Gold Royal Crown Emblem (Top Center in Reference Image)
         ctx.strokeStyle = '#F4D27A';
         ctx.fillStyle = '#F4D27A';
         ctx.lineWidth = 1.0;
@@ -1209,10 +662,10 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
           ctx.fillText('x²', -hw * 0.32, hh * 0.09);
           ctx.fillText('f(x)', hw * 0.32, hh * 0.09);
 
-          // 6. Sacred Geometry Icosahedron / Polyhedral Watermark Emblem (2-Rasm Bottom)
+          // 6. Sacred Geometry Icosahedron Watermark Emblem (Bottom in Reference Image)
           ctx.save();
           ctx.translate(0, hh * 0.26);
-          ctx.strokeStyle = 'rgba(244, 210, 122, 0.72)';
+          ctx.strokeStyle = 'rgba(244, 210, 122, 0.75)';
           ctx.lineWidth = 0.8;
           const rGeo = 15;
           // Outer hexagon
@@ -1239,7 +692,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
           ctx.closePath();
           ctx.stroke();
 
-          // Radial diagonal facets to vertices
+          // Radial diagonal facets
           for (let a = 0; a < 6; a++) {
             const ang = (a * Math.PI) / 3;
             ctx.beginPath();
@@ -1248,64 +701,26 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
             ctx.stroke();
           }
           ctx.restore();
-        } else if (activeTheme === 'english') {
-          ctx.font = 'bold 9px sans-serif';
-          ctx.fillStyle = 'rgba(244, 210, 122, 0.55)';
-          ctx.fillText('READ', -hw * 0.44, -hh * 0.02);
-          ctx.fillText('SPEAK', hw * 0.44, -hh * 0.02);
-          ctx.fillText('THINK', 0, hh * 0.12);
-
-          // English Academy Seal
-          ctx.strokeStyle = '#F4D27A';
-          ctx.lineWidth = 1.0;
-          ctx.beginPath(); ctx.arc(0, hh * 0.26, 17, 0, Math.PI * 2); ctx.stroke();
-          ctx.font = 'bold 11px monospace';
-          ctx.fillStyle = '#F4D27A';
-          ctx.fillText('EN', 0, hh * 0.26 + 3.5);
         } else {
-          ctx.strokeStyle = '#F4D27A';
-          ctx.lineWidth = 1.0;
-          ctx.beginPath(); ctx.arc(0, hh * 0.26, 17, 0, Math.PI * 2); ctx.stroke();
-          ctx.font = 'bold 10px monospace';
-          ctx.fillStyle = '#F4D27A';
-          ctx.fillText('★ DTM', 0, hh * 0.26 + 3.5);
+          ctx.font = 'bold 9px sans-serif';
+          ctx.fillStyle = 'rgba(244, 210, 122, 0.65)';
+          ctx.fillText('ACADEMIC PROGRAM', 0, 0);
         }
 
         ctx.restore();
-
-        // Draped Silk Ribbon Bookmark (Warm Gold)
-        ctx.beginPath();
-        const rTopX = cf0.x * 0.45 + cf1.x * 0.55;
-        const rTopY = cf0.y * 0.45 + cf1.y * 0.55;
-        const rBotX = cf3.x * 0.42 + projCoverFront[2].x * 0.58;
-        const rBotY = cf3.y * 0.42 + projCoverFront[2].x * 0.58 + 26;
-        ctx.moveTo(rTopX, rTopY);
-        ctx.quadraticCurveTo(rTopX + 8, (rTopY + rBotY) / 2, rBotX, rBotY);
-        ctx.lineTo(rBotX - 7, rBotY - 5);
-        ctx.lineTo(rBotX - 14, rBotY);
-        ctx.quadraticCurveTo(rTopX - 6, (rTopY + rBotY) / 2, rTopX - 14, rTopY);
-        ctx.closePath();
-        const ribbonGrad = ctx.createLinearGradient(rTopX, rTopY, rBotX, rBotY);
-        ribbonGrad.addColorStop(0, '#D9A93A');
-        ribbonGrad.addColorStop(0.5, '#F4D27A');
-        ribbonGrad.addColorStop(1, '#9E741A');
-        ctx.fillStyle = ribbonGrad;
-        ctx.fill();
       }
 
       ctx.restore();
 
       // -----------------------------------------------------------------------
-      // 6. RENDER FOREGROUND SCULPTURES (z >= 0: In Front of Book) & RING FRONT HALF
+      // 6. RENDER FRONT HALF OF GRAND INSCRIBED ORBITAL RING (IN FRONT OF BOOK)
       // -----------------------------------------------------------------------
-      for (let i = 0; i < sculptures.length; i++) {
-        const sc = sculptures[i];
-        if (sc.type === 'ring_grand_horizontal') {
-          renderSculpture(ctx, sc, lightX, lightY, lightZ, 'front');
-        } else if (sc.projZ >= 10) {
-          renderSculpture(ctx, sc, lightX, lightY, lightZ, 'all');
-        }
-      }
+      ctx.save();
+      ctx.translate(centerX, centerY + floatY * 0.5);
+      // Front half: angles 0 to PI
+      drawGrandInscribedRing(ctx, ringRadius, ringTiltX, ringRotY, 'front');
+      drawNestedTiltedRing(ctx, 92, -0.38, -time * 0.08, 'front');
+      ctx.restore();
 
       animFrameRef.current = requestAnimationFrame(render);
     };
@@ -1313,622 +728,351 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     animFrameRef.current = requestAnimationFrame(render);
 
     // -------------------------------------------------------------------------
-    // HELPER: RENDER HIGH-END VOLUMETRIC SCULPTURE
+    // HELPER: DRAW GRAND INSCRIBED ORBITAL RING WITH 3D DEPTH
     // -------------------------------------------------------------------------
-    function renderSculpture(c: CanvasRenderingContext2D, sc: Sculpture3D, lx: number, ly: number, lz: number, ringHalf: 'back' | 'front' | 'all' = 'all') {
+    function drawGrandInscribedRing(c: CanvasRenderingContext2D, radius: number, tiltX: number, rotY: number, half: 'back' | 'front') {
+      const startAng = half === 'back' ? Math.PI : 0;
+      const endAng = half === 'back' ? Math.PI * 2 : Math.PI;
+
+      // Outer Beveled Ellipse (Wide, Metallic Luxury Gold Ribbon)
+      c.beginPath();
+      c.ellipse(0, 0, radius, radius * 0.32, tiltX, startAng, endAng);
+      c.lineWidth = 4.5;
+      c.strokeStyle = '#D9A93A';
+      c.stroke();
+
+      // Inner Concentric Edge
+      c.beginPath();
+      c.ellipse(0, 0, radius - 7, (radius - 7) * 0.32, tiltX, startAng, endAng);
+      c.lineWidth = 1.0;
+      c.strokeStyle = 'rgba(255, 244, 212, 0.75)';
+      c.stroke();
+
+      // Engraved Roman numerals / math markings along the ring
+      c.lineWidth = 1.1;
+      c.strokeStyle = '#FFF6DC';
+      for (let a = 0; a < Math.PI * 2; a += Math.PI / 10) {
+        if (half === 'back' && (a < Math.PI || a > Math.PI * 2)) continue;
+        if (half === 'front' && (a < 0 || a > Math.PI)) continue;
+        const cosA = Math.cos(a + rotY);
+        const sinA = Math.sin(a + rotY);
+        const rx1 = cosA * (radius - 6);
+        const ry1 = sinA * (radius - 6) * 0.32;
+        const rx2 = cosA * (radius + 2);
+        const ry2 = sinA * (radius + 2) * 0.32;
+        c.beginPath();
+        c.moveTo(rx1, ry1);
+        c.lineTo(rx2, ry2);
+        c.stroke();
+      }
+    }
+
+    function drawNestedTiltedRing(c: CanvasRenderingContext2D, radius: number, tiltX: number, rotY: number, half: 'back' | 'front') {
+      const startAng = half === 'back' ? Math.PI : 0;
+      const endAng = half === 'back' ? Math.PI * 2 : Math.PI;
+      c.beginPath();
+      c.ellipse(0, 0, radius, radius * 0.44, tiltX, startAng, endAng);
+      c.lineWidth = 1.2;
+      c.strokeStyle = 'rgba(217, 169, 58, 0.75)';
+      c.stroke();
+    }
+
+    // -------------------------------------------------------------------------
+    // HELPER: GLOSSY METALLIC GOLD SPHERE (ORB)
+    // -------------------------------------------------------------------------
+    function drawGlossyGoldSphere(c: CanvasRenderingContext2D, sx: number, sy: number, r: number) {
       c.save();
-      c.translate(sc.projX, sc.projY);
+      // Drop shadow on floor/stage
+      c.beginPath();
+      c.ellipse(sx, sy + r * 0.85, r * 0.9, r * 0.3, 0, 0, Math.PI * 2);
+      c.fillStyle = 'rgba(0, 0, 0, 0.55)';
+      c.fill();
 
-      const hoverScale = sc.isHovered || sc.isGrabbed ? 1.25 : 1.0;
-      c.scale(sc.projScale * hoverScale, sc.projScale * hoverScale);
-      c.globalAlpha = sc.baseOpacity;
+      // 3D Sphere gradient
+      const sGrad = c.createRadialGradient(sx - r * 0.35, sy - r * 0.35, r * 0.08, sx, sy, r);
+      sGrad.addColorStop(0, '#FFFFFF'); // Specular highlight
+      sGrad.addColorStop(0.2, '#FFF4D4');
+      sGrad.addColorStop(0.5, '#F4D27A');
+      sGrad.addColorStop(0.8, '#9E6F1D');
+      sGrad.addColorStop(1, '#341406');
+      c.fillStyle = sGrad;
+      c.beginPath();
+      c.arc(sx, sy, r, 0, Math.PI * 2);
+      c.fill();
 
-      // Physical Light Proximity Factor (3D Distance to Traveling Light Source)
-      const dxL = sc.x - lx;
-      const dyL = sc.y - ly;
-      const dzL = sc.z - lz;
-      const distToLight = Math.sqrt(dxL * dxL + dyL * dyL + dzL * dzL);
-      const lightProximity = Math.max(0, Math.min(1, 1 - distToLight / 420));
+      // Golden rim glow
+      c.strokeStyle = 'rgba(255, 246, 220, 0.4)';
+      c.lineWidth = 0.8;
+      c.stroke();
+      c.restore();
+    }
 
-      // Dynamic surface tone modulated by traveling light proximity:
-      // When far: deep wine/gold
-      // When near: radiant warm gold & champagne highlight
-      const surfaceTone = sc.isHovered
-        ? '#FFFFFF'
-        : lightProximity > 0.65
-        ? '#FFF4D4'
-        : lightProximity > 0.3
-        ? '#F4D27A'
-        : '#C89632';
+    // -------------------------------------------------------------------------
+    // HELPER: CURLED PARCHMENT MANUSCRIPT PAGE
+    // -------------------------------------------------------------------------
+    function drawCurledParchment(c: CanvasRenderingContext2D, px: number, py: number, w: number, h: number, rot: number) {
+      c.save();
+      c.translate(px, py);
+      c.rotate(rot);
 
-      // Rotate around local orientation
-      c.rotate(sc.rotZ);
+      // Cast shadow
+      c.beginPath();
+      c.roundRect(-w / 2 + 2, -h / 2 + 3, w, h, 3);
+      c.fillStyle = 'rgba(0, 0, 0, 0.38)';
+      c.fill();
 
-      // Warm Light Halo as Traveling Golden Light Passes or on Hover/Grab
-      if (lightProximity > 0.25 || sc.isHovered || sc.isGrabbed) {
-        const haloIntensity = sc.isHovered || sc.isGrabbed ? 0.35 : lightProximity * 0.24;
-        const gradHalo = c.createRadialGradient(0, 0, 4, 0, 0, sc.size * 1.5);
-        gradHalo.addColorStop(0, `rgba(255, 244, 212, ${haloIntensity})`);
-        gradHalo.addColorStop(0.4, `rgba(217, 169, 58, ${haloIntensity * 0.65})`);
-        gradHalo.addColorStop(0.8, `rgba(110, 22, 36, ${haloIntensity * 0.3})`);
-        gradHalo.addColorStop(1, 'rgba(5, 1, 2, 0)');
-        c.fillStyle = gradHalo;
+      // Page surface
+      const pGrad = c.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2);
+      pGrad.addColorStop(0, 'rgba(252, 248, 238, 0.95)');
+      pGrad.addColorStop(0.6, 'rgba(235, 224, 204, 0.92)');
+      pGrad.addColorStop(1, 'rgba(210, 196, 172, 0.90)');
+      c.fillStyle = pGrad;
+      c.beginPath();
+      c.roundRect(-w / 2, -h / 2, w, h, 2.5);
+      c.fill();
+      c.strokeStyle = 'rgba(217, 169, 58, 0.5)';
+      c.lineWidth = 0.8;
+      c.stroke();
+
+      // Curled corner
+      c.beginPath();
+      c.moveTo(w / 2 - 7, -h / 2);
+      c.lineTo(w / 2, -h / 2 + 7);
+      c.lineTo(w / 2 - 7, -h / 2 + 7);
+      c.closePath();
+      c.fillStyle = 'rgba(180, 165, 140, 0.85)';
+      c.fill();
+
+      // Faint handwritten equation lines
+      c.strokeStyle = 'rgba(100, 75, 45, 0.4)';
+      c.lineWidth = 0.6;
+      for (let l = 0; l < 3; l++) {
+        const ly = -h / 2 + 7 + l * 6;
         c.beginPath();
-        c.arc(0, 0, sc.size * 1.5, 0, Math.PI * 2);
+        c.moveTo(-w / 2 + 5, ly);
+        c.lineTo(w / 2 - (l === 0 ? 10 : 5), ly);
+        c.stroke();
+      }
+      c.restore();
+    }
+
+    // -------------------------------------------------------------------------
+    // HELPER: 3D COORDINATE SYSTEM & SINE WAVE WITH NODES (LEFT IN REFERENCE)
+    // -------------------------------------------------------------------------
+    function drawCoordinateSineWave(c: CanvasRenderingContext2D, sx: number, sy: number, t: number) {
+      c.save();
+      c.translate(sx, sy);
+
+      // Coordinate axes
+      c.strokeStyle = 'rgba(244, 210, 122, 0.65)';
+      c.lineWidth = 1.0;
+      // Y axis
+      c.beginPath(); c.moveTo(0, 35); c.lineTo(0, -35); c.stroke();
+      // Y arrowhead
+      c.beginPath(); c.moveTo(-2.5, -31); c.lineTo(0, -35); c.lineTo(2.5, -31); c.stroke();
+      // X axis
+      c.beginPath(); c.moveTo(-45, 0); c.lineTo(45, 0); c.stroke();
+      // X arrowhead
+      c.beginPath(); c.moveTo(41, -2.5); c.lineTo(45, 0); c.lineTo(41, 2.5); c.stroke();
+
+      // Labels
+      c.font = 'italic 8px serif';
+      c.fillStyle = '#F4D27A';
+      c.fillText('y', 4, -30);
+      c.fillText('x', 42, 10);
+
+      // Sine Wave Curve
+      c.beginPath();
+      for (let x = -40; x <= 40; x += 2) {
+        const y = Math.sin(x * 0.12 + t * 0.8) * 16;
+        if (x === -40) c.moveTo(x, y);
+        else c.lineTo(x, y);
+      }
+      c.lineWidth = 1.6;
+      c.strokeStyle = '#F4D27A';
+      c.stroke();
+
+      // Node points along the wave
+      [-30, -10, 10, 30].forEach((nx) => {
+        const ny = Math.sin(nx * 0.12 + t * 0.8) * 16;
+        c.beginPath();
+        c.arc(nx, ny, 2.0, 0, Math.PI * 2);
+        c.fillStyle = '#FFF6DC';
         c.fill();
+      });
+
+      c.restore();
+    }
+
+    // -------------------------------------------------------------------------
+    // HELPER: 3D WIREFRAME ICOSAHEDRON (LEFT IN REFERENCE)
+    // -------------------------------------------------------------------------
+    function drawWireframeIcosahedron(c: CanvasRenderingContext2D, sx: number, sy: number, size: number, rot: number) {
+      c.save();
+      c.translate(sx, sy);
+      c.rotate(rot);
+
+      c.strokeStyle = 'rgba(244, 210, 122, 0.75)';
+      c.lineWidth = 1.1;
+
+      // Outer hexagon
+      c.beginPath();
+      for (let a = 0; a < 6; a++) {
+        const ang = (a * Math.PI) / 3;
+        const x = Math.cos(ang) * size;
+        const y = Math.sin(ang) * size;
+        if (a === 0) c.moveTo(x, y);
+        else c.lineTo(x, y);
       }
+      c.closePath();
+      c.stroke();
 
-      c.strokeStyle = surfaceTone;
-      c.fillStyle = surfaceTone;
-      c.lineWidth = sc.isHovered ? 1.6 : 1.2;
-
-      // -----------------------------------------------------------------------
-      // A. The Grand Horizontal Brushed Gold Orbital Ring (With True 3D Depth Half-Arcs)
-      // -----------------------------------------------------------------------
-      if (sc.type === 'ring_grand_horizontal') {
-        const startAng = ringHalf === 'back' ? Math.PI : 0;
-        const endAng = ringHalf === 'back' ? Math.PI * 2 : ringHalf === 'front' ? Math.PI : Math.PI * 2;
-
-        // Outer Beveled Ellipse (Thin, delicate luxury gold wire)
-        c.beginPath();
-        c.ellipse(0, 0, sc.size, sc.size * 0.32, sc.rotX, startAng, endAng);
-        c.lineWidth = 1.3;
-        c.strokeStyle = '#D9A93A';
-        c.stroke();
-
-        // Inner Concentric Bevel
-        c.beginPath();
-        c.ellipse(0, 0, sc.size - 4, (sc.size - 4) * 0.32, sc.rotX, startAng, endAng);
-        c.lineWidth = 0.7;
-        c.strokeStyle = 'rgba(244, 210, 122, 0.45)';
-        c.stroke();
-
-        // Coordinate Tick Marks on this depth half
-        c.lineWidth = 0.7;
-        c.strokeStyle = 'rgba(244, 210, 122, 0.65)';
-        for (let a = 0; a < Math.PI * 2; a += Math.PI / 6) {
-          if (ringHalf === 'back' && (a < Math.PI || a > Math.PI * 2)) continue;
-          if (ringHalf === 'front' && (a < 0 || a > Math.PI)) continue;
-          const cosA = Math.cos(a + sc.rotY);
-          const sinA = Math.sin(a + sc.rotY);
-          const rx1 = cosA * (sc.size - 5);
-          const ry1 = sinA * (sc.size - 5) * 0.32;
-          const rx2 = cosA * (sc.size + 5);
-          const ry2 = sinA * (sc.size + 5) * 0.32;
-          c.beginPath();
-          c.moveTo(rx1, ry1);
-          c.lineTo(rx2, ry2);
-          c.stroke();
-        }
+      // Inscribed triangles
+      c.beginPath();
+      for (let a = 0; a < 3; a++) {
+        const ang = (a * Math.PI * 2) / 3;
+        const x = Math.cos(ang) * size;
+        const y = Math.sin(ang) * size;
+        if (a === 0) c.moveTo(x, y);
+        else c.lineTo(x, y);
       }
+      c.closePath();
+      c.stroke();
 
-      // -----------------------------------------------------------------------
-      // B. Nested Tilted Double Ring
-      // -----------------------------------------------------------------------
-      else if (sc.type === 'ring_nested_tilted') {
+      // Facets to center
+      for (let a = 0; a < 6; a++) {
+        const ang = (a * Math.PI) / 3;
         c.beginPath();
-        c.ellipse(0, 0, sc.size, sc.size * 0.5, sc.rotY, 0, Math.PI * 2);
+        c.moveTo(0, 0);
+        c.lineTo(Math.cos(ang) * size, Math.sin(ang) * size);
         c.stroke();
-
-        c.beginPath();
-        c.ellipse(0, 0, sc.size * 0.72, sc.size * 0.36, sc.rotY + 0.35, 0, Math.PI * 2);
-        c.strokeStyle = 'rgba(217, 169, 58, 0.65)';
-        c.stroke();
-      }
-
-      // -----------------------------------------------------------------------
-      // C. Volumetric Parabola Ribbon (y = x² with 3D Depth)
-      // -----------------------------------------------------------------------
-      else if (sc.type === 'parabola_volumetric') {
-        c.beginPath();
-        for (let px = -sc.size; px <= sc.size; px += 3) {
-          const py = 0.045 * px * px - 16;
-          if (px === -sc.size) c.moveTo(px, py);
-          else c.lineTo(px, py);
-        }
-        c.lineWidth = 2.0;
-        c.strokeStyle = '#F4D27A';
-        c.stroke();
-
-        // Extruded Depth Curve
-        c.beginPath();
-        for (let px = -sc.size; px <= sc.size; px += 3) {
-          const py = 0.045 * px * px - 16 + 5;
-          if (px === -sc.size) c.moveTo(px + 3, py);
-          else c.lineTo(px + 3, py);
-        }
-        c.lineWidth = 1.0;
-        c.strokeStyle = 'rgba(217, 169, 58, 0.45)';
-        c.stroke();
-
-        // Cross-linking rungs for volumetric look
-        for (let rx = -sc.size; rx <= sc.size; rx += sc.size / 2) {
-          const ry1 = 0.045 * rx * rx - 16;
-          c.beginPath();
-          c.moveTo(rx, ry1);
-          c.lineTo(rx + 3, ry1 + 5);
-          c.stroke();
-        }
-      }
-
-      // -----------------------------------------------------------------------
-      // D. Tubular Sine Wave Ribbon (y = sin(x))
-      // -----------------------------------------------------------------------
-      else if (sc.type === 'sinewave_tubular') {
-        c.beginPath();
-        for (let px = -sc.size; px <= sc.size; px += 3) {
-          const py = Math.sin(px * 0.16 + sc.rotY) * 12;
-          if (px === -sc.size) c.moveTo(px, py);
-          else c.lineTo(px, py);
-        }
-        c.lineWidth = 2.0;
-        c.strokeStyle = '#F4D27A';
-        c.stroke();
-
-        // Secondary thickness line
-        c.beginPath();
-        for (let px = -sc.size; px <= sc.size; px += 3) {
-          const py = Math.sin(px * 0.16 + sc.rotY) * 12 + 4;
-          if (px === -sc.size) c.moveTo(px + 2, py);
-          else c.lineTo(px + 2, py);
-        }
-        c.lineWidth = 1.0;
-        c.strokeStyle = 'rgba(217, 169, 58, 0.45)';
-        c.stroke();
-      }
-
-      // -----------------------------------------------------------------------
-      // E. Parametric 3D Saddle Surface Mesh (Hyperbolic Paraboloid)
-      // -----------------------------------------------------------------------
-      else if (sc.type === 'saddle_surface') {
-        const span = sc.size * 0.7;
-        const steps = 4;
-        c.strokeStyle = 'rgba(244, 210, 122, 0.65)';
-        c.lineWidth = 1.0;
-
-        for (let i = -steps; i <= steps; i++) {
-          const u = (i / steps) * span;
-          c.beginPath();
-          for (let j = -steps; j <= steps; j++) {
-            const v = (j / steps) * span;
-            const z = (u * u - v * v) * 0.02;
-            const px = u + z * 0.4;
-            const py = v - z * 0.3;
-            if (j === -steps) c.moveTo(px, py);
-            else c.lineTo(px, py);
-          }
-          c.stroke();
-        }
-        for (let j = -steps; j <= steps; j++) {
-          const v = (j / steps) * span;
-          c.beginPath();
-          for (let i = -steps; i <= steps; i++) {
-            const u = (i / steps) * span;
-            const z = (u * u - v * v) * 0.02;
-            const px = u + z * 0.4;
-            const py = v - z * 0.3;
-            if (i === -steps) c.moveTo(px, py);
-            else c.lineTo(px, py);
-          }
-          c.stroke();
-        }
-      }
-
-      // -----------------------------------------------------------------------
-      // F. 3D Double Helix
-      // -----------------------------------------------------------------------
-      else if (sc.type === 'double_helix') {
-        const steps = 14;
-        const hSpan = sc.size;
-        for (let i = 0; i <= steps; i++) {
-          const t = (i / steps) * Math.PI * 3 + sc.rotY;
-          const y = (i / steps - 0.5) * hSpan * 1.5;
-          const x1 = Math.cos(t) * sc.size * 0.45;
-          const x2 = Math.cos(t + Math.PI) * sc.size * 0.45;
-
-          // Helix rungs
-          c.beginPath();
-          c.moveTo(x1, y);
-          c.lineTo(x2, y);
-          c.strokeStyle = 'rgba(217, 169, 58, 0.4)';
-          c.lineWidth = 0.8;
-          c.stroke();
-
-          // Helix nodes
-          c.fillStyle = '#F4D27A';
-          c.beginPath(); c.arc(x1, y, 1.8, 0, Math.PI * 2); c.fill();
-          c.beginPath(); c.arc(x2, y, 1.8, 0, Math.PI * 2); c.fill();
-        }
-      }
-
-      // -----------------------------------------------------------------------
-      // G. 3D Coordinate Tripod (X, Y, Z)
-      // -----------------------------------------------------------------------
-      else if (sc.type === 'coord_tripod') {
-        const s = sc.size;
-        c.lineWidth = 1.6;
-
-        // X Axis (Gold)
-        c.strokeStyle = '#F4D27A';
-        c.beginPath(); c.moveTo(0, 0); c.lineTo(s, 0); c.stroke();
-
-        // Y Axis (Burgundy / Gold tint)
-        c.strokeStyle = '#D9A93A';
-        c.beginPath(); c.moveTo(0, 0); c.lineTo(0, -s); c.stroke();
-
-        // Z Axis (Champagne)
-        c.strokeStyle = '#FFE7A3';
-        c.beginPath(); c.moveTo(0, 0); c.lineTo(-s * 0.65, s * 0.65); c.stroke();
-
-        // Small Origin Cube
-        c.strokeRect(-2, -2, 4, 4);
-
-        // Labels
-        c.font = 'bold 8px monospace';
-        c.fillStyle = '#F4D27A';
-        c.fillText('X', s + 4, 2);
-        c.fillText('Y', 2, -s - 4);
-        c.fillText('Z', -s * 0.65 - 6, s * 0.65 + 6);
-      }
-
-      // -----------------------------------------------------------------------
-      // H. Architectural Vector Arrow
-      // -----------------------------------------------------------------------
-      else if (sc.type === 'vector_arrow') {
-        const s = sc.size;
-        c.lineWidth = 1.8;
-        c.beginPath();
-        c.moveTo(-s * 0.7, s * 0.5);
-        c.lineTo(s * 0.7, -s * 0.5);
-        c.stroke();
-
-        // 3D Arrowhead Pyramid
-        c.beginPath();
-        c.moveTo(s * 0.7, -s * 0.5);
-        c.lineTo(s * 0.4, -s * 0.5 - 6);
-        c.lineTo(s * 0.5 + 4, -s * 0.2);
-        c.closePath();
-        c.fillStyle = '#F4D27A';
-        c.fill();
-      }
-
-      // -----------------------------------------------------------------------
-      // I. 3D Triangular Prism
-      // -----------------------------------------------------------------------
-      else if (sc.type === 'prism_3d') {
-        const s = sc.size;
-        c.lineWidth = 1.2;
-        c.beginPath();
-        c.moveTo(0, -s * 0.7);
-        c.lineTo(s * 0.6, s * 0.5);
-        c.lineTo(-s * 0.6, s * 0.5);
-        c.closePath();
-        c.stroke();
-
-        // Rear offset triangle
-        c.beginPath();
-        c.moveTo(4, -s * 0.7 - 4);
-        c.lineTo(s * 0.6 + 4, s * 0.5 - 4);
-        c.lineTo(-s * 0.6 + 4, s * 0.5 - 4);
-        c.closePath();
-        c.strokeStyle = 'rgba(217, 169, 58, 0.45)';
-        c.stroke();
-
-        // Connecting lines
-        c.beginPath();
-        c.moveTo(0, -s * 0.7); c.lineTo(4, -s * 0.7 - 4);
-        c.moveTo(s * 0.6, s * 0.5); c.lineTo(s * 0.6 + 4, s * 0.5 - 4);
-        c.moveTo(-s * 0.6, s * 0.5); c.lineTo(-s * 0.6 + 4, s * 0.5 - 4);
-        c.stroke();
-      }
-
-      // -----------------------------------------------------------------------
-      // I2. 3D Faceted Octahedron / Polyhedral Pyramid
-      // -----------------------------------------------------------------------
-      else if (sc.type === 'pyramid_3d') {
-        const s = sc.size;
-        c.lineWidth = 1.2;
-        // Upper pyramid apex & base
-        c.beginPath();
-        c.moveTo(0, -s);
-        c.lineTo(s * 0.65, 0);
-        c.lineTo(0, s * 0.32);
-        c.lineTo(-s * 0.65, 0);
-        c.closePath();
-        c.stroke();
-
-        // Lower pyramid apex
-        c.beginPath();
-        c.moveTo(0, s);
-        c.lineTo(s * 0.65, 0);
-        c.lineTo(0, s * 0.32);
-        c.lineTo(-s * 0.65, 0);
-        c.closePath();
-        c.strokeStyle = 'rgba(217, 169, 58, 0.55)';
-        c.stroke();
-
-        // Facet axis lines
-        c.beginPath();
-        c.moveTo(0, -s); c.lineTo(0, s);
-        c.moveTo(-s * 0.65, 0); c.lineTo(s * 0.65, 0);
-        c.stroke();
-      }
-
-      // -----------------------------------------------------------------------
-      // J. Floating Mathematical Formulas (π, ∑, √, ∞, f(x))
-      // -----------------------------------------------------------------------
-      else if (sc.type === 'formula_3d') {
-        const fontSz = Math.round(sc.size * 1.2);
-        c.font = `bold ${fontSz}px serif`;
-        c.textAlign = 'center';
-        c.textBaseline = 'middle';
-
-        c.fillStyle = 'rgba(20, 6, 10, 0.75)';
-        c.fillText(sc.label || '', 2, 2);
-        c.fillStyle = '#F4D27A';
-        c.fillText(sc.label || '', 0, 0);
-      }
-
-      // -----------------------------------------------------------------------
-      // K. Extruded Volumetric 3D Letters (A, B, C, Z)
-      // -----------------------------------------------------------------------
-      else if (sc.type === 'letter_3d') {
-        const fontSz = Math.round(sc.size * 1.3);
-        c.font = `900 ${fontSz}px "Playfair Display", serif`;
-        c.textAlign = 'center';
-        c.textBaseline = 'middle';
-
-        // Extruded 3D Shadow Layers
-        c.fillStyle = 'rgba(20, 6, 10, 0.75)';
-        c.fillText(sc.label || '', 3, 3);
-        c.fillStyle = '#6E1624';
-        c.fillText(sc.label || '', 2, 2);
-        c.fillStyle = '#D9A93A';
-        c.fillText(sc.label || '', 1, 1);
-        // Front Face
-        c.fillStyle = '#F4D27A';
-        c.fillText(sc.label || '', 0, 0);
-      }
-
-      // -----------------------------------------------------------------------
-      // L. 3D Typographic Word Blocks
-      // -----------------------------------------------------------------------
-      else if (sc.type === 'word_3d') {
-        const fontSz = Math.round(sc.size);
-        c.font = `bold ${fontSz}px -apple-system, sans-serif`;
-        c.textAlign = 'center';
-        c.textBaseline = 'middle';
-
-        const textMetrics = c.measureText(sc.label || '');
-        const tw = textMetrics.width + 12;
-        const th = fontSz + 8;
-        c.fillStyle = 'rgba(18, 6, 10, 0.85)';
-        c.strokeStyle = 'rgba(217, 169, 58, 0.5)';
-        c.lineWidth = 1;
-        c.beginPath();
-        c.roundRect(-tw / 2, -th / 2, tw, th, 4);
-        c.fill();
-        c.stroke();
-
-        c.fillStyle = '#F4D27A';
-        c.fillText(sc.label || '', 0, 0);
-      }
-
-      // -----------------------------------------------------------------------
-      // M. 3D Code Block Constructs
-      // -----------------------------------------------------------------------
-      else if (sc.type === 'code_block_3d') {
-        const fontSz = Math.round(sc.size);
-        c.font = `bold ${fontSz}px monospace`;
-        c.textAlign = 'center';
-        c.textBaseline = 'middle';
-
-        c.fillStyle = 'rgba(10, 20, 14, 0.85)';
-        c.strokeStyle = 'rgba(217, 169, 58, 0.5)';
-        c.lineWidth = 1;
-        const tm = c.measureText(sc.label || '');
-        const cw = tm.width + 12;
-        const ch = fontSz + 8;
-        c.beginPath();
-        c.roundRect(-cw / 2, -ch / 2, cw, ch, 4);
-        c.fill();
-        c.stroke();
-
-        c.fillStyle = '#F4D27A';
-        c.fillText(sc.label || '', 0, 0);
       }
 
       c.restore();
     }
 
     // -------------------------------------------------------------------------
-    // 7. UNIFIED POINTER HIT-TESTING, DRAG-AND-CARRY & THROW PHYSICS
+    // HELPER: 3D DOUBLE HELIX (RIGHT IN REFERENCE)
     // -------------------------------------------------------------------------
-    const handlePointerDown = (e: PointerEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      const px = e.clientX - rect.left;
-      const py = e.clientY - rect.top;
+    function drawDoubleHelix(c: CanvasRenderingContext2D, sx: number, sy: number, size: number, t: number) {
+      c.save();
+      c.translate(sx, sy);
+      const steps = 12;
+      for (let i = 0; i <= steps; i++) {
+        const ang = (i / steps) * Math.PI * 2.5 + t * 0.8;
+        const y = (i / steps - 0.5) * size * 1.8;
+        const x1 = Math.cos(ang) * size * 0.5;
+        const x2 = Math.cos(ang + Math.PI) * size * 0.5;
 
-      const sculptures = sculpturesRef.current;
-      // Check Sculptures first (hit radius comfortably scaled for touch & mouse)
-      let grabbedScId: string | null = null;
-      for (let i = sculptures.length - 1; i >= 0; i--) {
-        const sc = sculptures[i];
-        const dx = px - sc.projX;
-        const dy = py - sc.projY;
-        const hitRadius = Math.max(sc.size * sc.projScale * 1.5, 34);
-        if (dx * dx + dy * dy < hitRadius * hitRadius) {
-          grabbedScId = sc.id;
-          sc.isGrabbed = true;
-          sc.vx = 0;
-          sc.vy = 0;
-          sc.spinVx = 0;
-          sc.spinVy = 0;
-          break;
+        // Rungs
+        c.beginPath();
+        c.moveTo(x1, y);
+        c.lineTo(x2, y);
+        c.strokeStyle = 'rgba(217, 169, 58, 0.45)';
+        c.lineWidth = 0.8;
+        c.stroke();
+
+        // Nodes
+        c.fillStyle = '#F4D27A';
+        c.beginPath(); c.arc(x1, y, 1.8, 0, Math.PI * 2); c.fill();
+        c.beginPath(); c.arc(x2, y, 1.8, 0, Math.PI * 2); c.fill();
+      }
+      c.restore();
+    }
+
+    // -------------------------------------------------------------------------
+    // HELPER: 3D PARAMETRIC SADDLE MESH (RIGHT IN REFERENCE)
+    // -------------------------------------------------------------------------
+    function drawSaddleMesh(c: CanvasRenderingContext2D, sx: number, sy: number, size: number, rot: number) {
+      c.save();
+      c.translate(sx, sy);
+      c.rotate(rot);
+      const span = size * 0.6;
+      const steps = 4;
+      c.strokeStyle = 'rgba(244, 210, 122, 0.65)';
+      c.lineWidth = 0.9;
+
+      for (let i = -steps; i <= steps; i++) {
+        const u = (i / steps) * span;
+        c.beginPath();
+        for (let j = -steps; j <= steps; j++) {
+          const v = (j / steps) * span;
+          const z = (u * u - v * v) * 0.02;
+          const px = u + z * 0.4;
+          const py = v - z * 0.3;
+          if (j === -steps) c.moveTo(px, py);
+          else c.lineTo(px, py);
         }
+        c.stroke();
       }
-
-      if (grabbedScId) {
-        activeGrabTargetRef.current = grabbedScId;
-        bookPhysicsRef.current.lastPointerX = e.clientX;
-        bookPhysicsRef.current.lastPointerY = e.clientY;
-        bookPhysicsRef.current.lastTime = performance.now();
-        bookPhysicsRef.current.samples = [{ x: e.clientX, y: e.clientY, time: performance.now() }];
-        try {
-          canvas.setPointerCapture(e.pointerId);
-        } catch (_) {}
-        return;
-      }
-
-      // Check Book Centerpiece (hit radius 150px around center)
-      const cdx = px - currentCenterX;
-      const cdy = py - (currentCenterY + currentFloatY);
-      if (cdx * cdx + cdy * cdy < 150 * 150) {
-        activeGrabTargetRef.current = 'book';
-        bookPhysicsRef.current.isDragging = true;
-        bookPhysicsRef.current.angVx = 0;
-        bookPhysicsRef.current.angVy = 0;
-        bookPhysicsRef.current.lastPointerX = e.clientX;
-        bookPhysicsRef.current.lastPointerY = e.clientY;
-        bookPhysicsRef.current.lastTime = performance.now();
-        bookPhysicsRef.current.samples = [{ x: e.clientX, y: e.clientY, time: performance.now() }];
-        try {
-          canvas.setPointerCapture(e.pointerId);
-        } catch (_) {}
-      }
-    };
-
-    const handlePointerMove = (e: PointerEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      const px = e.clientX - rect.left;
-      const py = e.clientY - rect.top;
-
-      // Update Mouse Parallax & 3D Tilt Coordinates
-      const normX = (px - width / 2) / (width / 2);
-      const normY = (py - height / 2) / (height / 2);
-      cameraRef.current.targetMouseX = normX;
-      cameraRef.current.targetMouseY = normY;
-
-      const activeTarget = activeGrabTargetRef.current;
-      const now = performance.now();
-
-      // If dragging an object across the screen
-      if (activeTarget) {
-        const dx = e.clientX - bookPhysicsRef.current.lastPointerX;
-        const dy = e.clientY - bookPhysicsRef.current.lastPointerY;
-
-        bookPhysicsRef.current.lastPointerX = e.clientX;
-        bookPhysicsRef.current.lastPointerY = e.clientY;
-        bookPhysicsRef.current.lastTime = now;
-
-        // Keep last 8 samples for exact velocity and momentum calculation
-        bookPhysicsRef.current.samples.push({ x: e.clientX, y: e.clientY, time: now });
-        if (bookPhysicsRef.current.samples.length > 8) {
-          bookPhysicsRef.current.samples.shift();
+      for (let j = -steps; j <= steps; j++) {
+        const v = (j / steps) * span;
+        c.beginPath();
+        for (let i = -steps; i <= steps; i++) {
+          const u = (i / steps) * span;
+          const z = (u * u - v * v) * 0.02;
+          const px = u + z * 0.4;
+          const py = v - z * 0.3;
+          if (i === -steps) c.moveTo(px, py);
+          else c.lineTo(px, py);
         }
-
-        if (activeTarget === 'book') {
-          // Horizontal turntable rotation driven by pointer
-          bookPhysicsRef.current.rotY += dx * 0.009;
-          // Vertical movement produces only very slight micro-tilt (strictly clamped to ±0.04 rad)
-          bookPhysicsRef.current.tiltX += dy * 0.0006;
-          bookPhysicsRef.current.tiltX = Math.max(-0.04, Math.min(0.04, bookPhysicsRef.current.tiltX));
-        } else {
-          // Sculpture Grab-and-Carry: Move with cursor in 3D world space
-          const sc = sculpturesRef.current.find((s) => s.id === activeTarget);
-          if (sc) {
-            const scale = sc.projScale || 1.0;
-            const worldDx = dx / scale;
-            const worldDy = dy / scale;
-            sc.x += worldDx;
-            sc.y += worldDy;
-            // Update anchor so object persists at new location without snapping back
-            sc.anchorX = sc.x - sc.currentOrbX;
-            sc.anchorY = sc.y - sc.currentOrbY;
-
-            // Fluid 3D rotation during drag
-            sc.rotY += dx * 0.014;
-            sc.rotX += dy * 0.014;
-          }
-        }
-        return;
+        c.stroke();
       }
+      c.restore();
+    }
 
-      // Hover Hit-testing
-      const sculptures = sculpturesRef.current;
-      let hoveredSc = false;
-      for (let i = 0; i < sculptures.length; i++) {
-        const sc = sculptures[i];
-        const distSq = (px - sc.projX) ** 2 + (py - sc.projY) ** 2;
-        const hitRadius = Math.max(sc.size * sc.projScale * 1.5, 34);
-        if (distSq < hitRadius * hitRadius) {
-          sc.isHovered = true;
-          hoveredSc = true;
-        } else {
-          sc.isHovered = false;
-        }
-      }
+    // -------------------------------------------------------------------------
+    // HELPER: 3D WIREFRAME PYRAMID (BOTTOM RIGHT IN REFERENCE)
+    // -------------------------------------------------------------------------
+    function drawWireframePyramid(c: CanvasRenderingContext2D, sx: number, sy: number, size: number, rot: number) {
+      c.save();
+      c.translate(sx, sy);
+      c.rotate(rot);
+      c.strokeStyle = 'rgba(244, 210, 122, 0.7)';
+      c.lineWidth = 1.1;
 
-      const cdx = px - currentCenterX;
-      const cdy = py - (currentCenterY + currentFloatY);
-      const isOverBook = cdx * cdx + cdy * cdy < 140 * 140;
-      bookPhysicsRef.current.isHovered = isOverBook;
+      // Base triangle
+      const b1 = { x: -size * 0.6, y: size * 0.5 };
+      const b2 = { x: size * 0.6, y: size * 0.5 };
+      const b3 = { x: 0, y: size * 0.2 };
+      // Apex
+      const apex = { x: 0, y: -size * 0.7 };
 
-      canvas.style.cursor = isOverBook || hoveredSc ? 'grab' : 'default';
-    };
+      c.beginPath();
+      c.moveTo(b1.x, b1.y);
+      c.lineTo(b2.x, b2.y);
+      c.lineTo(b3.x, b3.y);
+      c.closePath();
+      c.stroke();
 
-    const handlePointerUp = (e: PointerEvent) => {
-      const activeTarget = activeGrabTargetRef.current;
-      if (!activeTarget) return;
+      c.beginPath();
+      c.moveTo(apex.x, apex.y); c.lineTo(b1.x, b1.y);
+      c.moveTo(apex.x, apex.y); c.lineTo(b2.x, b2.y);
+      c.moveTo(apex.x, apex.y); c.lineTo(b3.x, b3.y);
+      c.stroke();
 
-      const samples = bookPhysicsRef.current.samples;
-      let calculatedVx = 0;
-      let calculatedVy = 0;
+      c.restore();
+    }
 
-      if (samples.length >= 2) {
-        const first = samples[0];
-        const last = samples[samples.length - 1];
-        const dtMs = Math.max(last.time - first.time, 16);
-        calculatedVx = ((last.x - first.x) / dtMs) * 16.6;
-        calculatedVy = ((last.y - first.y) / dtMs) * 16.6;
-      }
-
-      if (activeTarget === 'book') {
-        bookPhysicsRef.current.isDragging = false;
-        // Heavy book mass (2.4) -> deliberate response with high rotational inertia on Y-axis
-        bookPhysicsRef.current.angVy = calculatedVx * 0.0055;
-        bookPhysicsRef.current.angVx = 0; // Zero vertical angular velocity
-      } else {
-        const sc = sculpturesRef.current.find((s) => s.id === activeTarget);
-        if (sc) {
-          sc.isGrabbed = false;
-          const scale = sc.projScale || 1.0;
-          const invMass = 1.0 / (sc.mass || 1.0);
-          // Mass-scaled throw velocity response
-          sc.vx = (calculatedVx / scale) * 0.92 * invMass;
-          sc.vy = (calculatedVy / scale) * 0.92 * invMass;
-          sc.spinVy = calculatedVx * 0.014 * invMass;
-          sc.spinVx = calculatedVy * 0.014 * invMass;
-        }
-      }
-
-      activeGrabTargetRef.current = null;
-      try {
-        canvas.releasePointerCapture(e.pointerId);
-      } catch (_) {}
-    };
-
-    canvas.addEventListener('pointerdown', handlePointerDown);
-    canvas.addEventListener('pointermove', handlePointerMove);
-    canvas.addEventListener('pointerup', handlePointerUp);
-    canvas.addEventListener('pointercancel', handlePointerUp);
+    // -------------------------------------------------------------------------
+    // HELPER: GLOWING MATHEMATICAL FORMULA / GLYPH
+    // -------------------------------------------------------------------------
+    function drawGlowingFormula(c: CanvasRenderingContext2D, sx: number, sy: number, text: string, fontSize: number, color: string) {
+      c.save();
+      c.font = `bold ${fontSize}px "Playfair Display", serif`;
+      c.textAlign = 'center';
+      c.textBaseline = 'middle';
+      // Subtle shadow
+      c.fillStyle = 'rgba(10, 2, 4, 0.85)';
+      c.fillText(text, sx + 2, sy + 2);
+      // Main text
+      c.fillStyle = color;
+      c.fillText(text, sx, sy);
+      c.restore();
+    }
 
     return () => {
       window.removeEventListener('resize', updateSize);
-      canvas.removeEventListener('pointerdown', handlePointerDown);
-      canvas.removeEventListener('pointermove', handlePointerMove);
-      canvas.removeEventListener('pointerup', handlePointerUp);
-      canvas.removeEventListener('pointercancel', handlePointerUp);
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
   }, []);
@@ -1936,236 +1080,224 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
   return (
     <section
       id="courses"
-      ref={containerRef}
-      className="relative py-2 sm:py-3 lg:py-4 px-3 sm:px-5 lg:px-6 max-w-[1360px] mx-auto min-h-screen lg:h-screen lg:max-h-[960px] flex flex-col justify-center z-10 select-none"
-      style={{ touchAction: 'pan-y' }}
+      className="relative min-h-screen lg:h-screen w-full flex flex-col justify-center overflow-hidden bg-[#080607] py-6 sm:py-8 lg:py-0 px-4 sm:px-6 lg:px-8 select-none"
     >
       {/* -----------------------------------------------------------------------
-          TOP SECTION HERO: Luxury Visual Introduction (Compact for 100vh Single Screen)
+          BACKGROUND ATMOSPHERE (SEAMLESS LUXURY STUDIO)
           ----------------------------------------------------------------------- */}
-      <div className="text-center max-w-3xl mx-auto space-y-1 mb-2 sm:mb-2.5">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#16090D] border border-[#D9A93A]/40 text-[11px] font-bold uppercase tracking-widest text-[#D9A93A] shadow-md shadow-[#D9A93A]/10">
-          <Sparkles className="h-3 w-3" />
-          <span>LUMOS ILMIY MAKTABI</span>
-        </div>
-
-        <h2 className="text-2xl sm:text-3xl font-luxury-serif font-black text-[#F7F4EE] tracking-tight">
-          KURSLAR
-        </h2>
-
-        <p className="text-xs sm:text-sm font-luxury-serif italic text-[#F4D27A] font-medium">
-          “Kelajagingiz uchun bilimni tanlang.”
-        </p>
-
-        <p className="text-[11px] sm:text-xs text-[#A9A3A0] leading-normal max-w-2xl mx-auto">
-          Har bir yo‘nalish uchun xalqaro standartlarga asoslangan mukammal o‘quv dasturlari va interaktiv 3D ta’lim muhiti.
-        </p>
+      {/* Subtle Library Bookshelf Silhouette in Far Background */}
+      <div className="absolute inset-0 pointer-events-none opacity-35">
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#16060B]/40 via-transparent to-transparent" />
+        <div className="absolute -top-32 right-12 w-[600px] h-[600px] rounded-full bg-radial from-[#D9A93A]/10 via-[#4A0E1A]/15 to-transparent blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full bg-radial from-[#380B15]/20 to-transparent blur-3xl" />
       </div>
 
       {/* -----------------------------------------------------------------------
-          COURSE CATEGORY SELECTOR PILLS (Compact for 100vh Fit)
+          MAIN VIEWPORT GRID: LEFT UI (42-45%) + RIGHT 3D SCENE (55-58%)
           ----------------------------------------------------------------------- */}
-      <div className="flex items-center justify-center gap-1.5 sm:gap-2 flex-wrap mb-2 sm:mb-3">
-        {INITIAL_COURSES.map((course) => {
-          const isSelected = course.id === activeCourse.id;
-          return (
-            <button
-              key={course.id}
-              type="button"
-              onClick={() => handleSelectCourse(course)}
-              className={`px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-300 cursor-pointer flex items-center gap-1.5 border ${
-                isSelected
-                  ? 'bg-gradient-to-r from-[#D9A93A] via-[#F4D27A] to-[#D9A93A] text-[#0A0708] border-[#FFF2C6]/50 shadow-[0_3px_14px_rgba(217,169,58,0.35)] scale-102'
-                  : 'bg-[#120609]/80 text-[#BDB5B0] border-[#D9A93A]/25 hover:border-[#D9A93A]/60 hover:text-[#F7F4EE]'
-              }`}
-            >
-              <span>{course.title}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* -----------------------------------------------------------------------
-          MAIN 3D EDUCATION GALLERY SHOWROOM STAGE (Streamlined for 100vh)
-          ----------------------------------------------------------------------- */}
-      <div className="relative rounded-2xl lg:rounded-3xl bg-gradient-to-b from-[#18080E]/95 via-[#100407]/95 to-[#0A0204] border border-[#D9A93A]/30 p-4 sm:p-5 lg:p-6 shadow-[0_15px_50px_rgba(0,0,0,0.85)] overflow-hidden">
-        {/* Subtle Ambient Radial Lighting in Background */}
-        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-radial from-[#D9A93A]/12 to-transparent blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-radial from-[#4A0E1A]/20 to-transparent blur-3xl pointer-events-none" />
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-7 items-center relative z-10">
-          {/* LEFT COLUMN: Active Course Information & Specifications */}
-          <div
-            className={`lg:col-span-6 space-y-2.5 sm:space-y-3 transition-all duration-300 ${
-              isTransitioning ? 'opacity-30 translate-y-1' : 'opacity-100 translate-y-0'
-            }`}
-          >
-            {/* Top Meta: Category & Level */}
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="px-3 py-1 rounded-md bg-[#D9A93A]/15 border border-[#D9A93A]/30 text-[11px] font-bold text-[#F4D27A] uppercase tracking-wider">
-                  {activeCourse.category}
-                </span>
-                <span className="px-3 py-1 rounded-md bg-[#2A0F17]/60 border border-[#D9A93A]/20 text-[11px] font-medium text-[#D5CECA]">
-                  {activeCourse.level || 'Barcha bosqichlar'}
-                </span>
-              </div>
-
-              {/* Course Navigation Arrows */}
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handlePrev}
-                  className="p-2 rounded-full border border-[#D9A93A]/30 hover:border-[#D9A93A] text-[#A9A3A0] hover:text-[#F7F4EE] hover:bg-[#D9A93A]/10 transition-colors cursor-pointer"
-                  title="Oldingi kurs"
-                  aria-label="Oldingi kurs"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  className="p-2 rounded-full border border-[#D9A93A]/30 hover:border-[#D9A93A] text-[#A9A3A0] hover:text-[#F7F4EE] hover:bg-[#D9A93A]/10 transition-colors cursor-pointer"
-                  title="Keyingi kurs"
-                  aria-label="Keyingi kurs"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* Course Title */}
-            <h3 className="text-xl sm:text-2xl lg:text-3xl font-luxury-serif font-black text-[#F7F4EE] tracking-tight">
-              {activeCourse.title}
-            </h3>
-
-            {/* Description */}
-            <p className="text-xs sm:text-[13px] text-[#BDB5B0] leading-snug font-normal line-clamp-2">
-              {activeCourse.description}
-            </p>
-
-            {/* Key Specifications Grid (Compact Row for 100vh) */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 py-2.5 border-y border-[#D9A93A]/20">
-              <div className="flex items-center gap-2.5">
-                <div className="h-7 w-7 rounded-lg bg-[#D9A93A]/10 border border-[#D9A93A]/25 flex items-center justify-center text-[#D9A93A] shrink-0">
-                  <Clock className="h-3.5 w-3.5" />
-                </div>
-                <div>
-                  <span className="text-[9px] text-[#A9A3A0] font-semibold uppercase block">Davomiyligi</span>
-                  <span className="text-xs font-bold text-[#F7F4EE]">
-                    {activeCourse.durationMonths} oy ({activeCourse.lessonsCount} dars)
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2.5">
-                <div className="h-7 w-7 rounded-lg bg-[#D9A93A]/10 border border-[#D9A93A]/25 flex items-center justify-center text-[#D9A93A] shrink-0">
-                  <Calendar className="h-3.5 w-3.5" />
-                </div>
-                <div>
-                  <span className="text-[9px] text-[#A9A3A0] font-semibold uppercase block">Dars Grafigi</span>
-                  <span className="text-xs font-bold text-[#F7F4EE] line-clamp-1">
-                    {(activeCourse.schedule || '').split('(')[0] || 'Haftada 3 kun'}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2.5">
-                <div className="h-7 w-7 rounded-lg bg-[#D9A93A]/10 border border-[#D9A93A]/25 flex items-center justify-center text-[#D9A93A] shrink-0">
-                  <GraduationCap className="h-3.5 w-3.5" />
-                </div>
-                <div>
-                  <span className="text-[9px] text-[#A9A3A0] font-semibold uppercase block">Ustoz</span>
-                  <span className="text-xs font-bold text-[#F7F4EE] line-clamp-1">
-                    {activeCourse.instructor || 'Yetakchi ustoz'}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Syllabus Preview (2 Columns of Topics from 2-Rasm) */}
-            <div className="space-y-1.5 pt-0.5">
-              <span className="text-[11px] font-bold text-[#D9A93A] tracking-wide uppercase flex items-center gap-1.5">
-                <Sparkles className="h-3 w-3" />
-                <span>O‘quv dasturidan asosiy mavzular:</span>
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px] text-[#E8E1D9]">
-                {(activeCourse.syllabus || []).slice(0, 6).map((topic, idx) => (
-                  <div key={idx} className="flex items-start gap-1.5">
-                    <CheckCircle2 className="h-3 w-3 text-[#D9A93A] shrink-0 mt-0.5" />
-                    <span className="line-clamp-1 leading-tight">{topic}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Pricing & CTA Buttons */}
-            <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <span className="text-[10px] uppercase font-bold text-[#A9A3A0] block">Oylik to‘lov</span>
-                <span className="text-xl sm:text-2xl font-luxury-serif font-black text-[#F4D27A]">
-                  {formatMoney(activeCourse.pricePerMonth)}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2.5">
-                {/* Secondary CTA: Full Syllabus */}
-                <button
-                  type="button"
-                  onClick={() => onOpenDetails(activeCourse)}
-                  className="px-4 sm:px-5 py-2.5 rounded-full border border-[#D9A93A]/40 bg-[#16090D]/80 hover:bg-[#D9A93A]/15 hover:border-[#F4D27A] text-xs font-bold text-[#F7F4EE] hover:text-[#FFE7A3] transition-all duration-300 flex items-center gap-1.5 cursor-pointer shadow-[inset_0_1px_2px_rgba(255,255,255,0.06)]"
-                >
-                  <BookOpen className="h-3.5 w-3.5 text-[#D9A93A]" />
-                  <span>Batafsil dastur</span>
-                </button>
-
-                {/* Primary CTA: Register */}
-                <button
-                  type="button"
-                  onClick={() => onOpenRegister(activeCourse.title)}
-                  className="px-5 sm:px-6 py-2.5 rounded-full text-xs font-black text-[#0B0808] bg-gradient-to-r from-[#D9A93A] via-[#F4D27A] to-[#D9A93A] hover:brightness-110 shadow-[0_4px_18px_rgba(217,169,58,0.4)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 flex items-center gap-1.5 cursor-pointer border border-[#FFF2C6]/40"
-                >
-                  <span>Guruhga yozilish</span>
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Diagnostic Test Link */}
-            {onOpenDiagnostic && (
-              <div className="pt-1">
-                <button
-                  type="button"
-                  onClick={onOpenDiagnostic}
-                  className="text-[11px] font-bold text-[#D9A93A] hover:text-[#F4D27A] hover:underline flex items-center gap-1.5 cursor-pointer transition-colors"
-                >
-                  <span>Qaysi kurs sizga mos kelishini aniqlash uchun bepul diagnostik test topshiring</span>
-                  <ArrowRight className="h-2.5 w-2.5" />
-                </button>
-              </div>
-            )}
+      <div className="max-w-[1380px] w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center relative z-10">
+        {/* =====================================================================
+            LEFT COLUMN: Active Course Information Matching Reference Hierarchy
+            ===================================================================== */}
+        <div
+          className={`lg:col-span-5 xl:col-span-5 space-y-3.5 sm:space-y-4 transition-all duration-300 ${
+            isTransitioning ? 'opacity-40 translate-y-1' : 'opacity-100 translate-y-0'
+          }`}
+        >
+          {/* 1. Category & Audience Badges */}
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <span className="px-4 py-1 rounded-full border border-[#D9A93A] bg-[#14060A]/90 text-xs font-bold text-[#F4D27A] tracking-wider uppercase shadow-[0_0_12px_rgba(217,169,58,0.25)]">
+              {activeCourse.category || 'MATEMATIKA'}
+            </span>
+            <span className="px-4 py-1 rounded-full border border-white/10 bg-[#16090D]/80 text-xs font-medium text-[#D5CECA]">
+              {activeCourse.level || 'Barcha sinflar & Abituriyentlar'}
+            </span>
           </div>
 
-          {/* RIGHT COLUMN: Grand Interactive 3D World Stage (Sized for 100vh Fit) */}
-          <div className="lg:col-span-6 relative w-full aspect-square max-h-[350px] sm:max-h-[380px] lg:max-h-[410px] mx-auto flex items-center justify-center select-none">
-            {/* Ambient Behind-Glow */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="w-[88%] h-[88%] rounded-full bg-radial from-[#D9A93A]/22 via-[#4A0E17]/28 to-transparent blur-3xl" />
+          {/* 2. Course Main Title & Instructor */}
+          <div className="space-y-0.5">
+            <h2 className="text-3xl sm:text-4xl lg:text-[3.2rem] font-luxury-serif font-black text-[#FFFFFF] leading-[1.08] tracking-tight drop-shadow-md">
+              {(activeCourse.title || '').replace(/\s*\(.*?\)\s*/g, '').trim() || activeCourse.title}
+            </h2>
+            <p className="text-xl sm:text-2xl lg:text-[2.1rem] font-luxury-serif font-semibold text-[#F4D27A] leading-snug">
+              ({activeCourse.instructor || 'Hadicha ustoz'})
+            </p>
+          </div>
+
+          {/* 3. Description */}
+          <p className="text-xs sm:text-[13px] text-[#BDB5B0] leading-relaxed max-w-lg font-normal">
+            {activeCourse.description ||
+              'Matematika, mantiqiy fikrlash, DTM testlari va olimpiadalarga mukammal tayyorgarlik kursi.'}
+          </p>
+
+          {/* 4. Single Unified Specification Capsule Bar */}
+          <div className="rounded-2xl bg-[#14080D]/85 backdrop-blur-md border border-[#D9A93A]/25 p-2.5 sm:p-3 grid grid-cols-3 divide-x divide-[#D9A93A]/20 shadow-[0_8px_30px_rgba(0,0,0,0.6)]">
+            {/* Davomiyligi */}
+            <div className="flex items-center gap-2 px-1 sm:px-2">
+              <div className="h-7 w-7 rounded-lg bg-[#D9A93A]/10 border border-[#D9A93A]/25 flex items-center justify-center text-[#D9A93A] shrink-0">
+                <Calendar className="h-3.5 w-3.5" />
+              </div>
+              <div>
+                <span className="text-[9px] uppercase font-bold text-[#A9A3A0] tracking-wider block">Davomiyligi</span>
+                <span className="text-xs font-bold text-[#F7F4EE] block leading-tight">
+                  {activeCourse.durationMonths} oy ({activeCourse.lessonsCount} dars)
+                </span>
+              </div>
             </div>
 
-            {/* 3D Canvas */}
-            <canvas
-              ref={canvasRef}
-              className="w-full h-full block touch-none select-none relative z-10"
-              style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
-              title="3D Kurs Objekti: Aylantirish uchun ushlang va siljiting"
-            />
-
-            {/* Interaction Guide Hint Badge */}
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 px-3.5 py-1.5 rounded-full bg-[#120608]/85 backdrop-blur-md border border-[#D9A93A]/30 text-[10px] font-semibold text-[#D9A93A] pointer-events-none flex items-center gap-2 whitespace-nowrap shadow-xl">
-              <RotateCw className="h-3 w-3 animate-spin-slow" />
-              <span>Kitob va orbital ob’ektlarni 360° aylantirish uchun ushlang</span>
+            {/* Dars Grafigi */}
+            <div className="flex items-center gap-2 px-2 sm:px-3">
+              <div className="h-7 w-7 rounded-lg bg-[#D9A93A]/10 border border-[#D9A93A]/25 flex items-center justify-center text-[#D9A93A] shrink-0">
+                <Clock className="h-3.5 w-3.5" />
+              </div>
+              <div>
+                <span className="text-[9px] uppercase font-bold text-[#A9A3A0] tracking-wider block">Dars grafigi</span>
+                <span className="text-xs font-bold text-[#F7F4EE] block leading-tight line-clamp-1">
+                  {(activeCourse.schedule || '').split('(')[0] || 'Dush - Chor - Juma'}
+                </span>
+              </div>
             </div>
+
+            {/* Ustoz */}
+            <div className="flex items-center gap-2 px-2 sm:px-3">
+              <div className="h-7 w-7 rounded-lg bg-[#D9A93A]/10 border border-[#D9A93A]/25 flex items-center justify-center text-[#D9A93A] shrink-0">
+                <GraduationCap className="h-3.5 w-3.5" />
+              </div>
+              <div>
+                <span className="text-[9px] uppercase font-bold text-[#A9A3A0] tracking-wider block">Ustoz</span>
+                <span className="text-xs font-bold text-[#F7F4EE] block leading-tight line-clamp-1">
+                  {activeCourse.instructor || 'Hadicha ustoz'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* 5. Syllabus Topics (2 Columns with Gold Checkmarks) */}
+          <div className="space-y-1.5 pt-0.5">
+            <span className="text-[11px] font-bold text-[#D9A93A] tracking-wider uppercase block">
+              O‘QUV DASTURIDAN ASOSIY MAVZULAR:
+            </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-1.5 text-[11px] text-[#E8E1D9]">
+              {(activeCourse.syllabus || []).slice(0, 4).map((topic, idx) => (
+                <div key={idx} className="flex items-start gap-1.5">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-[#D9A93A] shrink-0 mt-0.5" />
+                  <span className="line-clamp-1 leading-snug">{topic}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 6. Price & Action CTAs Row */}
+          <div className="pt-2 flex items-center justify-between gap-4">
+            {/* Price block */}
+            <div className="shrink-0">
+              <span className="text-[10px] uppercase font-bold text-[#A9A3A0] tracking-wider block">Oylik to‘lov</span>
+              <span className="text-3xl sm:text-4xl lg:text-[2.7rem] font-luxury-serif font-black text-[#F4D27A] leading-none block">
+                {formatMoney(activeCourse.pricePerMonth).replace(" so'm", "").replace(" so‘m", "")}
+              </span>
+              <span className="text-xl sm:text-2xl font-luxury-serif font-black text-[#F4D27A] leading-tight block">
+                so‘m
+              </span>
+            </div>
+
+            {/* CTAs */}
+            <div className="flex items-center gap-2.5 shrink-0">
+              {/* Secondary CTA: Batafsil dastur */}
+              <button
+                type="button"
+                onClick={() => onOpenDetails(activeCourse)}
+                className="px-4 sm:px-5 py-3 rounded-full border border-[#D9A93A]/40 bg-[#16090D]/80 hover:bg-[#D9A93A]/15 hover:border-[#F4D27A] text-xs font-bold text-[#F7F4EE] hover:text-[#FFE7A3] transition-all duration-300 flex items-center gap-2 cursor-pointer shadow-[inset_0_1px_2px_rgba(255,255,255,0.08)]"
+              >
+                <BookOpen className="h-3.5 w-3.5 text-[#D9A93A]" />
+                <span className="whitespace-nowrap">Batafsil dastur</span>
+              </button>
+
+              {/* Primary CTA: Guruhga yozilish */}
+              <button
+                type="button"
+                onClick={() => onOpenRegister(activeCourse.title)}
+                className="px-5 sm:px-6 py-3 rounded-full text-xs font-black text-[#0B0808] bg-gradient-to-r from-[#D9A93A] via-[#F4D27A] to-[#D9A93A] hover:brightness-110 shadow-[0_4px_20px_rgba(217,169,58,0.42)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 flex items-center gap-2 cursor-pointer border border-[#FFF2C6]/40"
+              >
+                <span className="whitespace-nowrap">Guruhga yozilish</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* 7. Diagnostic Test Link */}
+          {onOpenDiagnostic && (
+            <div className="pt-0.5">
+              <button
+                type="button"
+                onClick={onOpenDiagnostic}
+                className="text-[11px] font-semibold text-[#BDB5B0] hover:text-[#F4D27A] flex items-center gap-1.5 cursor-pointer transition-colors group"
+              >
+                <div className="h-3.5 w-3.5 rounded-full border border-[#D9A93A]/60 flex items-center justify-center text-[9px] text-[#D9A93A] group-hover:border-[#F4D27A]">
+                  i
+                </div>
+                <span>Qaysi kurs sizga mos kelishini aniqlash uchun bepul diagnostik test topshiring</span>
+                <ArrowRight className="h-3 w-3 text-[#D9A93A] transition-transform group-hover:translate-x-0.5" />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* =====================================================================
+            RIGHT COLUMN: 3D Miniature Mathematical Universe (55-58%)
+            ===================================================================== */}
+        <div className="lg:col-span-7 xl:col-span-7 relative w-full h-[420px] sm:h-[480px] lg:h-[550px] flex items-center justify-center select-none">
+          {/* 3D Canvas */}
+          <canvas
+            ref={canvasRef}
+            className="w-full h-full block select-none relative z-10"
+            style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+            title="LUMOS 3D Kurs Olami"
+          />
+
+          {/* Bottom-Right Carousel Navigation Controls (Matching Reference Image) */}
+          <div className="absolute bottom-2 right-2 sm:bottom-4 sm:right-4 z-20 flex items-center gap-2.5 bg-[#120609]/70 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#D9A93A]/30 shadow-lg">
+            {/* Prev Button */}
+            <button
+              type="button"
+              onClick={handlePrev}
+              className="p-1.5 rounded-full border border-[#D9A93A]/40 text-[#D9A93A] hover:bg-[#D9A93A]/20 hover:text-[#FFF6DC] transition-colors cursor-pointer"
+              title="Oldingi kurs"
+              aria-label="Oldingi kurs"
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+            </button>
+
+            {/* Course Dots / Pill Indicator */}
+            <div className="flex items-center gap-1.5">
+              {INITIAL_COURSES.map((course, idx) => {
+                const isActive = course.id === activeCourse.id;
+                return (
+                  <button
+                    key={course.id}
+                    type="button"
+                    onClick={() => handleSelectCourse(course)}
+                    className={`transition-all duration-300 cursor-pointer ${
+                      isActive
+                        ? 'w-5 h-1.5 rounded-full bg-gradient-to-r from-[#D9A93A] to-[#F4D27A] shadow-[0_0_8px_#D9A93A]'
+                        : 'w-1.5 h-1.5 rounded-full bg-[#D9A93A]/40 hover:bg-[#D9A93A]/80'
+                    }`}
+                    title={course.title}
+                    aria-label={course.title}
+                  />
+                );
+              })}
+            </div>
+
+            {/* Next Button */}
+            <button
+              type="button"
+              onClick={handleNext}
+              className="p-1.5 rounded-full border border-[#D9A93A]/40 text-[#D9A93A] hover:bg-[#D9A93A]/20 hover:text-[#FFF6DC] transition-colors cursor-pointer"
+              title="Keyingi kurs"
+              aria-label="Keyingi kurs"
+            >
+              <ChevronRight className="h-3.5 w-3.5" />
+            </button>
           </div>
         </div>
       </div>
