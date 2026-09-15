@@ -59,6 +59,14 @@ interface Sculpture3D {
   x: number;
   y: number;
   z: number;
+  // Physics, Anchors & Grab-and-Carry State
+  anchorX: number;
+  anchorY: number;
+  anchorZ: number;
+  vx: number;
+  vy: number;
+  currentOrbX: number;
+  currentOrbY: number;
   // Local Rotations
   rotX: number;
   rotY: number;
@@ -201,7 +209,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       orbitPhase: 0.4,
       orbitInclination: 0.16,
       orbitEccentricity: 0.94,
-      x: 0, y: 0, z: 0,
+      x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
       rotX: 0.35, rotY: 0, rotZ: 0,
       rotSpeedX: 0.0002, rotSpeedY: 0.0006, rotSpeedZ: 0.0002,
       isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
@@ -222,7 +230,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       orbitPhase: 2.5,
       orbitInclination: -0.38,
       orbitEccentricity: 0.88,
-      x: 0, y: 0, z: 0,
+      x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
       rotX: -0.4, rotY: 0.3, rotZ: 0.2,
       rotSpeedX: 0.0004, rotSpeedY: -0.0005, rotSpeedZ: 0.0002,
       isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
@@ -248,7 +256,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         orbitPhase: 1.1,
         orbitInclination: 0.32,
         orbitEccentricity: 0.90,
-        x: 0, y: 0, z: 0,
+        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
         rotX: 0.25, rotY: 0.45, rotZ: 0.1,
         rotSpeedX: 0.0003, rotSpeedY: 0.0006, rotSpeedZ: 0.0002,
         isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
@@ -270,7 +278,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         orbitPhase: 3.7,
         orbitInclination: -0.34,
         orbitEccentricity: 0.86,
-        x: 0, y: 0, z: 0,
+        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
         rotX: -0.3, rotY: 0.55, rotZ: 0.15,
         rotSpeedX: 0.0004, rotSpeedY: 0.0006, rotSpeedZ: 0.0003,
         isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
@@ -291,7 +299,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         orbitPhase: 5.2,
         orbitInclination: 0.42,
         orbitEccentricity: 0.84,
-        x: 0, y: 0, z: 0,
+        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
         rotX: 0.5, rotY: 0.3, rotZ: -0.2,
         rotSpeedX: 0.0005, rotSpeedY: 0.0004, rotSpeedZ: 0.0002,
         isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
@@ -312,7 +320,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         orbitPhase: 2.1,
         orbitInclination: -0.28,
         orbitEccentricity: 0.89,
-        x: 0, y: 0, z: 0,
+        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
         rotX: 0.3, rotY: 0.6, rotZ: 0.2,
         rotSpeedX: 0.0006, rotSpeedY: 0.0007, rotSpeedZ: 0.0003,
         isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
@@ -334,7 +342,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         orbitPhase: 4.4,
         orbitInclination: 0.22,
         orbitEccentricity: 0.92,
-        x: 0, y: 0, z: 0,
+        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
         rotX: 0.35, rotY: 0.4, rotZ: -0.15,
         rotSpeedX: 0.0007, rotSpeedY: 0.0008, rotSpeedZ: 0.0004,
         isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
@@ -356,7 +364,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         orbitPhase: 0.8,
         orbitInclination: -0.45,
         orbitEccentricity: 0.85,
-        x: 0, y: 0, z: 0,
+        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
         rotX: 0.4, rotY: 0.2, rotZ: 0.5,
         rotSpeedX: 0.0005, rotSpeedY: 0.0004, rotSpeedZ: 0.0002,
         isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
@@ -377,7 +385,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         orbitPhase: 5.8,
         orbitInclination: 0.38,
         orbitEccentricity: 0.88,
-        x: 0, y: 0, z: 0,
+        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
         rotX: 0.3, rotY: 0.5, rotZ: 0.1,
         rotSpeedX: 0.0006, rotSpeedY: 0.0007, rotSpeedZ: 0.0003,
         isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
@@ -407,7 +415,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
           orbitPhase: mg.phase,
           orbitInclination: mg.inc,
           orbitEccentricity: 0.92,
-          x: 0, y: 0, z: 0,
+          x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
           rotX: 0, rotY: 0, rotZ: 0,
           rotSpeedX: 0.0007, rotSpeedY: 0.0011, rotSpeedZ: 0.0004,
           isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
@@ -423,7 +431,10 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         { label: 'A', r: 165, speed: 0.0012, phase: 0.5, inc: 0.24, layer: 'FOREGROUND' as const, size: 28 },
         { label: 'B', r: 215, speed: -0.0008, phase: 2.3, inc: -0.32, layer: 'MIDGROUND' as const, size: 25 },
         { label: 'C', r: 250, speed: 0.0007, phase: 4.1, inc: 0.28, layer: 'MIDGROUND' as const, size: 24 },
-        { label: 'Z', r: 285, speed: -0.0005, phase: 5.6, inc: -0.35, layer: 'BACKGROUND' as const, size: 22 },
+        { label: 'X', r: 270, speed: 0.0006, phase: 1.5, inc: 0.32, layer: 'MIDGROUND' as const, size: 23 },
+        { label: 'Y', r: 290, speed: -0.0005, phase: 3.2, inc: -0.26, layer: 'BACKGROUND' as const, size: 22 },
+        { label: 'Z', r: 310, speed: -0.00045, phase: 5.6, inc: -0.35, layer: 'BACKGROUND' as const, size: 21 },
+        { label: '“ ”', r: 180, speed: 0.0010, phase: 4.7, inc: 0.19, layer: 'FOREGROUND' as const, size: 24 },
       ];
       engLetters.forEach((el, idx) => {
         list.push({
@@ -437,7 +448,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
           orbitPhase: el.phase,
           orbitInclination: el.inc,
           orbitEccentricity: 0.90,
-          x: 0, y: 0, z: 0,
+          x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
           rotX: 0.2, rotY: 0.4, rotZ: 0.1,
           rotSpeedX: 0.0006, rotSpeedY: 0.0009, rotSpeedZ: 0.0003,
           isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
@@ -468,7 +479,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
           orbitPhase: ew.phase,
           orbitInclination: ew.inc,
           orbitEccentricity: 0.88,
-          x: 0, y: 0, z: 0,
+          x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
           rotX: 0.1, rotY: 0.3, rotZ: 0,
           rotSpeedX: 0.0004, rotSpeedY: 0.0007, rotSpeedZ: 0.0002,
           isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
@@ -498,7 +509,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
           orbitPhase: it.phase,
           orbitInclination: it.inc,
           orbitEccentricity: 0.89,
-          x: 0, y: 0, z: 0,
+          x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
           rotX: 0.2, rotY: 0.4, rotZ: 0.1,
           rotSpeedX: 0.0005, rotSpeedY: 0.0008, rotSpeedZ: 0.0003,
           isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
@@ -528,7 +539,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
           orbitPhase: ac.phase,
           orbitInclination: ac.inc,
           orbitEccentricity: 0.90,
-          x: 0, y: 0, z: 0,
+          x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
           rotX: 0.2, rotY: 0.4, rotZ: 0.1,
           rotSpeedX: 0.0005, rotSpeedY: 0.0008, rotSpeedZ: 0.0003,
           isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
@@ -688,12 +699,13 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       ctx.restore();
 
       // -----------------------------------------------------------------------
-      // 3. UPDATE SCULPTURES & DEPTH PROJECTION
+      // 3. UPDATE SCULPTURES & DEPTH PROJECTION (PHYSICAL GRAB, DRAG & THROW)
       // -----------------------------------------------------------------------
       const sculptures = sculpturesRef.current;
       for (let i = 0; i < sculptures.length; i++) {
         const sc = sculptures[i];
 
+        // Autonomous rotation when not grabbed
         if (!sc.isGrabbed) {
           sc.orbitPhase += sc.orbitSpeed;
           sc.rotX += sc.spinVx + sc.rotSpeedX;
@@ -704,20 +716,48 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
           sc.spinVy *= 0.965;
         }
 
-        // Elliptical inclined orbit coordinates
+        // Elliptical inclined orbit offsets around anchor
         const baseOrbX = Math.cos(sc.orbitPhase) * sc.orbitRadius;
         const baseOrbY = Math.sin(sc.orbitPhase) * sc.orbitRadius * sc.orbitEccentricity;
-        const baseOrbZ = 0;
-
-        // Apply orbital inclination
         const cosInc = Math.cos(sc.orbitInclination);
         const sinInc = Math.sin(sc.orbitInclination);
-        const inclinedY = baseOrbY * cosInc - baseOrbZ * sinInc;
-        const inclinedZ = baseOrbY * sinInc + baseOrbZ * cosInc;
+        const inclinedY = baseOrbY * cosInc;
+        const inclinedZ = baseOrbY * sinInc;
 
-        sc.x = baseOrbX;
-        sc.y = inclinedY;
-        sc.z = inclinedZ;
+        sc.currentOrbX = baseOrbX;
+        sc.currentOrbY = inclinedY;
+
+        if (sc.isGrabbed) {
+          // Object position (x, y) is directly locked to user drag
+          sc.z = sc.anchorZ + inclinedZ;
+        } else {
+          // Throw momentum & damping physics
+          const speed = Math.hypot(sc.vx, sc.vy);
+          if (speed > 0.03) {
+            sc.x += sc.vx;
+            sc.y += sc.vy;
+            sc.vx *= 0.962; // momentum damping
+            sc.vy *= 0.962;
+            // Continuously sync anchor so object settles naturally at new location
+            sc.anchorX = sc.x - baseOrbX;
+            sc.anchorY = sc.y - inclinedY;
+
+            // Soft boundaries: bounce gently if near canvas bounds
+            const boundX = width * 0.46;
+            const boundY = height * 0.46;
+            if (sc.x < -boundX) { sc.x = -boundX; sc.vx = Math.abs(sc.vx) * 0.55; }
+            if (sc.x > boundX) { sc.x = boundX; sc.vx = -Math.abs(sc.vx) * 0.55; }
+            if (sc.y < -boundY) { sc.y = -boundY; sc.vy = Math.abs(sc.vy) * 0.55; }
+            if (sc.y > boundY) { sc.y = boundY; sc.vy = -Math.abs(sc.vy) * 0.55; }
+          } else {
+            sc.vx = 0;
+            sc.vy = 0;
+            // Autonomous orbit around its persistent anchor
+            sc.x = sc.anchorX + baseOrbX;
+            sc.y = sc.anchorY + inclinedY;
+          }
+          sc.z = sc.anchorZ + inclinedZ;
+        }
 
         // 3D perspective projection
         const perspective = 540 / (540 + sc.z + 80);
@@ -729,12 +769,14 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       }
 
       // -----------------------------------------------------------------------
-      // 4. RENDER BACKGROUND SCULPTURES (z < 0: Behind Book)
+      // 4. RENDER BACKGROUND SCULPTURES (z < 0: Behind Book) & RING BACK HALF
       // -----------------------------------------------------------------------
       for (let i = 0; i < sculptures.length; i++) {
         const sc = sculptures[i];
-        if (sc.projZ < 10) {
-          renderSculpture(ctx, sc, lightX, lightY, lightZ);
+        if (sc.type === 'ring_grand_horizontal') {
+          renderSculpture(ctx, sc, lightX, lightY, lightZ, 'back');
+        } else if (sc.projZ < 10) {
+          renderSculpture(ctx, sc, lightX, lightY, lightZ, 'all');
         }
       }
 
@@ -979,21 +1021,23 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         ctx.fillStyle = coverGrad;
         ctx.fill();
 
-        // Dynamic Specular Highlight & Warm Light Spread
-        if (specHighlight > 0.3) {
-          const specGrad = ctx.createRadialGradient(
-            cf0.x * 0.4 + projCoverFront[2].x * 0.6,
-            cf0.y * 0.4 + projCoverFront[2].y * 0.6,
-            10,
-            cf0.x * 0.4 + projCoverFront[2].x * 0.6,
-            cf0.y * 0.4 + projCoverFront[2].y * 0.6,
-            hw * 1.2
-          );
-          specGrad.addColorStop(0, `rgba(255, 240, 195, ${0.22 * specHighlight})`);
-          specGrad.addColorStop(1, 'rgba(255, 240, 195, 0)');
-          ctx.fillStyle = specGrad;
-          ctx.fill();
-        }
+        // Physical Multi-Tier Warm Light Spread (dark -> burgundy -> warm gold -> champagne)
+        const lightSpotX = cf0.x * 0.35 + projCoverFront[2].x * 0.65;
+        const lightSpotY = cf0.y * 0.35 + projCoverFront[2].y * 0.65;
+        const specGrad = ctx.createRadialGradient(
+          lightSpotX,
+          lightSpotY,
+          6,
+          lightSpotX,
+          lightSpotY,
+          hw * 1.35
+        );
+        specGrad.addColorStop(0, `rgba(255, 244, 212, ${0.30 * specHighlight})`);
+        specGrad.addColorStop(0.35, `rgba(217, 169, 58, ${0.18 * specHighlight})`);
+        specGrad.addColorStop(0.7, `rgba(110, 22, 36, ${0.10 * specHighlight})`);
+        specGrad.addColorStop(1, 'rgba(5, 1, 2, 0)');
+        ctx.fillStyle = specGrad;
+        ctx.fill();
 
         // Gold Rim & Bevel Line
         ctx.strokeStyle = '#F4D27A';
@@ -1106,12 +1150,14 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       ctx.restore();
 
       // -----------------------------------------------------------------------
-      // 6. RENDER FOREGROUND SCULPTURES (z >= 0: In Front of Book)
+      // 6. RENDER FOREGROUND SCULPTURES (z >= 0: In Front of Book) & RING FRONT HALF
       // -----------------------------------------------------------------------
       for (let i = 0; i < sculptures.length; i++) {
         const sc = sculptures[i];
-        if (sc.projZ >= 10) {
-          renderSculpture(ctx, sc, lightX, lightY, lightZ);
+        if (sc.type === 'ring_grand_horizontal') {
+          renderSculpture(ctx, sc, lightX, lightY, lightZ, 'front');
+        } else if (sc.projZ >= 10) {
+          renderSculpture(ctx, sc, lightX, lightY, lightZ, 'all');
         }
       }
 
@@ -1123,7 +1169,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     // -------------------------------------------------------------------------
     // HELPER: RENDER HIGH-END VOLUMETRIC SCULPTURE
     // -------------------------------------------------------------------------
-    function renderSculpture(c: CanvasRenderingContext2D, sc: Sculpture3D, lx: number, ly: number, lz: number) {
+    function renderSculpture(c: CanvasRenderingContext2D, sc: Sculpture3D, lx: number, ly: number, lz: number, ringHalf: 'back' | 'front' | 'all' = 'all') {
       c.save();
       c.translate(sc.projX, sc.projY);
 
@@ -1147,27 +1193,32 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       c.lineWidth = sc.isHovered ? 1.6 : 1.2;
 
       // -----------------------------------------------------------------------
-      // A. The Grand Horizontal Brushed Gold Orbital Ring
+      // A. The Grand Horizontal Brushed Gold Orbital Ring (With True 3D Depth Half-Arcs)
       // -----------------------------------------------------------------------
       if (sc.type === 'ring_grand_horizontal') {
+        const startAng = ringHalf === 'back' ? Math.PI : 0;
+        const endAng = ringHalf === 'back' ? Math.PI * 2 : ringHalf === 'front' ? Math.PI : Math.PI * 2;
+
         // Outer Beveled Ellipse
         c.beginPath();
-        c.ellipse(0, 0, sc.size, sc.size * 0.32, sc.rotX, 0, Math.PI * 2);
+        c.ellipse(0, 0, sc.size, sc.size * 0.32, sc.rotX, startAng, endAng);
         c.lineWidth = 2.4;
         c.strokeStyle = '#D9A93A';
         c.stroke();
 
         // Inner Concentric Bevel
         c.beginPath();
-        c.ellipse(0, 0, sc.size - 5, (sc.size - 5) * 0.32, sc.rotX, 0, Math.PI * 2);
+        c.ellipse(0, 0, sc.size - 5, (sc.size - 5) * 0.32, sc.rotX, startAng, endAng);
         c.lineWidth = 1.0;
         c.strokeStyle = 'rgba(244, 210, 122, 0.45)';
         c.stroke();
 
-        // Coordinate Tick Marks
+        // Coordinate Tick Marks on this depth half
         c.lineWidth = 1.0;
         c.strokeStyle = 'rgba(244, 210, 122, 0.65)';
         for (let a = 0; a < Math.PI * 2; a += Math.PI / 6) {
+          if (ringHalf === 'back' && (a < Math.PI || a > Math.PI * 2)) continue;
+          if (ringHalf === 'front' && (a < 0 || a > Math.PI)) continue;
           const cosA = Math.cos(a + sc.rotY);
           const sinA = Math.sin(a + sc.rotY);
           const rx1 = cosA * (sc.size - 5);
@@ -1490,7 +1541,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     }
 
     // -------------------------------------------------------------------------
-    // 7. UNIFIED POINTER HIT-TESTING & MULTI-OBJECT DRAG INTERACTION
+    // 7. UNIFIED POINTER HIT-TESTING, DRAG-AND-CARRY & THROW PHYSICS
     // -------------------------------------------------------------------------
     const handlePointerDown = (e: PointerEvent) => {
       const rect = canvas.getBoundingClientRect();
@@ -1498,16 +1549,18 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       const py = e.clientY - rect.top;
 
       const sculptures = sculpturesRef.current;
-      // Check Sculptures first (hit radius 28px)
+      // Check Sculptures first (hit radius comfortably scaled for touch & mouse)
       let grabbedScId: string | null = null;
       for (let i = sculptures.length - 1; i >= 0; i--) {
         const sc = sculptures[i];
         const dx = px - sc.projX;
         const dy = py - sc.projY;
-        const hitRadius = Math.max(sc.size * sc.projScale * 1.3, 26);
+        const hitRadius = Math.max(sc.size * sc.projScale * 1.5, 34);
         if (dx * dx + dy * dy < hitRadius * hitRadius) {
           grabbedScId = sc.id;
           sc.isGrabbed = true;
+          sc.vx = 0;
+          sc.vy = 0;
           sc.spinVx = 0;
           sc.spinVy = 0;
           break;
@@ -1526,10 +1579,10 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         return;
       }
 
-      // Check Book Centerpiece (hit radius 140px around center)
+      // Check Book Centerpiece (hit radius 150px around center)
       const cdx = px - currentCenterX;
       const cdy = py - (currentCenterY + currentFloatY);
-      if (cdx * cdx + cdy * cdy < 140 * 140) {
+      if (cdx * cdx + cdy * cdy < 150 * 150) {
         activeGrabTargetRef.current = 'book';
         bookPhysicsRef.current.isDragging = true;
         bookPhysicsRef.current.angVx = 0;
@@ -1558,7 +1611,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       const activeTarget = activeGrabTargetRef.current;
       const now = performance.now();
 
-      // If dragging an object
+      // If dragging an object across the screen
       if (activeTarget) {
         const dx = e.clientX - bookPhysicsRef.current.lastPointerX;
         const dy = e.clientY - bookPhysicsRef.current.lastPointerY;
@@ -1567,7 +1620,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         bookPhysicsRef.current.lastPointerY = e.clientY;
         bookPhysicsRef.current.lastTime = now;
 
-        // Keep 8 samples for high-fidelity velocity
+        // Keep last 8 samples for exact velocity and momentum calculation
         bookPhysicsRef.current.samples.push({ x: e.clientX, y: e.clientY, time: now });
         if (bookPhysicsRef.current.samples.length > 8) {
           bookPhysicsRef.current.samples.shift();
@@ -1579,11 +1632,21 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
           bookPhysicsRef.current.rotX += dy * 0.003;
           bookPhysicsRef.current.rotX = Math.max(-0.25, Math.min(0.25, bookPhysicsRef.current.rotX));
         } else {
-          // Sculpture local rotation
+          // Sculpture Grab-and-Carry: Move with cursor in 3D world space
           const sc = sculpturesRef.current.find((s) => s.id === activeTarget);
           if (sc) {
-            sc.rotY += dx * 0.015;
-            sc.rotX += dy * 0.015;
+            const scale = sc.projScale || 1.0;
+            const worldDx = dx / scale;
+            const worldDy = dy / scale;
+            sc.x += worldDx;
+            sc.y += worldDy;
+            // Update anchor so object persists at new location without snapping back
+            sc.anchorX = sc.x - sc.currentOrbX;
+            sc.anchorY = sc.y - sc.currentOrbY;
+
+            // Fluid 3D rotation during drag
+            sc.rotY += dx * 0.014;
+            sc.rotX += dy * 0.014;
           }
         }
         return;
@@ -1595,7 +1658,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       for (let i = 0; i < sculptures.length; i++) {
         const sc = sculptures[i];
         const distSq = (px - sc.projX) ** 2 + (py - sc.projY) ** 2;
-        const hitRadius = Math.max(sc.size * sc.projScale * 1.3, 26);
+        const hitRadius = Math.max(sc.size * sc.projScale * 1.5, 34);
         if (distSq < hitRadius * hitRadius) {
           sc.isHovered = true;
           hoveredSc = true;
@@ -1606,7 +1669,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 
       const cdx = px - currentCenterX;
       const cdy = py - (currentCenterY + currentFloatY);
-      const isOverBook = cdx * cdx + cdy * cdy < 130 * 130;
+      const isOverBook = cdx * cdx + cdy * cdy < 140 * 140;
       bookPhysicsRef.current.isHovered = isOverBook;
 
       canvas.style.cursor = isOverBook || hoveredSc ? 'grab' : 'default';
@@ -1636,8 +1699,12 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         const sc = sculpturesRef.current.find((s) => s.id === activeTarget);
         if (sc) {
           sc.isGrabbed = false;
-          sc.spinVy = calculatedVx * 0.012;
-          sc.spinVx = calculatedVy * 0.012;
+          const scale = sc.projScale || 1.0;
+          // Throw momentum directly proportional to pointer velocity
+          sc.vx = (calculatedVx / scale) * 0.95;
+          sc.vy = (calculatedVy / scale) * 0.95;
+          sc.spinVy = calculatedVx * 0.015;
+          sc.spinVx = calculatedVy * 0.015;
         }
       }
 
