@@ -59,7 +59,7 @@ interface Sculpture3D {
   x: number;
   y: number;
   z: number;
-  // Physics, Anchors & Grab-and-Carry State
+  // Physics, Anchors, Mass & Grab-and-Carry State
   anchorX: number;
   anchorY: number;
   anchorZ: number;
@@ -67,6 +67,8 @@ interface Sculpture3D {
   vy: number;
   currentOrbX: number;
   currentOrbY: number;
+  mass?: number;
+  damping?: number;
   // Local Rotations
   rotX: number;
   rotY: number;
@@ -386,6 +388,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         orbitInclination: 0.38,
         orbitEccentricity: 0.88,
         x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
+        mass: 0.85, damping: 0.958,
         rotX: 0.3, rotY: 0.5, rotZ: 0.1,
         rotSpeedX: 0.0006, rotSpeedY: 0.0007, rotSpeedZ: 0.0003,
         isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
@@ -395,13 +398,38 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         projX: 0, projY: 0, projScale: 1, projZ: 0,
       });
 
-      // Floating Mathematical Formulas (π, ∑, √, ∞, f(x))
+      // 3D Faceted Octahedron / Polyhedral Pyramid
+      list.push({
+        id: 'math-octahedron',
+        type: 'pyramid_3d',
+        theme: 'math',
+        depthLayer: 'BACKGROUND',
+        orbitRadius: 290,
+        orbitSpeed: -0.0006,
+        orbitPhase: 3.2,
+        orbitInclination: -0.36,
+        orbitEccentricity: 0.86,
+        x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
+        mass: 0.90, damping: 0.960,
+        rotX: 0.4, rotY: 0.6, rotZ: 0.2,
+        rotSpeedX: 0.0008, rotSpeedY: 0.0007, rotSpeedZ: 0.0004,
+        isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
+        size: 26,
+        baseOpacity: 0.78,
+        transitionAlpha: 1.0,
+        projX: 0, projY: 0, projScale: 1, projZ: 0,
+      });
+
+      // Floating Mathematical Formulas (π, ∑, ∫, √x, x², f(x), y=sin(x), a²+b²=c²)
       const mathGlyphs = [
-        { label: 'π', r: 155, speed: 0.0013, phase: 0.3, inc: 0.22, layer: 'FOREGROUND' as const },
-        { label: '∑', r: 160, speed: -0.0011, phase: 2.2, inc: -0.26, layer: 'FOREGROUND' as const },
-        { label: '√x', r: 165, speed: 0.0012, phase: 4.1, inc: 0.18, layer: 'FOREGROUND' as const },
-        { label: '∞', r: 275, speed: 0.0006, phase: 1.7, inc: 0.35, layer: 'BACKGROUND' as const },
-        { label: 'f(x)', r: 305, speed: -0.0005, phase: 4.8, inc: -0.32, layer: 'BACKGROUND' as const },
+        { label: 'π', r: 155, speed: 0.0013, phase: 0.3, inc: 0.22, layer: 'FOREGROUND' as const, size: 18 },
+        { label: '∑', r: 160, speed: -0.0011, phase: 2.2, inc: -0.26, layer: 'FOREGROUND' as const, size: 18 },
+        { label: '∫', r: 170, speed: 0.0010, phase: 3.6, inc: 0.20, layer: 'FOREGROUND' as const, size: 20 },
+        { label: '√x', r: 175, speed: -0.0009, phase: 4.8, inc: -0.18, layer: 'FOREGROUND' as const, size: 16 },
+        { label: 'x²', r: 215, speed: 0.0008, phase: 1.2, inc: 0.32, layer: 'MIDGROUND' as const, size: 15 },
+        { label: 'f(x)', r: 250, speed: -0.0007, phase: 5.4, inc: -0.30, layer: 'MIDGROUND' as const, size: 15 },
+        { label: 'a²+b²=c²', r: 285, speed: 0.0005, phase: 2.8, inc: 0.28, layer: 'BACKGROUND' as const, size: 14 },
+        { label: '∞', r: 310, speed: -0.00045, phase: 0.7, inc: -0.35, layer: 'BACKGROUND' as const, size: 15 },
       ];
       mathGlyphs.forEach((mg, idx) => {
         list.push({
@@ -416,11 +444,12 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
           orbitInclination: mg.inc,
           orbitEccentricity: 0.92,
           x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
+          mass: 0.55, damping: 0.948,
           rotX: 0, rotY: 0, rotZ: 0,
           rotSpeedX: 0.0007, rotSpeedY: 0.0011, rotSpeedZ: 0.0004,
           isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-          size: mg.layer === 'FOREGROUND' ? 17 : 13,
-          baseOpacity: mg.layer === 'FOREGROUND' ? 0.88 : 0.65,
+          size: mg.size,
+          baseOpacity: mg.layer === 'FOREGROUND' ? 0.90 : mg.layer === 'MIDGROUND' ? 0.80 : 0.65,
           transitionAlpha: 1.0,
           projX: 0, projY: 0, projScale: 1, projZ: 0,
         });
@@ -622,34 +651,36 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       cam.mouseY += (cam.targetMouseY - cam.mouseY) * 0.05;
 
       // -----------------------------------------------------------------------
-      // 1. 3D HOVER TILT & HORIZONTAL TURNTABLE MOMENTUM
+      // 1. 3D HOVER TILT, CONTINUOUS 360° AUTONOMOUS ROTATION & INERTIA BLEND
       // -----------------------------------------------------------------------
-      // When not actively dragging, mouse position smoothly imparts 3D tilt (X: ±6°, Y: ±9°)
+      // Continuous, slow, elegant showroom rotation speed (~0.10 rad/s = 0.0016 rad/frame)
+      const baseAutoSpin = 0.0016;
+
       if (!bookPhys.isDragging) {
         const targetTiltX = -cam.mouseY * 0.11; // subtle X tilt
         const targetTiltY = cam.mouseX * 0.16;  // subtle Y tilt
         bookPhys.tiltX += (targetTiltX - bookPhys.tiltX) * 0.06;
         bookPhys.tiltY += (targetTiltY - bookPhys.tiltY) * 0.06;
 
-        bookPhys.rotY += bookPhys.angVy;
-        bookPhys.rotX += bookPhys.angVx;
-
-        // Realistic friction damping
-        bookPhys.angVy *= 0.965;
-        bookPhys.angVx *= 0.965;
-
-        // Clamped pitch (turntable freedom, no tumbling)
-        bookPhys.rotX = Math.max(-0.25, Math.min(0.25, bookPhys.rotX));
-
-        if (Math.abs(bookPhys.angVy) < 0.0001) bookPhys.angVy = 0;
-        if (Math.abs(bookPhys.angVx) < 0.0001) bookPhys.angVx = 0;
-
-        // Subtle showroom breathing when stationary
-        if (bookPhys.angVy === 0 && bookPhys.angVx === 0) {
-          bookPhys.rotY += Math.cos(time * 0.3) * 0.0002;
+        // Inertia decay with heavy book mass (mass = 2.4 => friction = 0.975)
+        if (Math.abs(bookPhys.angVy) > baseAutoSpin * 1.4) {
+          bookPhys.angVy *= 0.975;
+        } else {
+          // Seamlessly blend back into continuous slow showroom rotation in current direction
+          const targetDir = bookPhys.angVy < -0.0001 ? -1 : 1;
+          const targetSpin = targetDir * baseAutoSpin;
+          bookPhys.angVy += (targetSpin - bookPhys.angVy) * 0.035;
         }
+
+        bookPhys.rotY += bookPhys.angVy;
+
+        // Smooth pitch settling to comfortable showroom angle (-0.16 rad)
+        bookPhys.rotX += bookPhys.angVx;
+        bookPhys.angVx *= 0.95;
+        bookPhys.rotX = Math.max(-0.25, Math.min(0.25, bookPhys.rotX));
+        bookPhys.rotX += (-0.16 - bookPhys.rotX) * 0.015;
       } else {
-        // While dragging, hover tilt smoothly zeros out
+        // While dragging, hover tilt smoothly zeros out and user has 100% control
         bookPhys.tiltX *= 0.85;
         bookPhys.tiltY *= 0.85;
       }
@@ -665,6 +696,8 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       const centerX = width / 2;
       const centerY = height / 2;
       const floatY = Math.sin(time * 1.1) * 2.5 + bookPhys.hoverLift;
+      // Cinematic Camera Push-In / Pull-Back Breathing (Cycle ~36s)
+      const cameraBreathing = 1.0 + Math.sin(time * 0.17) * 0.035;
       currentCenterX = centerX;
       currentCenterY = centerY;
       currentFloatY = floatY;
@@ -736,8 +769,9 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
           if (speed > 0.03) {
             sc.x += sc.vx;
             sc.y += sc.vy;
-            sc.vx *= 0.962; // momentum damping
-            sc.vy *= 0.962;
+            const damp = sc.damping || 0.962;
+            sc.vx *= damp; // mass-scaled momentum damping
+            sc.vy *= damp;
             // Continuously sync anchor so object settles naturally at new location
             sc.anchorX = sc.x - baseOrbX;
             sc.anchorY = sc.y - inclinedY;
@@ -760,7 +794,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         }
 
         // 3D perspective projection
-        const perspective = 540 / (540 + sc.z + 80);
+        const perspective = (540 / (540 + sc.z + 80)) * cameraBreathing;
         const layerParallax = sc.depthLayer === 'FOREGROUND' ? 12 : sc.depthLayer === 'MIDGROUND' ? 6 : 2;
         sc.projX = centerX + sc.x * perspective + cam.mouseX * layerParallax;
         sc.projY = centerY + sc.y * perspective + floatY * 0.4 + cam.mouseY * layerParallax;
@@ -786,7 +820,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       ctx.save();
       const bookParallax = 8;
       ctx.translate(centerX + cam.mouseX * bookParallax, centerY + floatY + cam.mouseY * bookParallax);
-      ctx.scale(bookPhys.hoverScale, bookPhys.hoverScale);
+      ctx.scale(bookPhys.hoverScale * cameraBreathing, bookPhys.hoverScale * cameraBreathing);
 
       // Book Dimensions: Realistic Textbook Proportions with Overhanging Hardcover
       const isCompact = width < 480;
@@ -1177,19 +1211,43 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       c.scale(sc.projScale * hoverScale, sc.projScale * hoverScale);
       c.globalAlpha = sc.baseOpacity;
 
+      // Physical Light Proximity Factor (3D Distance to Traveling Light Source)
+      const dxL = sc.x - lx;
+      const dyL = sc.y - ly;
+      const dzL = sc.z - lz;
+      const distToLight = Math.sqrt(dxL * dxL + dyL * dyL + dzL * dzL);
+      const lightProximity = Math.max(0, Math.min(1, 1 - distToLight / 420));
+
+      // Dynamic surface tone modulated by traveling light proximity:
+      // When far: deep wine/gold
+      // When near: radiant warm gold & champagne highlight
+      const surfaceTone = sc.isHovered
+        ? '#FFFFFF'
+        : lightProximity > 0.65
+        ? '#FFF4D4'
+        : lightProximity > 0.3
+        ? '#F4D27A'
+        : '#C89632';
+
       // Rotate around local orientation
       c.rotate(sc.rotZ);
 
-      // Gold Glow Halo on Hover / Grab
-      if (sc.isHovered || sc.isGrabbed) {
-        c.fillStyle = 'rgba(217, 169, 58, 0.28)';
+      // Warm Light Halo as Traveling Golden Light Passes or on Hover/Grab
+      if (lightProximity > 0.25 || sc.isHovered || sc.isGrabbed) {
+        const haloIntensity = sc.isHovered || sc.isGrabbed ? 0.35 : lightProximity * 0.24;
+        const gradHalo = c.createRadialGradient(0, 0, 4, 0, 0, sc.size * 1.5);
+        gradHalo.addColorStop(0, `rgba(255, 244, 212, ${haloIntensity})`);
+        gradHalo.addColorStop(0.4, `rgba(217, 169, 58, ${haloIntensity * 0.65})`);
+        gradHalo.addColorStop(0.8, `rgba(110, 22, 36, ${haloIntensity * 0.3})`);
+        gradHalo.addColorStop(1, 'rgba(5, 1, 2, 0)');
+        c.fillStyle = gradHalo;
         c.beginPath();
         c.arc(0, 0, sc.size * 1.5, 0, Math.PI * 2);
         c.fill();
       }
 
-      c.strokeStyle = sc.isHovered ? '#FFFFFF' : '#F4D27A';
-      c.fillStyle = sc.isHovered ? '#FFFFFF' : '#F4D27A';
+      c.strokeStyle = surfaceTone;
+      c.fillStyle = surfaceTone;
       c.lineWidth = sc.isHovered ? 1.6 : 1.2;
 
       // -----------------------------------------------------------------------
@@ -1428,7 +1486,6 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       else if (sc.type === 'prism_3d') {
         const s = sc.size;
         c.lineWidth = 1.2;
-        c.strokeStyle = '#F4D27A';
         c.beginPath();
         c.moveTo(0, -s * 0.7);
         c.lineTo(s * 0.6, s * 0.5);
@@ -1450,6 +1507,38 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         c.moveTo(0, -s * 0.7); c.lineTo(4, -s * 0.7 - 4);
         c.moveTo(s * 0.6, s * 0.5); c.lineTo(s * 0.6 + 4, s * 0.5 - 4);
         c.moveTo(-s * 0.6, s * 0.5); c.lineTo(-s * 0.6 + 4, s * 0.5 - 4);
+        c.stroke();
+      }
+
+      // -----------------------------------------------------------------------
+      // I2. 3D Faceted Octahedron / Polyhedral Pyramid
+      // -----------------------------------------------------------------------
+      else if (sc.type === 'pyramid_3d') {
+        const s = sc.size;
+        c.lineWidth = 1.2;
+        // Upper pyramid apex & base
+        c.beginPath();
+        c.moveTo(0, -s);
+        c.lineTo(s * 0.65, 0);
+        c.lineTo(0, s * 0.32);
+        c.lineTo(-s * 0.65, 0);
+        c.closePath();
+        c.stroke();
+
+        // Lower pyramid apex
+        c.beginPath();
+        c.moveTo(0, s);
+        c.lineTo(s * 0.65, 0);
+        c.lineTo(0, s * 0.32);
+        c.lineTo(-s * 0.65, 0);
+        c.closePath();
+        c.strokeStyle = 'rgba(217, 169, 58, 0.55)';
+        c.stroke();
+
+        // Facet axis lines
+        c.beginPath();
+        c.moveTo(0, -s); c.lineTo(0, s);
+        c.moveTo(-s * 0.65, 0); c.lineTo(s * 0.65, 0);
         c.stroke();
       }
 
@@ -1693,18 +1782,20 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 
       if (activeTarget === 'book') {
         bookPhysicsRef.current.isDragging = false;
-        bookPhysicsRef.current.angVy = calculatedVx * 0.0075;
-        bookPhysicsRef.current.angVx = calculatedVy * 0.0025;
+        // Heavy book mass (2.4) -> deliberate response with high rotational inertia
+        bookPhysicsRef.current.angVy = calculatedVx * 0.0055;
+        bookPhysicsRef.current.angVx = calculatedVy * 0.0018;
       } else {
         const sc = sculpturesRef.current.find((s) => s.id === activeTarget);
         if (sc) {
           sc.isGrabbed = false;
           const scale = sc.projScale || 1.0;
-          // Throw momentum directly proportional to pointer velocity
-          sc.vx = (calculatedVx / scale) * 0.95;
-          sc.vy = (calculatedVy / scale) * 0.95;
-          sc.spinVy = calculatedVx * 0.015;
-          sc.spinVx = calculatedVy * 0.015;
+          const invMass = 1.0 / (sc.mass || 1.0);
+          // Mass-scaled throw velocity response
+          sc.vx = (calculatedVx / scale) * 0.92 * invMass;
+          sc.vy = (calculatedVy / scale) * 0.92 * invMass;
+          sc.spinVy = calculatedVx * 0.014 * invMass;
+          sc.spinVx = calculatedVy * 0.014 * invMass;
         }
       }
 
