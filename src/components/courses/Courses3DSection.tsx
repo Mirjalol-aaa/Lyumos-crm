@@ -87,7 +87,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
   }, [activeCourse.instructor]);
 
   // ---------------------------------------------------------------------------
-  // 3D CANVAS: MATHEMATICAL UNIVERSE (100% MATCH TO REFERENCE IMAGE)
+  // 3D CANVAS: LIVING MATHEMATICAL SPATIAL WORLD ENGINE
   // ---------------------------------------------------------------------------
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animFrameRef = useRef<number | null>(null);
@@ -98,7 +98,6 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     angVy: 0.0016, // Slow autonomous rotation
     targetHoverScale: 1.0,
     hoverScale: 1.0,
-    isHovered: false,
   });
 
   const currentThemeRef = useRef<CourseVisualTheme>(theme);
@@ -170,6 +169,13 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       const floatY = Math.sin(time * 1.2) * 3.5;
       const cameraBreathing = 1.0 + Math.sin(time * 0.22) * 0.025;
 
+      // -----------------------------------------------------------------------
+      // 1. VOLUMETRIC WARM KEY LIGHT & SPATIAL ATMOSPHERE
+      // -----------------------------------------------------------------------
+      const lightAngle = time * 0.28;
+      const lightX = Math.cos(lightAngle) * 260;
+      const lightY = Math.sin(lightAngle * 0.7) * 90 - 50;
+
       // Ambient Behind-Book Glow
       const bgGlow = ctx.createRadialGradient(centerX + 30, centerY - 10, 10, centerX + 30, centerY - 10, 280);
       bgGlow.addColorStop(0, 'rgba(217, 169, 58, 0.22)');
@@ -211,52 +217,85 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       // -----------------------------------------------------------------------
       // 2. RENDER BACK HALF OF GRAND INSCRIBED ORBITAL RING (BEHIND BOOK)
       // -----------------------------------------------------------------------
-      const ringRadius = 152;
+      const ringRadius = 154;
       const ringTiltX = 0.48; // ~28 deg tilt matching reference
       const ringRotY = time * 0.05;
 
       ctx.save();
       ctx.translate(centerX, centerY + floatY * 0.5);
       drawGrandInscribedRing(ctx, ringRadius, ringTiltX, ringRotY, 'back');
-      drawNestedTiltedRing(ctx, 100, -0.38, -time * 0.07, 'back');
+      drawNestedTiltedRing(ctx, 102, -0.38, -time * 0.07, 'back');
       ctx.restore();
 
       // -----------------------------------------------------------------------
-      // 3. BACKGROUND MATHEMATICAL OBJECTS (EXACT REFERENCE POSITIONS)
+      // 3. BACKGROUND SPATIAL MATHEMATICAL UNIVERSE (INDEPENDENT CURVED TRAJECTORIES)
       // -----------------------------------------------------------------------
       ctx.save();
       ctx.translate(centerX, centerY + floatY);
 
-      // A. Sine Wave along Coordinate Axes (Top-Left in Reference Image)
-      drawCoordinateSineWave(ctx, -155, -95, time);
+      // A. Analytical XYZ Coordinate System & Intersecting Vector (Top-Left)
+      // Spatial drift: slow harmonic trajectory through space
+      const coordDriftX = Math.sin(time * 0.45) * 12;
+      const coordDriftY = Math.cos(time * 0.38) * 8;
+      drawXYZCoordinateSculpture(ctx, -160 + coordDriftX, -90 + coordDriftY, 34, time);
 
-      // B. 3D Wireframe Icosahedron / Polyhedron (Left in Reference Image)
-      drawWireframeIcosahedron(ctx, -165, 25, 26, time * 0.4);
+      // B. Volumetric Parabola Ribbon (Travelling diagonally across mid-left)
+      const parabolaDriftX = Math.cos(time * 0.35) * 10;
+      const parabolaDriftY = Math.sin(time * 0.42) * 7;
+      drawVolumetricParabola(ctx, -145 + parabolaDriftX, -30 + parabolaDriftY, 28, time * 0.25);
 
-      // C. Small Golden Sphere (Left of Book)
-      drawGlossyGoldSphere(ctx, -85, -65, 7.0);
+      // C. Luminous Sine Wave with Coordinate Grid & Node Points (Left)
+      const sineDriftX = Math.sin(time * 0.40) * 8;
+      const sineDriftY = Math.cos(time * 0.32) * 10;
+      drawCoordinateSineWave(ctx, -170 + sineDriftX, 35 + sineDriftY, time);
 
-      // D. 3D Floating Double Helix / Spiral (Right in Reference Image)
-      drawDoubleHelix(ctx, 155, -110, 24, time);
+      // D. Precision 3D Wireframe Icosahedron (Left depth)
+      drawWireframeIcosahedron(ctx, -140, 75, 22, time * 0.35);
 
-      // E. 3D Parametric Saddle Surface Mesh (Right in Reference Image)
-      drawSaddleMesh(ctx, 220, -45, 28, time * 0.35);
+      // E. Small Golden Spatial Sphere (Left)
+      drawGlossyGoldSphere(ctx, -90 + Math.sin(time * 0.5) * 6, -70 + Math.cos(time * 0.4) * 6, 7.0);
 
-      // F. Small Golden Sphere (Near Pi / Helix)
-      drawGlossyGoldSphere(ctx, 135, -90, 6.0);
+      // F. Parametric Double Helix / DNA of Mathematics (Right)
+      const helixDriftX = Math.cos(time * 0.38) * 10;
+      const helixDriftY = Math.sin(time * 0.48) * 12;
+      drawDoubleHelix(ctx, 160 + helixDriftX, -115 + helixDriftY, 25, time);
 
-      // G. 3D Wireframe Pyramid / Cone (Bottom Right in Reference Image)
-      drawWireframePyramid(ctx, 235, 150, 28, time * 0.3);
+      // G. Parametric 3D Saddle Surface Mesh (Hyperbolic Paraboloid z = x² - y²) (Right)
+      const saddleDriftX = Math.sin(time * 0.32) * 12;
+      const saddleDriftY = Math.cos(time * 0.44) * 9;
+      drawSaddleMesh(ctx, 225 + saddleDriftX, -40 + saddleDriftY, 30, time * 0.35);
 
-      // H. Floating Mathematical Formulas:
-      // Pi (Top-Right in Reference Image)
-      drawGlowingFormula(ctx, 105, -165, 'π', 32, '#F4D27A');
-      // Integral (Bottom-Left in Reference Image)
-      drawGlowingFormula(ctx, -125, 105, '∫', 34, '#F4D27A');
-      // a² + b² = c² (Right in Reference Image)
-      drawGlowingFormula(ctx, 195, 45, 'a² + b² = c²', 15, '#EAE4DC');
-      // Sigma (Right below formula in Reference Image)
-      drawGlowingFormula(ctx, 200, 105, '∑', 24, '#F4D27A');
+      // H. 3D Wireframe Pyramid with Altitude Line (Bottom Right)
+      const pyrDriftX = Math.cos(time * 0.42) * 8;
+      const pyrDriftY = Math.sin(time * 0.36) * 10;
+      drawWireframePyramid(ctx, 240 + pyrDriftX, 150 + pyrDriftY, 28, time * 0.3);
+
+      // I. Small Golden Spatial Sphere (Top Right)
+      drawGlossyGoldSphere(ctx, 140 + Math.sin(time * 0.45) * 7, -95 + Math.cos(time * 0.52) * 7, 6.0);
+
+      // J. Floating Mathematical Formulas Drifting through Space:
+      // Pi (Top-Right): Slow spatial wander
+      const piDriftX = Math.sin(time * 0.35) * 8;
+      const piDriftY = Math.cos(time * 0.42) * 6;
+      drawGlowingFormula(ctx, 110 + piDriftX, -168 + piDriftY, 'π', 34, '#F4D27A');
+
+      // Integral (Bottom-Left)
+      const intDriftX = Math.cos(time * 0.38) * 8;
+      const intDriftY = Math.sin(time * 0.44) * 7;
+      drawGlowingFormula(ctx, -130 + intDriftX, 110 + intDriftY, '∫', 36, '#F4D27A');
+
+      // a² + b² = c² (Right Midground)
+      const pythDriftX = Math.sin(time * 0.30) * 9;
+      const pythDriftY = Math.cos(time * 0.36) * 8;
+      drawGlowingFormula(ctx, 200 + pythDriftX, 48 + pythDriftY, 'a² + b² = c²', 15, '#EAE4DC');
+
+      // Sigma (Right)
+      const sigDriftX = Math.cos(time * 0.40) * 7;
+      const sigDriftY = Math.sin(time * 0.32) * 8;
+      drawGlowingFormula(ctx, 205 + sigDriftX, 110 + sigDriftY, '∑', 25, '#F4D27A');
+
+      // f(x) Formula (Floating Midground)
+      drawGlowingFormula(ctx, 115 + Math.sin(time * 0.36) * 6, -55 + Math.cos(time * 0.4) * 5, 'f(x)', 14, '#EAE4DC');
 
       ctx.restore();
 
@@ -266,9 +305,10 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       ctx.save();
       ctx.translate(centerX, centerY + floatY);
 
-      const bw = 196;
-      const bh = Math.round(bw * 1.35); // 265px
-      const bThick = 34;
+      // Book Proportions: 1.0 : 1.35 : 0.18
+      const bw = 200;
+      const bh = Math.round(bw * 1.35); // 270px
+      const bThick = 36;
       const hw = bw / 2;
       const hh = bh / 2;
       const ht = bThick / 2;
@@ -276,27 +316,27 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       const pedY = hh + 30;
 
       // Floor Contact Glow & Drop Shadow
-      const floorGlow = ctx.createRadialGradient(0, pedY + 18, 8, 0, pedY + 18, 205);
-      floorGlow.addColorStop(0, 'rgba(217, 169, 58, 0.40)');
+      const floorGlow = ctx.createRadialGradient(0, pedY + 18, 8, 0, pedY + 18, 210);
+      floorGlow.addColorStop(0, 'rgba(217, 169, 58, 0.42)');
       floorGlow.addColorStop(0.35, 'rgba(92, 20, 32, 0.48)');
       floorGlow.addColorStop(0.7, 'rgba(8, 2, 4, 0.92)');
       floorGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = floorGlow;
       ctx.beginPath();
-      ctx.ellipse(0, pedY + 18, 195, 40, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, pedY + 18, 200, 42, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Pedestal Tier 3 (Base Plinth): Radius 165, Height 12
+      // Pedestal Tier 3 (Base Plinth): Radius 170, Height 12
       ctx.fillStyle = '#160806';
       ctx.beginPath();
-      ctx.ellipse(0, pedY + 15, 165, 30, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, pedY + 15, 170, 31, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.strokeStyle = '#6E3214';
       ctx.lineWidth = 1.3;
       ctx.stroke();
 
-      // Pedestal Tier 2 (Middle Beveled Ring): Radius 135, Height 9
-      const t2Grad = ctx.createLinearGradient(-135, 0, 135, 0);
+      // Pedestal Tier 2 (Middle Beveled Ring): Radius 140, Height 9
+      const t2Grad = ctx.createLinearGradient(-140, 0, 140, 0);
       t2Grad.addColorStop(0, '#2A1009');
       t2Grad.addColorStop(0.25, '#683315');
       t2Grad.addColorStop(0.5, '#C99238');
@@ -304,21 +344,21 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       t2Grad.addColorStop(1, '#2A1009');
       ctx.fillStyle = t2Grad;
       ctx.beginPath();
-      ctx.ellipse(0, pedY + 8, 135, 25, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, pedY + 8, 140, 26, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.strokeStyle = '#D9A93A';
       ctx.lineWidth = 1.3;
       ctx.stroke();
 
-      // Pedestal Tier 1 (Top Stage Platform Disc): Radius 110
-      const t1Grad = ctx.createRadialGradient(0, pedY, 4, 0, pedY, 110);
+      // Pedestal Tier 1 (Top Stage Platform Disc): Radius 114
+      const t1Grad = ctx.createRadialGradient(0, pedY, 4, 0, pedY, 114);
       t1Grad.addColorStop(0, '#FFF6DC');
       t1Grad.addColorStop(0.28, '#D9A93A');
       t1Grad.addColorStop(0.68, '#5E2B12');
       t1Grad.addColorStop(1, '#1A0B08');
       ctx.fillStyle = t1Grad;
       ctx.beginPath();
-      ctx.ellipse(0, pedY, 110, 20, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, pedY, 114, 21, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.strokeStyle = '#FFEAA7';
       ctx.lineWidth = 1.5;
@@ -326,7 +366,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 
       // Inner Concentric Gold Ring Groove
       ctx.beginPath();
-      ctx.ellipse(0, pedY, 94, 17, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, pedY, 96, 18, 0, 0, Math.PI * 2);
       ctx.strokeStyle = 'rgba(217, 169, 58, 0.65)';
       ctx.lineWidth = 0.9;
       ctx.stroke();
@@ -342,17 +382,17 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       ctx.ellipse(0, pedY - 2, effW * 1.1, 12, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Floating Parchment Manuscript Pages (At Pedestal Base)
-      drawCurledParchment(ctx, -50, pedY - 12, 42, 28, -0.22);
-      drawCurledParchment(ctx, 72, pedY - 8, 36, 24, 0.32);
+      // Floating Mathematical Study Manuscripts (Parchments with Coordinate Diagrams & Proofs)
+      drawMathematicalManuscript(ctx, -52, pedY - 12, 44, 30, -0.20, 'calculus');
+      drawMathematicalManuscript(ctx, 76, pedY - 8, 38, 26, 0.30, 'geometry');
 
       // Foreground Glossy Metallic Gold Sphere (The Orb on Pedestal Rim)
-      drawGlossyGoldSphere(ctx, -78, pedY + 8, 24);
+      drawGlossyGoldSphere(ctx, -82, pedY + 8, 25);
 
       ctx.restore();
 
       // -----------------------------------------------------------------------
-      // 5. RENDER THE HERO 3D TEXTBOOK (100% 2-RASM ARTWORK)
+      // 5. RENDER REDESIGNED HERO MATHEMATICS TEXTBOOK
       // -----------------------------------------------------------------------
       ctx.save();
       ctx.translate(centerX, centerY + floatY);
@@ -532,7 +572,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         ctx.stroke();
       }
 
-      // 5. Front Cover Plate (100% 2-Rasm Artwork)
+      // 5. Front Cover Plate (Custom Embossed Mathematics Artwork)
       if (frontNormalZ > 0) {
         ctx.beginPath();
         ctx.moveTo(cf0.x, cf0.y);
@@ -548,14 +588,14 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         ctx.fillStyle = coverGrad;
         ctx.fill();
 
-        // Subtle specular highlight sheen on front cover
+        // Specular highlight sheen
         const specGrad = ctx.createRadialGradient(
           cf0.x * 0.4 + projCoverFront[2].x * 0.6,
           cf0.y * 0.4 + projCoverFront[2].y * 0.6,
           6,
           cf0.x * 0.4 + projCoverFront[2].x * 0.6,
           cf0.y * 0.4 + projCoverFront[2].y * 0.6,
-          hw * 1.3
+          hw * 1.35
         );
         specGrad.addColorStop(0, 'rgba(255, 244, 212, 0.38)');
         specGrad.addColorStop(0.35, 'rgba(217, 169, 58, 0.20)');
@@ -581,7 +621,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         ctx.lineWidth = 0.9;
         ctx.stroke();
 
-        // Front Cover Typography & Emblem Artwork
+        // Front Cover Typography & Embossed Graphic
         const faceMidX = (cf0.x + cf1.x + projCoverFront[2].x + cf3.x) / 4;
         const faceMidY = (cf0.y + cf1.y + projCoverFront[2].y + cf3.y) / 4;
 
@@ -592,12 +632,12 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 
         ctx.textAlign = 'center';
 
-        // 1. Embossed Gold Royal Crown Emblem (Top Center in Reference Image)
+        // 1. Embossed Gold Royal Crown Emblem
         ctx.strokeStyle = '#F4D27A';
         ctx.fillStyle = '#F4D27A';
         ctx.lineWidth = 1.0;
         const crW = 13;
-        const crY = -hh * 0.44;
+        const crY = -hh * 0.45;
         ctx.beginPath();
         ctx.moveTo(-crW, crY + 5);
         ctx.lineTo(-crW * 0.65, crY - 2);
@@ -617,38 +657,70 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         // 2. LUMOS Wordmark (below crown)
         ctx.font = 'bold 11px "Playfair Display", serif';
         ctx.fillStyle = 'rgba(244, 210, 122, 0.95)';
-        ctx.fillText('LUMOS', 0, -hh * 0.33);
+        ctx.fillText('LUMOS', 0, -hh * 0.34);
 
         // 3. Main Golden Book Title (MATHEMATICS)
         ctx.font = '900 17px "Playfair Display", serif';
         ctx.fillStyle = '#FFFFFF';
-        ctx.fillText(bookTitle, 0, -hh * 0.19);
+        ctx.fillText(bookTitle, 0, -hh * 0.20);
         ctx.fillStyle = '#F4D27A';
-        ctx.fillText(bookTitle, 0.4, -hh * 0.19 + 0.4);
+        ctx.fillText(bookTitle, 0.4, -hh * 0.20 + 0.4);
 
         if (activeTheme === 'math') {
-          // 4. Mathematical Notation Row 1: π   ∫   √
-          ctx.font = 'italic bold 14px "Playfair Display", serif';
-          ctx.fillStyle = '#F4D27A';
-          ctx.fillText('π', -hw * 0.44, -hh * 0.04);
-          ctx.font = '17px serif';
-          ctx.fillText('∫', 0, -hh * 0.04);
-          ctx.font = 'italic 14px serif';
-          ctx.fillText('√', hw * 0.44, -hh * 0.04);
+          // 4. EMBOSSED GOLD COVER GRAPHIC: Parabola intersecting Coordinate Frame surrounded by Orbit
+          const grY = -hh * 0.02;
+          ctx.save();
+          ctx.translate(0, grY);
 
-          // 5. Mathematical Notation Row 2: x²   f(x)
-          ctx.font = 'italic 13px serif';
+          // Orbit circle around graphic
+          ctx.beginPath();
+          ctx.ellipse(0, 0, 36, 16, -0.22, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(244, 210, 122, 0.5)';
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+
+          // Coordinate frame axes
+          ctx.beginPath();
+          ctx.moveTo(0, 18); ctx.lineTo(0, -18);
+          ctx.moveTo(-28, 0); ctx.lineTo(28, 0);
+          ctx.strokeStyle = 'rgba(244, 210, 122, 0.7)';
+          ctx.lineWidth = 0.9;
+          ctx.stroke();
+
+          // Raised Gold Parabola
+          ctx.beginPath();
+          for (let px = -22; px <= 22; px += 2) {
+            const py = 0.035 * px * px - 12;
+            if (px === -22) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+          }
+          ctx.strokeStyle = '#FFF4D4';
+          ctx.lineWidth = 1.3;
+          ctx.stroke();
+
+          // Focus node point
+          ctx.beginPath();
+          ctx.arc(0, -4, 1.6, 0, Math.PI * 2);
+          ctx.fillStyle = '#FFF6DC';
+          ctx.fill();
+
+          ctx.restore();
+
+          // 5. Mathematical Notation Row (Refined Editorial Spacing)
+          ctx.font = 'italic bold 13px "Playfair Display", serif';
           ctx.fillStyle = '#F4D27A';
-          ctx.fillText('x²', -hw * 0.32, hh * 0.09);
-          ctx.fillText('f(x)', hw * 0.32, hh * 0.09);
+          ctx.fillText('π', -hw * 0.42, hh * 0.12);
+          ctx.font = '16px serif';
+          ctx.fillText('∫', 0, hh * 0.12);
+          ctx.font = 'italic 13px serif';
+          ctx.fillText('√', hw * 0.42, hh * 0.12);
 
           // 6. Sacred Geometry Icosahedron Watermark Emblem (Bottom in Reference Image)
           ctx.save();
-          ctx.translate(0, hh * 0.26);
+          ctx.translate(0, hh * 0.28);
           ctx.strokeStyle = 'rgba(244, 210, 122, 0.75)';
           ctx.lineWidth = 0.8;
-          const rGeo = 16;
-          // Outer hexagon
+          const rGeo = 15;
           ctx.beginPath();
           for (let a = 0; a < 6; a++) {
             const ang = (a * Math.PI) / 3;
@@ -660,7 +732,6 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
           ctx.closePath();
           ctx.stroke();
 
-          // Interlocking sacred triangle
           ctx.beginPath();
           for (let a = 0; a < 3; a++) {
             const ang = (a * Math.PI * 2) / 3 - Math.PI / 6;
@@ -672,7 +743,6 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
           ctx.closePath();
           ctx.stroke();
 
-          // Radial diagonal facets
           for (let a = 0; a < 6; a++) {
             const ang = (a * Math.PI) / 3;
             ctx.beginPath();
@@ -688,6 +758,25 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         }
 
         ctx.restore();
+
+        // Draped Silk Ribbon Bookmark (Warm Gold)
+        ctx.beginPath();
+        const rTopX = cf0.x * 0.45 + cf1.x * 0.55;
+        const rTopY = cf0.y * 0.45 + cf1.y * 0.55;
+        const rBotX = cf3.x * 0.42 + projCoverFront[2].x * 0.58;
+        const rBotY = cf3.y * 0.42 + projCoverFront[2].x * 0.58 + 26;
+        ctx.moveTo(rTopX, rTopY);
+        ctx.quadraticCurveTo(rTopX + 8, (rTopY + rBotY) / 2, rBotX, rBotY);
+        ctx.lineTo(rBotX - 7, rBotY - 5);
+        ctx.lineTo(rBotX - 14, rBotY);
+        ctx.quadraticCurveTo(rTopX - 6, (rTopY + rBotY) / 2, rTopX - 14, rTopY);
+        ctx.closePath();
+        const ribbonGrad = ctx.createLinearGradient(rTopX, rTopY, rBotX, rBotY);
+        ribbonGrad.addColorStop(0, '#D9A93A');
+        ribbonGrad.addColorStop(0.5, '#F4D27A');
+        ribbonGrad.addColorStop(1, '#9E741A');
+        ctx.fillStyle = ribbonGrad;
+        ctx.fill();
       }
 
       ctx.restore();
@@ -698,7 +787,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       ctx.save();
       ctx.translate(centerX, centerY + floatY * 0.5);
       drawGrandInscribedRing(ctx, ringRadius, ringTiltX, ringRotY, 'front');
-      drawNestedTiltedRing(ctx, 100, -0.38, -time * 0.07, 'front');
+      drawNestedTiltedRing(ctx, 102, -0.38, -time * 0.07, 'front');
       ctx.restore();
 
       animFrameRef.current = requestAnimationFrame(render);
@@ -707,20 +796,18 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     animFrameRef.current = requestAnimationFrame(render);
 
     // -------------------------------------------------------------------------
-    // HELPER: DRAW GRAND INSCRIBED ORBITAL RING WITH 3D DEPTH
+    // HELPER: GRAND INSCRIBED ORBITAL RING WITH 3D DEPTH
     // -------------------------------------------------------------------------
     function drawGrandInscribedRing(c: CanvasRenderingContext2D, radius: number, tiltX: number, rotY: number, half: 'back' | 'front') {
       const startAng = half === 'back' ? Math.PI : 0;
       const endAng = half === 'back' ? Math.PI * 2 : Math.PI;
 
-      // Outer Beveled Ellipse (Wide, Metallic Luxury Gold Ribbon)
       c.beginPath();
       c.ellipse(0, 0, radius, radius * 0.32, tiltX, startAng, endAng);
       c.lineWidth = 5.0;
       c.strokeStyle = '#D9A93A';
       c.stroke();
 
-      // Inner Concentric Edge
       c.beginPath();
       c.ellipse(0, 0, radius - 8, (radius - 8) * 0.32, tiltX, startAng, endAng);
       c.lineWidth = 1.1;
@@ -761,15 +848,13 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     // -------------------------------------------------------------------------
     function drawGlossyGoldSphere(c: CanvasRenderingContext2D, sx: number, sy: number, r: number) {
       c.save();
-      // Drop shadow on floor/stage
       c.beginPath();
       c.ellipse(sx, sy + r * 0.85, r * 0.9, r * 0.3, 0, 0, Math.PI * 2);
       c.fillStyle = 'rgba(0, 0, 0, 0.55)';
       c.fill();
 
-      // 3D Sphere gradient
       const sGrad = c.createRadialGradient(sx - r * 0.35, sy - r * 0.35, r * 0.08, sx, sy, r);
-      sGrad.addColorStop(0, '#FFFFFF'); // Specular highlight
+      sGrad.addColorStop(0, '#FFFFFF');
       sGrad.addColorStop(0.2, '#FFF4D4');
       sGrad.addColorStop(0.5, '#F4D27A');
       sGrad.addColorStop(0.8, '#9E6F1D');
@@ -779,7 +864,6 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       c.arc(sx, sy, r, 0, Math.PI * 2);
       c.fill();
 
-      // Golden rim glow
       c.strokeStyle = 'rgba(255, 246, 220, 0.4)';
       c.lineWidth = 0.8;
       c.stroke();
@@ -787,99 +871,220 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     }
 
     // -------------------------------------------------------------------------
-    // HELPER: CURLED PARCHMENT MANUSCRIPT PAGE
+    // HELPER: ARCHITECTURAL XYZ COORDINATE SYSTEM WITH INTERSECTING VECTOR
     // -------------------------------------------------------------------------
-    function drawCurledParchment(c: CanvasRenderingContext2D, px: number, py: number, w: number, h: number, rot: number) {
+    function drawXYZCoordinateSculpture(c: CanvasRenderingContext2D, sx: number, sy: number, s: number, t: number) {
       c.save();
-      c.translate(px, py);
+      c.translate(sx, sy);
+      c.lineWidth = 1.4;
+
+      // X-Axis (Gold)
+      c.strokeStyle = '#F4D27A';
+      c.beginPath(); c.moveTo(0, 0); c.lineTo(s, 0); c.stroke();
+      // Arrowhead X
+      c.beginPath(); c.moveTo(s - 3, -2.5); c.lineTo(s, 0); c.lineTo(s - 3, 2.5); c.stroke();
+
+      // Y-Axis (Champagne)
+      c.strokeStyle = '#FFF2C6';
+      c.beginPath(); c.moveTo(0, 0); c.lineTo(0, -s); c.stroke();
+      // Arrowhead Y
+      c.beginPath(); c.moveTo(-2.5, -s + 3); c.lineTo(0, -s); c.lineTo(2.5, -s + 3); c.stroke();
+
+      // Z-Axis (Bronze/Gold)
+      c.strokeStyle = '#D9A93A';
+      c.beginPath(); c.moveTo(0, 0); c.lineTo(-s * 0.6, s * 0.6); c.stroke();
+
+      // Origin junction cube
+      c.fillStyle = '#FFF6DC';
+      c.fillRect(-2, -2, 4, 4);
+
+      // Coordinate tick marks
+      for (let tk = 10; tk < s; tk += 10) {
+        c.beginPath(); c.moveTo(tk, -2); c.lineTo(tk, 2); c.stroke();
+        c.beginPath(); c.moveTo(-2, -tk); c.lineTo(2, -tk); c.stroke();
+      }
+
+      // Intersecting Vector Arrow v = (x, y, z)
+      c.save();
+      c.strokeStyle = '#FFDF78';
+      c.lineWidth = 1.8;
+      const vEndX = s * 0.7 + Math.sin(t * 1.5) * 4;
+      const vEndY = -s * 0.6 + Math.cos(t * 1.5) * 4;
+      c.beginPath(); c.moveTo(0, 0); c.lineTo(vEndX, vEndY); c.stroke();
+      // Vector head
+      c.fillStyle = '#FFF2C6';
+      c.beginPath();
+      c.arc(vEndX, vEndY, 2.2, 0, Math.PI * 2);
+      c.fill();
+      c.restore();
+
+      // Labels
+      c.font = 'italic bold 9px serif';
+      c.fillStyle = '#F4D27A';
+      c.fillText('x', s + 4, 3);
+      c.fillText('y', 3, -s - 3);
+      c.fillText('z', -s * 0.6 - 7, s * 0.6 + 5);
+
+      c.restore();
+    }
+
+    // -------------------------------------------------------------------------
+    // HELPER: VOLUMETRIC PARABOLA RIBBON (y = ax²)
+    // -------------------------------------------------------------------------
+    function drawVolumetricParabola(c: CanvasRenderingContext2D, sx: number, sy: number, size: number, rot: number) {
+      c.save();
+      c.translate(sx, sy);
       c.rotate(rot);
 
-      // Cast shadow
+      // Primary Curve
       c.beginPath();
-      c.roundRect(-w / 2 + 2, -h / 2 + 3, w, h, 3);
-      c.fillStyle = 'rgba(0, 0, 0, 0.38)';
-      c.fill();
-
-      // Page surface
-      const pGrad = c.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2);
-      pGrad.addColorStop(0, 'rgba(252, 248, 238, 0.95)');
-      pGrad.addColorStop(0.6, 'rgba(235, 224, 204, 0.92)');
-      pGrad.addColorStop(1, 'rgba(210, 196, 172, 0.90)');
-      c.fillStyle = pGrad;
-      c.beginPath();
-      c.roundRect(-w / 2, -h / 2, w, h, 2.5);
-      c.fill();
-      c.strokeStyle = 'rgba(217, 169, 58, 0.5)';
-      c.lineWidth = 0.8;
+      for (let px = -size; px <= size; px += 2) {
+        const py = 0.045 * px * px - 18;
+        if (px === -size) c.moveTo(px, py);
+        else c.lineTo(px, py);
+      }
+      c.lineWidth = 2.0;
+      c.strokeStyle = '#F4D27A';
       c.stroke();
 
-      // Curled corner
+      // Extruded 3D Depth Rail
       c.beginPath();
-      c.moveTo(w / 2 - 7, -h / 2);
-      c.lineTo(w / 2, -h / 2 + 7);
-      c.lineTo(w / 2 - 7, -h / 2 + 7);
-      c.closePath();
-      c.fillStyle = 'rgba(180, 165, 140, 0.85)';
-      c.fill();
+      for (let px = -size; px <= size; px += 2) {
+        const py = 0.045 * px * px - 18 + 5;
+        if (px === -size) c.moveTo(px + 3, py);
+        else c.lineTo(px + 3, py);
+      }
+      c.lineWidth = 1.0;
+      c.strokeStyle = 'rgba(217, 169, 58, 0.5)';
+      c.stroke();
 
-      // Faint handwritten equation lines
-      c.strokeStyle = 'rgba(100, 75, 45, 0.4)';
-      c.lineWidth = 0.6;
-      for (let l = 0; l < 3; l++) {
-        const ly = -h / 2 + 7 + l * 6;
+      // Cross-linking rungs
+      c.lineWidth = 0.8;
+      c.strokeStyle = 'rgba(255, 246, 220, 0.4)';
+      for (let rx = -size; rx <= size; rx += size / 2) {
+        const ry1 = 0.045 * rx * rx - 18;
         c.beginPath();
-        c.moveTo(-w / 2 + 5, ly);
-        c.lineTo(w / 2 - (l === 0 ? 10 : 5), ly);
+        c.moveTo(rx, ry1);
+        c.lineTo(rx + 3, ry1 + 5);
+        c.stroke();
+      }
+
+      c.restore();
+    }
+
+    // -------------------------------------------------------------------------
+    // HELPER: SINE WAVE WITH COORDINATE TICKS & NODE POINTS
+    // -------------------------------------------------------------------------
+    function drawCoordinateSineWave(c: CanvasRenderingContext2D, sx: number, sy: number, t: number) {
+      c.save();
+      c.translate(sx, sy);
+
+      // Grid line
+      c.strokeStyle = 'rgba(244, 210, 122, 0.4)';
+      c.lineWidth = 0.8;
+      c.beginPath(); c.moveTo(-45, 0); c.lineTo(45, 0); c.stroke();
+      c.beginPath(); c.moveTo(0, -26); c.lineTo(0, 26); c.stroke();
+
+      // Wave curve
+      c.beginPath();
+      for (let x = -42; x <= 42; x += 2) {
+        const y = Math.sin(x * 0.12 + t * 0.8) * 16;
+        if (x === -42) c.moveTo(x, y);
+        else c.lineTo(x, y);
+      }
+      c.lineWidth = 1.8;
+      c.strokeStyle = '#F4D27A';
+      c.stroke();
+
+      // Golden Node points
+      [-30, -10, 10, 30].forEach((nx) => {
+        const ny = Math.sin(nx * 0.12 + t * 0.8) * 16;
+        c.beginPath();
+        c.arc(nx, ny, 2.2, 0, Math.PI * 2);
+        c.fillStyle = '#FFF6DC';
+        c.fill();
+        c.strokeStyle = '#D9A93A';
+        c.lineWidth = 0.8;
+        c.stroke();
+      });
+
+      c.font = 'italic 8px serif';
+      c.fillStyle = '#F4D27A';
+      c.fillText('y=sin(x)', 15, -18);
+
+      c.restore();
+    }
+
+    // -------------------------------------------------------------------------
+    // HELPER: 3D PARAMETRIC SADDLE MESH (HYPERBOLIC PARABOLOID)
+    // -------------------------------------------------------------------------
+    function drawSaddleMesh(c: CanvasRenderingContext2D, sx: number, sy: number, size: number, rot: number) {
+      c.save();
+      c.translate(sx, sy);
+      c.rotate(rot);
+      const span = size * 0.65;
+      const steps = 4;
+      c.strokeStyle = 'rgba(244, 210, 122, 0.70)';
+      c.lineWidth = 1.0;
+
+      for (let i = -steps; i <= steps; i++) {
+        const u = (i / steps) * span;
+        c.beginPath();
+        for (let j = -steps; j <= steps; j++) {
+          const v = (j / steps) * span;
+          const z = (u * u - v * v) * 0.02;
+          const px = u + z * 0.4;
+          const py = v - z * 0.3;
+          if (j === -steps) c.moveTo(px, py);
+          else c.lineTo(px, py);
+        }
+        c.stroke();
+      }
+      for (let j = -steps; j <= steps; j++) {
+        const v = (j / steps) * span;
+        c.beginPath();
+        for (let i = -steps; i <= steps; i++) {
+          const u = (i / steps) * span;
+          const z = (u * u - v * v) * 0.02;
+          const px = u + z * 0.4;
+          const py = v - z * 0.3;
+          if (i === -steps) c.moveTo(px, py);
+          else c.lineTo(px, py);
+        }
         c.stroke();
       }
       c.restore();
     }
 
     // -------------------------------------------------------------------------
-    // HELPER: 3D COORDINATE SYSTEM & SINE WAVE WITH NODES (LEFT IN REFERENCE)
+    // HELPER: 3D DOUBLE HELIX (MATHEMATICAL SPIRAL)
     // -------------------------------------------------------------------------
-    function drawCoordinateSineWave(c: CanvasRenderingContext2D, sx: number, sy: number, t: number) {
+    function drawDoubleHelix(c: CanvasRenderingContext2D, sx: number, sy: number, size: number, t: number) {
       c.save();
       c.translate(sx, sy);
+      const steps = 14;
+      for (let i = 0; i <= steps; i++) {
+        const ang = (i / steps) * Math.PI * 2.5 + t * 0.8;
+        const y = (i / steps - 0.5) * size * 1.8;
+        const x1 = Math.cos(ang) * size * 0.5;
+        const x2 = Math.cos(ang + Math.PI) * size * 0.5;
 
-      // Coordinate axes
-      c.strokeStyle = 'rgba(244, 210, 122, 0.65)';
-      c.lineWidth = 1.0;
-      c.beginPath(); c.moveTo(0, 38); c.lineTo(0, -38); c.stroke();
-      c.beginPath(); c.moveTo(-2.5, -34); c.lineTo(0, -38); c.lineTo(2.5, -34); c.stroke();
-      c.beginPath(); c.moveTo(-48, 0); c.lineTo(48, 0); c.stroke();
-      c.beginPath(); c.moveTo(44, -2.5); c.lineTo(48, 0); c.lineTo(44, 2.5); c.stroke();
-
-      c.font = 'italic 8px serif';
-      c.fillStyle = '#F4D27A';
-      c.fillText('y', 4, -33);
-      c.fillText('x', 45, 10);
-
-      // Sine Wave Curve
-      c.beginPath();
-      for (let x = -44; x <= 44; x += 2) {
-        const y = Math.sin(x * 0.12 + t * 0.8) * 17;
-        if (x === -44) c.moveTo(x, y);
-        else c.lineTo(x, y);
-      }
-      c.lineWidth = 1.6;
-      c.strokeStyle = '#F4D27A';
-      c.stroke();
-
-      // Node points along the wave
-      [-32, -11, 11, 32].forEach((nx) => {
-        const ny = Math.sin(nx * 0.12 + t * 0.8) * 17;
         c.beginPath();
-        c.arc(nx, ny, 2.0, 0, Math.PI * 2);
-        c.fillStyle = '#FFF6DC';
-        c.fill();
-      });
+        c.moveTo(x1, y);
+        c.lineTo(x2, y);
+        c.strokeStyle = 'rgba(217, 169, 58, 0.5)';
+        c.lineWidth = 0.9;
+        c.stroke();
 
+        c.fillStyle = '#F4D27A';
+        c.beginPath(); c.arc(x1, y, 1.8, 0, Math.PI * 2); c.fill();
+        c.beginPath(); c.arc(x2, y, 1.8, 0, Math.PI * 2); c.fill();
+      }
       c.restore();
     }
 
     // -------------------------------------------------------------------------
-    // HELPER: 3D WIREFRAME ICOSAHEDRON (LEFT IN REFERENCE)
+    // HELPER: 3D WIREFRAME ICOSAHEDRON
     // -------------------------------------------------------------------------
     function drawWireframeIcosahedron(c: CanvasRenderingContext2D, sx: number, sy: number, size: number, rot: number) {
       c.save();
@@ -923,75 +1128,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     }
 
     // -------------------------------------------------------------------------
-    // HELPER: 3D DOUBLE HELIX (RIGHT IN REFERENCE)
-    // -------------------------------------------------------------------------
-    function drawDoubleHelix(c: CanvasRenderingContext2D, sx: number, sy: number, size: number, t: number) {
-      c.save();
-      c.translate(sx, sy);
-      const steps = 12;
-      for (let i = 0; i <= steps; i++) {
-        const ang = (i / steps) * Math.PI * 2.5 + t * 0.8;
-        const y = (i / steps - 0.5) * size * 1.8;
-        const x1 = Math.cos(ang) * size * 0.5;
-        const x2 = Math.cos(ang + Math.PI) * size * 0.5;
-
-        c.beginPath();
-        c.moveTo(x1, y);
-        c.lineTo(x2, y);
-        c.strokeStyle = 'rgba(217, 169, 58, 0.45)';
-        c.lineWidth = 0.8;
-        c.stroke();
-
-        c.fillStyle = '#F4D27A';
-        c.beginPath(); c.arc(x1, y, 1.8, 0, Math.PI * 2); c.fill();
-        c.beginPath(); c.arc(x2, y, 1.8, 0, Math.PI * 2); c.fill();
-      }
-      c.restore();
-    }
-
-    // -------------------------------------------------------------------------
-    // HELPER: 3D PARAMETRIC SADDLE MESH (RIGHT IN REFERENCE)
-    // -------------------------------------------------------------------------
-    function drawSaddleMesh(c: CanvasRenderingContext2D, sx: number, sy: number, size: number, rot: number) {
-      c.save();
-      c.translate(sx, sy);
-      c.rotate(rot);
-      const span = size * 0.6;
-      const steps = 4;
-      c.strokeStyle = 'rgba(244, 210, 122, 0.65)';
-      c.lineWidth = 0.9;
-
-      for (let i = -steps; i <= steps; i++) {
-        const u = (i / steps) * span;
-        c.beginPath();
-        for (let j = -steps; j <= steps; j++) {
-          const v = (j / steps) * span;
-          const z = (u * u - v * v) * 0.02;
-          const px = u + z * 0.4;
-          const py = v - z * 0.3;
-          if (j === -steps) c.moveTo(px, py);
-          else c.lineTo(px, py);
-        }
-        c.stroke();
-      }
-      for (let j = -steps; j <= steps; j++) {
-        const v = (j / steps) * span;
-        c.beginPath();
-        for (let i = -steps; i <= steps; i++) {
-          const u = (i / steps) * span;
-          const z = (u * u - v * v) * 0.02;
-          const px = u + z * 0.4;
-          const py = v - z * 0.3;
-          if (i === -steps) c.moveTo(px, py);
-          else c.lineTo(px, py);
-        }
-        c.stroke();
-      }
-      c.restore();
-    }
-
-    // -------------------------------------------------------------------------
-    // HELPER: 3D WIREFRAME PYRAMID (BOTTOM RIGHT IN REFERENCE)
+    // HELPER: 3D WIREFRAME PYRAMID
     // -------------------------------------------------------------------------
     function drawWireframePyramid(c: CanvasRenderingContext2D, sx: number, sy: number, size: number, rot: number) {
       c.save();
@@ -1017,6 +1154,91 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       c.moveTo(apex.x, apex.y); c.lineTo(b2.x, b2.y);
       c.moveTo(apex.x, apex.y); c.lineTo(b3.x, b3.y);
       c.stroke();
+
+      // Altitude axis
+      c.strokeStyle = 'rgba(255, 244, 212, 0.4)';
+      c.beginPath(); c.moveTo(apex.x, apex.y); c.lineTo(0, size * 0.38); c.stroke();
+
+      c.restore();
+    }
+
+    // -------------------------------------------------------------------------
+    // HELPER: MATHEMATICAL STUDY MANUSCRIPT (REAL FORMULAS & GRAPHS)
+    // -------------------------------------------------------------------------
+    function drawMathematicalManuscript(c: CanvasRenderingContext2D, px: number, py: number, w: number, h: number, rot: number, type: 'calculus' | 'geometry') {
+      c.save();
+      c.translate(px, py);
+      c.rotate(rot);
+
+      // Drop shadow
+      c.beginPath();
+      c.roundRect(-w / 2 + 2, -h / 2 + 3, w, h, 3);
+      c.fillStyle = 'rgba(0, 0, 0, 0.42)';
+      c.fill();
+
+      // Paper surface
+      const pGrad = c.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2);
+      pGrad.addColorStop(0, 'rgba(252, 248, 238, 0.96)');
+      pGrad.addColorStop(0.6, 'rgba(235, 224, 204, 0.92)');
+      pGrad.addColorStop(1, 'rgba(210, 196, 172, 0.90)');
+      c.fillStyle = pGrad;
+      c.beginPath();
+      c.roundRect(-w / 2, -h / 2, w, h, 2.5);
+      c.fill();
+      c.strokeStyle = 'rgba(217, 169, 58, 0.5)';
+      c.lineWidth = 0.8;
+      c.stroke();
+
+      // Curled corner
+      c.beginPath();
+      c.moveTo(w / 2 - 7, -h / 2);
+      c.lineTo(w / 2, -h / 2 + 7);
+      c.lineTo(w / 2 - 7, -h / 2 + 7);
+      c.closePath();
+      c.fillStyle = 'rgba(180, 165, 140, 0.85)';
+      c.fill();
+
+      // Mathematical content drawn on the page
+      if (type === 'calculus') {
+        // Coordinate sketch with integral curve
+        c.strokeStyle = 'rgba(85, 45, 20, 0.65)';
+        c.lineWidth = 0.7;
+        c.beginPath();
+        c.moveTo(-w / 2 + 6, h / 2 - 6); c.lineTo(-w / 2 + 6, -h / 2 + 8);
+        c.moveTo(-w / 2 + 6, h / 2 - 6); c.lineTo(w / 2 - 10, h / 2 - 6);
+        c.stroke();
+
+        // Integral curve on page
+        c.strokeStyle = 'rgba(180, 80, 20, 0.7)';
+        c.lineWidth = 0.9;
+        c.beginPath();
+        c.moveTo(-w / 2 + 8, h / 2 - 8);
+        c.quadraticCurveTo(-w / 2 + 18, -h / 2 + 12, w / 2 - 12, -h / 2 + 10);
+        c.stroke();
+
+        // Formula line
+        c.font = 'italic 7px serif';
+        c.fillStyle = 'rgba(70, 35, 15, 0.75)';
+        c.fillText('∫ f(x)dx', -w / 2 + 12, -h / 2 + 8);
+      } else {
+        // Geometric right triangle sketch
+        c.strokeStyle = 'rgba(85, 45, 20, 0.65)';
+        c.lineWidth = 0.8;
+        c.beginPath();
+        c.moveTo(-w / 2 + 8, h / 2 - 7);
+        c.lineTo(w / 2 - 10, h / 2 - 7);
+        c.lineTo(-w / 2 + 8, -h / 2 + 8);
+        c.closePath();
+        c.stroke();
+
+        // Right angle marker
+        c.strokeRect(-w / 2 + 8, h / 2 - 11, 4, 4);
+
+        // a² + b² = c² text
+        c.font = '6px serif';
+        c.fillStyle = 'rgba(70, 35, 15, 0.75)';
+        c.fillText('a²+b²=c²', -w / 2 + 8, h / 2 - 1);
+      }
 
       c.restore();
     }
@@ -1048,7 +1270,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       className="relative min-h-screen lg:h-screen w-full flex flex-col justify-center overflow-hidden bg-[#080607] py-8 lg:py-0 px-4 sm:px-6 lg:px-8 select-none"
     >
       {/* -----------------------------------------------------------------------
-          BACKGROUND ATMOSPHERE (SEAMLESS LUXURY STUDIO)
+          BACKGROUND ATMOSPHERE (SEAMLESS LUXURY MATHEMATICS STUDIO)
           ----------------------------------------------------------------------- */}
       <div className="absolute inset-0 pointer-events-none opacity-35">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#16060B]/40 via-transparent to-transparent" />
@@ -1217,7 +1439,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         </div>
 
         {/* =====================================================================
-            RIGHT COLUMN: 3D Miniature Mathematical Universe (55-58%)
+            RIGHT COLUMN: 3D Living Mathematics Spatial Universe (55-58%)
             ===================================================================== */}
         <div className="lg:col-span-7 xl:col-span-7 relative w-full h-[460px] sm:h-[520px] lg:h-[580px] flex items-center justify-center select-none">
           {/* 3D Canvas */}
@@ -1225,7 +1447,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
             ref={canvasRef}
             className="w-full h-full block select-none relative z-10"
             style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
-            title="LUMOS 3D Kurs Olami"
+            title="LUMOS 3D Matematika Koinoti"
           />
 
           {/* Bottom-Right Carousel Navigation Controls (Matching Reference Image) */}
