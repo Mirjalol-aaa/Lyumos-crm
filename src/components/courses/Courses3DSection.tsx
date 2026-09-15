@@ -150,13 +150,13 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const animFrameRef = useRef<number | null>(null);
 
-  // Book 360° Showroom Turntable Physics & 3D Tilt State
+  // Book 360° Showroom Turntable Physics & Pure Y-Axis Rotation State
   const bookPhysicsRef = useRef({
-    // Base Turntable Angles
-    rotX: -0.16, // subtle downward perspective
-    rotY: 0.42,  // showroom angle displaying cover and spine
-    rotZ: -0.02,
-    // Hover 3D Tilt offsets
+    // Base Turntable Angles: Pure Y-axis showroom orientation around central vertical axis
+    rotX: 0,     // Strictly 0 for pure horizontal rotation (no tumbling or wobbling)
+    rotY: 0.38,  // Initial showroom angle
+    rotZ: 0,     // Strictly 0
+    // Hover 3D Micro-Tilt offsets (strictly clamped)
     tiltX: 0,
     tiltY: 0,
     // Velocities
@@ -198,46 +198,48 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     const list: Sculpture3D[] = [];
 
     // =========================================================================
-    // 1. UNIVERSAL PRIMARY HERO ORBITAL RINGS (Always Present)
+    // 1. UNIVERSAL PRIMARY HERO ORBITAL RINGS (Thin, Elegant, Jewelry-like)
     // =========================================================================
-    // A. Grand Horizontal Brushed Gold Orbital Ring (Encircles book with depth)
+    // A. Grand Horizontal Brushed Gold Orbital Ring (Delicately frames the book)
     list.push({
       id: 'prim-ring-grand',
       type: 'ring_grand_horizontal',
       theme: 'universal',
       depthLayer: 'FOREGROUND',
-      orbitRadius: 195,
-      orbitSpeed: 0.00085,
+      orbitRadius: 118,
+      orbitSpeed: 0.00075,
       orbitPhase: 0.4,
-      orbitInclination: 0.16,
+      orbitInclination: 0.14,
       orbitEccentricity: 0.94,
       x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-      rotX: 0.35, rotY: 0, rotZ: 0,
-      rotSpeedX: 0.0002, rotSpeedY: 0.0006, rotSpeedZ: 0.0002,
+      mass: 1.1, damping: 0.965,
+      rotX: 0.28, rotY: 0, rotZ: 0,
+      rotSpeedX: 0.0002, rotSpeedY: 0.0005, rotSpeedZ: 0.0002,
       isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-      size: 195,
-      baseOpacity: 0.92,
+      size: 118,
+      baseOpacity: 0.90,
       transitionAlpha: 1.0,
       projX: 0, projY: 0, projScale: 1, projZ: 0,
     });
 
-    // B. Nested Tilted Double Ring (Secondary Hero Orbital)
+    // B. Nested Tilted Double Ring (Secondary Orbital Frame)
     list.push({
       id: 'prim-ring-nested',
       type: 'ring_nested_tilted',
       theme: 'universal',
       depthLayer: 'MIDGROUND',
-      orbitRadius: 240,
-      orbitSpeed: -0.0007,
+      orbitRadius: 80,
+      orbitSpeed: -0.00065,
       orbitPhase: 2.5,
-      orbitInclination: -0.38,
+      orbitInclination: -0.32,
       orbitEccentricity: 0.88,
       x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-      rotX: -0.4, rotY: 0.3, rotZ: 0.2,
-      rotSpeedX: 0.0004, rotSpeedY: -0.0005, rotSpeedZ: 0.0002,
+      mass: 0.95, damping: 0.962,
+      rotX: -0.35, rotY: 0.3, rotZ: 0.15,
+      rotSpeedX: 0.0003, rotSpeedY: -0.0004, rotSpeedZ: 0.0002,
       isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-      size: 46,
-      baseOpacity: 0.85,
+      size: 26,
+      baseOpacity: 0.82,
       transitionAlpha: 1.0,
       projX: 0, projY: 0, projScale: 1, projZ: 0,
     });
@@ -246,24 +248,25 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     // 2. SUBJECT-SPECIFIC SCULPTURE SUITES
     // =========================================================================
     if (theme === 'math') {
-      // Volumetric Parabola Ribbon (y = x²)
+      // Volumetric Parabola Ribbon (y = x²) - Delicate architectural curve
       list.push({
         id: 'math-parabola',
         type: 'parabola_volumetric',
         label: 'y = x²',
         theme: 'math',
         depthLayer: 'MIDGROUND',
-        orbitRadius: 220,
+        orbitRadius: 110,
         orbitSpeed: 0.00075,
         orbitPhase: 1.1,
-        orbitInclination: 0.32,
+        orbitInclination: 0.26,
         orbitEccentricity: 0.90,
         x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-        rotX: 0.25, rotY: 0.45, rotZ: 0.1,
-        rotSpeedX: 0.0003, rotSpeedY: 0.0006, rotSpeedZ: 0.0002,
+        mass: 0.85, damping: 0.958,
+        rotX: 0.2, rotY: 0.4, rotZ: 0.1,
+        rotSpeedX: 0.0003, rotSpeedY: 0.0005, rotSpeedZ: 0.0002,
         isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 38,
-        baseOpacity: 0.85,
+        size: 18,
+        baseOpacity: 0.82,
         transitionAlpha: 1.0,
         projX: 0, projY: 0, projScale: 1, projZ: 0,
       });
@@ -275,17 +278,18 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         label: 'y = sin(x)',
         theme: 'math',
         depthLayer: 'MIDGROUND',
-        orbitRadius: 250,
-        orbitSpeed: -0.0007,
+        orbitRadius: 125,
+        orbitSpeed: -0.00065,
         orbitPhase: 3.7,
-        orbitInclination: -0.34,
+        orbitInclination: -0.28,
         orbitEccentricity: 0.86,
         x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-        rotX: -0.3, rotY: 0.55, rotZ: 0.15,
-        rotSpeedX: 0.0004, rotSpeedY: 0.0006, rotSpeedZ: 0.0003,
+        mass: 0.85, damping: 0.958,
+        rotX: -0.25, rotY: 0.45, rotZ: 0.12,
+        rotSpeedX: 0.0004, rotSpeedY: 0.0005, rotSpeedZ: 0.0002,
         isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 40,
-        baseOpacity: 0.85,
+        size: 18,
+        baseOpacity: 0.82,
         transitionAlpha: 1.0,
         projX: 0, projY: 0, projScale: 1, projZ: 0,
       });
@@ -296,17 +300,18 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         type: 'saddle_surface',
         theme: 'math',
         depthLayer: 'BACKGROUND',
-        orbitRadius: 280,
+        orbitRadius: 135,
         orbitSpeed: 0.0005,
         orbitPhase: 5.2,
-        orbitInclination: 0.42,
+        orbitInclination: 0.35,
         orbitEccentricity: 0.84,
         x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-        rotX: 0.5, rotY: 0.3, rotZ: -0.2,
-        rotSpeedX: 0.0005, rotSpeedY: 0.0004, rotSpeedZ: 0.0002,
+        mass: 0.85, damping: 0.958,
+        rotX: 0.4, rotY: 0.3, rotZ: -0.15,
+        rotSpeedX: 0.0004, rotSpeedY: 0.0003, rotSpeedZ: 0.0002,
         isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 36,
-        baseOpacity: 0.80,
+        size: 15,
+        baseOpacity: 0.78,
         transitionAlpha: 1.0,
         projX: 0, projY: 0, projScale: 1, projZ: 0,
       });
@@ -317,17 +322,18 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         type: 'double_helix',
         theme: 'math',
         depthLayer: 'MIDGROUND',
-        orbitRadius: 265,
+        orbitRadius: 120,
         orbitSpeed: -0.00055,
         orbitPhase: 2.1,
-        orbitInclination: -0.28,
+        orbitInclination: -0.24,
         orbitEccentricity: 0.89,
         x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-        rotX: 0.3, rotY: 0.6, rotZ: 0.2,
-        rotSpeedX: 0.0006, rotSpeedY: 0.0007, rotSpeedZ: 0.0003,
+        mass: 0.85, damping: 0.958,
+        rotX: 0.25, rotY: 0.5, rotZ: 0.15,
+        rotSpeedX: 0.0005, rotSpeedY: 0.0006, rotSpeedZ: 0.0002,
         isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 34,
-        baseOpacity: 0.80,
+        size: 16,
+        baseOpacity: 0.78,
         transitionAlpha: 1.0,
         projX: 0, projY: 0, projScale: 1, projZ: 0,
       });
@@ -339,17 +345,18 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         label: 'XYZ',
         theme: 'math',
         depthLayer: 'FOREGROUND',
-        orbitRadius: 165,
-        orbitSpeed: 0.0011,
+        orbitRadius: 95,
+        orbitSpeed: 0.00095,
         orbitPhase: 4.4,
-        orbitInclination: 0.22,
+        orbitInclination: 0.18,
         orbitEccentricity: 0.92,
         x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-        rotX: 0.35, rotY: 0.4, rotZ: -0.15,
-        rotSpeedX: 0.0007, rotSpeedY: 0.0008, rotSpeedZ: 0.0004,
+        mass: 0.80, damping: 0.955,
+        rotX: 0.3, rotY: 0.35, rotZ: -0.1,
+        rotSpeedX: 0.0005, rotSpeedY: 0.0006, rotSpeedZ: 0.0003,
         isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 26,
-        baseOpacity: 0.88,
+        size: 13,
+        baseOpacity: 0.85,
         transitionAlpha: 1.0,
         projX: 0, projY: 0, projScale: 1, projZ: 0,
       });
@@ -361,17 +368,18 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         label: 'v⃗',
         theme: 'math',
         depthLayer: 'BACKGROUND',
-        orbitRadius: 295,
+        orbitRadius: 130,
         orbitSpeed: -0.00045,
         orbitPhase: 0.8,
-        orbitInclination: -0.45,
+        orbitInclination: -0.38,
         orbitEccentricity: 0.85,
         x: 0, y: 0, z: 0, anchorX: 0, anchorY: 0, anchorZ: 0, vx: 0, vy: 0, currentOrbX: 0, currentOrbY: 0,
-        rotX: 0.4, rotY: 0.2, rotZ: 0.5,
-        rotSpeedX: 0.0005, rotSpeedY: 0.0004, rotSpeedZ: 0.0002,
+        mass: 0.80, damping: 0.955,
+        rotX: 0.3, rotY: 0.2, rotZ: 0.4,
+        rotSpeedX: 0.0004, rotSpeedY: 0.0003, rotSpeedZ: 0.0002,
         isHovered: false, isGrabbed: false, spinVx: 0, spinVy: 0,
-        size: 32,
-        baseOpacity: 0.75,
+        size: 15,
+        baseOpacity: 0.72,
         transitionAlpha: 1.0,
         projX: 0, projY: 0, projScale: 1, projZ: 0,
       });
@@ -422,14 +430,14 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 
       // Floating Mathematical Formulas (π, ∑, ∫, √x, x², f(x), y=sin(x), a²+b²=c²)
       const mathGlyphs = [
-        { label: 'π', r: 155, speed: 0.0013, phase: 0.3, inc: 0.22, layer: 'FOREGROUND' as const, size: 18 },
-        { label: '∑', r: 160, speed: -0.0011, phase: 2.2, inc: -0.26, layer: 'FOREGROUND' as const, size: 18 },
-        { label: '∫', r: 170, speed: 0.0010, phase: 3.6, inc: 0.20, layer: 'FOREGROUND' as const, size: 20 },
-        { label: '√x', r: 175, speed: -0.0009, phase: 4.8, inc: -0.18, layer: 'FOREGROUND' as const, size: 16 },
-        { label: 'x²', r: 215, speed: 0.0008, phase: 1.2, inc: 0.32, layer: 'MIDGROUND' as const, size: 15 },
-        { label: 'f(x)', r: 250, speed: -0.0007, phase: 5.4, inc: -0.30, layer: 'MIDGROUND' as const, size: 15 },
-        { label: 'a²+b²=c²', r: 285, speed: 0.0005, phase: 2.8, inc: 0.28, layer: 'BACKGROUND' as const, size: 14 },
-        { label: '∞', r: 310, speed: -0.00045, phase: 0.7, inc: -0.35, layer: 'BACKGROUND' as const, size: 15 },
+        { label: 'π', r: 92, speed: 0.0012, phase: 0.3, inc: 0.18, layer: 'FOREGROUND' as const, size: 13 },
+        { label: '∑', r: 96, speed: -0.0010, phase: 2.2, inc: -0.20, layer: 'FOREGROUND' as const, size: 13 },
+        { label: '∫', r: 104, speed: 0.0009, phase: 3.6, inc: 0.16, layer: 'FOREGROUND' as const, size: 14 },
+        { label: '√x', r: 108, speed: -0.0008, phase: 4.8, inc: -0.15, layer: 'FOREGROUND' as const, size: 12 },
+        { label: 'x²', r: 122, speed: 0.0007, phase: 1.2, inc: 0.24, layer: 'MIDGROUND' as const, size: 12 },
+        { label: 'f(x)', r: 132, speed: -0.0006, phase: 5.4, inc: -0.22, layer: 'MIDGROUND' as const, size: 12 },
+        { label: 'a²+b²=c²', r: 140, speed: 0.00045, phase: 2.8, inc: 0.22, layer: 'BACKGROUND' as const, size: 11 },
+        { label: '∞', r: 145, speed: -0.0004, phase: 0.7, inc: -0.25, layer: 'BACKGROUND' as const, size: 12 },
       ];
       mathGlyphs.forEach((mg, idx) => {
         list.push({
@@ -457,13 +465,13 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     } else if (theme === 'english') {
       // Extruded 3D Letters (A, B, C, X, Y, Z)
       const engLetters = [
-        { label: 'A', r: 165, speed: 0.0012, phase: 0.5, inc: 0.24, layer: 'FOREGROUND' as const, size: 28 },
-        { label: 'B', r: 215, speed: -0.0008, phase: 2.3, inc: -0.32, layer: 'MIDGROUND' as const, size: 25 },
-        { label: 'C', r: 250, speed: 0.0007, phase: 4.1, inc: 0.28, layer: 'MIDGROUND' as const, size: 24 },
-        { label: 'X', r: 270, speed: 0.0006, phase: 1.5, inc: 0.32, layer: 'MIDGROUND' as const, size: 23 },
-        { label: 'Y', r: 290, speed: -0.0005, phase: 3.2, inc: -0.26, layer: 'BACKGROUND' as const, size: 22 },
-        { label: 'Z', r: 310, speed: -0.00045, phase: 5.6, inc: -0.35, layer: 'BACKGROUND' as const, size: 21 },
-        { label: '“ ”', r: 180, speed: 0.0010, phase: 4.7, inc: 0.19, layer: 'FOREGROUND' as const, size: 24 },
+        { label: 'A', r: 96, speed: 0.0011, phase: 0.5, inc: 0.18, layer: 'FOREGROUND' as const, size: 16 },
+        { label: 'B', r: 112, speed: -0.00075, phase: 2.3, inc: -0.24, layer: 'MIDGROUND' as const, size: 15 },
+        { label: 'C', r: 125, speed: 0.00065, phase: 4.1, inc: 0.22, layer: 'MIDGROUND' as const, size: 14 },
+        { label: 'X', r: 132, speed: 0.00055, phase: 1.5, inc: 0.25, layer: 'MIDGROUND' as const, size: 14 },
+        { label: 'Y', r: 138, speed: -0.00045, phase: 3.2, inc: -0.20, layer: 'BACKGROUND' as const, size: 13 },
+        { label: 'Z', r: 144, speed: -0.0004, phase: 5.6, inc: -0.26, layer: 'BACKGROUND' as const, size: 13 },
+        { label: '“ ”', r: 104, speed: 0.0009, phase: 4.7, inc: 0.16, layer: 'FOREGROUND' as const, size: 15 },
       ];
       engLetters.forEach((el, idx) => {
         list.push({
@@ -490,11 +498,11 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 
       // 3D Typographic Blocks (ENGLISH, LEARN, SPEAK, THINK, GROW)
       const engWords = [
-        { label: 'ENGLISH', r: 160, speed: 0.0011, phase: 3.8, inc: -0.22, layer: 'FOREGROUND' as const },
-        { label: 'LEARN', r: 230, speed: 0.00075, phase: 1.2, inc: 0.35, layer: 'MIDGROUND' as const },
-        { label: 'SPEAK', r: 260, speed: -0.00065, phase: 3.4, inc: -0.38, layer: 'MIDGROUND' as const },
-        { label: 'THINK', r: 290, speed: 0.00055, phase: 5.0, inc: 0.30, layer: 'BACKGROUND' as const },
-        { label: 'GROW', r: 310, speed: -0.00045, phase: 0.9, inc: -0.25, layer: 'BACKGROUND' as const },
+        { label: 'ENGLISH', r: 102, speed: 0.0010, phase: 3.8, inc: -0.18, layer: 'FOREGROUND' as const },
+        { label: 'LEARN', r: 118, speed: 0.0007, phase: 1.2, inc: 0.25, layer: 'MIDGROUND' as const },
+        { label: 'SPEAK', r: 128, speed: -0.0006, phase: 3.4, inc: -0.28, layer: 'MIDGROUND' as const },
+        { label: 'THINK', r: 136, speed: 0.0005, phase: 5.0, inc: 0.22, layer: 'BACKGROUND' as const },
+        { label: 'GROW', r: 144, speed: -0.0004, phase: 0.9, inc: -0.20, layer: 'BACKGROUND' as const },
       ];
       engWords.forEach((ew, idx) => {
         list.push({
@@ -520,11 +528,11 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       });
     } else if (theme === 'it') {
       const itItems = [
-        { label: '<dev/>', r: 165, speed: 0.0012, phase: 0.6, inc: 0.22, layer: 'FOREGROUND' as const },
-        { label: '{ state }', r: 220, speed: -0.0008, phase: 2.6, inc: -0.32, layer: 'MIDGROUND' as const },
-        { label: 'React.js', r: 250, speed: 0.0007, phase: 4.4, inc: 0.28, layer: 'MIDGROUND' as const },
-        { label: 'async/await', r: 285, speed: -0.0005, phase: 1.4, inc: -0.34, layer: 'BACKGROUND' as const },
-        { label: 'API 200 OK', r: 310, speed: 0.00045, phase: 5.1, inc: 0.30, layer: 'BACKGROUND' as const },
+        { label: '<dev/>', r: 102, speed: 0.0011, phase: 0.6, inc: 0.18, layer: 'FOREGROUND' as const },
+        { label: '{ state }', r: 118, speed: -0.00075, phase: 2.6, inc: -0.24, layer: 'MIDGROUND' as const },
+        { label: 'React.js', r: 128, speed: 0.00065, phase: 4.4, inc: 0.22, layer: 'MIDGROUND' as const },
+        { label: 'async/await', r: 136, speed: -0.0005, phase: 1.4, inc: -0.25, layer: 'BACKGROUND' as const },
+        { label: 'API 200 OK', r: 144, speed: 0.0004, phase: 5.1, inc: 0.22, layer: 'BACKGROUND' as const },
       ];
       itItems.forEach((it, idx) => {
         list.push({
@@ -551,10 +559,10 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     } else {
       // Academic / DTM / Presidential Schools
       const acadItems = [
-        { label: '189+', r: 160, speed: 0.0012, phase: 0.5, inc: 0.24, layer: 'FOREGROUND' as const },
-        { label: '★ DTM', r: 220, speed: -0.0008, phase: 2.4, inc: -0.30, layer: 'MIDGROUND' as const },
-        { label: 'GRANT', r: 255, speed: 0.0007, phase: 4.2, inc: 0.28, layer: 'MIDGROUND' as const },
-        { label: 'Cambridge', r: 290, speed: -0.0005, phase: 1.2, inc: -0.32, layer: 'BACKGROUND' as const },
+        { label: '189+', r: 100, speed: 0.0011, phase: 0.5, inc: 0.18, layer: 'FOREGROUND' as const },
+        { label: '★ DTM', r: 116, speed: -0.00075, phase: 2.4, inc: -0.22, layer: 'MIDGROUND' as const },
+        { label: 'GRANT', r: 128, speed: 0.00065, phase: 4.2, inc: 0.22, layer: 'MIDGROUND' as const },
+        { label: 'Cambridge', r: 138, speed: -0.00045, phase: 1.2, inc: -0.25, layer: 'BACKGROUND' as const },
       ];
       acadItems.forEach((ac, idx) => {
         list.push({
@@ -674,11 +682,10 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 
         bookPhys.rotY += bookPhys.angVy;
 
-        // Smooth pitch settling to comfortable showroom angle (-0.16 rad)
-        bookPhys.rotX += bookPhys.angVx;
-        bookPhys.angVx *= 0.95;
-        bookPhys.rotX = Math.max(-0.25, Math.min(0.25, bookPhys.rotX));
-        bookPhys.rotX += (-0.16 - bookPhys.rotX) * 0.015;
+        // Pure horizontal stability: rotX and rotZ strictly 0
+        bookPhys.rotX = 0;
+        bookPhys.rotZ = 0;
+        bookPhys.angVx = 0;
       } else {
         // While dragging, hover tilt smoothly zeros out and user has 100% control
         bookPhys.tiltX *= 0.85;
@@ -822,46 +829,48 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       ctx.translate(centerX + cam.mouseX * bookParallax, centerY + floatY + cam.mouseY * bookParallax);
       ctx.scale(bookPhys.hoverScale * cameraBreathing, bookPhys.hoverScale * cameraBreathing);
 
-      // Book Dimensions: Realistic Textbook Proportions with Overhanging Hardcover
+      // Book Dimensions: Exact Golden Ratio (width : height : depth ≈ 1.00 : 1.35 : 0.18)
       const isCompact = width < 480;
-      const bw = isCompact ? 175 : 220; // Cover width
-      const bh = isCompact ? 235 : 290; // Cover height
-      const bThick = isCompact ? 36 : 46; // Total thickness
+      const bw = isCompact ? 140 : 175; // Cover width (100% Hero Scale)
+      const bh = Math.round(bw * 1.35); // Cover height (~236px)
+      const bThick = Math.round(bw * 0.18); // Thickness (~32px)
 
-      const overhang = 4.5; // Overhang beyond page block
+      const overhang = 4.0; // Hardcover overhanging lip beyond page block
 
       const hw = bw / 2;
       const hh = bh / 2;
       const ht = bThick / 2;
 
-      // Realistic Ground Contact Shadow (broadens & darkens on hover)
-      const shadowExpand = bookPhys.isHovered ? 1.15 : 1.0;
-      const shadowGrad = ctx.createRadialGradient(0, hh + 44, 8, 0, hh + 44, hw * 1.6 * shadowExpand);
-      shadowGrad.addColorStop(0, 'rgba(4, 2, 3, 0.88)');
-      shadowGrad.addColorStop(0.55, 'rgba(4, 2, 3, 0.32)');
+      // Pure Horizontal Showroom Turntable Rotation (Y-axis only around exact central vertical axis)
+      const ry = bookPhys.rotY;
+      // Clamped micro-tilt from mouse hover (strictly limited to ±3 degrees = ±0.05 rad)
+      const rx = Math.max(-0.05, Math.min(0.05, bookPhys.tiltX));
+      const rz = 0; // Strictly 0: absolute horizontal stability
+
+      // Realistic Ground Contact Shadow: dynamically scales with rotated book footprint
+      const effW = (Math.abs(hw * Math.cos(ry)) + Math.abs(ht * Math.sin(ry))) * 1.35;
+      const shadowExpand = bookPhys.isHovered ? 1.12 : 1.0;
+      const shadowGrad = ctx.createRadialGradient(0, hh + 28, 4, 0, hh + 28, effW * shadowExpand);
+      shadowGrad.addColorStop(0, 'rgba(4, 2, 3, 0.85)');
+      shadowGrad.addColorStop(0.55, 'rgba(4, 2, 3, 0.28)');
       shadowGrad.addColorStop(1, 'rgba(4, 2, 3, 0)');
       ctx.fillStyle = shadowGrad;
       ctx.beginPath();
-      ctx.ellipse(0, hh + 44, hw * 1.35 * shadowExpand, 22 * shadowExpand, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, hh + 28, effW * shadowExpand, 13 * shadowExpand, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Effective Rotation angles (Turntable + 3D Hover Tilt)
-      const rx = bookPhys.rotX + bookPhys.tiltX;
-      const ry = bookPhys.rotY + bookPhys.tiltY;
-      const rz = bookPhys.rotZ;
-
-      // Vertices of Front Cover Plate (z = +ht)
+      // Vertices of Front Cover Plate (z = +ht, centered around origin)
       const coverFrontVerts = [
         [-hw, -hh, ht], [hw, -hh, ht], [hw, hh, ht], [-hw, hh, ht],
         [-hw, -hh, ht - 3], [hw, -hh, ht - 3], [hw, hh, ht - 3], [-hw, hh, ht - 3],
       ];
-      // Vertices of Back Cover Plate (z = -ht)
+      // Vertices of Back Cover Plate (z = -ht, centered around origin)
       const coverBackVerts = [
         [-hw, -hh, -ht + 3], [hw, -hh, -ht + 3], [hw, hh, -ht + 3], [-hw, hh, -ht + 3],
         [-hw, -hh, -ht], [hw, -hh, -ht], [hw, hh, -ht], [-hw, hh, -ht],
       ];
-      // Vertices of Recessed Stratified Ivory Page Block
-      const pageLeft = -hw + 6;
+      // Vertices of Recessed Stratified Ivory Page Block (inset by overhang)
+      const pageLeft = -hw + 5;
       const pageRight = hw - overhang;
       const pageTop = -hh + overhang;
       const pageBottom = hh - overhang;
@@ -870,19 +879,15 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         [pageLeft, pageTop, -ht + 3], [pageRight, pageTop, -ht + 3], [pageRight, pageBottom, -ht + 3], [pageLeft, pageBottom, -ht + 3],
       ];
 
-      // Projected vertex sets
-      const projCoverFront = coverFrontVerts.map((v) => {
+      // Projected vertex sets with true 3D perspective foreshortening
+      const projectVert = (v: number[]) => {
         rotate3D(v[0], v[1], v[2], rx, ry, rz);
-        return { x: rotBuf.x, y: rotBuf.y, z: rotBuf.z };
-      });
-      const projCoverBack = coverBackVerts.map((v) => {
-        rotate3D(v[0], v[1], v[2], rx, ry, rz);
-        return { x: rotBuf.x, y: rotBuf.y, z: rotBuf.z };
-      });
-      const projPages = pageVerts.map((v) => {
-        rotate3D(v[0], v[1], v[2], rx, ry, rz);
-        return { x: rotBuf.x, y: rotBuf.y, z: rotBuf.z };
-      });
+        const persp = 520 / (520 + rotBuf.z);
+        return { x: rotBuf.x * persp, y: rotBuf.y * persp, z: rotBuf.z };
+      };
+      const projCoverFront = coverFrontVerts.map(projectVert);
+      const projCoverBack = coverBackVerts.map(projectVert);
+      const projPages = pageVerts.map(projectVert);
 
       // Palette by Active Theme
       const activeTheme = currentThemeRef.current;
@@ -1257,22 +1262,22 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         const startAng = ringHalf === 'back' ? Math.PI : 0;
         const endAng = ringHalf === 'back' ? Math.PI * 2 : ringHalf === 'front' ? Math.PI : Math.PI * 2;
 
-        // Outer Beveled Ellipse
+        // Outer Beveled Ellipse (Thin, delicate luxury gold wire)
         c.beginPath();
         c.ellipse(0, 0, sc.size, sc.size * 0.32, sc.rotX, startAng, endAng);
-        c.lineWidth = 2.4;
+        c.lineWidth = 1.3;
         c.strokeStyle = '#D9A93A';
         c.stroke();
 
         // Inner Concentric Bevel
         c.beginPath();
-        c.ellipse(0, 0, sc.size - 5, (sc.size - 5) * 0.32, sc.rotX, startAng, endAng);
-        c.lineWidth = 1.0;
+        c.ellipse(0, 0, sc.size - 4, (sc.size - 4) * 0.32, sc.rotX, startAng, endAng);
+        c.lineWidth = 0.7;
         c.strokeStyle = 'rgba(244, 210, 122, 0.45)';
         c.stroke();
 
         // Coordinate Tick Marks on this depth half
-        c.lineWidth = 1.0;
+        c.lineWidth = 0.7;
         c.strokeStyle = 'rgba(244, 210, 122, 0.65)';
         for (let a = 0; a < Math.PI * 2; a += Math.PI / 6) {
           if (ringHalf === 'back' && (a < Math.PI || a > Math.PI * 2)) continue;
@@ -1718,8 +1723,9 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         if (activeTarget === 'book') {
           // Horizontal turntable rotation driven by pointer
           bookPhysicsRef.current.rotY += dx * 0.009;
-          bookPhysicsRef.current.rotX += dy * 0.003;
-          bookPhysicsRef.current.rotX = Math.max(-0.25, Math.min(0.25, bookPhysicsRef.current.rotX));
+          // Vertical movement produces only very slight micro-tilt (strictly clamped to ±0.04 rad)
+          bookPhysicsRef.current.tiltX += dy * 0.0006;
+          bookPhysicsRef.current.tiltX = Math.max(-0.04, Math.min(0.04, bookPhysicsRef.current.tiltX));
         } else {
           // Sculpture Grab-and-Carry: Move with cursor in 3D world space
           const sc = sculpturesRef.current.find((s) => s.id === activeTarget);
@@ -1782,9 +1788,9 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 
       if (activeTarget === 'book') {
         bookPhysicsRef.current.isDragging = false;
-        // Heavy book mass (2.4) -> deliberate response with high rotational inertia
+        // Heavy book mass (2.4) -> deliberate response with high rotational inertia on Y-axis
         bookPhysicsRef.current.angVy = calculatedVx * 0.0055;
-        bookPhysicsRef.current.angVx = calculatedVy * 0.0018;
+        bookPhysicsRef.current.angVx = 0; // Zero vertical angular velocity
       } else {
         const sc = sculpturesRef.current.find((s) => s.id === activeTarget);
         if (sc) {
