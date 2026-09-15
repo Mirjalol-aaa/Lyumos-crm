@@ -7,9 +7,7 @@ import {
   ChevronLeft,
   ChevronRight,
   CheckCircle2,
-  Sparkles,
   GraduationCap,
-  Info,
 } from 'lucide-react';
 import { Course } from '../../types/admin';
 import { INITIAL_COURSES } from '../../data/coursesData';
@@ -79,6 +77,15 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     handleSelectCourse(INITIAL_COURSES[nextIdx]);
   };
 
+  // Clean course title & instructor for exact reference typography
+  const cleanTitle = useMemo(() => {
+    return (activeCourse.title || '').replace(/\s*\(.*?\)\s*/g, '').trim() || activeCourse.title;
+  }, [activeCourse.title]);
+
+  const instructorDisplay = useMemo(() => {
+    return activeCourse.instructor ? `(${activeCourse.instructor})` : '';
+  }, [activeCourse.instructor]);
+
   // ---------------------------------------------------------------------------
   // 3D CANVAS: MATHEMATICAL UNIVERSE (100% MATCH TO REFERENCE IMAGE)
   // ---------------------------------------------------------------------------
@@ -87,13 +94,11 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 
   // Book Showroom Turntable Angle & Autonomous Spin
   const bookPhysicsRef = useRef({
-    rotY: -0.48, // Initial showroom angle (~ -28 deg to match reference image)
+    rotY: -0.44, // Exact showroom angle from reference image (~ -25 deg)
     angVy: 0.0016, // Slow autonomous rotation
     targetHoverScale: 1.0,
     hoverScale: 1.0,
     isHovered: false,
-    mouseX: 0,
-    mouseY: 0,
   });
 
   const currentThemeRef = useRef<CourseVisualTheme>(theme);
@@ -105,7 +110,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
-    let width = 720;
+    let width = 760;
     let height = 620;
     const dpr = Math.min(window.devicePixelRatio || 1, 2.0);
 
@@ -155,42 +160,33 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 
       // Autonomous horizontal rotation around central vertical axis
       bookPhys.rotY += bookPhys.angVy;
-
-      // Hover scale smooth lerp
       bookPhys.hoverScale += (bookPhys.targetHoverScale - bookPhys.hoverScale) * 0.1;
 
       ctx.clearRect(0, 0, width, height);
 
-      const centerX = width * 0.50;
-      const centerY = height * 0.48;
+      // Center calibrated so book and right-side objects fit with generous breathing space
+      const centerX = width * 0.44;
+      const centerY = height * 0.50;
       const floatY = Math.sin(time * 1.2) * 3.5;
       const cameraBreathing = 1.0 + Math.sin(time * 0.22) * 0.025;
 
-      // -----------------------------------------------------------------------
-      // 1. VOLUMETRIC WARM GOLD KEY LIGHT SOURCE
-      // -----------------------------------------------------------------------
-      const lightAngle = time * 0.28;
-      const lightX = Math.cos(lightAngle) * 260;
-      const lightY = Math.sin(lightAngle * 0.7) * 90 - 50;
-      const lightZ = Math.sin(lightAngle) * 220;
-
       // Ambient Behind-Book Glow
-      const bgGlow = ctx.createRadialGradient(centerX + 20, centerY - 10, 10, centerX + 20, centerY - 10, 260);
-      bgGlow.addColorStop(0, 'rgba(217, 169, 58, 0.18)');
-      bgGlow.addColorStop(0.35, 'rgba(110, 22, 36, 0.15)');
-      bgGlow.addColorStop(0.7, 'rgba(18, 6, 10, 0.4)');
+      const bgGlow = ctx.createRadialGradient(centerX + 30, centerY - 10, 10, centerX + 30, centerY - 10, 280);
+      bgGlow.addColorStop(0, 'rgba(217, 169, 58, 0.22)');
+      bgGlow.addColorStop(0.35, 'rgba(110, 22, 36, 0.18)');
+      bgGlow.addColorStop(0.7, 'rgba(18, 6, 10, 0.45)');
       bgGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = bgGlow;
       ctx.beginPath();
-      ctx.arc(centerX + 20, centerY - 10, 260, 0, Math.PI * 2);
+      ctx.arc(centerX + 30, centerY - 10, 280, 0, Math.PI * 2);
       ctx.fill();
 
       // Atmospheric Golden Bokeh Particles
-      for (let p = 0; p < 14; p++) {
-        const bx = Math.sin(time * 0.32 + p * 1.35) * (width * 0.44);
-        const by = Math.cos(time * 0.26 + p * 1.15) * (height * 0.42);
-        const br = (p % 3 === 0 ? 2.4 : 1.5) * (1 + Math.sin(time * 0.8 + p) * 0.3);
-        const bAlpha = 0.18 + 0.16 * Math.sin(time * 1.1 + p);
+      for (let p = 0; p < 16; p++) {
+        const bx = Math.sin(time * 0.32 + p * 1.35) * (width * 0.46);
+        const by = Math.cos(time * 0.26 + p * 1.15) * (height * 0.44);
+        const br = (p % 3 === 0 ? 2.5 : 1.5) * (1 + Math.sin(time * 0.8 + p) * 0.3);
+        const bAlpha = 0.20 + 0.18 * Math.sin(time * 1.1 + p);
         ctx.fillStyle = `rgba(244, 210, 122, ${bAlpha})`;
         ctx.beginPath();
         ctx.arc(centerX + bx, centerY + by, br, 0, Math.PI * 2);
@@ -200,71 +196,67 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       // Sweeping Curved Golden Light Arc (Top in Reference Image)
       ctx.save();
       ctx.beginPath();
-      const arcCenterX = centerX + 45;
-      const arcCenterY = centerY - 155 + floatY * 0.4;
-      ctx.ellipse(arcCenterX, arcCenterY, 130, 48, -0.22, Math.PI * 0.85, Math.PI * 1.75);
+      const arcCenterX = centerX + 40;
+      const arcCenterY = centerY - 165 + floatY * 0.4;
+      ctx.ellipse(arcCenterX, arcCenterY, 140, 52, -0.22, Math.PI * 0.85, Math.PI * 1.75);
       const arcGrad = ctx.createLinearGradient(arcCenterX - 100, arcCenterY, arcCenterX + 100, arcCenterY);
       arcGrad.addColorStop(0, 'rgba(217, 169, 58, 0)');
-      arcGrad.addColorStop(0.5, 'rgba(255, 246, 220, 0.65)');
+      arcGrad.addColorStop(0.5, 'rgba(255, 246, 220, 0.75)');
       arcGrad.addColorStop(1, 'rgba(217, 169, 58, 0)');
       ctx.strokeStyle = arcGrad;
-      ctx.lineWidth = 1.6;
+      ctx.lineWidth = 1.8;
       ctx.stroke();
       ctx.restore();
 
       // -----------------------------------------------------------------------
       // 2. RENDER BACK HALF OF GRAND INSCRIBED ORBITAL RING (BEHIND BOOK)
       // -----------------------------------------------------------------------
-      const ringRadius = 138;
+      const ringRadius = 152;
       const ringTiltX = 0.48; // ~28 deg tilt matching reference
-      const ringRotY = time * 0.06;
+      const ringRotY = time * 0.05;
 
       ctx.save();
       ctx.translate(centerX, centerY + floatY * 0.5);
-      // Back half: angles PI to 2*PI
       drawGrandInscribedRing(ctx, ringRadius, ringTiltX, ringRotY, 'back');
-      // Secondary tilted nested ring
-      drawNestedTiltedRing(ctx, 92, -0.38, -time * 0.08, 'back');
+      drawNestedTiltedRing(ctx, 100, -0.38, -time * 0.07, 'back');
       ctx.restore();
 
       // -----------------------------------------------------------------------
-      // 3. BACKGROUND MATHEMATICAL OBJECTS (Z < 0)
+      // 3. BACKGROUND MATHEMATICAL OBJECTS (EXACT REFERENCE POSITIONS)
       // -----------------------------------------------------------------------
       ctx.save();
       ctx.translate(centerX, centerY + floatY);
 
       // A. Sine Wave along Coordinate Axes (Top-Left in Reference Image)
-      drawCoordinateSineWave(ctx, -145, -75, time);
+      drawCoordinateSineWave(ctx, -155, -95, time);
 
       // B. 3D Wireframe Icosahedron / Polyhedron (Left in Reference Image)
-      drawWireframeIcosahedron(ctx, -135, 22, 24, time * 0.4);
+      drawWireframeIcosahedron(ctx, -165, 25, 26, time * 0.4);
 
       // C. Small Golden Sphere (Left of Book)
-      drawGlossyGoldSphere(ctx, -85, -60, 6.5);
+      drawGlossyGoldSphere(ctx, -85, -65, 7.0);
 
       // D. 3D Floating Double Helix / Spiral (Right in Reference Image)
-      drawDoubleHelix(ctx, 155, -55, 22, time);
+      drawDoubleHelix(ctx, 155, -110, 24, time);
 
       // E. 3D Parametric Saddle Surface Mesh (Right in Reference Image)
-      drawSaddleMesh(ctx, 175, 30, 24, time * 0.35);
+      drawSaddleMesh(ctx, 220, -45, 28, time * 0.35);
 
-      // F. Small Golden Sphere (Near Saddle)
-      drawGlossyGoldSphere(ctx, 122, -45, 5.5);
+      // F. Small Golden Sphere (Near Pi / Helix)
+      drawGlossyGoldSphere(ctx, 135, -90, 6.0);
 
       // G. 3D Wireframe Pyramid / Cone (Bottom Right in Reference Image)
-      drawWireframePyramid(ctx, 185, 145, 24, time * 0.3);
+      drawWireframePyramid(ctx, 235, 150, 28, time * 0.3);
 
       // H. Floating Mathematical Formulas:
       // Pi (Top-Right in Reference Image)
-      drawGlowingFormula(ctx, 115, -135, 'π', 28, '#F4D27A');
-      // Small sphere near Pi
-      drawGlossyGoldSphere(ctx, 130, -95, 6.0);
+      drawGlowingFormula(ctx, 105, -165, 'π', 32, '#F4D27A');
       // Integral (Bottom-Left in Reference Image)
-      drawGlowingFormula(ctx, -125, 95, '∫', 32, '#F4D27A');
+      drawGlowingFormula(ctx, -125, 105, '∫', 34, '#F4D27A');
       // a² + b² = c² (Right in Reference Image)
-      drawGlowingFormula(ctx, 160, 95, 'a² + b² = c²', 14, '#EAE4DC');
+      drawGlowingFormula(ctx, 195, 45, 'a² + b² = c²', 15, '#EAE4DC');
       // Sigma (Right below formula in Reference Image)
-      drawGlowingFormula(ctx, 160, 140, '∑', 22, '#F4D27A');
+      drawGlowingFormula(ctx, 200, 105, '∑', 24, '#F4D27A');
 
       ctx.restore();
 
@@ -274,37 +266,37 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       ctx.save();
       ctx.translate(centerX, centerY + floatY);
 
-      const bw = 172;
-      const bh = Math.round(bw * 1.35); // 232px
-      const bThick = 32;
+      const bw = 196;
+      const bh = Math.round(bw * 1.35); // 265px
+      const bThick = 34;
       const hw = bw / 2;
       const hh = bh / 2;
       const ht = bThick / 2;
 
-      const pedY = hh + 28;
+      const pedY = hh + 30;
 
       // Floor Contact Glow & Drop Shadow
-      const floorGlow = ctx.createRadialGradient(0, pedY + 16, 8, 0, pedY + 16, 185);
-      floorGlow.addColorStop(0, 'rgba(217, 169, 58, 0.36)');
-      floorGlow.addColorStop(0.35, 'rgba(92, 20, 32, 0.45)');
-      floorGlow.addColorStop(0.7, 'rgba(8, 2, 4, 0.90)');
+      const floorGlow = ctx.createRadialGradient(0, pedY + 18, 8, 0, pedY + 18, 205);
+      floorGlow.addColorStop(0, 'rgba(217, 169, 58, 0.40)');
+      floorGlow.addColorStop(0.35, 'rgba(92, 20, 32, 0.48)');
+      floorGlow.addColorStop(0.7, 'rgba(8, 2, 4, 0.92)');
       floorGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = floorGlow;
       ctx.beginPath();
-      ctx.ellipse(0, pedY + 16, 175, 36, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, pedY + 18, 195, 40, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Pedestal Tier 3 (Base Plinth): Radius 138, Height 10
+      // Pedestal Tier 3 (Base Plinth): Radius 165, Height 12
       ctx.fillStyle = '#160806';
       ctx.beginPath();
-      ctx.ellipse(0, pedY + 14, 138, 26, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, pedY + 15, 165, 30, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.strokeStyle = '#6E3214';
-      ctx.lineWidth = 1.2;
+      ctx.lineWidth = 1.3;
       ctx.stroke();
 
-      // Pedestal Tier 2 (Middle Beveled Ring): Radius 116, Height 8
-      const t2Grad = ctx.createLinearGradient(-116, 0, 116, 0);
+      // Pedestal Tier 2 (Middle Beveled Ring): Radius 135, Height 9
+      const t2Grad = ctx.createLinearGradient(-135, 0, 135, 0);
       t2Grad.addColorStop(0, '#2A1009');
       t2Grad.addColorStop(0.25, '#683315');
       t2Grad.addColorStop(0.5, '#C99238');
@@ -312,57 +304,50 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       t2Grad.addColorStop(1, '#2A1009');
       ctx.fillStyle = t2Grad;
       ctx.beginPath();
-      ctx.ellipse(0, pedY + 7, 116, 22, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, pedY + 8, 135, 25, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.strokeStyle = '#D9A93A';
-      ctx.lineWidth = 1.2;
+      ctx.lineWidth = 1.3;
       ctx.stroke();
 
-      // Pedestal Tier 1 (Top Stage Platform Disc): Radius 96
-      const t1Grad = ctx.createRadialGradient(0, pedY, 4, 0, pedY, 96);
+      // Pedestal Tier 1 (Top Stage Platform Disc): Radius 110
+      const t1Grad = ctx.createRadialGradient(0, pedY, 4, 0, pedY, 110);
       t1Grad.addColorStop(0, '#FFF6DC');
       t1Grad.addColorStop(0.28, '#D9A93A');
       t1Grad.addColorStop(0.68, '#5E2B12');
       t1Grad.addColorStop(1, '#1A0B08');
       ctx.fillStyle = t1Grad;
       ctx.beginPath();
-      ctx.ellipse(0, pedY, 96, 18, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, pedY, 110, 20, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.strokeStyle = '#FFEAA7';
-      ctx.lineWidth = 1.4;
+      ctx.lineWidth = 1.5;
       ctx.stroke();
 
       // Inner Concentric Gold Ring Groove
       ctx.beginPath();
-      ctx.ellipse(0, pedY, 82, 15, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, pedY, 94, 17, 0, 0, Math.PI * 2);
       ctx.strokeStyle = 'rgba(217, 169, 58, 0.65)';
-      ctx.lineWidth = 0.8;
+      ctx.lineWidth = 0.9;
       ctx.stroke();
 
       // Dynamic Book Contact Shadow on Top of Pedestal
       const effW = (Math.abs(hw * Math.cos(bookPhys.rotY)) + Math.abs(ht * Math.sin(bookPhys.rotY))) * 1.25;
       const bookShadow = ctx.createRadialGradient(0, pedY - 2, 4, 0, pedY - 2, effW * 1.1);
-      bookShadow.addColorStop(0, 'rgba(4, 2, 3, 0.85)');
-      bookShadow.addColorStop(0.6, 'rgba(4, 2, 3, 0.3)');
+      bookShadow.addColorStop(0, 'rgba(4, 2, 3, 0.88)');
+      bookShadow.addColorStop(0.6, 'rgba(4, 2, 3, 0.32)');
       bookShadow.addColorStop(1, 'rgba(4, 2, 3, 0)');
       ctx.fillStyle = bookShadow;
       ctx.beginPath();
-      ctx.ellipse(0, pedY - 2, effW * 1.1, 11, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, pedY - 2, effW * 1.1, 12, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // -----------------------------------------------------------------------
-      // FLOATING PARCHMENT MANUSCRIPT PAGES (AT PEDESTAL BASE)
-      // -----------------------------------------------------------------------
-      // Paper 1: Floating open manuscript under book / behind gold sphere
-      drawCurledParchment(ctx, -48, pedY - 14, 38, 26, -0.22);
-      // Paper 2: Floating curled parchment page on right side
-      drawCurledParchment(ctx, 64, pedY - 10, 32, 22, 0.32);
+      // Floating Parchment Manuscript Pages (At Pedestal Base)
+      drawCurledParchment(ctx, -50, pedY - 12, 42, 28, -0.22);
+      drawCurledParchment(ctx, 72, pedY - 8, 36, 24, 0.32);
 
-      // -----------------------------------------------------------------------
-      // FOREGROUND GLOSSY METALLIC GOLD SPHERE (THE ORB ON PEDESTAL RIM)
-      // -----------------------------------------------------------------------
-      // In Reference Image: large shiny gold sphere sitting on front-left pedestal rim!
-      drawGlossyGoldSphere(ctx, -72, pedY + 8, 22);
+      // Foreground Glossy Metallic Gold Sphere (The Orb on Pedestal Rim)
+      drawGlossyGoldSphere(ctx, -78, pedY + 8, 24);
 
       ctx.restore();
 
@@ -373,24 +358,19 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       ctx.translate(centerX, centerY + floatY);
       ctx.scale(bookPhys.hoverScale * cameraBreathing, bookPhys.hoverScale * cameraBreathing);
 
-      // Book Angles: Y-axis rotation + slight backward pitch to match reference camera
       const ry = bookPhys.rotY;
       const rx = 0.08; // ~4.5 deg backward pitch
       const rz = 0;
-
       const overhang = 4.0;
 
-      // Vertices of Front Cover Plate (z = +ht)
       const coverFrontVerts = [
         [-hw, -hh, ht], [hw, -hh, ht], [hw, hh, ht], [-hw, hh, ht],
         [-hw, -hh, ht - 3], [hw, -hh, ht - 3], [hw, hh, ht - 3], [-hw, hh, ht - 3],
       ];
-      // Vertices of Back Cover Plate (z = -ht)
       const coverBackVerts = [
         [-hw, -hh, -ht + 3], [hw, -hh, -ht + 3], [hw, hh, -ht + 3], [-hw, hh, -ht + 3],
         [-hw, -hh, -ht], [hw, -hh, -ht], [hw, hh, -ht], [-hw, hh, -ht],
       ];
-      // Vertices of Recessed Stratified Ivory Page Block
       const pageLeft = -hw + 5;
       const pageRight = hw - overhang;
       const pageTop = -hh + overhang;
@@ -425,9 +405,9 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 
       // Theme Palette
       const activeTheme = currentThemeRef.current;
-      let coverTopColor = '#380B15';
-      let coverBotColor = '#140307';
-      let spineColor = '#500E20';
+      let coverTopColor = '#460E1C';
+      let coverBotColor = '#160408';
+      let spineColor = '#5A1224';
       let bookTitle = 'MATHEMATICS';
 
       if (activeTheme === 'english') {
@@ -502,10 +482,10 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         const spineAngle = Math.atan2(cf3.y - cf0.y, cf3.x - cf0.x);
         ctx.rotate(spineAngle - Math.PI / 2);
         ctx.font = 'bold 9px "Playfair Display", serif';
-        ctx.fillStyle = 'rgba(244, 210, 122, 0.8)';
+        ctx.fillStyle = 'rgba(244, 210, 122, 0.85)';
         ctx.textAlign = 'center';
         ctx.letterSpacing = '2px';
-        ctx.fillText('MATHEMATICS', 0, 3);
+        ctx.fillText(bookTitle, 0, 3);
         ctx.restore();
       }
 
@@ -518,9 +498,9 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         ctx.lineTo(p2.x, p2.y);
         ctx.closePath();
         const pageGrad = ctx.createLinearGradient(p1.x, p1.y, p6.x, p6.y);
-        pageGrad.addColorStop(0, 'rgba(250, 246, 238, 0.98)');
-        pageGrad.addColorStop(0.5, 'rgba(226, 218, 202, 0.94)');
-        pageGrad.addColorStop(1, 'rgba(180, 168, 146, 0.90)');
+        pageGrad.addColorStop(0, 'rgba(252, 248, 240, 0.98)');
+        pageGrad.addColorStop(0.5, 'rgba(230, 222, 206, 0.94)');
+        pageGrad.addColorStop(1, 'rgba(185, 172, 150, 0.90)');
         ctx.fillStyle = pageGrad;
         ctx.fill();
         ctx.strokeStyle = 'rgba(217, 169, 58, 0.4)';
@@ -546,7 +526,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         ctx.lineTo(projPages[5].x, projPages[5].y);
         ctx.lineTo(projPages[4].x, projPages[4].y);
         ctx.closePath();
-        ctx.fillStyle = 'rgba(238, 232, 218, 0.95)';
+        ctx.fillStyle = 'rgba(240, 234, 220, 0.95)';
         ctx.fill();
         ctx.strokeStyle = 'rgba(217, 169, 58, 0.35)';
         ctx.stroke();
@@ -577,8 +557,8 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
           cf0.y * 0.4 + projCoverFront[2].y * 0.6,
           hw * 1.3
         );
-        specGrad.addColorStop(0, 'rgba(255, 244, 212, 0.35)');
-        specGrad.addColorStop(0.35, 'rgba(217, 169, 58, 0.18)');
+        specGrad.addColorStop(0, 'rgba(255, 244, 212, 0.38)');
+        specGrad.addColorStop(0.35, 'rgba(217, 169, 58, 0.20)');
         specGrad.addColorStop(0.7, 'rgba(110, 22, 36, 0.10)');
         specGrad.addColorStop(1, 'rgba(5, 1, 2, 0)');
         ctx.fillStyle = specGrad;
@@ -616,7 +596,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         ctx.strokeStyle = '#F4D27A';
         ctx.fillStyle = '#F4D27A';
         ctx.lineWidth = 1.0;
-        const crW = 12;
+        const crW = 13;
         const crY = -hh * 0.44;
         ctx.beginPath();
         ctx.moveTo(-crW, crY + 5);
@@ -635,12 +615,12 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         });
 
         // 2. LUMOS Wordmark (below crown)
-        ctx.font = 'bold 10px "Playfair Display", serif';
+        ctx.font = 'bold 11px "Playfair Display", serif';
         ctx.fillStyle = 'rgba(244, 210, 122, 0.95)';
         ctx.fillText('LUMOS', 0, -hh * 0.33);
 
         // 3. Main Golden Book Title (MATHEMATICS)
-        ctx.font = '900 16px "Playfair Display", serif';
+        ctx.font = '900 17px "Playfair Display", serif';
         ctx.fillStyle = '#FFFFFF';
         ctx.fillText(bookTitle, 0, -hh * 0.19);
         ctx.fillStyle = '#F4D27A';
@@ -648,16 +628,16 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 
         if (activeTheme === 'math') {
           // 4. Mathematical Notation Row 1: π   ∫   √
-          ctx.font = 'italic bold 13px "Playfair Display", serif';
+          ctx.font = 'italic bold 14px "Playfair Display", serif';
           ctx.fillStyle = '#F4D27A';
           ctx.fillText('π', -hw * 0.44, -hh * 0.04);
-          ctx.font = '16px serif';
+          ctx.font = '17px serif';
           ctx.fillText('∫', 0, -hh * 0.04);
-          ctx.font = 'italic 13px serif';
+          ctx.font = 'italic 14px serif';
           ctx.fillText('√', hw * 0.44, -hh * 0.04);
 
           // 5. Mathematical Notation Row 2: x²   f(x)
-          ctx.font = 'italic 12px serif';
+          ctx.font = 'italic 13px serif';
           ctx.fillStyle = '#F4D27A';
           ctx.fillText('x²', -hw * 0.32, hh * 0.09);
           ctx.fillText('f(x)', hw * 0.32, hh * 0.09);
@@ -667,7 +647,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
           ctx.translate(0, hh * 0.26);
           ctx.strokeStyle = 'rgba(244, 210, 122, 0.75)';
           ctx.lineWidth = 0.8;
-          const rGeo = 15;
+          const rGeo = 16;
           // Outer hexagon
           ctx.beginPath();
           for (let a = 0; a < 6; a++) {
@@ -702,7 +682,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
           }
           ctx.restore();
         } else {
-          ctx.font = 'bold 9px sans-serif';
+          ctx.font = 'bold 10px sans-serif';
           ctx.fillStyle = 'rgba(244, 210, 122, 0.65)';
           ctx.fillText('ACADEMIC PROGRAM', 0, 0);
         }
@@ -717,9 +697,8 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       // -----------------------------------------------------------------------
       ctx.save();
       ctx.translate(centerX, centerY + floatY * 0.5);
-      // Front half: angles 0 to PI
       drawGrandInscribedRing(ctx, ringRadius, ringTiltX, ringRotY, 'front');
-      drawNestedTiltedRing(ctx, 92, -0.38, -time * 0.08, 'front');
+      drawNestedTiltedRing(ctx, 100, -0.38, -time * 0.07, 'front');
       ctx.restore();
 
       animFrameRef.current = requestAnimationFrame(render);
@@ -737,27 +716,27 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       // Outer Beveled Ellipse (Wide, Metallic Luxury Gold Ribbon)
       c.beginPath();
       c.ellipse(0, 0, radius, radius * 0.32, tiltX, startAng, endAng);
-      c.lineWidth = 4.5;
+      c.lineWidth = 5.0;
       c.strokeStyle = '#D9A93A';
       c.stroke();
 
       // Inner Concentric Edge
       c.beginPath();
-      c.ellipse(0, 0, radius - 7, (radius - 7) * 0.32, tiltX, startAng, endAng);
-      c.lineWidth = 1.0;
+      c.ellipse(0, 0, radius - 8, (radius - 8) * 0.32, tiltX, startAng, endAng);
+      c.lineWidth = 1.1;
       c.strokeStyle = 'rgba(255, 244, 212, 0.75)';
       c.stroke();
 
       // Engraved Roman numerals / math markings along the ring
-      c.lineWidth = 1.1;
+      c.lineWidth = 1.2;
       c.strokeStyle = '#FFF6DC';
       for (let a = 0; a < Math.PI * 2; a += Math.PI / 10) {
         if (half === 'back' && (a < Math.PI || a > Math.PI * 2)) continue;
         if (half === 'front' && (a < 0 || a > Math.PI)) continue;
         const cosA = Math.cos(a + rotY);
         const sinA = Math.sin(a + rotY);
-        const rx1 = cosA * (radius - 6);
-        const ry1 = sinA * (radius - 6) * 0.32;
+        const rx1 = cosA * (radius - 7);
+        const ry1 = sinA * (radius - 7) * 0.32;
         const rx2 = cosA * (radius + 2);
         const ry2 = sinA * (radius + 2) * 0.32;
         c.beginPath();
@@ -772,7 +751,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       const endAng = half === 'back' ? Math.PI * 2 : Math.PI;
       c.beginPath();
       c.ellipse(0, 0, radius, radius * 0.44, tiltX, startAng, endAng);
-      c.lineWidth = 1.2;
+      c.lineWidth = 1.3;
       c.strokeStyle = 'rgba(217, 169, 58, 0.75)';
       c.stroke();
     }
@@ -866,26 +845,21 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       // Coordinate axes
       c.strokeStyle = 'rgba(244, 210, 122, 0.65)';
       c.lineWidth = 1.0;
-      // Y axis
-      c.beginPath(); c.moveTo(0, 35); c.lineTo(0, -35); c.stroke();
-      // Y arrowhead
-      c.beginPath(); c.moveTo(-2.5, -31); c.lineTo(0, -35); c.lineTo(2.5, -31); c.stroke();
-      // X axis
-      c.beginPath(); c.moveTo(-45, 0); c.lineTo(45, 0); c.stroke();
-      // X arrowhead
-      c.beginPath(); c.moveTo(41, -2.5); c.lineTo(45, 0); c.lineTo(41, 2.5); c.stroke();
+      c.beginPath(); c.moveTo(0, 38); c.lineTo(0, -38); c.stroke();
+      c.beginPath(); c.moveTo(-2.5, -34); c.lineTo(0, -38); c.lineTo(2.5, -34); c.stroke();
+      c.beginPath(); c.moveTo(-48, 0); c.lineTo(48, 0); c.stroke();
+      c.beginPath(); c.moveTo(44, -2.5); c.lineTo(48, 0); c.lineTo(44, 2.5); c.stroke();
 
-      // Labels
       c.font = 'italic 8px serif';
       c.fillStyle = '#F4D27A';
-      c.fillText('y', 4, -30);
-      c.fillText('x', 42, 10);
+      c.fillText('y', 4, -33);
+      c.fillText('x', 45, 10);
 
       // Sine Wave Curve
       c.beginPath();
-      for (let x = -40; x <= 40; x += 2) {
-        const y = Math.sin(x * 0.12 + t * 0.8) * 16;
-        if (x === -40) c.moveTo(x, y);
+      for (let x = -44; x <= 44; x += 2) {
+        const y = Math.sin(x * 0.12 + t * 0.8) * 17;
+        if (x === -44) c.moveTo(x, y);
         else c.lineTo(x, y);
       }
       c.lineWidth = 1.6;
@@ -893,8 +867,8 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       c.stroke();
 
       // Node points along the wave
-      [-30, -10, 10, 30].forEach((nx) => {
-        const ny = Math.sin(nx * 0.12 + t * 0.8) * 16;
+      [-32, -11, 11, 32].forEach((nx) => {
+        const ny = Math.sin(nx * 0.12 + t * 0.8) * 17;
         c.beginPath();
         c.arc(nx, ny, 2.0, 0, Math.PI * 2);
         c.fillStyle = '#FFF6DC';
@@ -915,7 +889,6 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       c.strokeStyle = 'rgba(244, 210, 122, 0.75)';
       c.lineWidth = 1.1;
 
-      // Outer hexagon
       c.beginPath();
       for (let a = 0; a < 6; a++) {
         const ang = (a * Math.PI) / 3;
@@ -927,7 +900,6 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       c.closePath();
       c.stroke();
 
-      // Inscribed triangles
       c.beginPath();
       for (let a = 0; a < 3; a++) {
         const ang = (a * Math.PI * 2) / 3;
@@ -939,7 +911,6 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       c.closePath();
       c.stroke();
 
-      // Facets to center
       for (let a = 0; a < 6; a++) {
         const ang = (a * Math.PI) / 3;
         c.beginPath();
@@ -964,7 +935,6 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         const x1 = Math.cos(ang) * size * 0.5;
         const x2 = Math.cos(ang + Math.PI) * size * 0.5;
 
-        // Rungs
         c.beginPath();
         c.moveTo(x1, y);
         c.lineTo(x2, y);
@@ -972,7 +942,6 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         c.lineWidth = 0.8;
         c.stroke();
 
-        // Nodes
         c.fillStyle = '#F4D27A';
         c.beginPath(); c.arc(x1, y, 1.8, 0, Math.PI * 2); c.fill();
         c.beginPath(); c.arc(x2, y, 1.8, 0, Math.PI * 2); c.fill();
@@ -1031,11 +1000,9 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       c.strokeStyle = 'rgba(244, 210, 122, 0.7)';
       c.lineWidth = 1.1;
 
-      // Base triangle
       const b1 = { x: -size * 0.6, y: size * 0.5 };
       const b2 = { x: size * 0.6, y: size * 0.5 };
       const b3 = { x: 0, y: size * 0.2 };
-      // Apex
       const apex = { x: 0, y: -size * 0.7 };
 
       c.beginPath();
@@ -1062,10 +1029,8 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       c.font = `bold ${fontSize}px "Playfair Display", serif`;
       c.textAlign = 'center';
       c.textBaseline = 'middle';
-      // Subtle shadow
       c.fillStyle = 'rgba(10, 2, 4, 0.85)';
       c.fillText(text, sx + 2, sy + 2);
-      // Main text
       c.fillStyle = color;
       c.fillText(text, sx, sy);
       c.restore();
@@ -1080,12 +1045,11 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
   return (
     <section
       id="courses"
-      className="relative min-h-screen lg:h-screen w-full flex flex-col justify-center overflow-hidden bg-[#080607] py-6 sm:py-8 lg:py-0 px-4 sm:px-6 lg:px-8 select-none"
+      className="relative min-h-screen lg:h-screen w-full flex flex-col justify-center overflow-hidden bg-[#080607] py-8 lg:py-0 px-4 sm:px-6 lg:px-8 select-none"
     >
       {/* -----------------------------------------------------------------------
           BACKGROUND ATMOSPHERE (SEAMLESS LUXURY STUDIO)
           ----------------------------------------------------------------------- */}
-      {/* Subtle Library Bookshelf Silhouette in Far Background */}
       <div className="absolute inset-0 pointer-events-none opacity-35">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#16060B]/40 via-transparent to-transparent" />
         <div className="absolute -top-32 right-12 w-[600px] h-[600px] rounded-full bg-radial from-[#D9A93A]/10 via-[#4A0E1A]/15 to-transparent blur-3xl" />
@@ -1095,51 +1059,53 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       {/* -----------------------------------------------------------------------
           MAIN VIEWPORT GRID: LEFT UI (42-45%) + RIGHT 3D SCENE (55-58%)
           ----------------------------------------------------------------------- */}
-      <div className="max-w-[1380px] w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center relative z-10">
+      <div className="max-w-[1380px] w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center relative z-10">
         {/* =====================================================================
             LEFT COLUMN: Active Course Information Matching Reference Hierarchy
             ===================================================================== */}
         <div
-          className={`lg:col-span-5 xl:col-span-5 space-y-3.5 sm:space-y-4 transition-all duration-300 ${
+          className={`lg:col-span-5 xl:col-span-5 space-y-4 sm:space-y-4.5 transition-all duration-300 ${
             isTransitioning ? 'opacity-40 translate-y-1' : 'opacity-100 translate-y-0'
           }`}
         >
           {/* 1. Category & Audience Badges */}
           <div className="flex items-center gap-2.5 flex-wrap">
-            <span className="px-4 py-1 rounded-full border border-[#D9A93A] bg-[#14060A]/90 text-xs font-bold text-[#F4D27A] tracking-wider uppercase shadow-[0_0_12px_rgba(217,169,58,0.25)]">
+            <span className="px-4 py-1.5 rounded-full border border-[#D9A93A] bg-[#14060A]/90 text-xs font-bold text-[#F4D27A] tracking-wider uppercase shadow-[0_0_12px_rgba(217,169,58,0.25)]">
               {activeCourse.category || 'MATEMATIKA'}
             </span>
-            <span className="px-4 py-1 rounded-full border border-white/10 bg-[#16090D]/80 text-xs font-medium text-[#D5CECA]">
+            <span className="px-4 py-1.5 rounded-full border border-white/10 bg-[#16090D]/80 text-xs font-medium text-[#D5CECA]">
               {activeCourse.level || 'Barcha sinflar & Abituriyentlar'}
             </span>
           </div>
 
-          {/* 2. Course Main Title & Instructor */}
-          <div className="space-y-0.5">
-            <h2 className="text-3xl sm:text-4xl lg:text-[3.2rem] font-luxury-serif font-black text-[#FFFFFF] leading-[1.08] tracking-tight drop-shadow-md">
-              {(activeCourse.title || '').replace(/\s*\(.*?\)\s*/g, '').trim() || activeCourse.title}
+          {/* 2. Course Main Title & Instructor (White Serif matching reference image) */}
+          <div className="space-y-1">
+            <h2 className="text-4xl sm:text-5xl lg:text-[3.6rem] font-luxury-serif font-black text-[#FFFFFF] leading-[1.05] tracking-tight drop-shadow-md">
+              {cleanTitle}
             </h2>
-            <p className="text-xl sm:text-2xl lg:text-[2.1rem] font-luxury-serif font-semibold text-[#F4D27A] leading-snug">
-              ({activeCourse.instructor || 'Hadicha ustoz'})
-            </p>
+            {instructorDisplay && (
+              <p className="text-2xl sm:text-3xl lg:text-[2.4rem] font-luxury-serif font-semibold text-[#FFFFFF]/95 leading-snug">
+                {instructorDisplay}
+              </p>
+            )}
           </div>
 
           {/* 3. Description */}
-          <p className="text-xs sm:text-[13px] text-[#BDB5B0] leading-relaxed max-w-lg font-normal">
+          <p className="text-xs sm:text-sm text-[#C8C0B8] leading-relaxed max-w-md font-normal">
             {activeCourse.description ||
               'Matematika, mantiqiy fikrlash, DTM testlari va olimpiadalarga mukammal tayyorgarlik kursi.'}
           </p>
 
-          {/* 4. Single Unified Specification Capsule Bar */}
-          <div className="rounded-2xl bg-[#14080D]/85 backdrop-blur-md border border-[#D9A93A]/25 p-2.5 sm:p-3 grid grid-cols-3 divide-x divide-[#D9A93A]/20 shadow-[0_8px_30px_rgba(0,0,0,0.6)]">
+          {/* 4. Single Unified Specification Capsule Bar (Pill Shape with Dividers) */}
+          <div className="rounded-full bg-[#100508]/85 backdrop-blur-md border border-[#D9A93A]/30 px-3 py-2 sm:px-4 sm:py-2.5 grid grid-cols-3 divide-x divide-[#D9A93A]/20 shadow-[0_8px_32px_rgba(0,0,0,0.65)]">
             {/* Davomiyligi */}
             <div className="flex items-center gap-2 px-1 sm:px-2">
-              <div className="h-7 w-7 rounded-lg bg-[#D9A93A]/10 border border-[#D9A93A]/25 flex items-center justify-center text-[#D9A93A] shrink-0">
+              <div className="h-7 w-7 rounded-lg bg-[#D9A93A]/10 border border-[#D9A93A]/30 flex items-center justify-center text-[#D9A93A] shrink-0">
                 <Calendar className="h-3.5 w-3.5" />
               </div>
               <div>
                 <span className="text-[9px] uppercase font-bold text-[#A9A3A0] tracking-wider block">Davomiyligi</span>
-                <span className="text-xs font-bold text-[#F7F4EE] block leading-tight">
+                <span className="text-xs font-bold text-white block leading-tight">
                   {activeCourse.durationMonths} oy ({activeCourse.lessonsCount} dars)
                 </span>
               </div>
@@ -1147,12 +1113,12 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 
             {/* Dars Grafigi */}
             <div className="flex items-center gap-2 px-2 sm:px-3">
-              <div className="h-7 w-7 rounded-lg bg-[#D9A93A]/10 border border-[#D9A93A]/25 flex items-center justify-center text-[#D9A93A] shrink-0">
+              <div className="h-7 w-7 rounded-lg bg-[#D9A93A]/10 border border-[#D9A93A]/30 flex items-center justify-center text-[#D9A93A] shrink-0">
                 <Clock className="h-3.5 w-3.5" />
               </div>
               <div>
                 <span className="text-[9px] uppercase font-bold text-[#A9A3A0] tracking-wider block">Dars grafigi</span>
-                <span className="text-xs font-bold text-[#F7F4EE] block leading-tight line-clamp-1">
+                <span className="text-xs font-bold text-white block leading-tight line-clamp-1">
                   {(activeCourse.schedule || '').split('(')[0] || 'Dush - Chor - Juma'}
                 </span>
               </div>
@@ -1160,39 +1126,39 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
 
             {/* Ustoz */}
             <div className="flex items-center gap-2 px-2 sm:px-3">
-              <div className="h-7 w-7 rounded-lg bg-[#D9A93A]/10 border border-[#D9A93A]/25 flex items-center justify-center text-[#D9A93A] shrink-0">
+              <div className="h-7 w-7 rounded-full bg-[#D9A93A]/10 border border-[#D9A93A]/30 flex items-center justify-center text-[#D9A93A] shrink-0">
                 <GraduationCap className="h-3.5 w-3.5" />
               </div>
               <div>
                 <span className="text-[9px] uppercase font-bold text-[#A9A3A0] tracking-wider block">Ustoz</span>
-                <span className="text-xs font-bold text-[#F7F4EE] block leading-tight line-clamp-1">
+                <span className="text-xs font-bold text-white block leading-tight line-clamp-1">
                   {activeCourse.instructor || 'Hadicha ustoz'}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* 5. Syllabus Topics (2 Columns with Gold Checkmarks) */}
-          <div className="space-y-1.5 pt-0.5">
-            <span className="text-[11px] font-bold text-[#D9A93A] tracking-wider uppercase block">
+          {/* 5. Syllabus Topics (2 Columns with Circular Gold Checkmarks) */}
+          <div className="space-y-2 pt-0.5">
+            <span className="text-xs font-bold text-[#D9A93A] tracking-wider uppercase block">
               O‘QUV DASTURIDAN ASOSIY MAVZULAR:
             </span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-1.5 text-[11px] text-[#E8E1D9]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-xs text-[#EAE4DC]">
               {(activeCourse.syllabus || []).slice(0, 4).map((topic, idx) => (
-                <div key={idx} className="flex items-start gap-1.5">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-[#D9A93A] shrink-0 mt-0.5" />
+                <div key={idx} className="flex items-start gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-[#D9A93A] shrink-0 mt-0.5" />
                   <span className="line-clamp-1 leading-snug">{topic}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* 6. Price & Action CTAs Row */}
+          {/* 6. Price & Action CTAs Row (Matching Reference Button Style) */}
           <div className="pt-2 flex items-center justify-between gap-4">
             {/* Price block */}
             <div className="shrink-0">
-              <span className="text-[10px] uppercase font-bold text-[#A9A3A0] tracking-wider block">Oylik to‘lov</span>
-              <span className="text-3xl sm:text-4xl lg:text-[2.7rem] font-luxury-serif font-black text-[#F4D27A] leading-none block">
+              <span className="text-[9px] uppercase font-bold text-[#A9A3A0] tracking-wider block">Oylik to‘lov</span>
+              <span className="text-3xl sm:text-4xl lg:text-[2.9rem] font-luxury-serif font-black text-[#F4D27A] leading-none block">
                 {formatMoney(activeCourse.pricePerMonth).replace(" so'm", "").replace(" so‘m", "")}
               </span>
               <span className="text-xl sm:text-2xl font-luxury-serif font-black text-[#F4D27A] leading-tight block">
@@ -1201,42 +1167,50 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
             </div>
 
             {/* CTAs */}
-            <div className="flex items-center gap-2.5 shrink-0">
+            <div className="flex items-center gap-3 shrink-0">
               {/* Secondary CTA: Batafsil dastur */}
               <button
                 type="button"
                 onClick={() => onOpenDetails(activeCourse)}
-                className="px-4 sm:px-5 py-3 rounded-full border border-[#D9A93A]/40 bg-[#16090D]/80 hover:bg-[#D9A93A]/15 hover:border-[#F4D27A] text-xs font-bold text-[#F7F4EE] hover:text-[#FFE7A3] transition-all duration-300 flex items-center gap-2 cursor-pointer shadow-[inset_0_1px_2px_rgba(255,255,255,0.08)]"
+                className="px-5 py-2.5 rounded-full border border-[#D9A93A]/45 bg-[#120508]/90 hover:bg-[#D9A93A]/15 hover:border-[#F4D27A] text-white transition-all duration-300 flex items-center gap-2.5 cursor-pointer shadow-[inset_0_1px_2px_rgba(255,255,255,0.08)]"
               >
-                <BookOpen className="h-3.5 w-3.5 text-[#D9A93A]" />
-                <span className="whitespace-nowrap">Batafsil dastur</span>
+                <BookOpen className="h-4 w-4 text-[#D9A93A]" />
+                <div className="text-left leading-tight text-xs font-bold text-white">
+                  <div>Batafsil</div>
+                  <div>dastur</div>
+                </div>
               </button>
 
               {/* Primary CTA: Guruhga yozilish */}
               <button
                 type="button"
                 onClick={() => onOpenRegister(activeCourse.title)}
-                className="px-5 sm:px-6 py-3 rounded-full text-xs font-black text-[#0B0808] bg-gradient-to-r from-[#D9A93A] via-[#F4D27A] to-[#D9A93A] hover:brightness-110 shadow-[0_4px_20px_rgba(217,169,58,0.42)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 flex items-center gap-2 cursor-pointer border border-[#FFF2C6]/40"
+                className="px-6 py-2.5 rounded-full bg-gradient-to-r from-[#F4C664] via-[#E5B54A] to-[#D99C35] hover:brightness-110 shadow-[0_4px_22px_rgba(244,198,100,0.45)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 flex items-center gap-2 cursor-pointer border border-[#FFF2C6]/40"
               >
-                <span className="whitespace-nowrap">Guruhga yozilish</span>
-                <ArrowRight className="h-3.5 w-3.5" />
+                <div className="text-left leading-tight text-xs font-black text-[#0A0604]">
+                  <div>Guruhga</div>
+                  <div className="flex items-center gap-1">
+                    <span>yozilish</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </div>
+                </div>
               </button>
             </div>
           </div>
 
-          {/* 7. Diagnostic Test Link */}
+          {/* 7. Diagnostic Test Link (Gold Text Matching Reference) */}
           {onOpenDiagnostic && (
-            <div className="pt-0.5">
+            <div className="pt-1">
               <button
                 type="button"
                 onClick={onOpenDiagnostic}
-                className="text-[11px] font-semibold text-[#BDB5B0] hover:text-[#F4D27A] flex items-center gap-1.5 cursor-pointer transition-colors group"
+                className="text-xs font-semibold text-[#F4D27A] hover:text-[#FFF2C6] flex items-center gap-1.5 cursor-pointer transition-colors group"
               >
-                <div className="h-3.5 w-3.5 rounded-full border border-[#D9A93A]/60 flex items-center justify-center text-[9px] text-[#D9A93A] group-hover:border-[#F4D27A]">
+                <div className="h-4 w-4 rounded-full border border-[#F4D27A] flex items-center justify-center text-[10px] text-[#F4D27A] group-hover:border-[#FFF2C6]">
                   i
                 </div>
                 <span>Qaysi kurs sizga mos kelishini aniqlash uchun bepul diagnostik test topshiring</span>
-                <ArrowRight className="h-3 w-3 text-[#D9A93A] transition-transform group-hover:translate-x-0.5" />
+                <ArrowRight className="h-3 w-3 text-[#F4D27A] transition-transform group-hover:translate-x-0.5" />
               </button>
             </div>
           )}
@@ -1245,7 +1219,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         {/* =====================================================================
             RIGHT COLUMN: 3D Miniature Mathematical Universe (55-58%)
             ===================================================================== */}
-        <div className="lg:col-span-7 xl:col-span-7 relative w-full h-[420px] sm:h-[480px] lg:h-[550px] flex items-center justify-center select-none">
+        <div className="lg:col-span-7 xl:col-span-7 relative w-full h-[460px] sm:h-[520px] lg:h-[580px] flex items-center justify-center select-none">
           {/* 3D Canvas */}
           <canvas
             ref={canvasRef}
@@ -1255,7 +1229,7 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
           />
 
           {/* Bottom-Right Carousel Navigation Controls (Matching Reference Image) */}
-          <div className="absolute bottom-2 right-2 sm:bottom-4 sm:right-4 z-20 flex items-center gap-2.5 bg-[#120609]/70 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#D9A93A]/30 shadow-lg">
+          <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-20 flex items-center gap-2.5 bg-[#120609]/75 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-[#D9A93A]/30 shadow-xl">
             {/* Prev Button */}
             <button
               type="button"
