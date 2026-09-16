@@ -14,6 +14,8 @@ import {
   Layers,
 } from 'lucide-react';
 
+import { createVisibilityObserver } from '../../lib/performanceManager';
+
 export const Hero3DScene: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -29,7 +31,11 @@ export const Hero3DScene: React.FC = () => {
     const container = containerRef.current;
     if (!container) return;
 
+    let isVisible = true;
+    let animationFrameId: number | null = null;
+
     const handleMouseMove = (e: MouseEvent) => {
+      if (!isVisible) return;
       const rect = container.getBoundingClientRect();
       const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       const y = ((e.clientY - rect.top) / rect.height) * 2 - 1;
@@ -46,8 +52,9 @@ export const Hero3DScene: React.FC = () => {
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     container.addEventListener('mouseleave', handleMouseLeave);
 
-    let animationFrameId: number;
     const updatePhysics = () => {
+      if (!isVisible) return;
+
       // Calm, smooth 0.04 lerp for luxurious Apple-like inertia
       mouseCurrentRef.current.x +=
         (mouseTargetRef.current.x - mouseCurrentRef.current.x) * 0.04;
@@ -78,12 +85,29 @@ export const Hero3DScene: React.FC = () => {
       animationFrameId = requestAnimationFrame(updatePhysics);
     };
 
-    animationFrameId = requestAnimationFrame(updatePhysics);
+    const startLoop = () => {
+      isVisible = true;
+      if (!animationFrameId) {
+        animationFrameId = requestAnimationFrame(updatePhysics);
+      }
+    };
+
+    const stopLoop = () => {
+      isVisible = false;
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+    };
+
+    // Pause physics entirely when hero is scrolled out of viewport
+    const unobserve = createVisibilityObserver(container, startLoop, stopLoop, 0.05);
 
     return () => {
+      stopLoop();
+      unobserve();
       window.removeEventListener('mousemove', handleMouseMove);
       if (container) container.removeEventListener('mouseleave', handleMouseLeave);
-      cancelAnimationFrame(animationFrameId);
     };
   }, []);
 
@@ -341,13 +365,13 @@ export const Hero3DScene: React.FC = () => {
                   <div className="grid grid-cols-2 gap-2">
                     <div className="p-2 rounded-lg bg-[#220E13]/85 border border-[#D9A83F]/25 text-center shadow-inner">
                       <span className="text-[8px] text-[#FFE7A3] uppercase block font-bold tracking-wider">Matematika</span>
-                      <span className="text-sm font-black text-emerald-400 font-mono">189.0 DTM</span>
-                      <span className="text-[7.5px] text-[#C7BCB1] block font-medium">98% O‘zlashtirish</span>
+                      <span className="text-xs font-black text-emerald-400 font-mono">DTM & Mantiq</span>
+                      <span className="text-[7.5px] text-[#C7BCB1] block font-medium">Olimpiada & Milliy</span>
                     </div>
                     <div className="p-2 rounded-lg bg-[#220E13]/85 border border-[#D9A83F]/25 text-center shadow-inner">
                       <span className="text-[8px] text-[#FFE7A3] uppercase block font-bold tracking-wider">Ingliz tili</span>
-                      <span className="text-sm font-black text-[#F4D27A] font-mono">Band 8.0</span>
-                      <span className="text-[7.5px] text-[#C7BCB1] block font-medium">IELTS & C1 CEFR</span>
+                      <span className="text-xs font-black text-[#F4D27A] font-mono">General & IELTS</span>
+                      <span className="text-[7.5px] text-[#C7BCB1] block font-medium">B1 → B2 & CEFR</span>
                     </div>
                   </div>
 

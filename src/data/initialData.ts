@@ -3,9 +3,9 @@ import { Student, Teacher, Group, Expense, NotificationItem, CalendarEvent, Cent
 export const initialSettings: CenterSettings = {
   centerName: "LUMOS O‘quv Markazi",
   tagline: "Bilim bilan yorqin kelajakka!",
-  phone: "+998 (71) 200-00-25",
-  email: "admin@lumos.uz",
-  address: "Toshkent sh., Chilonzor tumani, Bunyodkor shoh ko‘chasi 42",
+  phone: "+998 95 821 30 01",
+  email: "info@lumos.uz",
+  address: "LUMOS o‘quv markazi",
   currency: "UZS",
   currencySymbol: "so‘m",
   academicYear: "2025 - 2026",
@@ -29,25 +29,25 @@ export const initialSettings: CenterSettings = {
 export const INITIAL_TEACHERS: Teacher[] = [
   {
     id: "TCH-01",
-    fullName: "Hadicha ustoz",
-    avatar: "", // No photo as requested
-    phone: "+998 (90) 123-45-67",
-    email: "hadicha@lumos.uz",
+    fullName: "Diyorbek",
+    avatar: "",
+    phone: "+998 95 821 30 01",
+    email: "diyorbek@lumos.uz",
     subjects: ["Matematika"],
     baseSalary: 1200000,
     bonusPerStudent: 15000,
     groupsCount: 1,
-    studentsCount: 11,
-    joinedDate: "2024-06-01",
+    studentsCount: 8,
+    joinedDate: "2024-05-01",
     rating: 5.0,
     schedule: "Dushanba, Chorshanba, Juma (14:00 - 16:00)",
     status: "Active"
   },
   {
     id: "TCH-02",
-    fullName: "Hasanboy ustoz",
-    avatar: "", // No photo as requested
-    phone: "+998 (90) 987-65-43",
+    fullName: "Hasanboy",
+    avatar: "",
+    phone: "+998 95 821 30 01",
     email: "hasanboy@lumos.uz",
     subjects: ["Ingliz tili"],
     baseSalary: 1200000,
@@ -57,6 +57,38 @@ export const INITIAL_TEACHERS: Teacher[] = [
     joinedDate: "2024-07-01",
     rating: 5.0,
     schedule: "Seshanba, Payshanba, Shanba (15:30 - 17:30)",
+    status: "Active"
+  },
+  {
+    id: "TCH-03",
+    fullName: "Hadicha",
+    avatar: "",
+    phone: "+998 95 821 30 01",
+    email: "hadicha@lumos.uz",
+    subjects: ["Matematika"],
+    baseSalary: 1200000,
+    bonusPerStudent: 15000,
+    groupsCount: 1,
+    studentsCount: 11,
+    joinedDate: "2024-06-01",
+    rating: 5.0,
+    schedule: "Dushanba, Chorshanba, Juma (16:00 - 18:00)",
+    status: "Active"
+  },
+  {
+    id: "TCH-04",
+    fullName: "Mirjalol",
+    avatar: "",
+    phone: "+998 95 821 30 01",
+    email: "mirjalol@lumos.uz",
+    subjects: ["Matematika"],
+    baseSalary: 1200000,
+    bonusPerStudent: 15000,
+    groupsCount: 1,
+    studentsCount: 6,
+    joinedDate: "2024-08-01",
+    rating: 5.0,
+    schedule: "Seshanba, Payshanba, Shanba (16:00 - 18:00)",
     status: "Active"
   }
 ];

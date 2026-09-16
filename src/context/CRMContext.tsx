@@ -496,9 +496,9 @@ export const CRMProvider: React.FC<{
     return {
       centerName: 'LUMOS O‘quv Markazi',
       tagline: 'Bilim bilan yorqin kelajakka!',
-      phone: '+998 (71) 200-00-25',
-      email: 'admin@lumos.uz',
-      address: 'Toshkent sh., Chilonzor tumani, Bunyodkor shoh ko‘chasi 42',
+      phone: '+998 95 821 30 01',
+      email: 'info@lumos.uz',
+      address: 'LUMOS o‘quv markazi',
       currency: 'UZS',
       currencySymbol: 'so‘m',
       academicYear: '2025 - 2026',

@@ -198,7 +198,7 @@ export function formatPaymentReceiptMessage(params: {
     method,
     receiptNo,
     dateTime = new Date().toLocaleString('uz-UZ'),
-    centerPhone = '+998 (71) 200-00-25',
+    centerPhone = '+998 95 821 30 01',
     centerName = 'LUMOS O‘quv Markazi',
   } = params;
 
@@ -234,7 +234,7 @@ export function formatAttendanceAlertMessage(params: {
     date,
     status,
     note,
-    centerPhone = '+998 (71) 200-00-25',
+    centerPhone = '+998 95 821 30 01',
     centerName = 'LUMOS O‘quv Markazi',
   } = params;
 
@@ -432,7 +432,7 @@ export async function processTelegramUpdates({
   students = [],
   groups = [],
   centerName = 'LUMOS O‘quv Markazi',
-  centerPhone = '+998 (71) 200-00-25',
+  centerPhone = '+998 95 821 30 01',
 }: {
   botToken: string;
   students?: any[];

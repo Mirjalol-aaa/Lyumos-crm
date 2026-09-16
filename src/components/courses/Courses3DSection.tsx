@@ -12,6 +12,13 @@ import {
 import { Course } from '../../types/admin';
 import { INITIAL_COURSES } from '../../data/coursesData';
 import { useI18n } from '../../lib/i18n';
+import {
+  detectDeviceTier,
+  getTierDpr,
+  createVisibilityObserver,
+  AdaptiveFPSController,
+  PerformanceTier,
+} from '../../lib/performanceManager';
 
 interface Courses3DSectionProps {
   onOpenDetails: (course: Course) => void;
@@ -19,7 +26,7 @@ interface Courses3DSectionProps {
   onOpenDiagnostic?: () => void;
 }
 
-type CourseVisualTheme = 'math' | 'english' | 'it' | 'academic';
+type CourseVisualTheme = 'math' | 'english' | 'academic';
 
 export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
   onOpenDetails,
@@ -52,7 +59,6 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
   const theme: CourseVisualTheme = useMemo(() => {
     const title = activeCourse.title.toLowerCase();
     const cat = (activeCourse.category || '').toLowerCase();
-    if (cat.includes('it') || title.includes('frontend') || title.includes('dastur')) return 'it';
     if (title.includes('ielts') || cat.includes('til') || title.includes('ingliz')) return 'english';
     if (title.includes('prezident') || title.includes('abituriyent') || title.includes('dtm')) return 'academic';
     return 'math';
@@ -98,10 +104,49 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     angVy: 0.0016, // Slow autonomous rotation
     targetHoverScale: 1.0,
     hoverScale: 1.0,
+    isDragging: false,
+    dragStartX: 0,
+    lastDragX: 0,
+    lastDragTime: 0,
+    dragVelocityX: 0,
   });
 
   const currentThemeRef = useRef<CourseVisualTheme>(theme);
   currentThemeRef.current = theme;
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const phys = bookPhysicsRef.current;
+    phys.isDragging = true;
+    phys.dragStartX = e.clientX;
+    phys.lastDragX = e.clientX;
+    phys.lastDragTime = performance.now();
+    phys.dragVelocityX = 0;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch (_) {}
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const phys = bookPhysicsRef.current;
+    if (!phys.isDragging) return;
+    const now = performance.now();
+    const dt = Math.max(1, now - phys.lastDragTime);
+    const dx = e.clientX - phys.lastDragX;
+    phys.dragVelocityX = dx / dt;
+    phys.rotY += dx * 0.0075;
+    phys.lastDragX = e.clientX;
+    phys.lastDragTime = now;
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const phys = bookPhysicsRef.current;
+    if (!phys.isDragging) return;
+    phys.isDragging = false;
+    phys.angVy = Math.max(-0.035, Math.min(0.035, phys.dragVelocityX * 0.015));
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch (_) {}
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -109,17 +154,28 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
+    const fpsController = new AdaptiveFPSController();
+    let currentTier: PerformanceTier = fpsController.getTier();
+
     let width = 760;
     let height = 620;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2.0);
+    let dpr = getTierDpr(currentTier);
+    let isVisible = true;
+
+    fpsController.subscribe((newTier) => {
+      currentTier = newTier;
+      updateSize();
+    });
 
     const updateSize = () => {
       const rect = canvas.parentElement?.getBoundingClientRect();
       if (rect && rect.width > 0) {
         width = rect.width;
         height = rect.height;
+        dpr = getTierDpr(currentTier);
         canvas.width = Math.round(width * dpr);
         canvas.height = Math.round(height * dpr);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.scale(dpr, dpr);
       }
     };
@@ -150,24 +206,38 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
     let lastTime = performance.now();
     let time = 0;
 
+    // Zero-heap pre-allocated projection buffers
+    const projCoverFront = Array.from({ length: 8 }, () => ({ x: 0, y: 0, z: 0 }));
+    const projCoverBack = Array.from({ length: 8 }, () => ({ x: 0, y: 0, z: 0 }));
+    const projPages = Array.from({ length: 8 }, () => ({ x: 0, y: 0, z: 0 }));
+
     const render = (now: number) => {
+      if (!isVisible) return;
+      fpsController.recordFrame(now);
       const dt = Math.min((now - lastTime) / 1000, 0.08);
       lastTime = now;
       time += dt;
 
       const bookPhys = bookPhysicsRef.current;
 
-      // Autonomous horizontal rotation around central vertical axis
-      bookPhys.rotY += bookPhys.angVy;
+      // Momentum physics & autonomous rotation
+      if (!bookPhys.isDragging) {
+        bookPhys.rotY += bookPhys.angVy;
+        // Smooth exponential damping toward autonomous cruising velocity (0.0016)
+        if (Math.abs(bookPhys.angVy - 0.0016) > 0.0001) {
+          bookPhys.angVy = bookPhys.angVy * 0.94 + 0.0016 * 0.06;
+        }
+      }
       bookPhys.hoverScale += (bookPhys.targetHoverScale - bookPhys.hoverScale) * 0.1;
 
       ctx.clearRect(0, 0, width, height);
 
-      // Center calibrated so book and right-side objects fit with generous breathing space
-      const centerX = width * 0.44;
+      const isMobile = width < 768;
+      const mobileScale = isMobile ? Math.min(1.0, width / 440) * 0.78 : 1.0;
+      const centerX = isMobile ? width * 0.50 : width * 0.44;
       const centerY = height * 0.50;
-      const floatY = Math.sin(time * 1.2) * 3.5;
-      const cameraBreathing = 1.0 + Math.sin(time * 0.22) * 0.025;
+      const floatY = Math.sin(time * 1.2) * (isMobile ? 2.2 : 3.5);
+      const cameraBreathing = 1.0 + Math.sin(time * 0.22) * 0.02;
 
       // -----------------------------------------------------------------------
       // 1. VOLUMETRIC WARM KEY LIGHT & SPATIAL ATMOSPHERE
@@ -305,10 +375,10 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       ctx.save();
       ctx.translate(centerX, centerY + floatY);
 
-      // Book Proportions: 1.0 : 1.35 : 0.18
-      const bw = 200;
-      const bh = Math.round(bw * 1.35); // 270px
-      const bThick = 36;
+      // Book Proportions: 1.0 : 1.35 : 0.18 (Mobile scaled)
+      const bw = Math.round(200 * mobileScale);
+      const bh = Math.round(bw * 1.35);
+      const bThick = Math.round(36 * mobileScale);
       const hw = bw / 2;
       const hh = bh / 2;
       const ht = bThick / 2;
@@ -420,15 +490,19 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         [pageLeft, pageTop, -ht + 3], [pageRight, pageTop, -ht + 3], [pageRight, pageBottom, -ht + 3], [pageLeft, pageBottom, -ht + 3],
       ];
 
-      const projectVert = (v: number[]) => {
+      const projectInto = (v: number[], out: { x: number; y: number; z: number }) => {
         rotate3D(v[0], v[1], v[2], rx, ry, rz);
         const persp = 540 / (540 + rotBuf.z);
-        return { x: rotBuf.x * persp, y: rotBuf.y * persp, z: rotBuf.z };
+        out.x = rotBuf.x * persp;
+        out.y = rotBuf.y * persp;
+        out.z = rotBuf.z;
       };
 
-      const projCoverFront = coverFrontVerts.map(projectVert);
-      const projCoverBack = coverBackVerts.map(projectVert);
-      const projPages = pageVerts.map(projectVert);
+      for (let i = 0; i < 8; i++) {
+        projectInto(coverFrontVerts[i], projCoverFront[i]);
+        projectInto(coverBackVerts[i], projCoverBack[i]);
+        projectInto(pageVerts[i], projPages[i]);
+      }
 
       const cf0 = projCoverFront[0];
       const cf1 = projCoverFront[1];
@@ -455,11 +529,6 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
         coverBotColor = '#070B14';
         spineColor = '#1D2D48';
         bookTitle = 'ENGLISH';
-      } else if (activeTheme === 'it') {
-        coverTopColor = '#10241A';
-        coverBotColor = '#05100B';
-        spineColor = '#173627';
-        bookTitle = 'FRONTEND IT';
       } else if (activeTheme === 'academic') {
         coverTopColor = '#30101A';
         coverBotColor = '#100308';
@@ -1258,9 +1327,28 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
       c.restore();
     }
 
+    const startLoop = () => {
+      isVisible = true;
+      if (!animFrameRef.current) {
+        lastTime = performance.now();
+        animFrameRef.current = requestAnimationFrame(render);
+      }
+    };
+
+    const stopLoop = () => {
+      isVisible = false;
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current);
+        animFrameRef.current = null;
+      }
+    };
+
+    const unobserve = createVisibilityObserver(canvas, startLoop, stopLoop, 0.05);
+
     return () => {
+      stopLoop();
+      unobserve();
       window.removeEventListener('resize', updateSize);
-      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
   }, []);
 
@@ -1442,11 +1530,15 @@ export const Courses3DSection: React.FC<Courses3DSectionProps> = ({
             RIGHT COLUMN: 3D Living Mathematics Spatial Universe (55-58%)
             ===================================================================== */}
         <div className="lg:col-span-7 xl:col-span-7 relative w-full h-[460px] sm:h-[520px] lg:h-[580px] flex items-center justify-center select-none">
-          {/* 3D Canvas */}
+          {/* 3D Canvas with smooth momentum drag and non-interfering scroll */}
           <canvas
             ref={canvasRef}
-            className="w-full h-full block select-none relative z-10"
-            style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            className="w-full h-full block select-none relative z-10 cursor-grab active:cursor-grabbing"
+            style={{ userSelect: 'none', WebkitUserSelect: 'none', touchAction: 'pan-y' }}
             title="LUMOS 3D Matematika Koinoti"
           />
 

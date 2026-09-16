@@ -1161,6 +1161,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
     };
 
     const handleTouchMove = (e: TouchEvent) => {
+      if (isMobile) return; // Never block page scroll on mobile
       if (pointerRef.grabbedEntity) {
         e.preventDefault();
       }
@@ -1184,7 +1185,24 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
     window.addEventListener('pointerdown', handlePointerDown, { passive: false });
     window.addEventListener('pointerup', handlePointerUp, { passive: true });
     window.addEventListener('pointercancel', handlePointerUp, { passive: true });
-    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    let isTabVisible = true;
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        isTabVisible = false;
+        if (animFrameIdRef.current) {
+          cancelAnimationFrame(animFrameIdRef.current);
+          animFrameIdRef.current = null;
+        }
+      } else {
+        isTabVisible = true;
+        lastTime = performance.now();
+        if (!animFrameIdRef.current) {
+          animFrameIdRef.current = requestAnimationFrame(render);
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('touchmove', handleTouchMove, { passive: isMobile ? true : false });
     window.addEventListener('blur', () => handlePointerUp());
     document.addEventListener('selectstart', handleSelectStart, { capture: true });
     document.addEventListener('dragstart', handleDragStart, { capture: true });
@@ -1280,6 +1298,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
     let highFpsCount = 0;
 
     const render = (now: number) => {
+      if (!isTabVisible) return;
       const dt = Math.min((now - lastTime) / 1000, 0.08);
       lastTime = now;
       const elapsed = (now - startTimeRef.current) / 1000;
@@ -2569,6 +2588,7 @@ export const LumosAmbient3D: React.FC<LumosAmbient3DProps> = ({
       window.removeEventListener('pointerup', handlePointerUp);
       window.removeEventListener('pointercancel', handlePointerUp);
       window.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       document.removeEventListener('selectstart', handleSelectStart, { capture: true } as any);
       document.removeEventListener('dragstart', handleDragStart, { capture: true } as any);
       setSelectionShield(false);

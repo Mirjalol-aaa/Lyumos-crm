@@ -83,9 +83,8 @@ export const LandingPage: React.FC = () => {
   const [selectedCategoryKey, setSelectedCategoryKey] = useState<string>('all');
   const categoryFilters = [
     { key: 'all', label: 'Barchasi' },
-    { key: 'til', label: 'Xorijiy tillar' },
-    { key: 'it', label: 'IT & Dasturlash' },
-    { key: 'aniq', label: 'Aniq fanlar & DTM' },
+    { key: 'aniq', label: 'Matematika' },
+    { key: 'til', label: 'Ingliz tili' },
   ];
 
   // Newsletter
@@ -170,62 +169,62 @@ export const LandingPage: React.FC = () => {
     });
   }, [selectedCategoryKey]);
 
-  // Teacher Profiles
+  // Teacher Profiles: Strictly 4 Real Teachers
   const teacherProfiles = [
     {
-      name: 'Sherzodbek Rahimov',
-      role: 'Katta Ustoz & Metodist',
-      specialization: 'IELTS & Akademik Ingliz tili',
-      experience: '9+ yil',
-      rating: '4.98',
-      badge: 'IELTS Band 8.5',
-      bio: 'Buyuk Britaniyada tahsil olgan. 1200 dan ortiq o‘quvchisi 7.0+ va 8.0+ natijalarni qayd etgan.',
-      achievements: ['Cambridge CELTA sertifikati', '1200+ IELTS bitiruvchilari', 'Top 10 eng yaxshi metodist'],
+      name: 'Diyorbek',
+      role: 'Matematika ustozi',
+      specialization: 'Matematika & Mantiqiy fikrlash',
+      experience: '4 yillik tajriba',
+      rating: '5.0',
+      badge: '4 yillik tajriba',
+      bio: 'Matematika fani bo‘yicha 4 yillik tajribaga ega ustoz. O‘quvchilarda mantiqiy tafakkur va nostandart masalalar yechish ko‘nikmasini shakllantiradi.',
+      achievements: ['4 yillik pedagogik tajriba', 'Mantiqiy fikrlash metodikasi', 'Nostandart masalalar tahlili'],
       scheduleDays: 'Dush - Chor - Juma',
-      scheduleTime: '15:00 - 17:00 / 18:30 - 20:30',
-      symbol: 'SR',
+      scheduleTime: '14:00 - 16:00',
+      symbol: 'D',
       gradient: 'from-[#4A1520] via-[#851C2C] to-[#2B0910]',
     },
     {
-      name: 'Malika Karimova',
-      role: 'Bosh Dasturlash Ustozi',
-      specialization: 'Full Stack & Python Dasturlash',
-      experience: '6+ yil',
-      rating: '4.95',
-      badge: 'Senior Full Stack',
-      bio: 'Xalqaro IT kompaniyalarda ishlagan dasturchi. Real loyihalar va amaliy keyslar asosida o‘qitadi.',
-      achievements: ['Ex-EPAM dasturchisi', '650+ IT bitiruvchilari', '15+ xalqaro startap loyihalar'],
+      name: 'Hasanboy',
+      role: 'Ingliz tili ustozi',
+      specialization: 'General English & IELTS',
+      experience: 'Ingliz tili mutaxassisi',
+      rating: '5.0',
+      badge: 'Ingliz tili',
+      bio: 'Ingliz tilini interaktiv metodlar, jonli muloqot va tizimli grammatika orqali oson hamda samarali o‘rgatuvchi tajribali murabbiy.',
+      achievements: ['General English & IELTS tayyorlovi', 'Ravon so‘zlashuv va tinglab tushunish', 'Interaktiv dars muhiti'],
       scheduleDays: 'Sesh - Pay - Shan',
-      scheduleTime: '14:00 - 16:00 / 18:00 - 20:00',
-      symbol: 'MK',
-      gradient: 'from-[#1B2836] via-[#2A3E54] to-[#121C26]',
+      scheduleTime: '15:30 - 17:30',
+      symbol: 'H',
+      gradient: 'from-[#141E32] via-[#2A3E54] to-[#0A1424]',
     },
     {
-      name: 'Akmal Rustamov',
-      role: 'DTM & Matematika Koordinatori',
-      specialization: 'Oliy Matematika & Mantiq',
-      experience: '11+ yil',
-      rating: '4.99',
-      badge: '100% Grant Natija',
-      bio: 'O‘zbekiston Respublikasi fan olimpiadalari g‘olibi. 189 ballik DTM rekordchilarini yetishtirgan.',
-      achievements: ['189 ball DTM rekordchisi tayyorlagan', '98% OTMga grant qabul', 'Mualliflik qo‘llanmalari'],
+      name: 'Hadicha',
+      role: 'Matematika ustozi',
+      specialization: 'Matematika & DTM tayyorlov',
+      experience: 'Matematika mutaxassisi',
+      rating: '5.0',
+      badge: 'Matematika',
+      bio: 'Matematika fanini sodda, tushunarli va mustahkam uslubda o‘rgatishga ixtisoslashgan pedagog. DTM va maktab darsliklari bo‘yicha mustahkam bilim beradi.',
+      achievements: ['DTM va maktab dasturi bo‘yicha tayyorgarlik', 'Tezkor test yechish usullari', 'Har bir o‘quvchiga individual e’tibor'],
       scheduleDays: 'Dush - Chor - Juma',
-      scheduleTime: '09:00 - 11:00 / 14:00 - 16:00',
-      symbol: 'AR',
+      scheduleTime: '16:00 - 18:00',
+      symbol: 'H',
       gradient: 'from-[#2D2411] via-[#5C4517] to-[#1A1509]',
     },
     {
-      name: 'Zilola Alimova',
-      role: 'Rus tili & Grammatika Mutaxassisi',
-      specialization: 'So‘zlashuv & Akademik Rus tili',
-      experience: '7+ yil',
-      rating: '4.92',
-      badge: 'TORFL C2 Ekspert',
-      bio: 'Moskva Davlat Universitetida amaliyot o‘tagan. 1 oylik ekspress so‘zlashuv metodikasi muallifi.',
-      achievements: ['TORFL C2 oliy daraja', '800+ faol talabalar', 'Zamonaviy audio-vizual metod'],
+      name: 'Mirjalol',
+      role: 'Matematika ustozi',
+      specialization: 'Matematika & Mantiq',
+      experience: 'Matematika mutaxassisi',
+      rating: '5.0',
+      badge: 'Matematika',
+      bio: 'Matematika va mantiqiy masalalar bo‘yicha chuqurlashtirilgan bilim beruvchi murabbiy. O‘quvchilarni tahliliy fikrlash va masalalarga nostandart yondashishga o‘rgatadi.',
+      achievements: ['Matematika va mantiq uyg‘unligi', 'Tahliliy fikrlashni o‘stirish', 'Doimiy test monitoringi'],
       scheduleDays: 'Sesh - Pay - Shan',
-      scheduleTime: '10:00 - 12:00 / 16:00 - 18:00',
-      symbol: 'ZA',
+      scheduleTime: '16:00 - 18:00',
+      symbol: 'M',
       gradient: 'from-[#381B2E] via-[#5A2649] to-[#1F0E1A]',
     },
   ];
@@ -245,8 +244,8 @@ export const LandingPage: React.FC = () => {
   };
 
   // Center location and contact info
-  const centerAddress = settings.address || 'Urganch shahri, Al-Xorazmiy shoh ko‘chasi, 42';
-  const centerPhone = settings.phone || '+998 (71) 200-00-25';
+  const centerAddress = settings.address || 'LUMOS o‘quv markazi';
+  const centerPhone = settings.phone || '+998 95 821 30 01';
   const centerWorkingHours = '08:00 - 20:00 (Dushanba - Shanba)';
 
   return (
@@ -594,56 +593,48 @@ export const LandingPage: React.FC = () => {
             </p>
           </div>
 
-          {/* 4 Big Metrics */}
+          {/* 4 Real Authentic Metrics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center relative z-10 mb-14">
             <div className="p-6 rounded-2xl bg-[#080607]/80 border border-[#D9A93A]/20">
-              <span className="text-3xl sm:text-5xl font-luxury-serif font-black text-[#D9A93A] block">189</span>
-              <span className="text-xs font-bold text-[#F7F4EE] mt-1 block">DTM Maksimal Ball</span>
-              <span className="text-[11px] text-[#A9A3A0]">Davlat granti sohibi</span>
+              <span className="text-3xl sm:text-5xl font-luxury-serif font-black text-[#D9A93A] block">30+</span>
+              <span className="text-xs font-bold text-[#F7F4EE] mt-1 block">Faol O‘quvchi</span>
+              <span className="text-[11px] text-[#A9A3A0]">Sifatli ixcham guruhlar</span>
             </div>
             <div className="p-6 rounded-2xl bg-[#080607]/80 border border-[#D9A93A]/20">
-              <span className="text-3xl sm:text-5xl font-luxury-serif font-black text-[#D9A93A] block">8.0</span>
-              <span className="text-xs font-bold text-[#F7F4EE] mt-1 block">IELTS Band Natija</span>
-              <span className="text-[11px] text-[#A9A3A0]">Cambridge imtihoni</span>
+              <span className="text-3xl sm:text-5xl font-luxury-serif font-black text-[#D9A93A] block">4</span>
+              <span className="text-xs font-bold text-[#F7F4EE] mt-1 block">Professional Ustoz</span>
+              <span className="text-[11px] text-[#A9A3A0]">Matematika & Ingliz tili</span>
             </div>
             <div className="p-6 rounded-2xl bg-[#080607]/80 border border-[#D9A93A]/20">
-              <span className="text-3xl sm:text-5xl font-luxury-serif font-black text-[#D9A93A] block">C1</span>
-              <span className="text-xs font-bold text-[#F7F4EE] mt-1 block">CEFR Xalqaro Daraja</span>
-              <span className="text-[11px] text-[#A9A3A0]">Til bilish sertifikati</span>
+              <span className="text-3xl sm:text-5xl font-luxury-serif font-black text-[#D9A93A] block">2</span>
+              <span className="text-xs font-bold text-[#F7F4EE] mt-1 block">Asosiy Yo‘nalish</span>
+              <span className="text-[11px] text-[#A9A3A0]">Matematika & Ingliz tili</span>
             </div>
             <div className="p-6 rounded-2xl bg-[#080607]/80 border border-[#D9A93A]/20">
-              <span className="text-3xl sm:text-5xl font-luxury-serif font-black text-[#D9A93A] block">95%</span>
-              <span className="text-xs font-bold text-[#F7F4EE] mt-1 block">O‘zlashtirish & Kirish</span>
-              <span className="text-[11px] text-[#A9A3A0]">Nufuzli OTMlarga</span>
+              <span className="text-3xl sm:text-5xl font-luxury-serif font-black text-[#D9A93A] block">100%</span>
+              <span className="text-xs font-bold text-[#F7F4EE] mt-1 block">Individual E’tibor</span>
+              <span className="text-[11px] text-[#A9A3A0]">Har bir o‘quvchiga</span>
             </div>
           </div>
 
-          {/* Before/After Verified Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+          {/* Strictly 2 Verified Results Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto relative z-10">
             {[
               {
-                student: 'Jasur Bekmurodov',
-                faculty: 'Jahon Iqtisodiyoti va Diplomatiya Universiteti (Grant)',
-                before: 'IELTS 5.5',
-                after: 'IELTS 8.0',
-                time: '6 oy o‘qish davri',
-                quote: 'Lumosdagi mock imtihonlar va ustozlarning individual yondashuvi natijani 8.0 ga olib chiqdi.',
+                student: 'Mirjalol Ahmadov',
+                faculty: 'Ingliz tili kursi',
+                before: 'B1 Daraja',
+                after: 'B2 Daraja',
+                time: 'Tasdiqlangan natija',
+                quote: 'Lumosdagi darslar va ustozlarning tizimli yondashuvi evaziga ingliz tili darajam qisqa vaqtda B1 dan B2 ga ko‘tarildi.',
               },
               {
-                student: 'Dildora Ahmedova',
-                faculty: 'Toshkent Davlat Yuridik Universiteti (Grant)',
-                before: 'DTM 58 ball',
-                after: 'DTM 189 ball',
-                time: '8 oy o‘qish davri',
-                quote: 'Aniq fanlar va mantiqiy testlar bo‘yicha mualliflik metodikasi imtihonda 100% ishonch berdi.',
-              },
-              {
-                student: 'Temur Soliyev',
-                faculty: 'EPAM Junior Python Developer',
-                before: 'Noldan boshlagan',
-                after: 'Full Stack Dev',
-                time: '7 oy o‘qish davri',
-                quote: 'Amaliy keyslar va xalqaro startap loyihalarida ishtirok etib, kurs yakunidayoq ishga kirdim.',
+                student: 'Khasanboy Shokhnazarov',
+                faculty: 'Matematika & DTM tayyorlov',
+                before: 'Tayyorgarlik',
+                after: 'DTM Natijasi',
+                time: 'Tasdiqlangan natija',
+                quote: 'Matematika va testlar bilan ishlash strategiyalari imtihonda ishonchli va yuqori natijaga erishishimga yordam berdi.',
               },
             ].map((card, i) => (
               <div
@@ -875,7 +866,7 @@ export const LandingPage: React.FC = () => {
             </div>
 
             <a
-              href="https://maps.google.com"
+              href="https://maps.app.goo.gl/meDFLdKXs5mjVwRWA"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full py-2.5 rounded-2xl border border-[#D9A93A]/40 hover:border-[#D9A93A] bg-[#16090D] text-xs font-bold text-[#F7F4EE] hover:text-[#F3D276] flex items-center justify-center gap-2 transition-all block text-center"
@@ -933,10 +924,15 @@ export const LandingPage: React.FC = () => {
                 <Phone className="h-4 w-4 text-[#D9A93A] shrink-0" />
                 <span>{centerPhone}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-[#D9A93A] shrink-0" />
-                <span>{settings.email || 'admin@lumos.uz'}</span>
-              </div>
+              <a
+                href="https://t.me/Name1ess_King"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 hover:text-[#D9A93A] transition-colors"
+              >
+                <Send className="h-4 w-4 text-[#D9A93A] shrink-0" />
+                <span>Telegram: @Name1ess_King</span>
+              </a>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-[#D9A93A] shrink-0" />
                 <span>{centerWorkingHours}</span>

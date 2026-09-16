@@ -26,7 +26,7 @@ interface DiagnosticTestModalProps {
   onClose: () => void;
 }
 
-type Track = 'math' | 'english' | 'it';
+type Track = 'math' | 'english';
 
 interface Question {
   id: number;
@@ -82,26 +82,6 @@ const QUESTIONS_DATA: Record<'uz' | 'ru' | 'en', Record<Track, Question[]>> = {
         correctIndex: 1,
       },
     ],
-    it: [
-      {
-        id: 1,
-        text: 'HTML da asosiy sahifa eng katta sarlavhasi qaysi teg bilan yoziladi?',
-        options: ['<p>', '<h6>', '<h1>', '<div>'],
-        correctIndex: 2,
-      },
-      {
-        id: 2,
-        text: 'CSS da elementlarni yonma-yon joylashtirish va moslashuvchan qilish uchun nima ishlatiladi?',
-        options: ['display: flex', 'float: none', 'position: static', 'text-align: center'],
-        correctIndex: 0,
-      },
-      {
-        id: 3,
-        text: 'JavaScript da o‘zgarmas qiymatli o‘zgaruvchi qaysi kalit so‘z bilan e’lon qilinadi?',
-        options: ['var', 'let', 'const', 'function'],
-        correctIndex: 2,
-      },
-    ],
   },
   ru: {
     math: [
@@ -149,26 +129,6 @@ const QUESTIONS_DATA: Record<'uz' | 'ru' | 'en', Record<Track, Question[]>> = {
         correctIndex: 1,
       },
     ],
-    it: [
-      {
-        id: 1,
-        text: 'Какой тег в HTML используется для самого крупного заголовка?',
-        options: ['<p>', '<h6>', '<h1>', '<div>'],
-        correctIndex: 2,
-      },
-      {
-        id: 2,
-        text: 'Что используется в CSS для гибкого выравнивания элементов в ряд?',
-        options: ['display: flex', 'float: none', 'position: static', 'text-align: center'],
-        correctIndex: 0,
-      },
-      {
-        id: 3,
-        text: 'Какое ключевое слово используется в JS для объявления неизменяемой константы?',
-        options: ['var', 'let', 'const', 'function'],
-        correctIndex: 2,
-      },
-    ],
   },
   en: {
     math: [
@@ -214,26 +174,6 @@ const QUESTIONS_DATA: Record<'uz' | 'ru' | 'en', Record<Track, Question[]>> = {
         text: 'Which word is the closest in meaning to "meticulous"?',
         options: ['careless', 'thorough and precise', 'slow and lazy', 'loud'],
         correctIndex: 1,
-      },
-    ],
-    it: [
-      {
-        id: 1,
-        text: 'Which HTML tag is used for the largest main heading?',
-        options: ['<p>', '<h6>', '<h1>', '<div>'],
-        correctIndex: 2,
-      },
-      {
-        id: 2,
-        text: 'Which CSS property creates a flexible horizontal layout for elements?',
-        options: ['display: flex', 'float: none', 'position: static', 'text-align: center'],
-        correctIndex: 0,
-      },
-      {
-        id: 3,
-        text: 'Which keyword declares an immutable variable constant in JavaScript?',
-        options: ['var', 'let', 'const', 'function'],
-        correctIndex: 2,
       },
     ],
   },
@@ -430,7 +370,8 @@ export const DiagnosticTestModal: React.FC<DiagnosticTestModalProps> = ({
           ? 'Our foundation courses in arithmetic and algebra will quickly elevate your score to 100%.'
           : 'Arifmetika va formulalar bilan ishlash bo‘yicha poydevor darslarimiz sizga tezda 100% natija beradi.',
       };
-    } else if (selectedTrack === 'english') {
+    } else {
+      // English Track
       if (score >= 2) {
         return {
           level: 'B2 Upper-Intermediate',
@@ -454,20 +395,6 @@ export const DiagnosticTestModal: React.FC<DiagnosticTestModalProps> = ({
           : language === 'en'
           ? 'To build fluency and conversational confidence, we recommend Hasanboy mentor’s General English track.'
           : 'Nutq va ravonlikni rivojlantirish uchun Hasanboy ustozning General English guruhida qatnashishni tavsiya qilamiz.',
-      };
-    } else {
-      return {
-        level: score >= 2 
-          ? (language === 'ru' ? 'Junior Frontend' : language === 'en' ? 'Junior Frontend' : 'Junior Frontend')
-          : (language === 'ru' ? 'Начальный IT' : language === 'en' ? 'Foundational IT' : 'Boshlang‘ich IT'),
-        course: 'Frontend & IT Asoslari',
-        group: 'GRP-01',
-        teacher: 'Mirjalol Rustamov',
-        advice: language === 'ru'
-          ? 'Практические компьютерные уроки позволят вам уже через 6 месяцев создавать реальные сайты и проекты.'
-          : language === 'en'
-          ? 'With hands-on development classes, you will begin building real web applications within 6 months.'
-          : 'Amaliy kompyuter darslarimiz bilan 6 oyda haqiqiy loyihalar yaratishni boshlaysiz.',
       };
     }
   };
@@ -607,7 +534,7 @@ export const DiagnosticTestModal: React.FC<DiagnosticTestModalProps> = ({
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[
                   {
                     id: 'math' as Track,
@@ -622,13 +549,6 @@ export const DiagnosticTestModal: React.FC<DiagnosticTestModalProps> = ({
                     subtitle: t.engSub,
                     icon: 'EN',
                     color: 'from-blue-500/20 to-cyan-500/10 border-blue-500/30 text-blue-500',
-                  },
-                  {
-                    id: 'it' as Track,
-                    title: t.itTitle,
-                    subtitle: t.itSub,
-                    icon: '</>',
-                    color: 'from-emerald-500/20 to-teal-500/10 border-emerald-500/30 text-emerald-500',
                   },
                 ].map((track) => {
                   const isSelected = selectedTrack === track.id;

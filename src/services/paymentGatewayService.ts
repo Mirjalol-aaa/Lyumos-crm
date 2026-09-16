@@ -155,7 +155,7 @@ export function generatePdfReceipt(data: PaymentReceiptData): void {
   doc.setFontSize(7.5);
   doc.setFont('helvetica', 'normal');
   doc.text('Ushbu kvitansiya LUMOS CRM elektron to‘lov tizimi tomonidan avtomatik shakllantirilgan.', 74, 180, { align: 'center' });
-  doc.text('Savollar uchun: +998 (71) 200-00-25 | info@lumos.uz', 74, 186, { align: 'center' });
+  doc.text('Savollar uchun: +998 95 821 30 01 | Telegram: @Name1ess_King', 74, 186, { align: 'center' });
 
   doc.save(`LUMOS_Receipt_${data.transactionId}.pdf`);
 }

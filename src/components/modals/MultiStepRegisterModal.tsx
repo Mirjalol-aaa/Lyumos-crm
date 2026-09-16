@@ -102,7 +102,7 @@ export const MultiStepRegisterModal: React.FC<MultiStepRegisterModalProps> = ({
       if (settings.eskizToken || settings.eskizEmail) {
         sendEskizSms({
           phone: phone.trim(),
-          message: `${settings.centerName || 'LUMOS'}: Hurmatli ${name.trim()}, sizning arizangiz qabul qilindi! Tez orada mutaxassisimiz bog'lanadi. Tel: ${settings.phone || '+998 71 200-00-25'}`,
+          message: `${settings.centerName || 'LUMOS'}: Hurmatli ${name.trim()}, sizning arizangiz qabul qilindi! Tez orada mutaxassisimiz bog'lanadi. Tel: ${settings.phone || '+998 95 821 30 01'}`,
           token: settings.eskizToken,
           email: settings.eskizEmail,
           password: settings.eskizPassword,

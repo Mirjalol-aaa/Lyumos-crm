@@ -60,7 +60,7 @@ export const PaymentFailedPage: React.FC = () => {
 
         <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
           <HelpCircle className="h-3.5 w-3.5" />
-          <span>Yordam uchun: +998 (71) 200-00-25</span>
+          <span>Yordam uchun: +998 95 821 30 01</span>
         </div>
       </div>
     </div>

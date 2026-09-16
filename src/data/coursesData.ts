@@ -71,29 +71,6 @@ export const INITIAL_COURSES: Course[] = [
     outcomes: ['IELTS 7.0–8.0 natijasi', 'Akademik insho yozish mahorati'],
   },
   {
-    id: 'CRS-04',
-    title: 'Frontend & IT Asoslari',
-    category: 'IT & Dasturlash',
-    level: 'Boshlang‘ich (Noldan boshlovchilar uchun)',
-    durationMonths: 6,
-    lessonsCount: 72,
-    pricePerMonth: 380000,
-    activeGroupsCount: 1,
-    description: 'HTML5, CSS3, JavaScript, Tailwind CSS va zamonaviy veb-saytlar hamda ilovalar yaratish amaliy kursi.',
-    instructor: 'Mirjalol Rustamov (Senior Developer)',
-    schedule: 'Sesh - Pay - Shan (18:00 - 20:00)',
-    syllabus: [
-      'HTML5 semantikasi, zamonaviy CSS3 va moslashuvchan Flexbox/Grid',
-      'JavaScript dasturlash asoslari: O‘zgaruvchilar, funksiyalar va DOM',
-      'React.js ga kirish: Komponentlar, holat (State) va interfeyslar',
-      'Git va GitHub bilan jamoaviy ishlash, loyihalarni internetga chiqarish',
-      'Kurs yakunida 3 ta real portfolio loyihasini himoya qilish',
-    ],
-    features: ['Har bir o‘quvchiga kompyuter', 'Haqiqiy loyihalar portfeli', 'Ishga kirishga ko‘mak'],
-    targetAudience: 'IT sohasiga qiziquvchi yoshlar, maktab bitiruvchilari va talabalar',
-    outcomes: ['Mustaqil veb-sayt yarata olish', 'Junior Frontend darajasi'],
-  },
-  {
     id: 'CRS-05',
     title: 'Prezident Maktabiga Tayyorlov',
     category: 'Maktab fanlari',
@@ -103,7 +80,7 @@ export const INITIAL_COURSES: Course[] = [
     pricePerMonth: 280000,
     activeGroupsCount: 1,
     description: 'Prezident, Al-Xorazmiy va ixtisoslashtirilgan maktablar imtihonlariga tanqidiy fikrlash va matematika asosida tayyorgarlik.',
-    instructor: 'Hadicha ustoz & Metodistlar',
+    instructor: 'Hadicha ustoz & Diyorbek ustoz',
     schedule: 'Dush - Chor - Juma (10:00 - 12:00)',
     syllabus: [
       'Mantiqiy masalalar va Critical Thinking testlari',
@@ -126,7 +103,7 @@ export const INITIAL_COURSES: Course[] = [
     pricePerMonth: 320000,
     activeGroupsCount: 1,
     description: 'Davlat oliy ta’lim muassasalariga kirish testlarining majburiy va asosiy mutaxassislik fanlari bo‘yicha intensiv tayyorgarlik.',
-    instructor: 'Hadicha ustoz & Hasanboy ustoz',
+    instructor: 'Diyorbek, Hadicha & Hasanboy ustozlar',
     schedule: 'Dushdan - Shanbagacha (Moslashuvchan grafik)',
     syllabus: [
       'Majburiy fanlar: Ona tili, Matematika, O‘zbekiston tarixi',
@@ -137,7 +114,7 @@ export const INITIAL_COURSES: Course[] = [
     ],
     features: ['Haftada 5 kun dars', 'Har haftalik DTM diagnostikasi', 'Psixologik maslahat'],
     targetAudience: 'Oliy o‘quv yurtlariga davlat granti asosida kirishni maqsad qilganlar',
-    outcomes: ['180+ DTM bali to‘plash', 'Talabalik maqomiga erishish'],
+    outcomes: ['DTM imtihonida yuqori natija', 'Talabalik maqomiga erishish'],
   },
 ];
 
