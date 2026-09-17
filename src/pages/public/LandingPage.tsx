@@ -36,6 +36,7 @@ import { DiagnosticTestModal } from '../../components/modals/DiagnosticTestModal
 import { CourseDetailsModal } from '../../components/modals/CourseDetailsModal';
 import { useI18n } from '../../lib/i18n';
 import { useCRM } from '../../context/CRMContext';
+import { useLMS } from '../../context/LMSContext';
 import { INITIAL_COURSES } from '../../data/coursesData';
 import { Course } from '../../types/admin';
 import aboutAcademyImg from '../../assets/lumos_about_academy.jpg';
@@ -43,6 +44,7 @@ import aboutAcademyImg from '../../assets/lumos_about_academy.jpg';
 export const LandingPage: React.FC = () => {
   const { t, language, setLanguage, formatMoney } = useI18n();
   const { settings } = useCRM();
+  const { currentUser, currentRole } = useLMS();
 
   // Scroll detection & Reading Progress Indicator
   const [isScrolled, setIsScrolled] = useState(false);
@@ -301,12 +303,12 @@ export const LandingPage: React.FC = () => {
 
           {/* Action Tools on Right: Kirish & Ro‘yxatdan o‘tish (Harmonious Button Pair) */}
           <div className="hidden sm:flex items-center gap-3 shrink-0">
-            {/* Secondary CTA: Compact Luxury Glass Login Button */}
+            {/* Secondary CTA: Compact Luxury Glass Login / Kabinet Button */}
             <a
-              href="#/login"
+              href={currentUser ? (currentRole === 'teacher' ? '#/teacher' : currentRole === 'student' ? '#/student-portal' : '#/dashboard') : '#/login'}
               className="h-10 px-5 rounded-full border border-[#D9A83F]/40 bg-[#16090D]/80 hover:bg-[#D9A83F]/15 hover:border-[#F4D27A] hover:shadow-[0_0_15px_rgba(217,168,63,0.3)] hover:-translate-y-[1px] active:translate-y-0 text-xs font-bold text-[#F8F5EF] hover:text-[#FFE7A3] whitespace-nowrap transition-all duration-300 flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.08)] cursor-pointer select-none"
             >
-              Kirish
+              {currentUser ? 'Kabinet' : 'Kirish'}
             </a>
 
             {/* Primary CTA: High-End Gold Registration Button (Guaranteed 1 line) */}
@@ -391,10 +393,11 @@ export const LandingPage: React.FC = () => {
               </button>
 
               <a
-                href="#/login"
+                href={currentUser ? (currentRole === 'teacher' ? '#/teacher' : currentRole === 'student' ? '#/student-portal' : '#/dashboard') : '#/login'}
+                onClick={() => setIsMobileMenuOpen(false)}
                 className="w-full py-2 text-center text-xs font-bold text-[#A9A3A0] hover:text-[#F7F4EE]"
               >
-                Kirish (Login)
+                {currentUser ? 'Kabinetga kirish' : 'Kirish (Login)'}
               </a>
             </div>
           </div>

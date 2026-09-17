@@ -404,89 +404,83 @@ function AppContentRouter() {
     return <PaymentFailedPage />;
   }
 
-  // 2. Explicit Navigation to Public Website / Courses
-  // Allows both visitors and logged in users to browse the public website and course information freely
-  const isExplicitLandingRequested =
-    currentHash.includes('landing') ||
-    currentHash.includes('home') ||
-    currentHash.startsWith('#courses') ||
-    currentHash.startsWith('#teachers') ||
-    currentHash.startsWith('#stats') ||
-    currentHash.startsWith('#reviews') ||
-    currentHash.startsWith('#contact');
+  // 2. Explicit Dedicated Login Pages (ONLY when requested via #/login, #/auth, #/student)
+  const isStudentLoginRequested =
+    currentHash === '#/student' ||
+    currentHash === '#/student-login' ||
+    currentHash.startsWith('#/student-login');
 
-  if (isExplicitLandingRequested) {
-    return (
-      <>
-        <LandingPage />
-        <PwaInstallPrompt />
-      </>
-    );
-  }
+  const isAdminTeacherLoginRequested =
+    currentHash === '#/login' ||
+    currentHash === '#/auth' ||
+    currentHash === '#/signin' ||
+    currentHash === '#/admin-login' ||
+    (currentHash === '#/admin' && !currentUser);
 
-  // 3. Unauthenticated Visitor Flow
   if (!currentUser) {
-    if (currentHash.includes('student')) {
+    if (isStudentLoginRequested) {
       return (
         <StudentLogin
           onSwitchToAdmin={() => {
-            window.location.hash = '#/admin';
+            window.location.hash = '#/login';
           }}
           onBackToHome={() => {
-            window.location.hash = '#/home';
+            window.location.hash = '#/';
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         />
       );
     }
 
-    if (
-      currentHash.includes('admin') ||
-      currentHash.includes('login') ||
-      currentHash.includes('dashboard') ||
-      currentHash.includes('schedule') ||
-      currentHash.includes('attendance') ||
-      currentHash.includes('teachers') ||
-      currentHash.includes('students') ||
-      currentHash.includes('finance') ||
-      currentHash.includes('settings') ||
-      currentHash.includes('applications') ||
-      currentHash.includes('branches') ||
-      currentHash.includes('credentials')
-    ) {
+    if (isAdminTeacherLoginRequested) {
       return (
         <AdminTeacherLogin
           onSwitchToStudent={() => {
             window.location.hash = '#/student';
           }}
           onBackToHome={() => {
-            window.location.hash = '#/home';
+            window.location.hash = '#/';
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         />
       );
     }
+  }
 
-    // Default public landing page at root and #/
+  // 3. Authenticated Internal Portal (ONLY when logged in AND hash starts with portal route)
+  const isPortalRoute =
+    currentHash.startsWith('#/dashboard') ||
+    currentHash.startsWith('#/portal') ||
+    currentHash.startsWith('#/crm') ||
+    currentHash.startsWith('#/erp') ||
+    currentHash.startsWith('#/teacher') ||
+    currentHash.startsWith('#/student-portal') ||
+    (currentHash === '#/admin' && !!currentUser);
+
+  if (currentUser && isPortalRoute) {
     return (
-      <>
-        <LandingPage />
+      <div className="flex flex-col min-h-screen">
+        <div className="flex-1 min-h-0">
+          {currentRole === 'admin' && <AdminPortalContent />}
+          {currentRole === 'teacher' && <TeacherPortalContent />}
+          {currentRole === 'student' && <StudentPortalContent />}
+        </div>
+
+        <Toast />
         <PwaInstallPrompt />
-      </>
+      </div>
     );
   }
 
+  // 4. Default: ALWAYS Render the Public Landing Page (Bosh sahifa)
+  // Regardless of whether user was previously logged in or not,
+  // opening /, #/, #/home, #/landing, #hero, #courses, #teachers, #benefits, etc.
+  // will ALWAYS show the complete LUMOS Landing Page!
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="flex-1 min-h-0">
-        {currentRole === 'admin' && <AdminPortalContent />}
-        {currentRole === 'teacher' && <TeacherPortalContent />}
-        {currentRole === 'student' && <StudentPortalContent />}
-      </div>
-
-      <Toast />
+    <>
+      <LandingPage />
       <PwaInstallPrompt />
-    </div>
+    </>
   );
 }
 

@@ -32,7 +32,7 @@ export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchTo
     if (onBackToHome) {
       onBackToHome();
     } else {
-      window.location.hash = '#/home';
+      window.location.hash = '#/';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
