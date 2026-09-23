@@ -114,7 +114,7 @@ export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchTo
               />
             </div>
             <div className="min-w-0">
-              <span className="text-lg sm:text-xl font-black tracking-tight text-white group-hover:text-amber-400 transition-colors font-serif block">
+              <span className="text-lg sm:text-xl font-black tracking-tight text-white group-hover:text-amber-400 transition-colors font-sans block">
                 LUMOS
               </span>
               <span className="block text-[9px] sm:text-[11px] uppercase tracking-wider text-amber-400 font-extrabold truncate max-w-[130px] xs:max-w-none">

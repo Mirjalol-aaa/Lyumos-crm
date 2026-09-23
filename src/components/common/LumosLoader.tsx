@@ -69,16 +69,16 @@ export const LumosLoader: React.FC<LumosLoaderProps> = ({
 
       {/* Brand Title & Slogan */}
       <div className="text-center space-y-2 relative z-10">
-        <h2 className="text-2xl sm:text-3xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 uppercase drop-shadow font-serif">
+        <h2 className="text-3xl sm:text-4xl font-black tracking-wide text-white uppercase drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)] font-sans">
           LUMOS
         </h2>
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 backdrop-blur-xs">
-          <span className="text-[11px] font-black tracking-wider text-amber-300 uppercase">
-            O‘quv Markazi
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 backdrop-blur-xs">
+          <span className="text-xs font-semibold tracking-wide text-[#E2AC50]">
+            Bilim — kelajak
           </span>
-          <span className="w-1 h-1 rounded-full bg-amber-400" />
-          <span className="text-[10px] font-medium text-amber-200/80 italic">
-            Bilim bilan yorqin kelajakka!
+          <span className="w-1 h-1 rounded-full bg-amber-400/60" />
+          <span className="text-[11px] font-medium text-amber-200/80">
+            O‘quv Markazi
           </span>
         </div>
       </div>
