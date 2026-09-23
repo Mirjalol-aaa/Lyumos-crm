@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLMS } from '../../context/LMSContext';
 import { InteractiveParticles } from '../../components/common/InteractiveParticles';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
-import lumosLogo from '../../assets/lumos-logo.png';
+import lumosLogoMark from '../../assets/branding/lumos-logo-mark.png';
 
 interface StudentLoginProps {
   onSwitchToAdmin: () => void;
@@ -134,9 +134,9 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({ onSwitchToAdmin, onB
           >
             <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-tr from-amber-500/20 via-yellow-500/10 to-amber-300/20 p-1.5 sm:p-2 border border-amber-400/40 shadow-md shadow-amber-500/10 group-hover:scale-105 transition-transform">
               <img
-                src={lumosLogo}
-                alt="LUMOS"
-                className="h-full w-full object-contain filter drop-shadow-sm"
+                src={lumosLogoMark}
+                alt="LUMOS Emblem"
+                className="h-full w-full object-contain filter drop-shadow-[0_2px_8px_rgba(217,166,46,0.35)]"
               />
             </div>
             <div className="min-w-0">

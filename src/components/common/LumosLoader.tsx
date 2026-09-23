@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import lumosLogo from '../../assets/lumos-logo.png';
+import lumosLogoMark from '../../assets/branding/lumos-logo-mark.png';
 
 interface LumosLoaderProps {
   message?: string;
@@ -19,7 +19,7 @@ export const LumosLoader: React.FC<LumosLoaderProps> = ({
           <div className="absolute inset-0 rounded-full border-2 border-amber-500/20 border-t-amber-500 animate-spin" />
           {!hasImgError ? (
             <img
-              src={lumosLogo}
+              src={lumosLogoMark}
               alt="LUMOS"
               onError={() => setHasImgError(true)}
               className="w-3.5 h-3.5 object-contain"
@@ -34,10 +34,10 @@ export const LumosLoader: React.FC<LumosLoaderProps> = ({
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-slate-950 text-white p-6 relative overflow-hidden font-sans select-none z-[9999]">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#070C18] text-white p-6 relative overflow-hidden font-sans select-none z-[9999]">
       {/* Ambient Gold Radial Glow */}
       <div className="absolute w-[500px] h-[500px] rounded-full bg-amber-500/15 blur-[120px] pointer-events-none -translate-y-10 animate-pulse" />
-      
+
       {/* Decorative Gold Grid lines */}
       <div className="absolute inset-0 bg-[radial-gradient(#d4af37_1px,transparent_1px)] [background-size:28px_28px] opacity-15 pointer-events-none" />
 
@@ -45,18 +45,18 @@ export const LumosLoader: React.FC<LumosLoaderProps> = ({
       <div className="relative flex items-center justify-center mb-8">
         {/* Outer Rotating Glowing Ring */}
         <div className="absolute w-44 h-44 rounded-full border border-amber-500/30 border-t-amber-400 border-r-amber-500/60 animate-[spin_7s_linear_infinite]" />
-        
+
         {/* Reverse Rotating Inner Ring */}
         <div className="absolute w-36 h-36 rounded-full border border-dashed border-amber-400/40 border-b-amber-300 animate-[spin_5s_linear_infinite_reverse]" />
-        
+
         {/* Soft Golden Pulsing Halo Backdrop */}
-        <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-gradient-to-tr from-amber-600/30 via-yellow-500/20 to-amber-300/30 backdrop-blur-xl border border-amber-400/50 shadow-[0_0_50px_rgba(212,175,55,0.45)] flex items-center justify-center p-2 animate-pulse overflow-hidden">
+        <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-gradient-to-tr from-amber-600/30 via-yellow-500/20 to-amber-300/30 backdrop-blur-xl border border-amber-400/50 shadow-[0_0_50px_rgba(212,175,55,0.45)] flex items-center justify-center p-3 animate-pulse overflow-hidden">
           {!hasImgError ? (
             <img
-              src={lumosLogo}
+              src={lumosLogoMark}
               alt="LUMOS O'QUV MARKAZI"
               onError={() => setHasImgError(true)}
-              className="w-full h-full object-contain filter drop-shadow-[0_4px_14px_rgba(212,175,55,0.6)]"
+              className="w-full h-full object-contain filter drop-shadow-[0_4px_16px_rgba(212,175,55,0.6)]"
             />
           ) : (
             <div className="flex flex-col items-center justify-center text-center">
@@ -69,7 +69,7 @@ export const LumosLoader: React.FC<LumosLoaderProps> = ({
 
       {/* Brand Title & Slogan */}
       <div className="text-center space-y-2 relative z-10">
-        <h2 className="text-2xl sm:text-3xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 uppercase drop-shadow">
+        <h2 className="text-2xl sm:text-3xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 uppercase drop-shadow font-serif">
           LUMOS
         </h2>
         <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 backdrop-blur-xs">
@@ -95,3 +95,5 @@ export const LumosLoader: React.FC<LumosLoaderProps> = ({
     </div>
   );
 };
+
+export default LumosLoader;

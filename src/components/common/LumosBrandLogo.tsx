@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import lumosLogo from '../../assets/lumos-logo.png';
+import lumosLogoMark from '../../assets/branding/lumos-logo-mark.png';
 
 interface LumosBrandLogoProps {
   className?: string;
@@ -17,22 +17,22 @@ export const LumosBrandLogo: React.FC<LumosBrandLogoProps> = ({
   const [hasError, setHasError] = useState(false);
 
   const sizeClasses = {
-    sm: 'w-7 h-7 rounded-xl p-1',
-    md: 'w-11 h-11 rounded-2xl p-1.5',
-    lg: 'w-16 h-16 rounded-2xl p-2',
-    xl: 'w-24 h-24 rounded-3xl p-3',
+    sm: 'w-7 h-7 rounded-xl p-0.5',
+    md: 'w-11 h-11 rounded-2xl p-1',
+    lg: 'w-16 h-16 rounded-2xl p-1.5',
+    xl: 'w-24 h-24 rounded-3xl p-2.5',
   };
 
   return (
     <div
-      className={`relative flex items-center justify-center bg-gradient-to-tr from-amber-500/20 via-yellow-500/10 to-amber-300/20 border border-amber-400/30 shadow-md shadow-amber-500/10 shrink-0 ${sizeClasses[size]} ${className}`}
+      className={`relative flex items-center justify-center bg-gradient-to-tr from-amber-500/20 via-yellow-500/10 to-amber-300/20 border border-amber-400/30 shadow-md shadow-amber-500/15 shrink-0 select-none overflow-hidden ${sizeClasses[size]} ${className}`}
     >
       {!hasError ? (
         <img
-          src={lumosLogo}
-          alt="LUMOS"
+          src={lumosLogoMark}
+          alt="LUMOS Emblem"
           onError={() => setHasError(true)}
-          className={`h-full w-full object-contain filter drop-shadow-xs transition-transform duration-300 ${imgClassName}`}
+          className={`h-full w-full object-contain filter drop-shadow-[0_2px_8px_rgba(217,166,46,0.35)] transition-transform duration-300 ${imgClassName}`}
         />
       ) : (
         <div className="flex items-center justify-center font-black text-amber-500 font-serif tracking-wider select-none text-xs">
@@ -49,3 +49,5 @@ export const LumosBrandLogo: React.FC<LumosBrandLogoProps> = ({
     </div>
   );
 };
+
+export default LumosBrandLogo;

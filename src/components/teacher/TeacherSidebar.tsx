@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useCRM } from '../../context/CRMContext';
 import { useLMS } from '../../context/LMSContext';
 import { LogoutConfirmModal } from '../modals/LogoutConfirmModal';
-import lumosLogo from '../../assets/lumos-logo.png';
+import lumosLogoMark from '../../assets/branding/lumos-logo-mark.png';
 import {
   LayoutDashboard,
   Video,
@@ -106,9 +106,9 @@ export const TeacherSidebar: React.FC<TeacherSidebarProps> = ({
           >
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500/20 via-yellow-500/10 to-amber-300/20 p-1.5 border border-amber-400/30 shadow-md shadow-amber-500/10 group-hover:scale-105 transition-transform">
               <img
-                src={lumosLogo}
-                alt="LUMOS"
-                className="h-full w-full object-contain filter drop-shadow-sm"
+                src={lumosLogoMark}
+                alt="LUMOS Emblem"
+                className="h-full w-full object-contain filter drop-shadow-[0_2px_8px_rgba(217,166,46,0.35)]"
               />
             </div>
 
