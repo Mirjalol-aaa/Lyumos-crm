@@ -20,6 +20,9 @@ import {
   PaymentMethod,
   AttendanceRecord,
 } from '../types/crm';
+import { Branch, AdminUser } from '../types/admin';
+import { INITIAL_BRANCHES } from '../data/branchesData';
+import { INITIAL_ADMINS } from '../data/adminsData';
 
 import { isSupabaseConfigured } from '../lib/supabase';
 import { migrateSeedDataIfNeeded } from '../services/migrationService';
@@ -323,6 +326,18 @@ interface CRMContextType {
 
     unpaidCount: number;
   };
+
+  // BRANCHES & ADMINS
+  branches: Branch[];
+  admins: AdminUser[];
+  selectedBranchFilter: string;
+  setSelectedBranchFilter: (branchId: string) => void;
+  addBranch: (branch: Omit<Branch, 'id' | 'createdAt'>) => void;
+  updateBranch: (id: string, updated: Partial<Branch>) => void;
+  deleteBranch: (id: string) => void;
+  addAdmin: (admin: Omit<AdminUser, 'id' | 'createdAt'>) => void;
+  updateAdmin: (id: string, updated: Partial<AdminUser>) => void;
+  deleteAdmin: (id: string) => void;
 }
 
 
@@ -351,6 +366,8 @@ export const CRMProvider: React.FC<{
 
   const validPages: PageType[] = [
     'dashboard',
+    'branches',
+    'credentials',
     'students',
     'payments',
     'attendance',
@@ -359,6 +376,15 @@ export const CRMProvider: React.FC<{
     'reports',
     'expenses',
     'settings',
+    'schedule',
+    'homework',
+    'grades',
+    'applications',
+    'teachers_workload',
+    'courses_groups',
+    'students_hub',
+    'finance_payroll',
+    'audit_settings',
   ];
 
 
@@ -598,6 +624,87 @@ export const CRMProvider: React.FC<{
     attendanceRecords,
     setAttendanceRecords,
   ] = useState<AttendanceRecord[]>([]);
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // BRANCHES & ADMINS STATE (SUPER ADMIN)
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const [branches, setBranches] = useState<Branch[]>(() => {
+    try {
+      const saved = localStorage.getItem('lumos_branches_db');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error('Error loading branches from storage', e);
+    }
+    return INITIAL_BRANCHES;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('lumos_branches_db', JSON.stringify(branches));
+    } catch (e) {
+      console.error('Error saving branches to storage', e);
+    }
+  }, [branches]);
+
+  const [admins, setAdmins] = useState<AdminUser[]>(() => {
+    try {
+      const saved = localStorage.getItem('lumos_admins_db');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error('Error loading admins from storage', e);
+    }
+    return INITIAL_ADMINS;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('lumos_admins_db', JSON.stringify(admins));
+    } catch (e) {
+      console.error('Error saving admins to storage', e);
+    }
+  }, [admins]);
+
+  const [selectedBranchFilter, setSelectedBranchFilter] = useState<string>('all');
+
+  const addBranch = useCallback((branchData: Omit<Branch, 'id' | 'createdAt'>) => {
+    const newBranch: Branch = {
+      ...branchData,
+      id: `BR-${Date.now().toString().slice(-4)}`,
+      createdAt: new Date().toISOString().split('T')[0],
+    };
+    setBranches((prev) => [newBranch, ...prev]);
+  }, []);
+
+  const updateBranch = useCallback((id: string, updated: Partial<Branch>) => {
+    setBranches((prev) =>
+      prev.map((b) => (b.id === id ? { ...b, ...updated } : b))
+    );
+  }, []);
+
+  const deleteBranch = useCallback((id: string) => {
+    setBranches((prev) => prev.filter((b) => b.id !== id));
+  }, []);
+
+  const addAdmin = useCallback((adminData: Omit<AdminUser, 'id' | 'createdAt'>) => {
+    const newAdmin: AdminUser = {
+      ...adminData,
+      id: `ADM-${Date.now().toString().slice(-3)}`,
+      createdAt: new Date().toISOString().split('T')[0],
+      lastActive: 'Hozir faol',
+    };
+    setAdmins((prev) => [newAdmin, ...prev]);
+  }, []);
+
+  const updateAdmin = useCallback((id: string, updated: Partial<AdminUser>) => {
+    setAdmins((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, ...updated } : a))
+    );
+  }, []);
+
+  const deleteAdmin = useCallback((id: string) => {
+    setAdmins((prev) => prev.filter((a) => a.id !== id));
+  }, []);
 
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -2164,6 +2271,17 @@ export const CRMProvider: React.FC<{
         setIsAddExpenseModalOpen,
 
         financials,
+
+        branches,
+        admins,
+        selectedBranchFilter,
+        setSelectedBranchFilter,
+        addBranch,
+        updateBranch,
+        deleteBranch,
+        addAdmin,
+        updateAdmin,
+        deleteAdmin,
       }}
     >
       {children}

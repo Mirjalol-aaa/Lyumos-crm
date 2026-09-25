@@ -1,1182 +1,327 @@
-import React, {
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
-
+import React, { useState, useRef, useEffect } from 'react';
 import { useCRM } from '../../context/CRMContext';
-import { useI18n, Language } from '../../lib/i18n';
-
+import { useLMS } from '../../context/LMSContext';
+import { LogoutConfirmModal } from '../modals/LogoutConfirmModal';
 import {
   Search,
   Bell,
-  Plus,
-  CreditCard,
-  PanelLeftOpen,
-  PanelLeftClose,
+  Building2,
+  ChevronDown,
+  Menu,
   Sun,
   Moon,
-  Globe,
-  Command,
+  LogOut,
+  Settings,
+  Shield,
   Check,
-  Menu,
 } from 'lucide-react';
-
 
 interface HeaderProps {
   collapsed: boolean;
-
-  setCollapsed:
-    React.Dispatch<
-      React.SetStateAction<boolean>
-    >;
-
-  onOpenNotifications:
-    () => void;
+  setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
+  onOpenNotifications: () => void;
 }
 
-
-const PAGE_TITLES_BY_LANG: Record<string, Record<Language, string>> = {
-  dashboard: { uz: 'Boshqaruv Markazi', ru: 'Панель управления', en: 'Executive Dashboard' },
-  schedule: { uz: 'Dars Jadvali', ru: 'Расписание занятий', en: 'Class Schedule' },
-  homework: { uz: 'Uy Vazifalari', ru: 'Домашние задания', en: 'Homework & Tasks' },
-  grades: { uz: 'Baholar & Reyting', ru: 'Оценки и Рейтинг', en: 'Grades & Ranking' },
-  applications: { uz: 'Arizalar & Qabul', ru: 'Заявки и Прием', en: 'Applications & Leads' },
-  students_hub: { uz: 'O‘quvchilar Bazasi', ru: 'База студентов', en: 'Students Directory' },
-  teachers_workload: { uz: 'O‘qituvchilar & Yuklama', ru: 'Преподаватели и Нагрузка', en: 'Teachers & Workload' },
-  courses_groups: { uz: 'Guruhlar & Kurslar', ru: 'Группы и Курсы', en: 'Groups & Courses' },
-  attendance: { uz: 'Davomat Nazorati', ru: 'Контроль посещаемости', en: 'Attendance Tracking' },
-  finance_payroll: { uz: 'Moliya & Payroll', ru: 'Финансы и Зарплаты', en: 'Finance & Payroll' },
-  branches: { uz: 'Filiallar Boshqaruvi', ru: 'Управление филиалами', en: 'Branch Network' },
-  credentials: { uz: 'Login & Parollar Boshqaruvi', ru: 'Логины и Пароли', en: 'Credentials Management' },
-  audit_settings: { uz: 'Rollar & Audit Log', ru: 'Роли и Журнал действий', en: 'Roles & Audit Logs' },
-  reports: { uz: 'Tahliliy Hisobotlar', ru: 'Аналитические отчеты', en: 'Analytics & Reports' },
-  expenses: { uz: 'Xarajatlar Nazorati', ru: 'Контроль расходов', en: 'Expenses Registry' },
-  payments: { uz: 'To‘lovlar Tarixi', ru: 'История платежей', en: 'Payments Ledger' },
-  settings: { uz: 'Tizim Sozlamalari', ru: 'Настройки системы', en: 'System Settings' },
-  students: { uz: 'O‘quvchilar', ru: 'Студенты', en: 'Students' },
-  teachers: { uz: 'O‘qituvchilar', ru: 'Учителя', en: 'Teachers' },
-  groups: { uz: 'Guruhlar', ru: 'Группы', en: 'Groups' },
+const PAGE_NAMES: Record<string, string> = {
+  dashboard: 'Dashboard',
+  branches: 'Markazlar Tarmog‘i',
+  credentials: 'Adminlar Boshqaruvi',
+  teachers: 'O‘qituvchilar',
+  students: 'O‘quvchilar Bazasi',
+  groups: 'Guruhlar',
+  payments: 'To‘lovlar & Moliya',
+  reports: 'Tahliliy Hisobotlar',
+  settings: 'Tizim Sozlamalari',
+  teachers_workload: 'O‘qituvchilar & Yuklama',
+  courses_groups: 'Guruhlar & Kurslar',
+  students_hub: 'O‘quvchilar Markazi',
+  finance_payroll: 'Moliya & To‘lovlar',
+  audit_settings: 'Rollar & Audit',
+  schedule: 'Dars Jadvali',
+  homework: 'Uy Vazifalari',
+  grades: 'Baholar',
+  applications: 'Arizalar',
+  expenses: 'Xarajatlar',
 };
 
-export const Header:
-  React.FC<HeaderProps> = ({
-    collapsed,
-    setCollapsed,
-    onOpenNotifications,
-  }) => {
-    const { t, language, setLanguage } = useI18n();
+export const Header: React.FC<HeaderProps> = ({
+  collapsed,
+  setCollapsed,
+  onOpenNotifications,
+}) => {
+  const {
+    activePage,
+    setActivePage,
+    setIsGlobalSearchOpen,
+    notifications,
+    branches,
+    selectedBranchFilter,
+    setSelectedBranchFilter,
+    settings,
+    updateSettings,
+  } = useCRM();
 
-    const {
-      setIsGlobalSearchOpen,
+  const { currentUser } = useLMS();
 
-      notifications,
+  // Dropdown states
+  const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
-      setIsAddStudentModalOpen,
+  const branchRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
 
-      setIsReceivePaymentModalOpen,
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
-      settings,
+  // Keyboard shortcut Ctrl+K
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsGlobalSearchOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [setIsGlobalSearchOpen]);
 
-      updateSettings,
+  // Outside click handler
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (branchRef.current && !branchRef.current.contains(event.target as Node)) {
+        setIsBranchDropdownOpen(false);
+      }
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-      activePage,
-    } = useCRM();
+  const toggleTheme = () => {
+    const newTheme = settings.theme === 'dark' ? 'light' : 'dark';
+    updateSettings({ theme: newTheme });
+  };
 
+  const selectedBranchName =
+    selectedBranchFilter === 'all'
+      ? 'Barcha Markazlar (Tarmoq)'
+      : branches.find((b) => b.id === selectedBranchFilter)?.name || 'Barcha Markazlar';
 
-    const [
-      langMenuOpen,
-      setLangMenuOpen,
-    ] = useState(false);
+  const pageTitle = PAGE_NAMES[activePage] || 'Boshqaruv Paneli';
 
-
-    const languageMenuRef =
-      useRef<HTMLDivElement | null>(
-        null
-      );
-
-
-    const unreadCount =
-      notifications.filter(
-        notification =>
-          !notification.read
-      ).length;
-
-
-    const isMac =
-      typeof navigator !==
-        'undefined' &&
-      /Mac|iPhone|iPad|iPod/i.test(
-        navigator.platform
-      );
-
-
-    // ================================================================
-    // GLOBAL SEARCH SHORTCUT + ESC
-    // ================================================================
-
-    useEffect(() => {
-      const handleKeyDown = (
-        event: KeyboardEvent
-      ) => {
-        if (
-          (
-            event.ctrlKey ||
-            event.metaKey
-          ) &&
-          event.key.toLowerCase() ===
-            'k'
-        ) {
-          event.preventDefault();
-
-          setIsGlobalSearchOpen(
-            true
-          );
-        }
-
-
-        if (
-          event.key ===
-          'Escape'
-        ) {
-          setLangMenuOpen(
-            false
-          );
-        }
-      };
-
-
-      window.addEventListener(
-        'keydown',
-        handleKeyDown
-      );
-
-
-      return () => {
-        window.removeEventListener(
-          'keydown',
-          handleKeyDown
-        );
-      };
-    }, [
-      setIsGlobalSearchOpen,
-    ]);
-
-
-    // ================================================================
-    // CLOSE LANGUAGE MENU ON OUTSIDE CLICK
-    // ================================================================
-
-    useEffect(() => {
-      const handleOutsideClick = (
-        event: MouseEvent
-      ) => {
-        if (
-          !languageMenuRef.current
-        ) {
-          return;
-        }
-
-
-        const target =
-          event.target as Node;
-
-
-        if (
-          !languageMenuRef.current
-            .contains(target)
-        ) {
-          setLangMenuOpen(
-            false
-          );
-        }
-      };
-
-
-      document.addEventListener(
-        'mousedown',
-        handleOutsideClick
-      );
-
-
-      return () => {
-        document.removeEventListener(
-          'mousedown',
-          handleOutsideClick
-        );
-      };
-    }, []);
-
-
-    // ================================================================
-    // SIDEBAR
-    // ================================================================
-
-    const toggleSidebar =
-      () => {
-        setCollapsed(
-          previous =>
-            !previous
-        );
-      };
-
-
-    // ================================================================
-    // THEME
-    // ================================================================
-
-    const toggleTheme =
-      () => {
-        updateSettings({
-          theme:
-            settings.theme ===
-            'dark'
-              ? 'light'
-              : 'dark',
-        });
-      };
-
-
-    return (
-      <header
-        className="
-          sticky
-          top-0
-          z-30
-
-          flex
-          h-[68px]
-          shrink-0
-          items-center
-
-          border-b
-          border-slate-200/70
-
-          bg-white/95
-
-          px-3
-
-          backdrop-blur-xl
-
-          dark:border-white/[0.06]
-          dark:bg-slate-900/95
-
-          sm:px-4
-          lg:px-5
-        "
-      >
-        {/* ============================================================
-            LEFT
-        ============================================================ */}
-
-        <div
-          className="
-            flex
-            min-w-0
-            shrink-0
-            items-center
-            gap-2.5
-
-            sm:gap-3
-          "
-        >
-          {/* SIDEBAR TOGGLE */}
-
+  return (
+    <>
+      <header className="sticky top-0 z-30 flex h-18 shrink-0 items-center justify-between border-b border-slate-200/80 bg-white/85 px-4 backdrop-blur-xl transition-colors dark:border-amber-500/15 dark:bg-[#0D0608]/90 sm:px-6">
+        {/* Left Side: Mobile Menu Button & Breadcrumb */}
+        <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={
-              toggleSidebar
-            }
-            className="
-              group
-
-              flex
-              h-10
-              w-10
-              shrink-0
-
-              cursor-pointer
-              items-center
-              justify-center
-
-              rounded-xl
-
-              border
-              border-transparent
-
-              text-slate-500
-
-              transition-all
-              duration-200
-
-              hover:border-slate-200
-              hover:bg-slate-100
-              hover:text-slate-900
-
-              active:scale-[0.96]
-
-              dark:text-slate-400
-
-              dark:hover:border-slate-700
-              dark:hover:bg-slate-800
-              dark:hover:text-white
-            "
-            title={
-              collapsed
-                ? 'Open sidebar'
-                : 'Close sidebar'
-            }
-            aria-label={
-              collapsed
-                ? 'Open sidebar'
-                : 'Close sidebar'
-            }
+            onClick={() => setCollapsed(!collapsed)}
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-[#9D958C] dark:hover:bg-amber-500/10 dark:hover:text-[#E7B83F] lg:hidden"
+            aria-label="Menyu"
           >
-            {/* MOBILE:
-                only ONE hamburger */}
-
-            <Menu
-              className="
-                h-[19px]
-                w-[19px]
-
-                lg:hidden
-              "
-            />
-
-
-            {/* DESKTOP:
-                clear open / close icon */}
-
-            {collapsed ? (
-              <PanelLeftOpen
-                className="
-                  hidden
-                  h-[19px]
-                  w-[19px]
-
-                  lg:block
-                "
-              />
-            ) : (
-              <PanelLeftClose
-                className="
-                  hidden
-                  h-[19px]
-                  w-[19px]
-
-                  lg:block
-                "
-              />
-            )}
+            <Menu className="h-5 w-5" />
           </button>
 
-
-          {/* PAGE CONTEXT */}
-
-          <div
-            className="
-              flex
-              min-w-0
-              flex-col
-            "
-          >
-            <h1
-              className="
-                max-w-[115px]
-                truncate
-
-                text-xs
-                font-bold
-                tracking-tight
-                text-slate-900
-
-                dark:text-slate-100
-
-                sm:max-w-[160px]
-                sm:text-sm
-                sm:font-semibold
-
-                md:max-w-[200px]
-                md:text-[15px]
-
-                xl:max-w-[280px]
-              "
-            >
-              {PAGE_TITLES_BY_LANG[
-                activePage
-              ]?.[language] ||
-                PAGE_TITLES_BY_LANG[
-                  activePage
-                ]?.uz ||
-                'LUMOS ERP'}
+          <div className="flex flex-col">
+            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 dark:text-[#9D958C]">
+              <span>Lumos Super Admin</span>
+              <span className="text-slate-300 dark:text-amber-500/40">/</span>
+              <span className="text-amber-600 dark:text-[#E7B83F] font-bold">{pageTitle}</span>
+            </div>
+            <h1 className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-[#F8F4EA] sm:text-base">
+              {pageTitle}
             </h1>
-
-
-            <span
-              className="
-                mt-0.5
-
-                hidden
-                truncate
-
-                text-[10px]
-                font-medium
-                text-slate-400
-
-                xl:block
-              "
-            >
-              {t.common.academicYear}{' '}
-              {
-                settings.academicYear
-              }
-            </span>
           </div>
         </div>
 
-
-        {/* ============================================================
-            SEARCH
-        ============================================================ */}
-
-        <div
-          className="
-            mx-4
-            hidden
-            min-w-0
-            max-w-[520px]
-            flex-1
-
-            lg:block
-            xl:mx-6
-          "
-        >
-          <button
-            type="button"
-            onClick={() =>
-              setIsGlobalSearchOpen(
-                true
-              )
-            }
-            className="
-              group
-
-              flex
-              h-11
-              w-full
-
-              cursor-pointer
-              items-center
-              gap-3
-
-              rounded-xl
-
-              border
-              border-slate-200/80
-
-              bg-slate-50
-
-              px-3.5
-
-              text-slate-400
-
-              transition-all
-              duration-200
-
-              hover:border-slate-300
-              hover:bg-white
-              hover:shadow-sm
-
-              dark:border-slate-700/80
-              dark:bg-slate-800/65
-              dark:text-slate-500
-
-              dark:hover:border-slate-600
-              dark:hover:bg-slate-800
-            "
-          >
-            <Search
-              className="
-                h-[17px]
-                w-[17px]
-                shrink-0
-
-                transition-colors
-
-                group-hover:text-[#007AFF]
-              "
-            />
-
-
-            <span
-              className="
-                min-w-0
-                flex-1
-                truncate
-                text-left
-
-                text-[13px]
-                font-medium
-              "
-            >
-              {language === 'en'
-                ? 'Search students, teachers, groups...'
-                : language === 'ru'
-                ? 'Поиск учеников, учителей, групп...'
-                : 'O‘quvchilar, ustozlar, guruhlarni qidirish...'}
-            </span>
-
-
-            <kbd
-              className="
-                hidden
-                shrink-0
-                items-center
-                gap-1
-
-                rounded-md
-
-                border
-                border-slate-200
-
-                bg-white
-
-                px-2
-                py-1
-
-                text-[9px]
-                font-semibold
-                text-slate-400
-
-                shadow-sm
-
-                dark:border-slate-700
-                dark:bg-slate-900
-
-                xl:inline-flex
-              "
-            >
-              {isMac ? (
-                <>
-                  <Command
-                    className="
-                      h-3
-                      w-3
-                    "
-                  />
-
-                  K
-                </>
-              ) : (
-                <>
-                  Ctrl
-
-                  <span
-                    className="
-                      text-slate-300
-
-                      dark:text-slate-600
-                    "
-                  >
-                    +
-                  </span>
-
-                  K
-                </>
-              )}
-            </kbd>
-          </button>
-        </div>
-
-
-        {/* ============================================================
-            RIGHT
-        ============================================================ */}
-
-        <div
-          className="
-            ml-auto
-
-            flex
-            shrink-0
-            items-center
-            gap-1
-
-            sm:gap-1.5
-          "
-        >
-          {/* MOBILE/TABLET SEARCH */}
-
-          <button
-            type="button"
-            onClick={() =>
-              setIsGlobalSearchOpen(
-                true
-              )
-            }
-            className="
-              flex
-              h-10
-              w-10
-              shrink-0
-
-              cursor-pointer
-              items-center
-              justify-center
-
-              rounded-xl
-
-              text-slate-500
-
-              transition-all
-
-              hover:bg-slate-100
-              hover:text-slate-900
-
-              active:scale-[0.96]
-
-              dark:text-slate-400
-              dark:hover:bg-slate-800
-              dark:hover:text-white
-
-              lg:hidden
-            "
-            title="Search"
-            aria-label="Search"
-          >
-            <Search
-              className="
-                h-[18px]
-                w-[18px]
-              "
-            />
-          </button>
-
-
-          {/* RECEIVE PAYMENT */}
-
-          <button
-            type="button"
-            onClick={() =>
-              setIsReceivePaymentModalOpen(
-                true
-              )
-            }
-            className="
-              hidden
-              h-10
-              shrink-0
-
-              cursor-pointer
-              items-center
-              justify-center
-              gap-2
-
-              rounded-xl
-
-              bg-emerald-600
-
-              px-3.5
-
-              text-xs
-              font-semibold
-              text-white
-              whitespace-nowrap
-
-              shadow-md
-              shadow-emerald-600/20
-
-              transition-all
-
-              hover:bg-emerald-700
-              hover:shadow-lg
-              hover:shadow-emerald-600/20
-
-              active:scale-[0.98]
-
-              xl:flex
-            "
-          >
-            <CreditCard
-              className="
-                h-4
-                w-4
-                shrink-0
-              "
-            />
-
-            <span>{t.common.receivePayment}</span>
-          </button>
-
-
-          {/* ADD STUDENT */}
-
-          <button
-            type="button"
-            onClick={() =>
-              setIsAddStudentModalOpen(
-                true
-              )
-            }
-            className="
-              flex
-              h-10
-              shrink-0
-
-              cursor-pointer
-              items-center
-              justify-center
-              gap-2
-
-              rounded-xl
-
-              bg-[#007AFF]
-
-              px-3
-
-              text-xs
-              font-semibold
-              text-white
-              whitespace-nowrap
-
-              shadow-md
-              shadow-blue-500/20
-
-              transition-all
-
-              hover:bg-[#006EE6]
-              hover:shadow-lg
-              hover:shadow-blue-500/20
-
-              active:scale-[0.98]
-
-              md:px-4
-            "
-            title={t.common.addStudent}
-          >
-            <Plus
-              className="
-                h-4
-                w-4
-                shrink-0
-              "
-            />
-
-
-            <span
-              className="
-                hidden
-                md:inline
-                whitespace-nowrap
-              "
-            >
-              {t.common.addStudent}
-            </span>
-          </button>
-
-
-          {/* DIVIDER */}
-
-          <div
-            className="
-              mx-1
-              hidden
-              h-6
-              w-px
-
-              bg-slate-200
-
-              dark:bg-slate-800
-
-              sm:block
-            "
-          />
-
-
-          {/* NOTIFICATIONS */}
-
-          <button
-            type="button"
-            onClick={
-              onOpenNotifications
-            }
-            className="
-              relative
-
-              flex
-              h-10
-              w-10
-              shrink-0
-
-              cursor-pointer
-              items-center
-              justify-center
-
-              rounded-xl
-
-              text-slate-500
-
-              transition-all
-
-              hover:bg-slate-100
-              hover:text-slate-900
-
-              active:scale-[0.96]
-
-              dark:text-slate-400
-
-              dark:hover:bg-slate-800
-              dark:hover:text-white
-            "
-            title="Notifications"
-            aria-label={`Notifications${
-              unreadCount > 0
-                ? `, ${unreadCount} unread`
-                : ''
-            }`}
-          >
-            <Bell
-              className="
-                h-[18px]
-                w-[18px]
-              "
-            />
-
-
-            {unreadCount > 0 && (
-              <span
-                className="
-                  absolute
-                  right-[8px]
-                  top-[7px]
-
-                  h-2.5
-                  w-2.5
-
-                  rounded-full
-
-                  bg-rose-500
-
-                  ring-2
-                  ring-white
-
-                  dark:ring-slate-900
-                "
-              />
-            )}
-          </button>
-
-
-          {/* VIEW MAIN PUBLIC WEBSITE */}
-          <button
-            type="button"
-            onClick={() => {
-              window.location.hash = '#/landing';
-            }}
-            className="
-              hidden
-              sm:flex
-              h-10
-              shrink-0
-              cursor-pointer
-              items-center
-              gap-1.5
-              rounded-xl
-              border
-              border-slate-200/80
-              bg-slate-50
-              px-2.5
-              text-xs
-              font-bold
-              text-slate-600
-              whitespace-nowrap
-              transition-all
-              hover:border-amber-300
-              hover:bg-amber-50
-              hover:text-amber-700
-              dark:border-slate-700/60
-              dark:bg-slate-800
-              dark:text-slate-300
-              dark:hover:bg-slate-700
-              sm:px-3
-            "
-            title="LUMOS Asosiy saytini ko‘rish"
-          >
-            <Globe
-              className="
-                h-4
-                w-4
-                shrink-0
-                text-amber-500
-              "
-            />
-            <span className="hidden sm:inline whitespace-nowrap">
-              {t.common.publicSite}
-            </span>
-          </button>
-
-
-          {/* LANGUAGE (RESPONSIVE ON ALL SCREENS) */}
-
-          <div
-            ref={
-              languageMenuRef
-            }
-            className="
-              relative
-              flex
-            "
-          >
+        {/* Right Side: Branch Filter, Search, Notifications, Theme, Profile */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Branch Filter Switcher */}
+          <div className="relative" ref={branchRef}>
             <button
               type="button"
-              onClick={() =>
-                setLangMenuOpen(
-                  previous =>
-                    !previous
-                )
-              }
-              className={`
-                flex
-                h-10
-
-                cursor-pointer
-                items-center
-                gap-1.5
-
-                rounded-xl
-
-                px-2
-                sm:px-2.5
-
-                text-slate-500
-
-                transition-all
-
-                hover:bg-slate-100
-                hover:text-slate-900
-
-                dark:text-slate-400
-
-                dark:hover:bg-slate-800
-                dark:hover:text-white
-
-                ${
-                  langMenuOpen
-                    ? `
-                      bg-slate-100
-                      text-slate-900
-
-                      dark:bg-slate-800
-                      dark:text-white
-                    `
-                    : ''
-                }
-              `}
-              title={language === 'en' ? 'Language' : language === 'ru' ? 'Язык' : 'Til'}
-              aria-expanded={
-                langMenuOpen
-              }
+              onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
+              className="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-slate-50/70 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:border-amber-500/30 hover:bg-amber-50/40 dark:border-amber-500/20 dark:bg-[#180D12]/80 dark:text-[#D8D0C5] dark:hover:border-amber-500/40 dark:hover:bg-amber-500/10 transition-all cursor-pointer"
+              title="Markazni tanlash"
             >
-              <Globe
-                className="
-                  h-[18px]
-                  w-[18px]
-                "
-              />
-
-
-              <span
-                className="
-                  text-[10px]
-                  font-semibold
-                  uppercase
-                "
-              >
-                {
-                  language
-                }
-              </span>
+              <Building2 className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+              <span className="max-w-[130px] truncate sm:max-w-[180px]">{selectedBranchName}</span>
+              <ChevronDown className="h-3.5 w-3.5 text-slate-400 dark:text-amber-500/60" />
             </button>
 
+            {isBranchDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-64 origin-top-right rounded-2xl border border-slate-200/80 bg-white/95 p-1.5 shadow-2xl backdrop-blur-xl dark:border-amber-500/25 dark:bg-[#1A0E14]/98 dark:shadow-black/70 z-50">
+                <div className="px-3 py-2 border-b border-slate-100 dark:border-amber-500/15">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-amber-500/60">
+                    Markazni Filtrlash
+                  </p>
+                </div>
 
-            {langMenuOpen && (
-              <div
-                className="
-                  absolute
-                  right-0
-                  top-full
-                  z-50
+                <div className="py-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedBranchFilter('all');
+                      setIsBranchDropdownOpen(false);
+                    }}
+                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-all ${
+                      selectedBranchFilter === 'all'
+                        ? 'bg-amber-500/15 text-amber-600 dark:text-[#E7B83F] font-bold'
+                        : 'text-slate-700 hover:bg-slate-100 dark:text-[#D8D0C5] dark:hover:bg-amber-500/10'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <Building2 className="h-3.5 w-3.5 text-amber-500" />
+                      Barcha Markazlar (Tarmoq)
+                    </span>
+                    {selectedBranchFilter === 'all' && <Check className="h-4 w-4 text-[#E7B83F]" />}
+                  </button>
 
-                  mt-2
-                  w-40
-                  sm:w-44
-
-                  overflow-hidden
-
-                  rounded-xl
-
-                  border
-                  border-slate-200
-
-                  bg-white
-
-                  p-1.5
-
-                  shadow-2xl
-                  shadow-slate-900/10
-
-                  dark:border-slate-700
-                  dark:bg-slate-900
-                "
-              >
-                {[
-                  {
-                    code: 'uz',
-                    label:
-                      "O'zbekcha",
-                  },
-                  {
-                    code: 'ru',
-                    label:
-                      'Русский',
-                  },
-                  {
-                    code: 'en',
-                    label:
-                      'English',
-                  },
-                ].map(
-                  langItem => {
-                    const isSelected =
-                      language ===
-                      langItem.code;
-
-
-                    return (
-                      <button
-                        type="button"
-                        key={
-                          langItem.code
-                        }
-                        onClick={() => {
-                          setLanguage(
-                            langItem.code as any
-                          );
-                          updateSettings({
-                            language:
-                              langItem.code as any,
-                          });
-
-
-                          setLangMenuOpen(
-                            false
-                          );
-                        }}
-                        className={`
-                          flex
-                          w-full
-
-                          cursor-pointer
-                          items-center
-                          justify-between
-
-                          rounded-lg
-
-                          px-3
-                          py-2.5
-
-                          text-left
-                          text-xs
-                          font-medium
-
-                          transition-colors
-
-                          ${
-                            isSelected
-                              ? `
-                                bg-blue-50
-                                text-[#007AFF]
-
-                                dark:bg-blue-950/30
-                                dark:text-blue-400
-                              `
-                              : `
-                                text-slate-600
-
-                                hover:bg-slate-100
-                                hover:text-slate-900
-
-                                dark:text-slate-300
-
-                                dark:hover:bg-slate-800
-                                dark:hover:text-white
-                              `
-                          }
-                        `}
-                      >
-                        <span>
-                          {
-                            langItem.label
-                          }
+                  {branches.map((b) => (
+                    <button
+                      key={b.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedBranchFilter(b.id);
+                        setIsBranchDropdownOpen(false);
+                      }}
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-all ${
+                        selectedBranchFilter === b.id
+                          ? 'bg-amber-500/15 text-amber-600 dark:text-[#E7B83F] font-bold'
+                          : 'text-slate-700 hover:bg-slate-100 dark:text-[#D8D0C5] dark:hover:bg-amber-500/10'
+                      }`}
+                    >
+                      <div className="flex flex-col text-left">
+                        <span className="truncate">{b.name}</span>
+                        <span className="text-[10px] text-slate-400 dark:text-[#9D958C] font-normal">
+                          {b.city} • {b.studentCount} o‘quvchi
                         </span>
-
-
-                        {isSelected && (
-                          <Check
-                            className="
-                              h-4
-                              w-4
-                            "
-                          />
-                        )}
-                      </button>
-                    );
-                  }
-                )}
+                      </div>
+                      {selectedBranchFilter === b.id && <Check className="h-4 w-4 text-[#E7B83F] shrink-0" />}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
 
+          {/* Compact Search Trigger */}
+          <button
+            type="button"
+            onClick={() => setIsGlobalSearchOpen(true)}
+            className="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-slate-50/70 px-2.5 py-1.5 text-xs text-slate-500 shadow-2xs hover:border-amber-500/30 hover:bg-slate-100 dark:border-amber-500/20 dark:bg-[#180D12]/80 dark:text-[#9D958C] dark:hover:border-amber-500/40 dark:hover:bg-amber-500/10 transition-all cursor-pointer"
+            title="Qidirish (Ctrl+K)"
+          >
+            <Search className="h-3.5 w-3.5 text-amber-500" />
+            <span className="hidden md:inline text-xs font-medium">Qidiruv...</span>
+            <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded border border-slate-200 px-1 py-0.5 text-[9px] font-mono font-bold text-slate-400 dark:border-amber-500/30 dark:bg-black/30 dark:text-amber-400/80">
+              Ctrl K
+            </kbd>
+          </button>
 
-          {/* THEME (RESPONSIVE ON ALL SCREENS) */}
+          {/* Notifications Trigger */}
+          <button
+            type="button"
+            onClick={onOpenNotifications}
+            className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50/70 text-slate-600 hover:border-amber-500/30 hover:bg-slate-100 dark:border-amber-500/20 dark:bg-[#180D12]/80 dark:text-[#D8D0C5] dark:hover:border-amber-500/40 dark:hover:bg-amber-500/10 transition-all cursor-pointer"
+            title="Bildirishnomalar"
+          >
+            <Bell className="h-4 w-4 text-slate-600 dark:text-[#D8D0C5]" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-black text-white ring-2 ring-white dark:ring-[#0D0608]">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </button>
 
+          {/* Discreet Theme Switcher */}
           <button
             type="button"
             onClick={toggleTheme}
-            className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xl text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900 active:scale-[0.96] dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white overflow-hidden relative"
-            title={
-              settings.theme === 'dark'
-                ? "Yorug' rejimga o'tish"
-                : "Qorong'i rejimga o'tish"
-            }
-            aria-label={
-              settings.theme === 'dark'
-                ? "Yorug' rejimga o'tish"
-                : "Qorong'i rejimga o'tish"
-            }
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50/70 text-slate-500 hover:border-amber-500/30 hover:bg-slate-100 dark:border-amber-500/20 dark:bg-[#180D12]/80 dark:text-[#D8D0C5] dark:hover:border-amber-500/40 dark:hover:bg-amber-500/10 transition-all cursor-pointer"
+            title={settings.theme === 'dark' ? 'Yorug‘ rejim' : 'Qorong‘i rejim'}
           >
-            <span
-              className={`inline-flex items-center justify-center transition-all duration-500 ease-out transform ${
-                settings.theme === 'dark'
-                  ? 'rotate-0 scale-100 opacity-100'
-                  : 'rotate-90 scale-0 opacity-0 absolute'
-              }`}
-            >
-              <Sun className="h-[18px] w-[18px] text-amber-400" />
-            </span>
-            <span
-              className={`inline-flex items-center justify-center transition-all duration-500 ease-out transform ${
-                settings.theme === 'dark'
-                  ? '-rotate-90 scale-0 opacity-0 absolute'
-                  : 'rotate-0 scale-100 opacity-100'
-              }`}
-            >
-              <Moon className="h-[18px] w-[18px]" />
-            </span>
+            {settings.theme === 'dark' ? (
+              <Sun className="h-4 w-4 text-amber-400" />
+            ) : (
+              <Moon className="h-4 w-4 text-slate-600" />
+            )}
           </button>
 
+          {/* Super Admin Profile Pill & Dropdown */}
+          <div className="relative" ref={profileRef}>
+            <button
+              type="button"
+              onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+              className="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-slate-50/70 p-1 pr-2 hover:border-amber-500/30 dark:border-amber-500/20 dark:bg-[#180D12]/80 dark:hover:border-amber-500/40 transition-all cursor-pointer"
+            >
+              <div className="relative flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-tr from-[#5A0B1C] to-[#3A0712] text-[11px] font-bold text-[#E7B83F] border border-amber-500/30">
+                👑
+              </div>
+              <div className="hidden sm:flex flex-col text-left">
+                <span className="text-xs font-black text-slate-800 dark:text-[#F8F4EA] leading-tight">
+                  {currentUser?.name || 'Mirjalol Ahmadov'}
+                </span>
+                <span className="text-[9px] font-semibold text-amber-600 dark:text-[#E7B83F] leading-tight">
+                  Super Admin
+                </span>
+              </div>
+              <ChevronDown className="h-3.5 w-3.5 text-slate-400 dark:text-amber-500/60" />
+            </button>
+
+            {isProfileDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-2xl border border-slate-200/80 bg-white/95 p-1.5 shadow-2xl backdrop-blur-xl dark:border-amber-500/25 dark:bg-[#1A0E14]/98 dark:shadow-black/70 z-50">
+                <div className="px-3 py-2 border-b border-slate-100 dark:border-amber-500/15">
+                  <p className="text-xs font-bold text-slate-900 dark:text-[#F8F4EA]">
+                    {currentUser?.name || 'Mirjalol Ahmadov'}
+                  </p>
+                  <p className="text-[10px] text-slate-400 dark:text-[#9D958C]">
+                    {currentUser?.email || 'admin@lumos.uz'}
+                  </p>
+                  <div className="mt-1 inline-flex items-center gap-1 rounded bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-bold text-amber-600 dark:text-[#E7B83F]">
+                    <Shield className="h-2.5 w-2.5" /> Super Admin
+                  </div>
+                </div>
+
+                <div className="py-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActivePage('settings');
+                      setIsProfileDropdownOpen(false);
+                    }}
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:text-[#D8D0C5] dark:hover:bg-amber-500/10 dark:hover:text-white transition-colors"
+                  >
+                    <Settings className="h-3.5 w-3.5 text-slate-400 dark:text-[#9D958C]" />
+                    Sozlamalar
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsProfileDropdownOpen(false);
+                      setIsLogoutModalOpen(true);
+                    }}
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40 transition-colors"
+                  >
+                    <LogOut className="h-3.5 w-3.5 text-rose-500" />
+                    Tizimdan chiqish
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </header>
-    );
-  };
+
+      {/* Logout Confirmation Modal */}
+      <LogoutConfirmModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+      />
+    </>
+  );
+};

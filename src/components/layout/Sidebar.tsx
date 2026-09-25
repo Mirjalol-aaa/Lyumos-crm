@@ -1,32 +1,24 @@
 import React, { useState } from 'react';
 import { useCRM } from '../../context/CRMContext';
 import { useLMS } from '../../context/LMSContext';
-import { useI18n } from '../../lib/i18n';
 import type { PageType } from '../../types/crm';
 import { LogoutConfirmModal } from '../modals/LogoutConfirmModal';
 import lumosLogoMark from '../../assets/branding/lumos-logo-mark.png';
 import {
   LayoutDashboard,
-  Users,
-  GraduationCap,
-  BookOpen,
   Building2,
-  CalendarCheck2,
-  Calendar,
-  Award,
-  FileText,
-  BookCheck,
   ShieldCheck,
-  KeyRound,
-  BarChart3,
-  Receipt,
-  Wallet,
+  GraduationCap,
+  Users,
+  BookOpen,
   CreditCard,
+  BarChart3,
   Settings,
   ChevronRight,
   LogOut,
   X,
-  Globe,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from 'lucide-react';
 
 interface SidebarNavProps {
@@ -34,23 +26,19 @@ interface SidebarNavProps {
   setCollapsed: (collapsed: boolean) => void;
 }
 
-interface NavGroup {
-  groupTitle: string;
-  items: {
-    id: PageType;
-    label: string;
-    icon: React.ComponentType<{ className?: string }>;
-    badge?: number | string;
-    badgeColor?: string;
-  }[];
+interface MenuItem {
+  id: PageType;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badge?: number | string;
+  badgeColor?: string;
 }
 
 export const Sidebar: React.FC<SidebarNavProps> = ({
   collapsed,
   setCollapsed,
 }) => {
-  const { t, language } = useI18n();
-  const { activePage, setActivePage, students } = useCRM();
+  const { activePage, setActivePage, students, teachers, groups, branches, admins } = useCRM();
   const { currentUser } = useLMS();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
@@ -60,122 +48,64 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
     )
   ).length;
 
-  const navGroups: NavGroup[] = [
+  // STRICTLY 9 CORE SUPER ADMIN ITEMS
+  const menuItems: MenuItem[] = [
     {
-      groupTitle: language === 'en' ? 'MAIN' : language === 'ru' ? 'ОСНОВНОЕ' : 'ASOSIY',
-      items: [
-        {
-          id: 'dashboard',
-          label: t.common.dashboard,
-          icon: LayoutDashboard,
-        },
-      ],
+      id: 'dashboard',
+      label: 'Dashboard',
+      icon: LayoutDashboard,
     },
     {
-      groupTitle: language === 'en' ? 'EDUCATION' : language === 'ru' ? 'ОБУЧЕНИЕ' : 'TA’LIM',
-      items: [
-        {
-          id: 'students_hub',
-          label: t.common.students,
-          icon: Users,
-          badge: students.length,
-          badgeColor: 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300',
-        },
-        {
-          id: 'courses_groups',
-          label: t.common.groups,
-          icon: BookOpen,
-        },
-        {
-          id: 'teachers_workload',
-          label: t.common.teachers,
-          icon: GraduationCap,
-        },
-        {
-          id: 'schedule',
-          label: t.common.schedule,
-          icon: Calendar,
-        },
-        {
-          id: 'attendance',
-          label: t.common.attendance,
-          icon: CalendarCheck2,
-        },
-        {
-          id: 'homework',
-          label: t.common.homework,
-          icon: BookCheck,
-        },
-        {
-          id: 'grades',
-          label: t.common.grades,
-          icon: Award,
-        },
-      ],
+      id: 'branches',
+      label: 'Markazlar',
+      icon: Building2,
+      badge: branches?.length || 5,
+      badgeColor: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20',
     },
     {
-      groupTitle: language === 'en' ? 'FINANCE' : language === 'ru' ? 'ФИНАНСЫ' : 'MOLIYA',
-      items: [
-        {
-          id: 'payments',
-          label: t.common.payments,
-          icon: Receipt,
-          badge: overdueCount > 0 ? (language === 'en' ? `${overdueCount} due` : language === 'ru' ? `${overdueCount} долг` : `${overdueCount} qarz`) : undefined,
-          badgeColor: 'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300',
-        },
-        {
-          id: 'expenses',
-          label: t.common.expenses,
-          icon: Wallet,
-        },
-        {
-          id: 'finance_payroll',
-          label: t.common.payroll,
-          icon: CreditCard,
-        },
-      ],
+      id: 'credentials',
+      label: 'Adminlar',
+      icon: ShieldCheck,
+      badge: admins?.length || 6,
+      badgeColor: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20',
     },
     {
-      groupTitle: 'CRM',
-      items: [
-        {
-          id: 'applications',
-          label: t.common.applications,
-          icon: FileText,
-          badge: language === 'en' ? 'New' : language === 'ru' ? 'Новые' : 'Yangi',
-          badgeColor: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300',
-        },
-      ],
+      id: 'teachers',
+      label: 'O‘qituvchilar',
+      icon: GraduationCap,
+      badge: teachers?.length,
+      badgeColor: 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20',
     },
     {
-      groupTitle: language === 'en' ? 'ANALYTICS' : language === 'ru' ? 'АНАЛИТИКА' : 'TAHLIL',
-      items: [
-        {
-          id: 'reports',
-          label: t.common.reports,
-          icon: BarChart3,
-        },
-      ],
+      id: 'students',
+      label: 'O‘quvchilar',
+      icon: Users,
+      badge: students?.length,
+      badgeColor: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20',
     },
     {
-      groupTitle: language === 'en' ? 'SYSTEM' : language === 'ru' ? 'СИСТЕМА' : 'TIZIM',
-      items: [
-        {
-          id: 'settings',
-          label: t.common.settings,
-          icon: Settings,
-        },
-        {
-          id: 'credentials',
-          label: t.common.credentials,
-          icon: KeyRound,
-        },
-        {
-          id: 'audit_settings',
-          label: t.common.audit,
-          icon: ShieldCheck,
-        },
-      ],
+      id: 'groups',
+      label: 'Guruhlar',
+      icon: BookOpen,
+      badge: groups?.length,
+      badgeColor: 'bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/20',
+    },
+    {
+      id: 'payments',
+      label: 'To‘lovlar',
+      icon: CreditCard,
+      badge: overdueCount > 0 ? `${overdueCount} qarz` : undefined,
+      badgeColor: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/20',
+    },
+    {
+      id: 'reports',
+      label: 'Hisobotlar',
+      icon: BarChart3,
+    },
+    {
+      id: 'settings',
+      label: 'Sozlamalar',
+      icon: Settings,
     },
   ];
 
@@ -188,53 +118,59 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
 
   return (
     <>
+      {/* Mobile Backdrop */}
       {!collapsed && (
         <button
           type="button"
-          aria-label="Close sidebar"
+          aria-label="Sidebar yopish"
           onClick={() => setCollapsed(true)}
-          className="fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-xs lg:hidden"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs lg:hidden"
         />
       )}
 
+      {/* Main Sidebar Drawer */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex h-screen flex-col border-r border-slate-200/80 bg-white/95 backdrop-blur-xl transition-all duration-300 ease-out dark:border-slate-800/80 dark:bg-slate-900/95 lg:relative lg:z-20 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex h-screen flex-col border-r transition-all duration-300 ease-in-out lg:relative lg:z-20 lg:translate-x-0 ${
           collapsed ? '-translate-x-full w-72 lg:w-20 lg:translate-x-0' : 'translate-x-0 w-72 lg:w-64'
-        }`}
+        } border-slate-200/80 bg-white/95 text-slate-800 dark:border-amber-500/15 dark:bg-[#0D0608]/98 dark:text-[#F8F4EA] shadow-xl dark:shadow-2xl dark:shadow-black/70`}
       >
-        {/* Brand Header with Official Lumos Logo */}
-        <div className="flex h-[72px] shrink-0 items-center justify-between border-b border-slate-100 px-4 dark:border-slate-800/60">
-          <button
-            type="button"
-            onClick={() => {
-              window.location.hash = '#/landing';
-            }}
-            className="flex min-w-0 items-center gap-3 overflow-hidden text-left group cursor-pointer"
-            title="LUMOS Asosiy saytiga o‘tish"
-          >
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500/20 via-yellow-500/10 to-amber-300/20 p-1.5 border border-amber-400/30 shadow-md shadow-amber-500/10 group-hover:scale-105 transition-transform">
+        {/* Brand Header */}
+        <div className="flex h-18 shrink-0 items-center justify-between border-b border-slate-100 px-3.5 dark:border-amber-500/15">
+          <div className="flex min-w-0 items-center gap-3 overflow-hidden">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500/20 via-[#3A0712]/40 to-amber-400/20 p-1.5 border border-amber-500/30 shadow-md shadow-amber-500/10">
               <img
                 src={lumosLogoMark}
-                alt="LUMOS Emblem"
+                alt="Lumos Logo"
                 className="h-full w-full object-contain filter drop-shadow-[0_2px_8px_rgba(217,166,46,0.35)]"
               />
             </div>
 
             <div className={`min-w-0 flex-col ${collapsed ? 'lg:hidden' : 'flex'}`}>
               <div className="flex items-center gap-1.5">
-                <span className="text-lg font-black tracking-tight text-slate-900 dark:text-white group-hover:text-amber-600 transition-colors">
+                <span className="text-base font-black tracking-tight text-slate-900 dark:text-[#F8F4EA] font-serif">
                   LUMOS
                 </span>
-                <span className="rounded-full bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-300">
-                  Super Admin
+                <span className="rounded-md bg-amber-500/15 border border-amber-500/30 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider text-amber-700 dark:text-[#E7B83F]">
+                  SUPER ADMIN
                 </span>
               </div>
-              <p className="truncate text-[10px] font-medium text-slate-400">
-                O‘quv Markazi Boshqaruvi
+              <p className="truncate text-[10px] font-medium text-slate-400 dark:text-[#9D958C]">
+                Education CRM/ERP
               </p>
             </div>
+          </div>
+
+          {/* Desktop Toggle Icon */}
+          <button
+            type="button"
+            onClick={() => setCollapsed(!collapsed)}
+            className="hidden lg:flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 dark:text-[#9D958C] dark:hover:bg-amber-500/10 dark:hover:text-[#E7B83F] transition-colors"
+            title={collapsed ? 'Kengaytirish' : 'Yig‘ish'}
+          >
+            {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
           </button>
 
+          {/* Mobile Close Button */}
           <button
             type="button"
             onClick={() => setCollapsed(true)}
@@ -244,99 +180,108 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
           </button>
         </div>
 
-        {/* Scrollable Navigation Items */}
-        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6 scrollbar-thin">
-          {navGroups.map((group) => (
-            <div key={group.groupTitle} className="space-y-1">
-              <p
-                className={`px-3 text-[9px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500 ${
-                  collapsed ? 'lg:hidden' : ''
-                }`}
-              >
-                {group.groupTitle}
-              </p>
+        {/* Navigation Items (Exactly 9 Items) */}
+        <nav className="flex-1 overflow-y-auto px-2.5 py-3.5 space-y-1 scrollbar-thin">
+          <p
+            className={`px-3 pb-1 text-[9px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-amber-500/50 ${
+              collapsed ? 'lg:hidden' : ''
+            }`}
+          >
+            Boshqaruv menyusi
+          </p>
 
-              {group.items.map((item) => {
-                const Icon = item.icon;
-                const isActive = activePage === item.id;
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive =
+              activePage === item.id ||
+              (item.id === 'teachers' && activePage === 'teachers_workload') ||
+              (item.id === 'students' && activePage === 'students_hub') ||
+              (item.id === 'groups' && activePage === 'courses_groups') ||
+              (item.id === 'payments' && activePage === 'finance_payroll') ||
+              (item.id === 'credentials' && activePage === 'audit_settings');
 
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => handleNavigation(item.id)}
-                    title={collapsed ? item.label : undefined}
-                    className={`group relative flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-xs transition-all duration-200 ${
-                      isActive
-                        ? 'bg-amber-600 font-bold text-white shadow-md shadow-amber-600/25 dark:bg-amber-500 dark:text-slate-950'
-                        : 'font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white'
-                    } ${collapsed ? 'lg:justify-center lg:px-0' : ''}`}
-                  >
-                    <Icon
-                      className={`h-4 w-4 shrink-0 transition-all duration-200 ${
-                        isActive ? 'text-white dark:text-slate-950' : 'text-slate-500 group-hover:text-amber-600 dark:text-slate-400'
-                      }`}
-                    />
+            return (
+              <div key={item.id} className="relative group">
+                <button
+                  type="button"
+                  onClick={() => handleNavigation(item.id)}
+                  className={`relative flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-xs transition-all duration-200 ${
+                    isActive
+                      ? 'bg-gradient-to-r from-[#5A0B1C] to-[#3A0712] font-bold text-white shadow-md shadow-black/20 border border-[#D9A62E]/40'
+                      : 'font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-[#D8D0C5] dark:hover:bg-amber-500/10 dark:hover:text-white dark:hover:border dark:hover:border-amber-500/20'
+                  } ${collapsed ? 'lg:justify-center lg:px-0' : ''}`}
+                >
+                  <Icon
+                    className={`h-4.5 w-4.5 shrink-0 transition-colors ${
+                      isActive ? 'text-[#E7B83F]' : 'text-slate-400 group-hover:text-amber-500 dark:text-[#9D958C]'
+                    }`}
+                  />
 
-                    <span className={`min-w-0 flex-1 truncate text-left ${collapsed ? 'lg:hidden' : ''}`}>
-                      {item.label}
+                  <span className={`min-w-0 flex-1 truncate text-left tracking-wide ${collapsed ? 'lg:hidden' : ''}`}>
+                    {item.label}
+                  </span>
+
+                  {item.badge !== undefined && (
+                    <span
+                      className={`min-w-[20px] rounded-md px-1.5 py-0.5 text-center text-[10px] font-bold ${
+                        isActive
+                          ? 'bg-black/30 text-[#FFE29A] border border-amber-500/30'
+                          : item.badgeColor || 'bg-slate-100 dark:bg-amber-500/10 dark:text-amber-300'
+                      } ${collapsed ? 'lg:hidden' : ''}`}
+                    >
+                      {item.badge}
                     </span>
+                  )}
 
+                  {isActive && (
+                    <ChevronRight className={`h-3.5 w-3.5 shrink-0 text-[#E7B83F] ${collapsed ? 'lg:hidden' : ''}`} />
+                  )}
+                </button>
+
+                {/* Tooltip for Collapsed Mode on Desktop */}
+                {collapsed && (
+                  <div className="pointer-events-none fixed left-20 z-50 hidden ml-2.5 -translate-y-1/2 rounded-lg border border-amber-500/25 bg-[#180D12] px-2.5 py-1.5 text-xs font-semibold text-[#F8F4EA] shadow-xl backdrop-blur-md group-hover:lg:block">
+                    {item.label}
                     {item.badge !== undefined && (
-                      <span
-                        className={`min-w-[20px] rounded-full px-1.5 py-0.5 text-center text-[10px] font-bold ${
-                          isActive ? 'bg-white/20 text-white dark:text-slate-950' : item.badgeColor
-                        } ${collapsed ? 'lg:hidden' : ''}`}
-                      >
+                      <span className="ml-1.5 rounded-sm bg-amber-500/20 px-1 py-0.2 text-[9px] text-amber-300">
                         {item.badge}
                       </span>
                     )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </nav>
 
-                    {isActive && (
-                      <ChevronRight className={`h-3.5 w-3.5 shrink-0 text-white/80 dark:text-slate-950/80 ${collapsed ? 'lg:hidden' : ''}`} />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          ))}
-        </div>
-
-        {/* Footer with User Profile and Logout Modal trigger */}
-        <div className="shrink-0 border-t border-slate-100 p-3 dark:border-slate-800/60 space-y-2">
-          {/* Main Website / Public Page Button */}
-          <button
-            type="button"
-            onClick={() => {
-              window.location.hash = '#/landing';
-            }}
-            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-amber-200/80 bg-amber-50/70 py-2 text-xs font-bold text-amber-800 hover:bg-amber-100 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-300 dark:hover:bg-amber-900/60 transition-all shadow-xs"
-            title={t.common.publicSite}
+        {/* Footer with Super Admin Profile */}
+        <div className="shrink-0 border-t border-slate-100 p-3 dark:border-amber-500/15">
+          <div
+            className={`flex items-center gap-3 rounded-2xl border p-2 transition-all ${
+              collapsed ? 'lg:justify-center' : ''
+            } border-slate-200/60 bg-slate-50/80 dark:border-amber-500/20 dark:bg-[#180D12]/80`}
           >
-            <Globe className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
-            <span className={collapsed ? 'lg:hidden' : ''}>{t.common.publicSite}</span>
-          </button>
-
-          <div className={`flex items-center gap-3 rounded-2xl border border-slate-200/60 bg-slate-50/80 p-2.5 dark:border-slate-700/50 dark:bg-slate-800/50 ${collapsed ? 'lg:justify-center' : ''}`}>
-            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-amber-600 to-yellow-500 text-xs font-bold text-white shadow-sm ring-2 ring-amber-500/20">
+            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-[#5A0B1C] to-[#3A0712] text-xs font-bold text-[#E7B83F] shadow-sm border border-amber-500/30">
               👑
-              <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900" />
+              <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-[#0D0608]" />
             </div>
 
-            <div className={`min-w-0 flex-1 ${collapsed ? 'lg:hidden' : ''}`}>
-              <p className="truncate text-xs font-black text-slate-800 dark:text-white">
+            <div className={`min-w-0 flex-1 ${collapsed ? 'lg:hidden' : 'flex flex-col'}`}>
+              <p className="truncate text-xs font-black text-slate-800 dark:text-[#F8F4EA]">
                 {currentUser?.name || 'Mirjalol Ahmadov'}
               </p>
-              <p className="truncate text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                {t.roles.superAdmin} ({currentUser?.email || 'Mirjalol'})
+              <p className="truncate text-[10px] text-slate-500 dark:text-[#9D958C] font-medium">
+                {currentUser?.email || 'admin@lumos.uz'}
               </p>
             </div>
 
             <button
               type="button"
               onClick={() => setIsLogoutModalOpen(true)}
-              title={t.common.logout}
-              className={`rounded-xl p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/50 transition-colors cursor-pointer ${collapsed ? 'lg:hidden' : ''}`}
+              title="Tizimdan chiqish"
+              className={`rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:text-[#9D958C] dark:hover:bg-rose-950/40 dark:hover:text-rose-400 transition-colors cursor-pointer ${
+                collapsed ? 'lg:hidden' : ''
+              }`}
             >
               <LogOut className="h-4 w-4" />
             </button>

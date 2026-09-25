@@ -50,18 +50,18 @@ export const Breadcrumb: React.FC = () => {
   const pageTitle = PAGE_LABELS_BY_LANG[activePage]?.[language] || PAGE_LABELS_BY_LANG[activePage]?.uz || activePage;
 
   return (
-    <nav className="flex items-center gap-2 py-2.5 px-6 text-xs font-medium text-slate-500 dark:text-slate-400 bg-white/70 dark:bg-slate-900/40 border-b border-slate-200/50 dark:border-slate-800/50 backdrop-blur-xs">
+    <nav className="flex items-center gap-2 py-2 px-6 text-xs font-medium text-slate-500 dark:text-[#9D958C] bg-white/40 dark:bg-[#0D0608]/50 border-b border-slate-200/40 dark:border-amber-500/10 backdrop-blur-xs">
       <button 
         onClick={() => setActivePage('dashboard')} 
-        className="flex items-center gap-1.5 hover:text-amber-600 dark:hover:text-amber-400 transition-colors font-bold"
+        className="flex items-center gap-1.5 hover:text-amber-600 dark:hover:text-[#E7B83F] transition-colors font-bold"
       >
-        <Home className="w-3.5 h-3.5" />
+        <Home className="w-3.5 h-3.5 text-amber-500" />
         <span>LUMOS</span>
       </button>
 
-      <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+      <ChevronRight className="w-3.5 h-3.5 text-slate-400 dark:text-amber-500/40 shrink-0" />
 
-      <span className={`${!subLabel ? 'font-black text-slate-900 dark:text-white' : 'hover:text-amber-600 dark:hover:text-amber-400 cursor-pointer'}`}
+      <span className={`${!subLabel ? 'font-bold text-slate-900 dark:text-[#F8F4EA]' : 'hover:text-amber-600 dark:hover:text-[#E7B83F] cursor-pointer'}`}
         onClick={() => subLabel && setActivePage(activePage)}
       >
         {pageTitle}
@@ -69,8 +69,8 @@ export const Breadcrumb: React.FC = () => {
 
       {subLabel && (
         <>
-          <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-          <span className="font-bold text-amber-600 dark:text-amber-400 truncate max-w-[200px]">
+          <ChevronRight className="w-3.5 h-3.5 text-slate-400 dark:text-amber-500/40 shrink-0" />
+          <span className="font-bold text-amber-600 dark:text-[#E7B83F] truncate max-w-[200px]">
             {subLabel}
           </span>
         </>

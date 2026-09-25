@@ -16,3 +16,4 @@ export * from './Pagination';
 export * from './Checkbox';
 export * from './Switch';
 export * from './ConfirmDialog';
+export * from './ActionDropdown';

@@ -1,459 +1,553 @@
 import React, { useState } from 'react';
 import { useCRM } from '../../context/CRMContext';
-import { useLMS } from '../../context/LMSContext';
-import { UserCredential } from '../../data/authCredentials';
+import { AdminUser } from '../../types/admin';
+import { DataTable, Column } from '../../components/ui/DataTable';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
-import { DataTable, Column } from '../../components/ui/DataTable';
+import { Modal } from '../../components/ui/Modal';
+import { Input } from '../../components/ui/Input';
+import { Select } from '../../components/ui/Select';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { ActionDropdown } from '../../components/ui/ActionDropdown';
 import {
-  KeyRound,
+  ShieldCheck,
   Plus,
+  Building2,
+  Phone,
+  Mail,
+  KeyRound,
   Copy,
   Check,
-  Send,
+  Edit2,
   Trash2,
   RefreshCw,
-  ShieldCheck,
-  GraduationCap,
-  Users,
-  X,
+  UserCheck,
+  Clock,
   Sparkles,
+  Lock,
 } from 'lucide-react';
 
 export const AdminCredentialsPage: React.FC = () => {
-  const { teachers, students } = useCRM();
-  const {
-    credentials,
-    addOrUpdateCredential,
-    deleteCredential,
-    generatePassword,
-  } = useLMS();
+  const { admins, addAdmin, updateAdmin, deleteAdmin, branches } = useCRM();
 
-  const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'teacher' | 'student'>('all');
-  const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [sentNoticeId, setSentNoticeId] = useState<string | null>(null);
+  // Modals state
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingAdmin, setEditingAdmin] = useState<AdminUser | null>(null);
+  const [deletingAdminId, setDeletingAdminId] = useState<string | null>(null);
+  const [resettingPasswordAdmin, setResettingPasswordAdmin] = useState<AdminUser | null>(null);
+  const [generatedPassword, setGeneratedPassword] = useState<string>('');
+  const [isCopied, setIsCopied] = useState(false);
 
-  // Modal State
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [targetRole, setTargetRole] = useState<'teacher' | 'student'>('student');
-  const [selectedPersonId, setSelectedPersonId] = useState('');
-  const [loginInput, setLoginInput] = useState('');
-  const [passwordInput, setPasswordInput] = useState('');
-
-  const handleOpenModal = () => {
-    const defaultPerson = targetRole === 'teacher' ? teachers[0] : students[0];
-    setSelectedPersonId(defaultPerson?.id || '');
-    setLoginInput(defaultPerson?.email || '');
-    setPasswordInput(generatePassword());
-    setIsModalOpen(true);
-  };
-
-  const handleRoleChange = (role: 'teacher' | 'student') => {
-    setTargetRole(role);
-    const defaultPerson = role === 'teacher' ? teachers[0] : students[0];
-    setSelectedPersonId(defaultPerson?.id || '');
-    setLoginInput(defaultPerson?.email || '');
-    setPasswordInput(generatePassword());
-  };
-
-  const handlePersonChange = (id: string) => {
-    setSelectedPersonId(id);
-    if (targetRole === 'teacher') {
-      const t = teachers.find(item => item.id === id);
-      if (t) setLoginInput(t.email);
-    } else {
-      const s = students.find(item => item.id === id);
-      if (s) setLoginInput(s.email || `${s.fullName.toLowerCase().replace(/\s+/g, '')}@lumos.uz`);
-    }
-  };
-
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!loginInput || !passwordInput) return;
-
-    let personName = 'Foydalanuvchi';
-    let details = 'Biriktirilgan hisob';
-    let teacherId: string | undefined;
-    let studentId: string | undefined;
-
-    if (targetRole === 'teacher') {
-      const t = teachers.find(item => item.id === selectedPersonId);
-      personName = t?.fullName || 'O‘qituvchi';
-      details = `${t?.subjects.join(', ')} ustozi`;
-      teacherId = selectedPersonId;
-    } else {
-      const s = students.find(item => item.id === selectedPersonId);
-      personName = s?.fullName || 'Talaba';
-      details = `${s?.groupName} guruhi o‘quvchisi`;
-      studentId = selectedPersonId;
-    }
-
-    const newCred: UserCredential = {
-      id: `CRED-${Date.now()}`,
-      role: targetRole,
-      name: personName,
-      login: loginInput.trim().toLowerCase(),
-      password: passwordInput.trim(),
-      details,
-      teacherId,
-      studentId,
-    };
-
-    addOrUpdateCredential(newCred);
-    setIsModalOpen(false);
-  };
-
-  const handleCopy = (cred: UserCredential) => {
-    const text = `Hurmatli ${cred.name}!\nSizning Lumos ta’lim tizimiga kirish ma’lumotlaringiz:\n🌐 Havola: https://lumos.uz\n👤 Login: ${cred.login}\n🔑 Parol: ${cred.password}`;
-    navigator.clipboard.writeText(text);
-    setCopiedId(cred.id);
-    setTimeout(() => setCopiedId(null), 3000);
-  };
-
-  const handleSendTelegramSMS = (cred: UserCredential) => {
-    setSentNoticeId(cred.id);
-    setTimeout(() => setSentNoticeId(null), 3500);
-  };
-
-  const filteredData = credentials.filter(c => {
-    if (roleFilter !== 'all' && c.role !== roleFilter) return false;
-    return true;
+  // Form State
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    phone: '+998',
+    branchId: branches[0]?.id || 'BR-01',
+    role: 'branch_admin' as AdminUser['role'],
+    status: 'active' as AdminUser['status'],
   });
 
-  const columns: Column<UserCredential>[] = [
+  const generateSecurePassword = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%';
+    let pwd = '';
+    for (let i = 0; i < 10; i++) {
+      pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return pwd;
+  };
+
+  const handleOpenAddModal = () => {
+    setFormData({
+      fullName: '',
+      email: '',
+      phone: '+998',
+      branchId: branches[0]?.id || 'BR-01',
+      role: 'branch_admin',
+      status: 'active',
+    });
+    setIsAddModalOpen(true);
+  };
+
+  const handleOpenEditModal = (admin: AdminUser) => {
+    setEditingAdmin(admin);
+    setFormData({
+      fullName: admin.fullName,
+      email: admin.email,
+      phone: admin.phone,
+      branchId: admin.branchId,
+      role: admin.role,
+      status: admin.status,
+    });
+  };
+
+  const handleOpenPasswordReset = (admin: AdminUser) => {
+    const newPass = generateSecurePassword();
+    setGeneratedPassword(newPass);
+    setIsCopied(false);
+    setResettingPasswordAdmin(admin);
+  };
+
+  const handleCopyPassword = () => {
+    navigator.clipboard.writeText(generatedPassword);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2500);
+  };
+
+  const handleSaveAdd = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.fullName.trim() || !formData.email.trim()) return;
+
+    const b = branches.find((item) => item.id === formData.branchId);
+
+    addAdmin({
+      fullName: formData.fullName.trim(),
+      email: formData.email.trim().toLowerCase(),
+      phone: formData.phone.trim(),
+      branchId: formData.branchId,
+      branchName: b?.name || 'Filial',
+      role: formData.role,
+      status: formData.status,
+      lastActive: 'Hozir faol',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&h=120&fit=crop&crop=face',
+    });
+
+    setIsAddModalOpen(false);
+  };
+
+  const handleSaveEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingAdmin || !formData.fullName.trim()) return;
+
+    const b = branches.find((item) => item.id === formData.branchId);
+
+    updateAdmin(editingAdmin.id, {
+      fullName: formData.fullName.trim(),
+      email: formData.email.trim().toLowerCase(),
+      phone: formData.phone.trim(),
+      branchId: formData.branchId,
+      branchName: b?.name || editingAdmin.branchName,
+      role: formData.role,
+      status: formData.status,
+    });
+
+    setEditingAdmin(null);
+  };
+
+  const handleToggleStatus = (admin: AdminUser) => {
+    const newStatus = admin.status === 'active' ? 'inactive' : 'active';
+    updateAdmin(admin.id, { status: newStatus });
+  };
+
+  const handleConfirmDelete = () => {
+    if (deletingAdminId) {
+      deleteAdmin(deletingAdminId);
+      setDeletingAdminId(null);
+    }
+  };
+
+  const columns: Column<AdminUser>[] = [
     {
-      key: 'name',
-      header: 'Foydalanuvchi',
+      key: 'id',
+      header: '№',
+      align: 'center',
+      render: (_, index) => (
+        <span className="text-xs font-bold text-slate-400">
+          {(index ?? 0) + 1}
+        </span>
+      ),
+    },
+    {
+      key: 'fullName',
+      header: 'F.I.O',
       sortable: true,
-      render: (c) => (
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-sm ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700">
-            {c.role === 'admin' ? '👑' : c.role === 'teacher' ? '👨‍🏫' : '👨‍🎓'}
+      render: (a) => (
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-[#5A0B1C] to-[#3A0712] text-xs font-bold text-[#E7B83F] border border-amber-500/30">
+            {a.role === 'super_admin' ? '👑' : a.fullName.charAt(0)}
           </div>
-          <div className="min-w-0">
-            <span className="font-bold text-slate-900 dark:text-white truncate block">
-              {c.name}
+          <div>
+            <span className="font-bold text-slate-900 dark:text-[#F8F4EA] flex items-center gap-1.5">
+              {a.fullName}
+              {a.role === 'super_admin' && (
+                <span className="rounded bg-amber-500/20 px-1 py-0.2 text-[9px] font-black uppercase text-amber-500">
+                  Super
+                </span>
+              )}
             </span>
-            <p className="text-[10px] text-slate-400 truncate">
-              {c.details}
-            </p>
+            <span className="text-[10px] text-slate-400 dark:text-[#9D958C]">
+              {a.role === 'super_admin' ? 'Boshqaruvchi' : 'Filial Admini'}
+            </span>
           </div>
         </div>
       ),
     },
     {
-      key: 'role',
-      header: 'Tizim Roli',
+      key: 'email',
+      header: 'Email / Login',
+      sortable: true,
+      render: (a) => (
+        <span className="text-xs font-semibold text-slate-700 dark:text-[#D8D0C5] flex items-center gap-1.5">
+          <Mail className="h-3 w-3 text-amber-500/70" />
+          {a.email}
+        </span>
+      ),
+    },
+    {
+      key: 'phone',
+      header: 'Telefon',
+      render: (a) => (
+        <span className="text-xs text-slate-600 dark:text-[#D8D0C5] flex items-center gap-1.5">
+          <Phone className="h-3 w-3 text-slate-400" />
+          {a.phone}
+        </span>
+      ),
+    },
+    {
+      key: 'branchName',
+      header: 'Biriktirilgan Markaz',
+      sortable: true,
+      render: (a) => (
+        <span className="rounded-lg bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 text-xs font-bold text-amber-600 dark:text-[#E7B83F] flex items-center gap-1 w-fit">
+          <Building2 className="h-3 w-3 text-amber-500" />
+          {a.branchName}
+        </span>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Status',
       align: 'center',
-      render: (c) => {
-        const variant = c.role === 'admin' ? 'default' : c.role === 'teacher' ? 'purple' : 'success';
-        const label = c.role === 'admin' ? 'Super Admin' : c.role === 'teacher' ? 'Ustoz' : 'Talaba';
-        return <Badge variant={variant as any}>{label}</Badge>;
+      render: (a) => {
+        const isFaol = a.status === 'active';
+        return (
+          <Badge variant={isFaol ? 'success' : 'neutral'} hasDot>
+            {isFaol ? 'Faol' : 'Nofaol'}
+          </Badge>
+        );
       },
     },
     {
-      key: 'login',
-      header: 'Login (Email / Username)',
-      sortable: true,
-      render: (c) => (
-        <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400">
-          {c.login}
+      key: 'lastActive',
+      header: 'Oxirgi Faollik',
+      render: (a) => (
+        <span className="text-xs text-slate-500 dark:text-[#9D958C] flex items-center gap-1">
+          <Clock className="h-3 w-3 text-slate-400" />
+          {a.lastActive}
         </span>
       ),
     },
     {
-      key: 'password',
-      header: 'Maxfiy Parol',
-      render: (c) => (
-        <span className="inline-block rounded-lg bg-slate-100 px-2.5 py-1 font-mono text-xs font-black text-slate-800 dark:bg-slate-800 dark:text-slate-200">
-          {c.password}
-        </span>
-      ),
-    },
-    {
-      key: 'actions',
+      key: 'id' as any,
       header: 'Amallar',
       align: 'right',
-      render: (c) => (
-        <div className="flex items-center justify-end gap-1.5">
-          <Button
-            size="xs"
-            variant="outline"
-            leftIcon={copiedId === c.id ? <Check className="h-3 w-3 text-emerald-600" /> : <Copy className="h-3 w-3" />}
-            onClick={() => handleCopy(c)}
-            title="Login va parolni nusxalash"
-          >
-            {copiedId === c.id ? 'Nusxalandi! ✓' : 'Nusxalash'}
-          </Button>
-
-          <Button
-            size="xs"
-            variant="primary"
-            leftIcon={<Send className="h-3 w-3" />}
-            onClick={() => handleSendTelegramSMS(c)}
-            title="Telegram / SMS orqali yuborish"
-          >
-            {sentNoticeId === c.id ? 'Yuborildi! ✓' : 'SMS / Bot'}
-          </Button>
-
-          {c.role !== 'admin' && (
-            <button
-              type="button"
-              onClick={() => {
-                if (window.confirm(`${c.name} ning kirish ruxsatini o‘chirishni tasdiqlaysizmi?`)) {
-                  deleteCredential(c.id);
-                }
-              }}
-              className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/40 transition-colors"
-              title="Hisobni o‘chirish"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
-          )}
-        </div>
+      render: (a) => (
+        <ActionDropdown
+          items={[
+            {
+              label: 'Tahrirlash',
+              icon: Edit2,
+              onClick: () => handleOpenEditModal(a),
+            },
+            {
+              label: 'Parolni Yangilash',
+              icon: KeyRound,
+              onClick: () => handleOpenPasswordReset(a),
+            },
+            {
+              label: a.status === 'active' ? 'Deaktivatsiya qilish' : 'Faollashtirish',
+              icon: a.status === 'active' ? Lock : UserCheck,
+              variant: a.status === 'active' ? 'warning' : 'success',
+              onClick: () => handleToggleStatus(a),
+            },
+            {
+              label: 'O‘chirish',
+              icon: Trash2,
+              variant: 'danger',
+              disabled: a.role === 'super_admin',
+              onClick: () => setDeletingAdminId(a.id),
+            },
+          ]}
+        />
       ),
     },
   ];
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
-      {/* Top Banner Header */}
+    <div className="space-y-6 p-4 sm:p-6 lg:p-8 min-h-screen bg-[#080406]/30">
+      {/* Top Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <span className="rounded-lg bg-blue-50 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-              Access Control & Credentials
+            <span className="rounded-md bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-[#E7B83F]">
+              Adminlar & Ruxsatlar
             </span>
-            <span className="text-xs text-slate-400">Super Admin Xavfsizlik Paneli</span>
+            <span className="text-xs text-slate-400">Jami {admins.length} ta mas’ul admin</span>
           </div>
-          <h1 className="mt-1 text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-            Login & Parollar Boshqaruvi
+          <h1 className="mt-1 text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-[#F8F4EA] font-serif">
+            Lumos Adminlar Boshqaruvi
           </h1>
-          <p className="text-xs text-slate-500">
-            Faqat Super Admin yangi o‘qituvchi yoki talabaga login/parol yaratadi, nusxalaydi va SMS orqali taqdim etadi.
+          <p className="text-xs text-slate-500 dark:text-[#9D958C]">
+            Filiallar rahbarlari, tizim mas’ullari va ularning kirish hisoblarini xavfsiz boshqarish.
           </p>
         </div>
 
         <Button
           variant="primary"
           leftIcon={<Plus className="h-4 w-4" />}
-          onClick={handleOpenModal}
+          onClick={handleOpenAddModal}
         >
-          Yangi Login & Parol Yaratish
+          Yangi Admin Qo‘shish
         </Button>
       </div>
 
-      {/* Info Card */}
-      <div className="rounded-2xl border border-blue-200/80 bg-blue-50/60 p-4 text-xs dark:border-blue-900/60 dark:bg-blue-950/30 flex items-start gap-3.5 shadow-xs">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-xs">
-          <KeyRound className="h-4 w-4" />
-        </div>
-        <div className="space-y-1">
-          <h4 className="font-bold text-blue-900 dark:text-blue-300">
-            Markaziy Xavfsizlik Qoidasi:
-          </h4>
-          <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
-            Har bir talaba yoki ustoz faqat siz yaratib bergan login/parol orqali o‘z portaliga kirishi mumkin. Tashqi ro‘yxatdan o‘tish yopiq, barcha hisoblar Super Admin orqali nazorat qilinadi.
-          </p>
-        </div>
+      {/* Table Container */}
+      <div className="rounded-2xl border border-amber-500/15 bg-[#12080D]/80 shadow-xl backdrop-blur-xl p-4 sm:p-5">
+        <DataTable
+          data={admins}
+          columns={columns}
+          searchPlaceholder="F.I.O, email yoki markaz bo‘yicha qidiruv..."
+        />
       </div>
 
-      {/* Table with Role Filters */}
-      <DataTable
-        data={filteredData}
-        columns={columns}
-        searchPlaceholder="Ism, login yoki guruh bo‘yicha qidiruv..."
-        filterNode={
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => setRoleFilter('all')}
-              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
-                roleFilter === 'all'
-                  ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
-                  : 'bg-white text-slate-600 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800'
-              }`}
-            >
-              Barchasi ({credentials.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setRoleFilter('teacher')}
-              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
-                roleFilter === 'teacher'
-                  ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/20'
-                  : 'bg-white text-slate-600 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800'
-              }`}
-            >
-              Ustozlar
-            </button>
-            <button
-              type="button"
-              onClick={() => setRoleFilter('student')}
-              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
-                roleFilter === 'student'
-                  ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-500/20'
-                  : 'bg-white text-slate-600 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800'
-              }`}
-            >
-              Talabalar
-            </button>
-            <button
-              type="button"
-              onClick={() => setRoleFilter('admin')}
-              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
-                roleFilter === 'admin'
-                  ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
-                  : 'bg-white text-slate-600 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800'
-              }`}
-            >
-              Admin
-            </button>
+      {/* MODAL: ADD ADMIN */}
+      <Modal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        title="Yangi Admin Qo‘shish"
+        maxWidth="md"
+      >
+        <form onSubmit={handleSaveAdd} className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 dark:text-[#D8D0C5] mb-1">
+              F.I.O *
+            </label>
+            <Input
+              required
+              placeholder="Masalan: Sardorbek Umarov"
+              value={formData.fullName}
+              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+            />
           </div>
-        }
-      />
 
-      {/* CREATE MODAL */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
-                  <KeyRound className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-base font-black text-slate-900 dark:text-white">
-                    Yangi Login & Parol Biriktirish
-                  </h3>
-                  <p className="text-xs text-slate-400">
-                    O‘qituvchi yoki talaba uchun tizimga kirish kalitlarini yarating
-                  </p>
-                </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-[#D8D0C5] mb-1">
+                Email / Login *
+              </label>
+              <Input
+                required
+                type="email"
+                placeholder="s.umarov@lumos.uz"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-[#D8D0C5] mb-1">
+                Telefon Raqami
+              </label>
+              <Input
+                placeholder="+998 (90) 000-00-00"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-[#D8D0C5] mb-1">
+                Biriktiriladigan Markaz *
+              </label>
+              <Select
+                value={formData.branchId}
+                onChange={(e) => setFormData({ ...formData, branchId: e.target.value })}
+              >
+                {branches.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-[#D8D0C5] mb-1">
+                Rol
+              </label>
+              <Select
+                value={formData.role}
+                onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
+              >
+                <option value="branch_admin">Filial Admini</option>
+                <option value="manager">Menejer</option>
+                <option value="super_admin">Super Admin</option>
+              </Select>
+            </div>
+          </div>
+
+          <div className="p-3 rounded-xl border border-amber-500/20 bg-amber-500/5 text-xs text-[#D8D0C5] flex items-start gap-2">
+            <Sparkles className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+            <span>
+              Admin saqlangach, unga xavfsiz vaqtinchalik parol taqdim etiladi. Table ichida ochiq parollar saqlanmaydi.
+            </span>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4 border-t border-slate-200 dark:border-amber-500/20">
+            <Button variant="ghost" type="button" onClick={() => setIsAddModalOpen(false)}>
+              Bekor qilish
+            </Button>
+            <Button variant="primary" type="submit">
+              Adminni saqlash
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* MODAL: EDIT ADMIN */}
+      <Modal
+        isOpen={!!editingAdmin}
+        onClose={() => setEditingAdmin(null)}
+        title="Admin Ma’lumotlarini Tahrirlash"
+        maxWidth="md"
+      >
+        <form onSubmit={handleSaveEdit} className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 dark:text-[#D8D0C5] mb-1">
+              F.I.O *
+            </label>
+            <Input
+              required
+              value={formData.fullName}
+              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-[#D8D0C5] mb-1">
+                Email / Login *
+              </label>
+              <Input
+                required
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-[#D8D0C5] mb-1">
+                Telefon Raqami
+              </label>
+              <Input
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-[#D8D0C5] mb-1">
+                Biriktirilgan Markaz *
+              </label>
+              <Select
+                value={formData.branchId}
+                onChange={(e) => setFormData({ ...formData, branchId: e.target.value })}
+              >
+                {branches.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-[#D8D0C5] mb-1">
+                Status
+              </label>
+              <Select
+                value={formData.status}
+                onChange={(e) =>
+                  setFormData({ ...formData, status: e.target.value as AdminUser['status'] })
+                }
+              >
+                <option value="active">Faol</option>
+                <option value="inactive">Nofaol</option>
+              </Select>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4 border-t border-slate-200 dark:border-amber-500/20">
+            <Button variant="ghost" type="button" onClick={() => setEditingAdmin(null)}>
+              Bekor qilish
+            </Button>
+            <Button variant="primary" type="submit">
+              O‘zgarishlarni saqlash
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* MODAL: RESET PASSWORD (SECURE ONE-TIME REVEAL) */}
+      {resettingPasswordAdmin && (
+        <Modal
+          isOpen={!!resettingPasswordAdmin}
+          onClose={() => setResettingPasswordAdmin(null)}
+          title="Xavfsiz Parolni Tiklash"
+          maxWidth="sm"
+        >
+          <div className="space-y-4">
+            <p className="text-xs text-slate-600 dark:text-[#D8D0C5] leading-relaxed">
+              <strong>{resettingPasswordAdmin.fullName}</strong> uchun yangi xavfsiz vaqtinchalik parol yaratildi. Xavfsizlik maqsadida ushbu parol faqat bir marta ko‘rsatiladi.
+            </p>
+
+            <div className="rounded-xl border border-amber-500/30 bg-[#1A0E14] p-4 flex items-center justify-between">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-[#9D958C]">Yangi Parol:</span>
+                <p className="text-lg font-mono font-black text-[#E7B83F] tracking-wider mt-0.5">
+                  {generatedPassword}
+                </p>
               </div>
 
               <button
                 type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                onClick={handleCopyPassword}
+                className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs font-bold text-[#E7B83F] hover:bg-amber-500/20 transition-all cursor-pointer"
               >
-                <X className="h-5 w-5" />
+                {isCopied ? (
+                  <>
+                    <Check className="h-4 w-4 text-emerald-400" />
+                    <span className="text-emerald-400">Nusxalandi</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4" />
+                    <span>Nusxa olish</span>
+                  </>
+                )}
               </button>
             </div>
 
-            <form onSubmit={handleSave} className="mt-5 space-y-4 text-xs">
-              {/* Role Select */}
-              <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                  Kimga hisob yaratmoqchisiz:
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleRoleChange('teacher')}
-                    className={`rounded-xl p-3 text-center font-bold border transition-all ${
-                      targetRole === 'teacher'
-                        ? 'border-indigo-600 bg-indigo-50/80 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 shadow-xs'
-                        : 'border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    👨‍🏫 O‘qituvchiga (Ustoz)
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleRoleChange('student')}
-                    className={`rounded-xl p-3 text-center font-bold border transition-all ${
-                      targetRole === 'student'
-                        ? 'border-emerald-600 bg-emerald-50/80 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 shadow-xs'
-                        : 'border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    👨‍🎓 O‘quvchiga (Talaba)
-                  </button>
-                </div>
-              </div>
-
-              {/* Person Select */}
-              <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                  {targetRole === 'teacher' ? 'O‘qituvchini tanlang:' : 'Talabani tanlang:'}
-                </label>
-                <select
-                  value={selectedPersonId}
-                  onChange={(e) => handlePersonChange(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 p-2.5 font-bold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:border-blue-500"
-                >
-                  {targetRole === 'teacher'
-                    ? teachers.map(t => (
-                        <option key={t.id} value={t.id}>
-                          {t.fullName} ({t.subjects.join(', ')})
-                        </option>
-                      ))
-                    : students.map(s => (
-                        <option key={s.id} value={s.id}>
-                          {s.fullName} ({s.groupName})
-                        </option>
-                      ))}
-                </select>
-              </div>
-
-              {/* Login Input */}
-              <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                  Login (Email yoki Foydalanuvchi nomi) *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={loginInput}
-                  onChange={(e) => setLoginInput(e.target.value)}
-                  placeholder="masalan: alexander.wright@lumos.uz"
-                  className="w-full rounded-xl border border-slate-200 p-2.5 font-mono text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:border-blue-500"
-                />
-              </div>
-
-              {/* Password Input + Generator */}
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="font-bold text-slate-700 dark:text-slate-300">
-                    Maxfiy Parol *
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setPasswordInput(generatePassword())}
-                    className="flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:underline"
-                  >
-                    <RefreshCw className="h-3 w-3" />
-                    Tasodifiy Parol Yaratish
-                  </button>
-                </div>
-                <input
-                  type="text"
-                  required
-                  value={passwordInput}
-                  onChange={(e) => setPasswordInput(e.target.value)}
-                  placeholder="Parolni kiriting..."
-                  className="w-full rounded-xl border border-slate-200 p-2.5 font-mono text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:border-blue-500"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsModalOpen(false)}
-                >
-                  Bekor qilish
-                </Button>
-                <Button type="submit" variant="primary">
-                  Login & Parolni Saqlash
-                </Button>
-              </div>
-            </form>
+            <div className="flex justify-end pt-3 border-t border-slate-200 dark:border-amber-500/15">
+              <Button variant="primary" onClick={() => setResettingPasswordAdmin(null)}>
+                Tushunarli, yopish
+              </Button>
+            </div>
           </div>
-        </div>
+        </Modal>
       )}
+
+      {/* CONFIRM DELETE MODAL */}
+      <ConfirmDialog
+        isOpen={!!deletingAdminId}
+        onClose={() => setDeletingAdminId(null)}
+        onConfirm={handleConfirmDelete}
+        title="Adminni O‘chirish"
+        message="Haqiqatan ham ushbu adminni o‘chirmoqchimisiz? Ushbu foydalanuvchi tizimga boshqa kira olmaydi."
+        confirmLabel="O‘chirish"
+        variant="danger"
+      />
     </div>
   );
 };

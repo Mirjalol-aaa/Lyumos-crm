@@ -9,7 +9,22 @@ export interface Branch {
   teacherCount: number;
   groupsCount: number;
   monthlyRevenue: number;
-  status: 'Active' | 'Planned' | 'Renovation';
+  status: 'Active' | 'Planned' | 'Renovation' | 'Inactive';
+  createdAt?: string;
+}
+
+export interface AdminUser {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  branchId: string;
+  branchName: string;
+  role: 'super_admin' | 'branch_admin' | 'manager';
+  status: 'active' | 'inactive';
+  lastActive: string;
+  avatar?: string;
+  createdAt: string;
 }
 
 export interface Course {
