@@ -293,84 +293,12 @@ export const ReportsPage:
             lg:justify-between
           "
         >
-          <div
-            className="
-              min-w-0
-            "
-          >
-            <div
-              className="
-                mb-2
-                flex
-                items-center
-                gap-2
-              "
-            >
-              <div
-                className="
-                  flex h-9 w-9
-                  shrink-0
-                  items-center
-                  justify-center
-                  rounded-xl
-                  bg-[#007AFF]/10
-                  text-[#007AFF]
-                "
-              >
-                <BarChart3
-                  className="
-                    h-4 w-4
-                  "
-                />
-              </div>
-
-              <span
-                className="
-                  text-[9px]
-                  font-black
-                  uppercase
-                  tracking-[0.16em]
-                  text-[#007AFF]
-
-                  sm:text-[10px]
-                "
-              >
-                Analytics Center
-              </span>
-            </div>
-
-
-            <h1
-              className="
-                text-xl
-                font-black
-                tracking-tight
-                text-slate-900
-
-                dark:text-white
-
-                sm:text-2xl
-              "
-            >
-              Financial & Academic
-              Analytics Reports
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Hisobot
             </h1>
-
-            <p
-              className="
-                mt-1
-                max-w-2xl
-                text-[11px]
-                leading-relaxed
-                text-slate-500
-
-                sm:text-xs
-              "
-            >
-              Generate executive
-              summaries, revenue
-              exports, PDF statements
-              and audit logs.
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              Markazlar bo‘yicha umumiy hisobotlar
             </p>
           </div>
 

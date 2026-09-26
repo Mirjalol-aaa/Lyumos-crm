@@ -902,95 +902,26 @@ export const TeachersPage:
             sm:justify-between
           "
         >
-          <div
-            className="
-              min-w-0
-            "
-          >
-            <h1
-              className="
-                text-xl
-                font-black
-                tracking-tight
-                text-slate-900
-
-                dark:text-white
-
-                sm:text-2xl
-              "
-            >
-              Teachers & Faculty
-              Roster
-
-              <span
-                className="
-                  ml-2
-                  text-base
-                  font-bold
-                  text-slate-400
-
-                  sm:text-lg
-                "
-              >
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              O‘qituvchilar
+              <span className="ml-2 text-base font-bold text-slate-400 sm:text-lg">
                 ({teachers.length})
               </span>
             </h1>
 
-            <p
-              className="
-                mt-1
-                max-w-2xl
-                text-[11px]
-                leading-relaxed
-                text-slate-500
-
-                sm:text-xs
-              "
-            >
-              Manage instructors,
-              subject specializations,
-              salaries, bonuses and
-              schedules.
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              Lumos tizimidagi o‘qituvchilarni boshqarish
             </p>
           </div>
 
-
           <button
             type="button"
-            onClick={() =>
-              setIsAddTeacherModalOpen(
-                true
-              )
-            }
-            className="
-              flex w-full
-              cursor-pointer
-              items-center
-              justify-center
-              gap-2
-              rounded-xl
-              bg-[#007AFF]
-              px-5 py-2.5
-              text-xs
-              font-bold
-              text-white
-              shadow-lg
-              shadow-blue-500/20
-              transition-all
-
-              hover:bg-blue-600
-              active:scale-[0.98]
-
-              sm:w-auto
-            "
+            onClick={() => setIsAddTeacherModalOpen(true)}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#5A0B1C] px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-[#450815] transition-all cursor-pointer shrink-0"
           >
-            <Plus
-              className="
-                h-4 w-4
-              "
-            />
-
-            Add New Teacher
+            <Plus className="h-4 w-4" />
+            O‘qituvchi qo‘shish
           </button>
         </div>
 

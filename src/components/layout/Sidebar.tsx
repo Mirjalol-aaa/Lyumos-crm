@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useCRM } from '../../context/CRMContext';
-import { useLMS } from '../../context/LMSContext';
 import type { PageType } from '../../types/crm';
-import { LogoutConfirmModal } from '../modals/LogoutConfirmModal';
 import lumosLogoMark from '../../assets/branding/lumos-logo-mark.png';
 import {
   Home,
@@ -14,7 +12,6 @@ import {
   CreditCard,
   BarChart3,
   Settings,
-  ChevronRight,
   Menu,
   X,
   ShieldCheck,
@@ -36,14 +33,12 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
   setCollapsed,
 }) => {
   const { activePage, setActivePage } = useCRM();
-  const { currentUser } = useLMS();
-  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
-  // EXACT 10 ITEMS PER USER INSTRUCTION & REFERENCE IMAGE
+  // EXACT 10 ITEMS PER SPECIFICATION
   const menuItems: MenuItem[] = [
     {
       id: 'dashboard',
-      label: 'Boshqaruv paneli',
+      label: 'Dashboard',
       icon: Home,
     },
     {
@@ -108,13 +103,13 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
 
   return (
     <>
-      {/* Mobile Backdrop */}
+      {/* Mobile Backdrop Overlay (closes drawer on tap) */}
       {!collapsed && (
         <button
           type="button"
           aria-label="Sidebar yopish"
           onClick={() => setCollapsed(true)}
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs lg:hidden"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs lg:hidden transition-opacity"
         />
       )}
 
@@ -126,16 +121,8 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
             : 'translate-x-0 w-72 lg:w-64'
         } border-[#3A0714] bg-[#23040C] text-[#F3D5DC] shadow-2xl overflow-hidden`}
       >
-        {/* Subtle Background Watermark Feather/Leaf */}
-        <div className="pointer-events-none absolute -bottom-10 -left-10 h-72 w-72 opacity-[0.06] text-white">
-          <svg viewBox="0 0 200 200" fill="currentColor">
-            <path d="M40 180 C40 100, 100 40, 180 20 C180 80, 120 160, 40 180 Z" />
-            <path d="M40 180 C80 140, 120 100, 180 20" stroke="currentColor" strokeWidth="4" fill="none" />
-          </svg>
-        </div>
-
         {/* ========================================================================= */}
-        {/* TOP HEADER: COLLAPSED VS EXPANDED UX (SEPARATE HIT TARGETS & CLEAN LAYOUT) */}
+        {/* TOP HEADER: LUMOS LOGO + HAMBURGER (NO OVERLAP, SEPARATE HIT TARGETS)     */}
         {/* ========================================================================= */}
         {!collapsed ? (
           /* EXPANDED HEADER: Logo on left, Hamburger button on right */
@@ -229,8 +216,14 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
           </div>
         )}
 
-        {/* Navigation Items (Exact 10 items) */}
-        <nav className={`flex-1 overflow-y-auto ${collapsed ? 'px-2 py-3 space-y-2' : 'px-3 py-4 space-y-1.5'} scrollbar-none`}>
+        {/* ========================================================================= */}
+        {/* NAVIGATION ITEMS (EXACTLY 10 ITEMS - CLEAN & RESPONSIVE)                  */}
+        {/* ========================================================================= */}
+        <nav
+          className={`flex-1 overflow-y-auto ${
+            collapsed ? 'px-2 py-3 space-y-2' : 'px-3 py-4 space-y-1.5'
+          } scrollbar-none`}
+        >
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive =
@@ -281,59 +274,8 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
           })}
         </nav>
 
-        {/* Bottom Super Admin Profile */}
-        <div className={`shrink-0 ${collapsed ? 'p-2' : 'p-3'} border-t border-white/5`}>
-          {!collapsed ? (
-            /* Expanded Profile Pill */
-            <button
-              type="button"
-              onClick={() => setIsLogoutModalOpen(true)}
-              className="flex w-full items-center gap-3 rounded-2xl border border-white/10 bg-[#350815]/60 p-2.5 hover:bg-[#3D0A18] transition-all cursor-pointer text-left group"
-              title="Super Admin hisobi (Chiqish)"
-            >
-              {/* SA Avatar Circle */}
-              <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#520C1F] text-xs font-black text-white shadow-sm border border-white/15">
-                SA
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-bold text-white leading-tight">
-                  {currentUser?.name || 'Super Admin'}
-                </p>
-                <p className="truncate text-[11px] text-[#D8B4BC] font-normal leading-tight mt-0.5">
-                  {currentUser?.email || 'super@lumos.uz'}
-                </p>
-              </div>
-
-              <ChevronRight className="h-4 w-4 text-[#D8B4BC] shrink-0 group-hover:translate-x-0.5 transition-transform" />
-            </button>
-          ) : (
-            /* Collapsed Profile Avatar with Tooltip */
-            <div className="relative group flex justify-center">
-              <button
-                type="button"
-                onClick={() => setIsLogoutModalOpen(true)}
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-[#520C1F] text-xs font-black text-white shadow-sm border border-white/15 hover:scale-105 transition-transform cursor-pointer"
-                title="Super Admin (Chiqish)"
-                aria-label="Super Admin profili"
-              >
-                SA
-              </button>
-
-              {/* Tooltip on right */}
-              <div className="pointer-events-none fixed left-[96px] z-50 hidden -translate-y-1/2 rounded-lg border border-white/10 bg-[#1D030A] px-3 py-1.5 text-xs font-semibold text-white shadow-xl backdrop-blur-md group-hover:lg:block whitespace-nowrap">
-                {currentUser?.name || 'Super Admin'} ({currentUser?.email || 'super@lumos.uz'}) — Chiqish
-              </div>
-            </div>
-          )}
-        </div>
+        {/* Note: Bottom profile card & decorative watermark completely removed per user request */}
       </aside>
-
-      {/* Logout Confirmation Modal */}
-      <LogoutConfirmModal
-        isOpen={isLogoutModalOpen}
-        onClose={() => setIsLogoutModalOpen(false)}
-      />
     </>
   );
 };

@@ -86,15 +86,11 @@ export const AdminSchedulePage: React.FC = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-700 dark:text-amber-300 mb-2">
-            <CalendarCheck className="h-3.5 w-3.5 text-amber-500" />
-            <span>Akademik Dars Jadvali</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
-            Dars Jadvali & Mashg‘ulotlar
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Darslar
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Matematika va Ingliz tili guruhlarining haftalik va kunlik dars soatlari nazorati
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Darslar va dars jadvalini boshqarish
           </p>
         </div>
 

@@ -8,7 +8,6 @@ import { I18nProvider } from './lib/i18n';
 import { DataLoader } from './components/common/DataLoader';
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
-import { Breadcrumb } from './components/layout/Breadcrumb';
 
 // Public & Payment Pages
 import { LandingPage } from './pages/public/LandingPage';
@@ -147,8 +146,6 @@ function AdminPortalContent() {
           setCollapsed={setCollapsed}
           onOpenNotifications={() => setIsNotificationsOpen(true)}
         />
-
-        {activePage !== 'dashboard' && <Breadcrumb />}
 
         <main className="flex-1 overflow-y-auto scrollbar-thin">
           {renderPage()}

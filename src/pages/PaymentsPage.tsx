@@ -452,80 +452,22 @@ export const PaymentsPage: React.FC = () => {
           sm:justify-between
         "
       >
-        <div
-          className="
-            min-w-0
-          "
-        >
-          <h1
-            className="
-              text-xl
-              font-black
-              tracking-tight
-              text-slate-900
-
-              dark:text-white
-
-              sm:text-2xl
-            "
-          >
-            To‘lovlar Tarixi & Matritsa
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            To‘lovlar
           </h1>
-
-          <p
-            className="
-              mt-1
-              text-[11px]
-              leading-relaxed
-              text-slate-500
-
-              sm:text-xs
-            "
-          >
-            Oylar kesimida oylik to‘lovlar, tushumlar, chegirmalar va kassa holati monitoringi.
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            O‘quvchilar to‘lovlarini boshqarish
           </p>
         </div>
 
-
         <button
           type="button"
-          onClick={() =>
-            openPaymentModal(
-              null,
-              activeMonthFilter
-            )
-          }
-          className="
-            flex w-full
-            cursor-pointer
-            items-center
-            justify-center
-            gap-2
-            rounded-xl
-            bg-emerald-600
-            px-5 py-2.5
-            text-xs
-            font-bold
-            text-white
-            shadow-lg
-            shadow-emerald-600/20
-            transition-all
-
-            hover:bg-emerald-700
-
-            active:scale-[0.98]
-
-            sm:w-auto
-          "
+          onClick={() => openPaymentModal(null, activeMonthFilter)}
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#5A0B1C] px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-[#450815] transition-all cursor-pointer shrink-0"
         >
-          <DollarSign
-            className="
-              h-4 w-4
-              shrink-0
-            "
-          />
-
-          To‘lov Qabul Qilish
+          <DollarSign className="h-4 w-4 shrink-0" />
+          To‘lov qabul qilish
         </button>
       </div>
 

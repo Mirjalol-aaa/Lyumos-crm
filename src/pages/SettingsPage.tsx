@@ -539,43 +539,12 @@ export const SettingsPage:
             sm:justify-between
           "
         >
-          <div
-            className="
-              min-w-0
-            "
-          >
-            <h1
-              className="
-                text-xl
-                font-black
-                tracking-tight
-                text-slate-900
-
-                dark:text-white
-
-                sm:text-2xl
-              "
-            >
-              System Preferences &
-              Center Settings
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Sozlamalar
             </h1>
-
-            <p
-              className="
-                mt-1
-                max-w-2xl
-                text-[11px]
-                leading-relaxed
-                text-slate-500
-
-                sm:text-xs
-              "
-            >
-              Configure center
-              identity, currency,
-              academic periods and
-              notification
-              preferences.
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              Lumos CRM tizimi sozlamalari
             </p>
           </div>
         </div>

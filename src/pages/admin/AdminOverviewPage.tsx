@@ -327,15 +327,11 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         {/* Left Title */}
         <div>
-          <span className="text-[13px] font-medium text-slate-500">
-            Boshqaruv paneli
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2 mt-0.5">
-            Xush kelibsiz, Super Admin
-            <span className="text-2xl">👑</span>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Dashboard
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Lumos ta’lim markazlari boshqaruv paneli
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Lumos tizimining umumiy boshqaruv paneli
           </p>
         </div>
 

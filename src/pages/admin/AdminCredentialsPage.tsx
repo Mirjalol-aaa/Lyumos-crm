@@ -274,35 +274,30 @@ export const AdminCredentialsPage: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 lg:p-8 min-h-screen bg-[#080406]/30">
+    <div className="space-y-6 p-4 sm:p-6 lg:p-8 min-h-screen">
       {/* Top Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="rounded-md bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-[#E7B83F]">
-              Adminlar & Ruxsatlar
-            </span>
-            <span className="text-xs text-slate-400">Jami {admins.length} ta mas’ul admin</span>
-          </div>
-          <h1 className="mt-1 text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-[#F8F4EA] font-serif">
-            Lumos Adminlar Boshqaruvi
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Adminlar
           </h1>
-          <p className="text-xs text-slate-500 dark:text-[#9D958C]">
-            Filiallar rahbarlari, tizim mas’ullari va ularning kirish hisoblarini xavfsiz boshqarish.
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Markaz administratorlarini boshqarish
           </p>
         </div>
 
-        <Button
-          variant="primary"
-          leftIcon={<Plus className="h-4 w-4" />}
+        <button
+          type="button"
           onClick={handleOpenAddModal}
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#5A0B1C] px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-[#450815] transition-all cursor-pointer shrink-0"
         >
-          Yangi Admin Qo‘shish
-        </Button>
+          <Plus className="h-4 w-4" />
+          Admin qo‘shish
+        </button>
       </div>
 
       {/* Table Container */}
-      <div className="rounded-2xl border border-amber-500/15 bg-[#12080D]/80 shadow-xl backdrop-blur-xl p-4 sm:p-5">
+      <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs p-4 sm:p-5 overflow-x-auto">
         <DataTable
           data={admins}
           columns={columns}

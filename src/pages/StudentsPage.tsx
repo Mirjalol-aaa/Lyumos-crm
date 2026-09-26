@@ -401,82 +401,24 @@ export const StudentsPage: React.FC = () => {
           sm:justify-between
         "
       >
-        <div
-          className="
-            min-w-0
-          "
-        >
-          <h1
-            className="
-              text-xl
-              font-black
-              tracking-tight
-              text-slate-900
-
-              dark:text-white
-
-              sm:text-2xl
-            "
-          >
-            Students Directory
-            <span
-              className="
-                ml-2
-                text-base
-                font-bold
-                text-slate-400
-
-                sm:text-lg
-              "
-            >
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            O‘quvchilar
+            <span className="ml-2 text-base font-bold text-slate-400 sm:text-lg">
               ({filteredStudents.length})
             </span>
           </h1>
 
-          <p
-            className="
-              mt-1
-              max-w-2xl
-              text-[11px]
-              leading-relaxed
-              text-slate-500
-
-              sm:text-xs
-            "
-          >
-            Manage student
-            profiles, parent
-            details, group
-            assignments and fee
-            records.
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Barcha o‘quvchilarni boshqarish
           </p>
         </div>
-
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
           <button
             type="button"
             onClick={() => setIsImportStudentsModalOpen(true)}
-            className="
-              flex w-full
-              cursor-pointer
-              items-center
-              justify-center
-              gap-2
-              rounded-xl
-              border border-emerald-500/30
-              bg-emerald-500/10
-              hover:bg-emerald-500/20
-              active:scale-[0.98]
-              px-4 py-2.5
-              text-xs
-              font-bold
-              text-emerald-700
-              dark:text-emerald-300
-              transition-all
-              shadow-sm
-              sm:w-auto
-            "
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 active:scale-[0.98] px-4 py-2.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 transition-all shadow-xs sm:w-auto"
             title="Excel yoki CSV fayldan o‘quvchilarni avtomatik yuklash"
           >
             <FileSpreadsheet className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
@@ -485,40 +427,11 @@ export const StudentsPage: React.FC = () => {
 
           <button
             type="button"
-            onClick={() =>
-              setIsAddStudentModalOpen(
-                true
-              )
-            }
-            className="
-              flex w-full
-              cursor-pointer
-              items-center
-              justify-center
-              gap-2
-              rounded-xl
-              bg-[#007AFF]
-              px-5 py-2.5
-              text-xs
-              font-bold
-              text-white
-              shadow-lg
-              shadow-blue-500/20
-              transition-all
-
-              hover:bg-blue-600
-              active:scale-[0.98]
-
-              sm:w-auto
-            "
+            onClick={() => setIsAddStudentModalOpen(true)}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#5A0B1C] px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-[#450815] transition-all cursor-pointer shrink-0"
           >
-            <Plus
-              className="
-                h-4 w-4
-              "
-            />
-
-            Add New Student
+            <Plus className="h-4 w-4" />
+            O‘quvchi qo‘shish
           </button>
         </div>
       </div>
