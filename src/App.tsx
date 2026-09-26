@@ -137,7 +137,7 @@ function AdminPortalContent() {
 
   return (
     <div
-      className="min-h-screen flex font-sans antialiased selection:bg-amber-600 selection:text-white bg-[#F8F9FA] dark:bg-[#080406] text-slate-900 dark:text-[#F8F4EA]"
+      className="min-h-screen flex font-sans antialiased selection:bg-[#5A0B1C] selection:text-white bg-[#F6F4F2] text-slate-900"
     >
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
@@ -148,7 +148,7 @@ function AdminPortalContent() {
           onOpenNotifications={() => setIsNotificationsOpen(true)}
         />
 
-        <Breadcrumb />
+        {activePage !== 'dashboard' && <Breadcrumb />}
 
         <main className="flex-1 overflow-y-auto scrollbar-thin">
           {renderPage()}
