@@ -187,7 +187,7 @@ export const StudentDashboardPage: React.FC<StudentDashboardPageProps> = ({ onNa
         <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Davomat Ko‘rsatkichi</span>
-            <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
+            <div className="rounded-xl bg-[#FAF0F2] p-2.5 text-[#5A0B1C] dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E]">
               <TrendingUp className="h-5 w-5" />
             </div>
           </div>
@@ -237,7 +237,7 @@ export const StudentDashboardPage: React.FC<StudentDashboardPageProps> = ({ onNa
 
               <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-800/50">
                 <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                  <Award className="h-4 w-4 text-indigo-600" />
+                  <Award className="h-4 w-4 text-[#D9A62E]" />
                   <span className="text-xs font-bold">Fan & O‘qituvchi:</span>
                 </div>
                 <p className="mt-2 text-sm font-bold text-slate-800 dark:text-white">

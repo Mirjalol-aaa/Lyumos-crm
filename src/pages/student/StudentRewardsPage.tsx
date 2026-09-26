@@ -141,7 +141,7 @@ export const StudentRewardsPage: React.FC = () => {
               <div className="mt-5 border-t border-slate-100 pt-4 dark:border-slate-800">
                 <Button
                   size="sm"
-                  variant={canAfford ? 'indigo' : 'secondary'}
+                  variant={canAfford ? 'gold' : 'secondary'}
                   className="w-full"
                   disabled={!canAfford}
                   onClick={() => handleRedeem(reward)}

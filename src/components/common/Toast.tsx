@@ -279,13 +279,13 @@ export const Toast:
 
       info: {
         wrapper:
-          'border-blue-200 bg-white dark:border-blue-900/60 dark:bg-slate-900',
+          'border-[#F0D5DC] bg-white dark:border-[#5A0B1C]/40 dark:bg-slate-900',
 
         iconBox:
-          'bg-blue-100 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400',
+          'bg-[#FAF0F2] text-[#5A0B1C] dark:bg-[#5A0B1C]/30 dark:text-[#D9A62E]',
 
         progress:
-          'bg-blue-500',
+          'bg-[#5A0B1C]',
       },
     } as const;
 

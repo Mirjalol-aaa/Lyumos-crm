@@ -117,7 +117,7 @@ export const TeacherSidebar: React.FC<TeacherSidebarProps> = ({
                 <span className="text-lg font-black tracking-tight text-slate-900 dark:text-white group-hover:text-amber-600 transition-colors">
                   LUMOS
                 </span>
-                <span className="rounded-full bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-300">
+                <span className="rounded-full bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-300">
                   Ustoz
                 </span>
               </div>
@@ -160,13 +160,13 @@ export const TeacherSidebar: React.FC<TeacherSidebarProps> = ({
                   title={collapsed ? item.label : undefined}
                   className={`group relative flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-200 ${
                     isActive
-                      ? 'bg-indigo-600 font-semibold text-white shadow-md shadow-indigo-600/20'
+                      ? 'bg-[#5A0B1C] font-semibold text-white shadow-md shadow-[#5A0B1C]/20'
                       : 'font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white'
                   } ${collapsed ? 'lg:justify-center lg:px-0' : ''}`}
                 >
                   <Icon
                     className={`h-5 w-5 shrink-0 transition-all duration-200 ${
-                      isActive ? 'text-white' : 'text-slate-500 group-hover:text-indigo-600 dark:text-slate-400'
+                      isActive ? 'text-white' : 'text-slate-500 group-hover:text-[#5A0B1C] dark:text-slate-400 dark:group-hover:text-[#D9A62E]'
                     }`}
                   />
 
@@ -201,10 +201,10 @@ export const TeacherSidebar: React.FC<TeacherSidebarProps> = ({
             onClick={() => {
               window.location.hash = '#/landing';
             }}
-            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-indigo-200/80 bg-indigo-50/70 py-2 text-xs font-bold text-indigo-800 hover:bg-indigo-100 dark:border-indigo-900/50 dark:bg-indigo-950/40 dark:text-indigo-300 dark:hover:bg-indigo-900/60 transition-all shadow-xs"
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-amber-200/80 bg-amber-50/70 py-2 text-xs font-bold text-amber-900 hover:bg-amber-100 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-300 dark:hover:bg-amber-900/60 transition-all shadow-xs"
             title="LUMOS Asosiy saytiga o‘tish"
           >
-            <Globe className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+            <Globe className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
             <span className={collapsed ? 'lg:hidden' : ''}>🌐 Asosiy Sayt & Kurslar</span>
           </button>
 
@@ -212,7 +212,7 @@ export const TeacherSidebar: React.FC<TeacherSidebarProps> = ({
             <img
               src={currentTeacher?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250'}
               alt={currentTeacher?.fullName}
-              className="h-9 w-9 rounded-full object-cover ring-2 ring-indigo-500/20"
+              className="h-9 w-9 rounded-full object-cover ring-2 ring-[#5A0B1C]/20 dark:ring-amber-500/20"
             />
 
             <div className={`min-w-0 flex-1 ${collapsed ? 'lg:hidden' : ''}`}>

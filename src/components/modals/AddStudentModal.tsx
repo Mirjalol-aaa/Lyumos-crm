@@ -285,9 +285,9 @@ export const AddStudentModal:
 
       placeholder:text-slate-400
 
-      focus:border-[#007AFF]/50
+      focus:border-[#5A0B1C]/50
       focus:ring-2
-      focus:ring-[#007AFF]/10
+      focus:ring-[#5A0B1C]/10
 
       dark:border-slate-700
       dark:bg-slate-800
@@ -402,10 +402,8 @@ export const AddStudentModal:
                   justify-center
 
                   rounded-xl
-                  bg-blue-50
-                  text-[#007AFF]
-
-                  dark:bg-blue-950/60
+                  bg-[#FAF0F2]
+                  text-[#5A0B1C]
 
                   sm:rounded-2xl
                 "
@@ -615,11 +613,11 @@ export const AddStudentModal:
                               gender ===
                               option
                                 ? `
-                                  border-[#007AFF]
-                                  bg-[#007AFF]
+                                  border-[#5A0B1C]
+                                  bg-[#5A0B1C]
                                   text-white
                                   shadow-sm
-                                  shadow-blue-500/20
+                                  shadow-[#5A0B1C]/20
                                 `
                                 : `
                                   border-slate-200
@@ -877,10 +875,8 @@ export const AddStudentModal:
                         gap-2
 
                         rounded-xl
-                        bg-blue-50/60
+                        bg-[#FAF0F2]
                         p-3
-
-                        dark:bg-blue-950/20
                       "
                     >
                       <div>
@@ -933,7 +929,7 @@ export const AddStudentModal:
                             text-[10px]
                             font-mono
                             font-bold
-                            text-[#007AFF]
+                            text-[#5A0B1C]
                           "
                         >
                           {Number(selectedGroup.monthlyFee).toLocaleString()} so‘m
@@ -1060,7 +1056,7 @@ export const AddStudentModal:
                   gap-2
 
                   rounded-xl
-                  bg-[#007AFF]
+                  bg-[#5A0B1C]
 
                   px-5
                   py-2.5
@@ -1070,11 +1066,11 @@ export const AddStudentModal:
                   text-white
 
                   shadow-lg
-                  shadow-blue-500/20
+                  shadow-[#5A0B1C]/20
 
                   transition-all
 
-                  hover:bg-blue-600
+                  hover:bg-[#450815]
 
                   active:scale-[0.98]
 

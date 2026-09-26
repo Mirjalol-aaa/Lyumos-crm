@@ -548,7 +548,7 @@ export const DiagnosticTestModal: React.FC<DiagnosticTestModalProps> = ({
                     title: t.engTitle,
                     subtitle: t.engSub,
                     icon: 'EN',
-                    color: 'from-blue-500/20 to-cyan-500/10 border-blue-500/30 text-blue-500',
+                    color: 'from-[#5A0B1C]/20 to-[#D9A62E]/10 border-[#5A0B1C]/30 text-[#5A0B1C] dark:text-[#D9A62E]',
                   },
                 ].map((track) => {
                   const isSelected = selectedTrack === track.id;

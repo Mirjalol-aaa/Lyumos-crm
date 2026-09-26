@@ -532,10 +532,9 @@ export const ReportsPage:
                       timeframe ===
                       option
                         ? `
-                          bg-[#007AFF]
+                          bg-[#5A0B1C]
                           text-white
-                          shadow-md
-                          shadow-blue-500/20
+                          shadow-sm
                         `
                         : `
                           text-slate-500

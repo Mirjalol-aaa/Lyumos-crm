@@ -87,7 +87,7 @@ export const AdminAuditSettingsPage: React.FC = () => {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <span className="rounded-lg bg-blue-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+            <span className="rounded-lg bg-[#FAF0F2] px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-[#5A0B1C] dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E] border border-[#F0D5DC] dark:border-[#5A0B1C]/30">
               Security & Governance
             </span>
             <span className="text-xs text-slate-400">RBAC, Audit Log & Xabarnomalar</span>
@@ -105,7 +105,7 @@ export const AdminAuditSettingsPage: React.FC = () => {
           onClick={() => setActiveTab('rbac')}
           className={`rounded-xl px-4 py-2 text-xs font-bold transition-all ${
             activeTab === 'rbac'
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+              ? 'bg-[#5A0B1C] text-white shadow-sm'
               : 'bg-white text-slate-600 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800'
           }`}
         >
@@ -117,7 +117,7 @@ export const AdminAuditSettingsPage: React.FC = () => {
           onClick={() => setActiveTab('audit')}
           className={`rounded-xl px-4 py-2 text-xs font-bold transition-all ${
             activeTab === 'audit'
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+              ? 'bg-[#5A0B1C] text-white shadow-sm'
               : 'bg-white text-slate-600 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800'
           }`}
         >
@@ -129,7 +129,7 @@ export const AdminAuditSettingsPage: React.FC = () => {
           onClick={() => setActiveTab('notifications')}
           className={`rounded-xl px-4 py-2 text-xs font-bold transition-all ${
             activeTab === 'notifications'
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+              ? 'bg-[#5A0B1C] text-white shadow-sm'
               : 'bg-white text-slate-600 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800'
           }`}
         >

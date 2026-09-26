@@ -34,10 +34,10 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             ref={ref}
             id={selectId}
             required={required}
-            className={`h-10 w-full appearance-none rounded-xl border bg-slate-50/60 px-3.5 py-2 pr-9.5 text-xs text-slate-900 shadow-2xs transition-all duration-150 hover:bg-slate-100/60 focus:bg-white focus:outline-none focus:ring-4 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-900/80 dark:hover:bg-slate-900 dark:focus:bg-slate-950 dark:text-slate-100 ${
+            className={`h-10 w-full appearance-none rounded-xl border bg-white px-3.5 py-2 pr-9.5 text-xs text-slate-900 shadow-2xs transition-all duration-150 hover:bg-slate-50/80 focus:bg-white focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-900/80 dark:hover:bg-slate-900 dark:focus:bg-slate-950 dark:text-slate-100 ${
               error
                 ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/15 dark:border-rose-600'
-                : 'border-slate-200/90 focus:border-amber-500 focus:ring-amber-500/15 dark:border-slate-800 dark:focus:border-amber-500'
+                : 'border-slate-200/90 focus:border-[#5A0B1C] focus:ring-[#5A0B1C]/15 dark:border-slate-800 dark:focus:border-[#5A0B1C]'
             } ${className}`}
             {...props}
           >

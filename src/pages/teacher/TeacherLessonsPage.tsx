@@ -82,7 +82,7 @@ export const TeacherLessonsPage: React.FC = () => {
         <button
           type="button"
           onClick={() => setIsAddModalOpen(true)}
-          className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 transition-all hover:bg-indigo-700 active:scale-95"
+          className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#5A0B1C] px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-[#5A0B1C]/20 transition-all hover:bg-[#450815] active:scale-95"
         >
           <Plus className="h-4 w-4" />
           Yangi Dars Qo‘shish
@@ -103,7 +103,7 @@ export const TeacherLessonsPage: React.FC = () => {
                 onClick={() => setSelectedGroupId(group.id)}
                 className={`flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all ${
                   isSelected
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                    ? 'bg-[#5A0B1C] text-white shadow-md shadow-[#5A0B1C]/20'
                     : 'bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800'
                 }`}
               >
@@ -127,7 +127,7 @@ export const TeacherLessonsPage: React.FC = () => {
       {/* Lessons Timeline List */}
       {filteredLessons.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FAF0F2] text-[#5A0B1C] dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E]">
             <Video className="h-7 w-7" />
           </div>
           <h3 className="mt-4 text-base font-bold text-slate-800 dark:text-white">
@@ -139,7 +139,7 @@ export const TeacherLessonsPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsAddModalOpen(true)}
-            className="mt-5 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-indigo-700"
+            className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#5A0B1C] px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#450815]"
           >
             <Plus className="h-4 w-4" />
             Dars Qo‘shish
@@ -154,7 +154,7 @@ export const TeacherLessonsPage: React.FC = () => {
             >
               <div className="flex items-start gap-4">
                 {/* Lesson number badge */}
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 font-black text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#FAF0F2] font-black text-[#5A0B1C] dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E]">
                   #{lesson.lessonNumber || index + 1}
                 </div>
 
@@ -193,7 +193,7 @@ export const TeacherLessonsPage: React.FC = () => {
                         href={lesson.materialsUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-blue-600 transition-colors hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-400"
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-[#FAF0F2] px-2.5 py-1 text-[11px] font-bold text-[#5A0B1C] transition-colors hover:bg-[#F3E2E6] dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E]"
                       >
                         <FileText className="h-3.5 w-3.5" />
                         Dars Materiallari / Taqdimot
@@ -230,7 +230,7 @@ export const TeacherLessonsPage: React.FC = () => {
           <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl dark:bg-slate-900">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
               <div className="flex items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#FAF0F2] text-[#5A0B1C] dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E]">
                   <Video className="h-5 w-5" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">
@@ -254,7 +254,7 @@ export const TeacherLessonsPage: React.FC = () => {
                 <select
                   value={selectedGroupId}
                   onChange={(e) => setSelectedGroupId(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-800 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-800 focus:border-[#5A0B1C] focus:ring-2 focus:ring-[#5A0B1C]/10 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 >
                   {myGroups.map(g => (
                     <option key={g.id} value={g.id}>
@@ -274,7 +274,7 @@ export const TeacherLessonsPage: React.FC = () => {
                   placeholder="Masalan: IELTS Writing Task 2 Kirish"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-900 focus:border-[#5A0B1C] focus:ring-2 focus:ring-[#5A0B1C]/10 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
               </div>
 
@@ -286,7 +286,7 @@ export const TeacherLessonsPage: React.FC = () => {
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-900 focus:border-[#5A0B1C] focus:ring-2 focus:ring-[#5A0B1C]/10 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
               </div>
 
@@ -299,7 +299,7 @@ export const TeacherLessonsPage: React.FC = () => {
                   placeholder="https://youtube.com/watch?v=..."
                   value={videoUrl}
                   onChange={(e) => setVideoUrl(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-900 focus:border-[#5A0B1C] focus:ring-2 focus:ring-[#5A0B1C]/10 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
               </div>
 
@@ -312,7 +312,7 @@ export const TeacherLessonsPage: React.FC = () => {
                   placeholder="https://drive.google.com/... yoki fayl havolasi"
                   value={materialsUrl}
                   onChange={(e) => setMaterialsUrl(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-900 focus:border-[#5A0B1C] focus:ring-2 focus:ring-[#5A0B1C]/10 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
               </div>
 
@@ -325,7 +325,7 @@ export const TeacherLessonsPage: React.FC = () => {
                   placeholder="Ushbu darsda o‘rganilgan asosiy tushunchalar..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-900 focus:border-[#5A0B1C] focus:ring-2 focus:ring-[#5A0B1C]/10 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
               </div>
 
@@ -340,7 +340,7 @@ export const TeacherLessonsPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="rounded-xl bg-indigo-600 px-5 py-2 text-xs font-bold text-white shadow-md hover:bg-indigo-700 disabled:opacity-50"
+                  className="rounded-xl bg-[#5A0B1C] px-5 py-2 text-xs font-bold text-white shadow-md hover:bg-[#450815] disabled:opacity-50"
                 >
                   {isSubmitting ? 'Saqlanmoqda...' : 'Darsni Saqlash'}
                 </button>

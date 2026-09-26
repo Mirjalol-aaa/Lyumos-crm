@@ -244,14 +244,14 @@ export const StudentsPage: React.FC = () => {
             className="
               inline-flex
               rounded-full
-              bg-blue-100
+              bg-[#FAF0F2]
               px-2.5 py-1
               text-[10px]
               font-bold
-              text-blue-800
+              text-[#5A0B1C]
 
-              dark:bg-blue-950
-              dark:text-blue-300
+              dark:bg-[#5A0B1C]/20
+              dark:text-[#D9A62E]
             "
           >
             Graduated
@@ -514,9 +514,9 @@ export const StudentsPage: React.FC = () => {
 
                 placeholder:text-slate-400
 
-                focus:border-[#007AFF]/40
+                focus:border-[#5A0B1C]
                 focus:ring-2
-                focus:ring-[#007AFF]/10
+                focus:ring-[#5A0B1C]/15
 
                 dark:border-slate-700
                 dark:bg-slate-800
@@ -739,10 +739,11 @@ export const StudentsPage: React.FC = () => {
                     'table'
                       ? `
                         bg-white
-                        text-[#007AFF]
+                        text-[#5A0B1C]
                         shadow-sm
 
                         dark:bg-slate-900
+                        dark:text-[#D9A62E]
                       `
                       : `
                         text-slate-400
@@ -797,10 +798,11 @@ export const StudentsPage: React.FC = () => {
                     'grid'
                       ? `
                         bg-white
-                        text-[#007AFF]
+                        text-[#5A0B1C]
                         shadow-sm
 
                         dark:bg-slate-900
+                        dark:text-[#D9A62E]
                       `
                       : `
                         text-slate-400
@@ -934,7 +936,7 @@ export const StudentsPage: React.FC = () => {
                         rounded-full
                         object-cover
                         ring-2
-                        ring-[#007AFF]/10
+                        ring-[#5A0B1C]/10
                       "
                     />
 
@@ -1218,12 +1220,13 @@ export const StudentsPage: React.FC = () => {
                               items-center
                               justify-center
                               rounded-xl
-                              text-[#007AFF]
+                              text-[#5A0B1C]
                               transition-colors
 
-                              hover:bg-blue-50
+                              hover:bg-[#FAF0F2]
 
-                              dark:hover:bg-blue-950/50
+                              dark:text-[#D9A62E]
+                              dark:hover:bg-[#5A0B1C]/20
                             "
                             title="View Profile"
                           >
@@ -1633,12 +1636,13 @@ export const StudentsPage: React.FC = () => {
                                 items-center
                                 justify-center
                                 rounded-lg
-                                text-[#007AFF]
+                                text-[#5A0B1C]
                                 transition-colors
 
-                                hover:bg-blue-50
+                                hover:bg-[#FAF0F2]
 
-                                dark:hover:bg-blue-950/50
+                                dark:text-[#D9A62E]
+                                dark:hover:bg-[#5A0B1C]/20
                               "
                               title="View Profile"
                             >
@@ -1761,7 +1765,7 @@ export const StudentsPage: React.FC = () => {
                           rounded-full
                           object-cover
                           ring-2
-                          ring-[#007AFF]/20
+                          ring-[#5A0B1C]/20
                         "
                       />
 
@@ -1791,7 +1795,7 @@ export const StudentsPage: React.FC = () => {
                             truncate
                             text-xs
                             font-medium
-                            text-[#007AFF]
+                            text-[#5A0B1C] dark:text-[#D9A62E]
                           "
                         >
                           {
@@ -1988,7 +1992,7 @@ export const StudentsPage: React.FC = () => {
                       px-3 py-2.5
                       text-xs
                       font-bold
-                      text-[#007AFF]
+                      text-[#5A0B1C] dark:text-[#D9A62E]
                       transition-colors
 
                       hover:bg-slate-200
@@ -2164,7 +2168,7 @@ export const StudentsPage: React.FC = () => {
               px-2
               text-center
               font-bold
-              text-[#007AFF]
+              text-[#5A0B1C] dark:text-[#D9A62E]
             "
           >
             {currentPage}

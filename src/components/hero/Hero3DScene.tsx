@@ -433,7 +433,7 @@ export const Hero3DScene: React.FC = () => {
                     transform: `translateY(${Math.cos(timeRef.current * 1.8) * 3.5}px) rotateZ(${-1.5 + Math.cos(timeRef.current * 1.4) * 1.8}deg)`,
                   }}
                 >
-                  <span className="text-[7.5px] font-luxury-display font-bold tracking-wider text-blue-200">
+                  <span className="text-[7.5px] font-luxury-display font-bold tracking-wider text-amber-200">
                     INGLIZ TILI
                   </span>
                   <div className="h-3.5 w-3 rounded-sm bg-[#F4D27A] border-l border-amber-900" />

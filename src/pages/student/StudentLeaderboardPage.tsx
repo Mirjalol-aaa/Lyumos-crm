@@ -199,7 +199,7 @@ export const StudentLeaderboardPage: React.FC = () => {
                     </td>
 
                     <td className="px-5 py-3.5 text-center">
-                      <span className="rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">
+                      <span className="rounded-lg bg-[#FAF0F2] px-2.5 py-1 text-xs font-bold text-[#5A0B1C] dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E]">
                         {item.averageScore} / 100 ball
                       </span>
                     </td>

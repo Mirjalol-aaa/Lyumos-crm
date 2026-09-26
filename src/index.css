@@ -20,21 +20,52 @@ html.theme-transitioning *::after {
 }
 
 
+@theme {
+  --color-lumos-burgundy: #5A0B1C;
+  --color-lumos-burgundy-hover: #450815;
+  --color-lumos-burgundy-dark: #3D0A18;
+  --color-lumos-burgundy-deep: #23040C;
+  --color-lumos-burgundy-light: #FAF0F2;
+  --color-lumos-gold: #D9A62E;
+  --color-lumos-gold-light: #FDF8EE;
+  --color-lumos-gold-hover: #C49220;
+  --color-lumos-background: #F6F4F2;
+  --color-lumos-surface: #FFFFFF;
+  --color-lumos-text: #0F172A;
+  --color-lumos-text-secondary: #64748B;
+  --color-lumos-text-muted: #94A3B8;
+  --color-lumos-border: #E2E8F0;
+}
+
 /* ==========================================================================
-   LYUMOS CRM — GLOBAL DESIGN FOUNDATION
+   LYUMOS CRM — GLOBAL DESIGN FOUNDATION & TOKENS
    ========================================================================== */
 
-
-/* --------------------------------------------------------------------------
-   DESIGN TOKENS
-   -------------------------------------------------------------------------- */
-
 :root {
-  /* LUMOS Brand Golden Amber */
-  --ly-primary: #f59e0b;
-  --ly-primary-hover: #d97706;
-  --ly-primary-active: #b45309;
-  --ly-primary-soft: rgba(245, 158, 11, 0.14);
+  /* LUMOS Brand Color System */
+  --lumos-burgundy: #5A0B1C;
+  --lumos-burgundy-hover: #450815;
+  --lumos-burgundy-dark: #3D0A18;
+  --lumos-burgundy-deep: #23040C;
+  --lumos-burgundy-light: #FAF0F2;
+  --lumos-burgundy-soft: rgba(90, 11, 28, 0.08);
+
+  --lumos-gold: #D9A62E;
+  --lumos-gold-light: #FDF8EE;
+  --lumos-gold-hover: #C49220;
+
+  --lumos-background: #F6F4F2;
+  --lumos-surface: #FFFFFF;
+  --lumos-text: #0F172A;
+  --lumos-text-secondary: #64748B;
+  --lumos-text-muted: #94A3B8;
+  --lumos-border: #E2E8F0;
+
+  /* Legacy primary aliases mapped strictly to Lumos Burgundy */
+  --ly-primary: #5A0B1C;
+  --ly-primary-hover: #450815;
+  --ly-primary-active: #3D0A18;
+  --ly-primary-soft: rgba(90, 11, 28, 0.1);
 
   /* Success Emerald */
   --ly-success: #10b981;
@@ -50,9 +81,9 @@ html.theme-transitioning *::after {
   --ly-danger-soft: rgba(225, 29, 72, 0.12);
 
   /* Light surfaces */
-  --ly-bg: #f8fafc;
+  --ly-bg: #F6F4F2;
   --ly-surface: #ffffff;
-  --ly-surface-soft: #f1f5f9;
+  --ly-surface-soft: #FAF0F2;
   --ly-surface-muted: #e2e8f0;
 
   /* Light borders */
@@ -573,4 +604,20 @@ html.lumos-grabbing-3d * {
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
   touch-action: pan-y;
+}
+
+/* --------------------------------------------------------------------------
+   GLOBAL FOCUS MANAGEMENT (Strictly Lumos Burgundy, No Orange/Blue)
+   -------------------------------------------------------------------------- */
+input:focus,
+textarea:focus,
+select:focus,
+button:focus {
+  outline: none !important;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none !important;
 }

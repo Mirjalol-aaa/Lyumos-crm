@@ -44,21 +44,21 @@ export const Button: React.FC<ButtonProps> = ({
 
   const variantStyles: Record<ButtonVariant, string> = {
     primary:
-      'bg-gradient-to-r from-amber-500 via-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-md shadow-amber-500/20 border border-amber-400/40 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-amber-500',
+      'bg-[#5A0B1C] hover:bg-[#450815] text-white shadow-xs border border-[#480816] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#5A0B1C]/40',
     gold:
-      'bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:brightness-105 text-slate-950 font-black shadow-lg shadow-amber-500/25 border border-amber-300/60 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-amber-400',
+      'bg-gradient-to-r from-[#D9A62E] to-[#C49220] hover:brightness-105 text-white font-black shadow-md shadow-amber-500/20 border border-amber-400/40 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-amber-500',
     secondary:
-      'bg-white hover:bg-slate-50 text-slate-800 dark:bg-slate-800/90 dark:hover:bg-slate-800 dark:text-slate-100 border border-slate-200/90 dark:border-slate-700/80 shadow-xs hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-slate-400',
+      'bg-white hover:bg-[#FAF0F2] text-[#0F172A] border border-slate-200 shadow-xs hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-[#5A0B1C]/30',
     outline:
-      'bg-transparent hover:bg-amber-500/5 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:border-amber-500/40 dark:hover:border-amber-500/40 focus-visible:ring-amber-500 active:scale-[0.98]',
+      'bg-transparent hover:bg-[#FAF0F2] text-[#0F172A] border border-slate-300 hover:border-[#5A0B1C]/50 focus-visible:ring-[#5A0B1C]/30 active:scale-[0.98]',
     ghost:
-      'bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800/70 text-slate-600 dark:text-slate-300 focus-visible:ring-slate-400 active:scale-[0.98]',
+      'bg-transparent hover:bg-[#FAF0F2] text-slate-600 hover:text-[#5A0B1C] focus-visible:ring-[#5A0B1C]/30 active:scale-[0.98]',
     danger:
-      'bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white shadow-md shadow-rose-500/20 border border-rose-500/40 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-rose-500',
+      'bg-rose-600 hover:bg-rose-700 text-white shadow-xs border border-rose-700 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-rose-500',
     success:
-      'bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white shadow-md shadow-emerald-500/20 border border-emerald-500/40 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-emerald-500',
+      'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs border border-emerald-700 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-emerald-500',
     indigo:
-      'bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white shadow-md shadow-indigo-500/20 border border-indigo-500/40 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-indigo-500',
+      'bg-[#5A0B1C] hover:bg-[#450815] text-white shadow-xs border border-[#480816] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#5A0B1C]/40',
   };
 
   return (

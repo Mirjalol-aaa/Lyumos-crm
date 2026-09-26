@@ -325,9 +325,9 @@ export const ReceivePaymentModal:
         },
 
         colors: [
-          '#007AFF',
-          '#34C759',
-          '#FF9500',
+          '#5A0B1C',
+          '#D9A62E',
+          '#10B981',
         ],
       });
 
@@ -924,7 +924,7 @@ export const ReceivePaymentModal:
                       className="
                         h-3.5
                         w-3.5
-                        text-[#007AFF]
+                        text-[#5A0B1C] dark:text-[#D9A62E]
                       "
                     />
 
@@ -935,15 +935,15 @@ export const ReceivePaymentModal:
                   <span
                     className="
                       rounded-lg
-                      bg-blue-50
+                      bg-[#FAF0F2]
                       px-2
                       py-1
 
                       text-[10px]
                       font-black
-                      text-[#007AFF]
+                      text-[#5A0B1C]
 
-                      dark:bg-blue-950/40
+                      dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E]
                     "
                   >
                     {discountPercent}%
@@ -997,11 +997,13 @@ export const ReceivePaymentModal:
                             discountPercent ===
                             discount
                               ? `
-                                border-[#007AFF]
-                                bg-blue-50
-                                text-[#007AFF]
+                                border-[#5A0B1C]
+                                bg-[#FAF0F2]
+                                text-[#5A0B1C]
 
-                                dark:bg-blue-950/50
+                                dark:border-[#5A0B1C]
+                                dark:bg-[#5A0B1C]/25
+                                dark:text-[#D9A62E]
                               `
                               : `
                                 border-slate-200
@@ -1271,16 +1273,16 @@ export const ReceivePaymentModal:
                     type="checkbox"
                     checked={sendTelegramReceipt}
                     onChange={(e) => setSendTelegramReceipt(e.target.checked)}
-                    className="h-4 w-4 accent-[#007AFF] cursor-pointer rounded"
+                    className="h-4 w-4 accent-[#5A0B1C] cursor-pointer rounded"
                   />
                   <span className="flex items-center gap-1.5 text-[11px] sm:text-xs">
-                    <Send className="h-3.5 w-3.5 text-sky-500 shrink-0" />
+                    <Send className="h-3.5 w-3.5 text-[#5A0B1C] dark:text-[#D9A62E] shrink-0" />
                     <span>
                       Telegram cheki{' '}
                       {settings.telegramBotToken ? (
                         <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">(Bot)</span>
                       ) : (
-                        <span className="text-[10px] text-sky-500 font-bold">(Telegram)</span>
+                        <span className="text-[10px] text-[#5A0B1C] dark:text-[#D9A62E] font-bold">(Telegram)</span>
                       )}
                     </span>
                   </span>

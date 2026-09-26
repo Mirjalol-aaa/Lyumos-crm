@@ -94,7 +94,7 @@ export const EditTeacherModal: React.FC<EditTeacherModalProps> = ({
         {/* Header */}
         <div className="p-5 sm:p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-2xl bg-[#FAF0F2] border border-[#F0D5DC] text-[#5A0B1C] dark:bg-[#5A0B1C]/20 dark:border-[#5A0B1C]/30 dark:text-[#D9A62E] flex items-center justify-center font-bold">
               <GraduationCap className="w-5 h-5" />
             </div>
             <div>
@@ -127,7 +127,7 @@ export const EditTeacherModal: React.FC<EditTeacherModalProps> = ({
               required
               value={fullName}
               onChange={e => setFullName(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:outline-none focus:border-[#5A0B1C] focus:ring-2 focus:ring-[#5A0B1C]/15"
             />
           </div>
 
@@ -142,7 +142,7 @@ export const EditTeacherModal: React.FC<EditTeacherModalProps> = ({
                 required
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:outline-none focus:border-[#5A0B1C] focus:ring-2 focus:ring-[#5A0B1C]/15"
               />
             </div>
             <div>
@@ -153,7 +153,7 @@ export const EditTeacherModal: React.FC<EditTeacherModalProps> = ({
                 type="email" 
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:outline-none focus:border-[#5A0B1C] focus:ring-2 focus:ring-[#5A0B1C]/15"
               />
             </div>
           </div>
@@ -173,7 +173,7 @@ export const EditTeacherModal: React.FC<EditTeacherModalProps> = ({
                     onClick={() => toggleSubject(sub)}
                     className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
                       active
-                        ? 'bg-blue-600 text-white font-black shadow-xs'
+                        ? 'bg-[#5A0B1C] text-white font-black shadow-xs'
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
                     }`}
                   >
@@ -269,7 +269,7 @@ export const EditTeacherModal: React.FC<EditTeacherModalProps> = ({
                 name="edit_status" 
                 checked={status === 'Active'} 
                 onChange={() => setStatus('Active')}
-                className="text-blue-600 focus:ring-blue-500"
+                className="text-[#5A0B1C] focus:ring-[#5A0B1C] accent-[#5A0B1C]"
               />
               <span className="font-bold text-emerald-600 dark:text-emerald-400">
                 {language === 'en' ? 'Active' : language === 'ru' ? 'Активный' : 'Faol'}
@@ -319,7 +319,7 @@ export const EditTeacherModal: React.FC<EditTeacherModalProps> = ({
             <button 
               type="submit" 
               disabled={isSuccess}
-              className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black shadow-md shadow-blue-500/20 flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+              className="px-6 py-2.5 rounded-xl bg-[#5A0B1C] hover:bg-[#450815] text-white font-black shadow-sm flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
             >
               <Save className="w-4 h-4" /> 
               <span>{language === 'en' ? 'Save Changes' : language === 'ru' ? 'Сохранить изменения' : 'Saqlash'}</span>

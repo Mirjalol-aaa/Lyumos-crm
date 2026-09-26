@@ -8,7 +8,7 @@ interface StatCardProps {
   delta?: string;
   isPositiveDelta?: boolean;
   icon?: React.ReactNode;
-  color?: 'blue' | 'emerald' | 'amber' | 'rose' | 'indigo' | 'purple';
+  color?: 'burgundy' | 'gold' | 'blue' | 'emerald' | 'amber' | 'rose' | 'indigo' | 'purple';
 }
 
 export const StatCard: React.FC<StatCardProps> = ({
@@ -18,7 +18,7 @@ export const StatCard: React.FC<StatCardProps> = ({
   delta,
   isPositiveDelta = true,
   icon,
-  color = 'blue',
+  color = 'burgundy',
 }) => {
   const [displayValue, setDisplayValue] = useState<string | number>(value);
 
@@ -67,16 +67,24 @@ export const StatCard: React.FC<StatCardProps> = ({
   }, [value]);
 
   const colorMap = {
+    burgundy: {
+      bg: 'bg-[#FAF0F2] text-[#5A0B1C] border border-[#F0D5DC]',
+      glow: 'shadow-[#5A0B1C]/5',
+    },
+    gold: {
+      bg: 'bg-[#FDF8EE] text-[#C49220] border border-[#F6E5BC]',
+      glow: 'shadow-amber-500/5',
+    },
     blue: {
-      bg: 'bg-blue-50/70 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400 border-blue-200/50 dark:border-blue-900/50',
-      glow: 'shadow-blue-500/5',
+      bg: 'bg-[#FAF0F2] text-[#5A0B1C] border border-[#F0D5DC]',
+      glow: 'shadow-[#5A0B1C]/5',
     },
     emerald: {
       bg: 'bg-emerald-50/70 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400 border-emerald-200/50 dark:border-emerald-900/50',
       glow: 'shadow-emerald-500/5',
     },
     amber: {
-      bg: 'bg-amber-50/70 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400 border-amber-200/50 dark:border-amber-900/50',
+      bg: 'bg-[#FDF8EE] text-[#C49220] border border-[#F6E5BC]',
       glow: 'shadow-amber-500/5',
     },
     rose: {
@@ -84,12 +92,12 @@ export const StatCard: React.FC<StatCardProps> = ({
       glow: 'shadow-rose-500/5',
     },
     indigo: {
-      bg: 'bg-indigo-50/70 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400 border-indigo-200/50 dark:border-indigo-900/50',
-      glow: 'shadow-indigo-500/5',
+      bg: 'bg-[#FAF0F2] text-[#5A0B1C] border border-[#F0D5DC]',
+      glow: 'shadow-[#5A0B1C]/5',
     },
     purple: {
-      bg: 'bg-purple-50/70 text-purple-600 dark:bg-purple-950/50 dark:text-purple-400 border-purple-200/50 dark:border-purple-900/50',
-      glow: 'shadow-purple-500/5',
+      bg: 'bg-[#FAF0F2] text-[#5A0B1C] border border-[#F0D5DC]',
+      glow: 'shadow-[#5A0B1C]/5',
     },
   };
 

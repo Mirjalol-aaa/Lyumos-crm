@@ -2,6 +2,8 @@ import React from 'react';
 
 export type BadgeVariant =
   | 'default'
+  | 'burgundy'
+  | 'gold'
   | 'success'
   | 'warning'
   | 'danger'
@@ -32,12 +34,20 @@ export const Badge: React.FC<BadgeProps> = ({
 
   const variantStyles: Record<BadgeVariant, { bg: string; dot: string }> = {
     default: {
-      bg: 'bg-amber-500/10 text-amber-700 border border-amber-500/20 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-400/25',
-      dot: 'bg-amber-500',
+      bg: 'bg-[#FAF0F2] text-[#5A0B1C] border border-[#F0D5DC]',
+      dot: 'bg-[#5A0B1C]',
+    },
+    burgundy: {
+      bg: 'bg-[#FAF0F2] text-[#5A0B1C] border border-[#F0D5DC]',
+      dot: 'bg-[#5A0B1C]',
+    },
+    gold: {
+      bg: 'bg-[#FDF8EE] text-[#C49220] border border-[#F6E5BC]',
+      dot: 'bg-[#D9A62E]',
     },
     amber: {
-      bg: 'bg-amber-500/10 text-amber-700 border border-amber-500/20 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-400/25',
-      dot: 'bg-amber-500',
+      bg: 'bg-[#FDF8EE] text-[#C49220] border border-[#F6E5BC]',
+      dot: 'bg-[#D9A62E]',
     },
     success: {
       bg: 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-400/25',
@@ -52,12 +62,12 @@ export const Badge: React.FC<BadgeProps> = ({
       dot: 'bg-rose-500',
     },
     info: {
-      bg: 'bg-sky-500/10 text-sky-700 border border-sky-500/20 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-400/25',
-      dot: 'bg-sky-500',
+      bg: 'bg-[#FAF0F2] text-[#5A0B1C] border border-[#F0D5DC]',
+      dot: 'bg-[#5A0B1C]',
     },
     purple: {
-      bg: 'bg-purple-500/10 text-purple-700 border border-purple-500/20 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-400/25',
-      dot: 'bg-purple-500',
+      bg: 'bg-[#FAF0F2] text-[#5A0B1C] border border-[#F0D5DC]',
+      dot: 'bg-[#5A0B1C]',
     },
     neutral: {
       bg: 'bg-slate-500/10 text-slate-700 border border-slate-500/20 dark:bg-slate-500/15 dark:text-slate-300 dark:border-slate-400/25',

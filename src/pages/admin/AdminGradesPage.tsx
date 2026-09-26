@@ -199,7 +199,7 @@ export const AdminGradesPage: React.FC = () => {
                     <span className="text-emerald-600 dark:text-emerald-400 font-bold">{item.attendanceScore}%</span>
                   </td>
                   <td className="px-5 py-4 text-center font-mono">
-                    <span className="text-blue-600 dark:text-blue-400 font-bold">{item.homeworkScore}%</span>
+                    <span className="text-[#5A0B1C] dark:text-[#D9A62E] font-bold">{item.homeworkScore}%</span>
                   </td>
                   <td className="px-5 py-4 text-center font-mono">
                     <span className="text-purple-600 dark:text-purple-400 font-bold">{item.testScore} ball</span>

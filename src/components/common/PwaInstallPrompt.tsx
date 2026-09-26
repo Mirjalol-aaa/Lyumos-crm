@@ -83,11 +83,11 @@ export const PwaInstallPrompt: React.FC = () => {
 
   return (
     <div className="fixed bottom-4 left-4 right-4 z-50 max-w-md mx-auto animate-in slide-in-from-bottom-5 duration-300">
-      <div className="flex flex-col gap-3 rounded-2xl border border-blue-500/30 bg-slate-900/95 text-white p-4 shadow-2xl backdrop-blur-xl ring-1 ring-white/10">
+      <div className="flex flex-col gap-3 rounded-2xl border border-[#5A0B1C]/40 bg-slate-900/95 text-white p-4 shadow-2xl backdrop-blur-xl ring-1 ring-white/10">
         
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-md shadow-blue-500/30">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#5A0B1C] text-white shadow-md shadow-[#5A0B1C]/30">
               <Smartphone className="h-6 w-6" />
             </div>
             <div>
@@ -118,7 +118,7 @@ export const PwaInstallPrompt: React.FC = () => {
           <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700 text-xs text-slate-200 space-y-1.5">
             <p className="font-bold text-amber-400">Apple iOS Safari bo‘yicha qo‘llanma:</p>
             <p className="flex items-center gap-1.5">
-              1. Safari pastki panelidagi <Share2 className="h-3.5 w-3.5 text-blue-400" /> (Ulashish) tugmasini bosing.
+              1. Safari pastki panelidagi <Share2 className="h-3.5 w-3.5 text-[#D9A62E]" /> (Ulashish) tugmasini bosing.
             </p>
             <p className="flex items-center gap-1.5">
               2. Menyuni pastga surib <PlusSquare className="h-3.5 w-3.5 text-emerald-400" /> "Bosh ekranga qo‘shish" (Add to Home Screen) ni tanlang.
@@ -138,7 +138,7 @@ export const PwaInstallPrompt: React.FC = () => {
           <button
             type="button"
             onClick={handleInstallClick}
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 active:scale-[0.98] text-xs font-bold text-white shadow-md shadow-blue-500/25 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-gradient-to-r from-[#5A0B1C] to-[#7D1228] hover:from-[#450815] hover:to-[#5A0B1C] active:scale-[0.98] text-xs font-bold text-white shadow-md shadow-[#5A0B1C]/25 transition-all cursor-pointer"
           >
             <Download className="h-3.5 w-3.5" />
             <span>{isIos && !showIosGuide ? 'Qo‘llanma' : 'O‘rnatish'}</span>

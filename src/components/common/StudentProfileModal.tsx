@@ -50,8 +50,8 @@ const fieldClass = `
   text-sm text-white
   outline-none
   transition-all
-  focus:border-blue-500
-  focus:ring-2 focus:ring-blue-500/15
+  focus:border-[#5A0B1C]
+  focus:ring-2 focus:ring-[#5A0B1C]/15
 `;
 
 const labelClass =
@@ -232,7 +232,7 @@ export const StudentProfileModal: React.FC = () => {
 
     if (status === 'Discount') {
       return (
-        <span className="inline-flex items-center gap-1 rounded-lg bg-blue-500/10 px-2 py-1 text-[10px] font-bold text-blue-400">
+        <span className="inline-flex items-center gap-1 rounded-lg bg-amber-500/10 px-2 py-1 text-[10px] font-bold text-amber-400">
           <CheckCircle2 className="h-3 w-3" />
           Discount
         </span>
@@ -340,7 +340,7 @@ export const StudentProfileModal: React.FC = () => {
                   shrink-0
                   rounded-xl sm:rounded-2xl
                   object-cover
-                  ring-2 ring-blue-500/40
+                  ring-2 ring-[#5A0B1C]/40
                 "
               />
 
@@ -433,13 +433,13 @@ export const StudentProfileModal: React.FC = () => {
                   className="
                     cursor-pointer
                     rounded-xl
-                    bg-blue-600
+                    bg-[#5A0B1C]
                     px-3 sm:px-4 py-2 sm:py-2.5
                     text-xs
                     font-bold
                     text-white
                     transition
-                    hover:bg-blue-500
+                    hover:bg-[#450815]
                   "
                 >
                   To‘lov Qabul Qilish
@@ -461,8 +461,8 @@ export const StudentProfileModal: React.FC = () => {
                     font-bold
                     text-slate-200
                     transition
-                    hover:border-blue-500
-                    hover:text-blue-400
+                    hover:border-[#5A0B1C]
+                    hover:text-[#E8B849]
                   "
                 >
                   <Edit3 className="h-3.5 w-3.5" />
@@ -530,7 +530,7 @@ export const StudentProfileModal: React.FC = () => {
                   ${
                     activeTab ===
                     'profile'
-                      ? 'border-blue-500 text-blue-400'
+                      ? 'border-[#5A0B1C] text-[#E8B849]'
                       : 'border-transparent text-slate-500 hover:text-slate-300'
                   }
                 `}
@@ -551,7 +551,7 @@ export const StudentProfileModal: React.FC = () => {
                   ${
                     activeTab ===
                     'payments'
-                      ? 'border-blue-500 text-blue-400'
+                      ? 'border-[#5A0B1C] text-[#E8B849]'
                       : 'border-transparent text-slate-500 hover:text-slate-300'
                   }
                 `}
@@ -588,7 +588,7 @@ export const StudentProfileModal: React.FC = () => {
                 {/* BASIC */}
 
                 <section>
-                  <h4 className="mb-4 text-[10px] font-black uppercase tracking-[0.18em] text-blue-400">
+                  <h4 className="mb-4 text-[10px] font-black uppercase tracking-[0.18em] text-[#E8B849]">
                     Student information
                   </h4>
 
@@ -946,7 +946,7 @@ export const StudentProfileModal: React.FC = () => {
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-5">
                 <div className="mb-5 flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#5A0B1C]/20 text-[#E8B849]">
                     <UserRound className="h-5 w-5" />
                   </div>
 
@@ -1014,7 +1014,7 @@ export const StudentProfileModal: React.FC = () => {
 
               <div className="md:col-span-2 grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-4">
-                  <BookOpen className="mb-3 h-4 w-4 text-blue-400" />
+                  <BookOpen className="mb-3 h-4 w-4 text-[#E8B849]" />
 
                   <p className="text-[9px] font-bold uppercase text-slate-500">
                     Group
@@ -1195,14 +1195,14 @@ export const StudentProfileModal: React.FC = () => {
                   cursor-pointer
                   items-center gap-2
                   rounded-xl
-                  bg-blue-600
+                  bg-[#5A0B1C]
                   px-5 py-2.5
                   text-xs font-bold
                   text-white
                   shadow-lg
-                  shadow-blue-600/20
+                  shadow-[#5A0B1C]/20
                   transition
-                  hover:bg-blue-500
+                  hover:bg-[#450815]
                 "
               >
                 <Save className="h-4 w-4" />

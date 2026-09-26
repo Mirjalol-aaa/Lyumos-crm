@@ -242,10 +242,10 @@ export const TeacherAttendancePage: React.FC = () => {
             type="button"
             onClick={handleSendTelegram}
             disabled={!currentGroup || groupStudents.length === 0 || isSendingTelegram}
-            className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-sky-500/30 bg-sky-500/10 px-4 py-2.5 text-xs font-bold text-sky-700 dark:text-sky-300 hover:bg-sky-500/20 active:scale-95 transition-all shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-[#5A0B1C]/20 bg-[#FAF0F2] px-4 py-2.5 text-xs font-bold text-[#5A0B1C] dark:border-[#5A0B1C]/40 dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E] hover:bg-[#F3E2E6] dark:hover:bg-[#5A0B1C]/30 active:scale-95 transition-all shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
             title="Davomat hisobotini Telegramga yuborish"
           >
-            <Send className="h-4 w-4 text-sky-500" />
+            <Send className="h-4 w-4 text-[#5A0B1C] dark:text-[#D9A62E]" />
             <span>
               {isSendingTelegram
                 ? 'Yuborilmoqda...'
@@ -275,7 +275,7 @@ export const TeacherAttendancePage: React.FC = () => {
           <button
             type="button"
             onClick={handleSaveAll}
-            className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 transition-all hover:bg-indigo-700 active:scale-95"
+            className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#5A0B1C] px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-[#5A0B1C]/20 transition-all hover:bg-[#450815] active:scale-95"
           >
             <Save className="h-4 w-4" />
             {isSaved ? 'Saqlandi! ✓' : 'Davomatni Saqlash'}
@@ -293,7 +293,7 @@ export const TeacherAttendancePage: React.FC = () => {
               setSelectedGroupId(e.target.value);
               setLocalStatuses({});
             }}
-            className="mt-1 block rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-800 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            className="mt-1 block rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-800 focus:border-[#5A0B1C] focus:ring-2 focus:ring-[#5A0B1C]/10 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
           >
             {myGroups.map(g => (
               <option key={g.id} value={g.id}>
@@ -312,7 +312,7 @@ export const TeacherAttendancePage: React.FC = () => {
               setSelectedDate(e.target.value);
               setLocalStatuses({});
             }}
-            className="mt-1 block rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-800 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            className="mt-1 block rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-800 focus:border-[#5A0B1C] focus:ring-2 focus:ring-[#5A0B1C]/10 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
           >
           </input>
         </div>
@@ -378,7 +378,7 @@ export const TeacherAttendancePage: React.FC = () => {
                             ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
                             : currentStatus === 'Late'
                             ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                            : 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
+                            : 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300'
                         }`}
                       >
                         {currentStatus === 'Present' && <CheckCircle2 className="h-3 w-3" />}

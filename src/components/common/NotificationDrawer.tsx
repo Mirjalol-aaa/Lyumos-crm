@@ -17,7 +17,7 @@ export const NotificationDrawer: React.FC<DrawerProps> = ({ isOpen, onClose }) =
       case 'payment':
         return <DollarSign className="w-4 h-4 text-emerald-500" />;
       case 'student':
-        return <User className="w-4 h-4 text-[#007AFF]" />;
+        return <User className="w-4 h-4 text-[#5A0B1C] dark:text-[#D9A62E]" />;
       case 'birthday':
         return <Cake className="w-4 h-4 text-amber-500" />;
       case 'attendance':
@@ -82,12 +82,12 @@ export const NotificationDrawer: React.FC<DrawerProps> = ({ isOpen, onClose }) =
                   }}
                   className={`p-4 rounded-2xl border transition-all cursor-pointer relative ${
                     !n.read 
-                      ? 'bg-blue-50/40 dark:bg-blue-950/20 border-blue-200/80 dark:border-blue-900/50 shadow-xs' 
+                      ? 'bg-[#FAF0F2]/60 dark:bg-[#5A0B1C]/15 border-[#F0D5DC] dark:border-[#5A0B1C]/30 shadow-xs' 
                       : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800'
                   }`}
                 >
                   {!n.read && (
-                    <span className="absolute top-4 right-4 w-2 h-2 bg-[#007AFF] rounded-full" />
+                    <span className="absolute top-4 right-4 w-2 h-2 bg-[#5A0B1C] dark:bg-[#D9A62E] rounded-full" />
                   )}
                   <div className="flex items-start gap-3">
                     <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 shrink-0">

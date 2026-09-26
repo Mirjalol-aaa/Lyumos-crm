@@ -183,7 +183,7 @@ export const AdminFinancePayrollPage: React.FC = () => {
       header: 'Ustoz Ulushi',
       align: 'center',
       render: (p) => (
-        <span className="inline-flex items-center gap-1 rounded-lg bg-indigo-500/10 px-2 py-0.5 text-xs font-black text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+        <span className="inline-flex items-center gap-1 rounded-lg bg-[#FAF0F2] px-2 py-0.5 text-xs font-black text-[#5A0B1C] dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E] border border-[#F0D5DC] dark:border-[#5A0B1C]/30">
           {p.sharePercent}%
         </span>
       ),
@@ -281,7 +281,7 @@ export const AdminFinancePayrollPage: React.FC = () => {
           title="Kutilayotgan Sof Foyda"
           value={`${netEstimatedProfit.toLocaleString('uz-UZ')} so‘m`}
           subtitle="Kirim minus Maoshlar minus Chiqimlar"
-          color="indigo"
+          color="burgundy"
           icon={<TrendingUp className="h-4 w-4" />}
         />
       </div>

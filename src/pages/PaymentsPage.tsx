@@ -223,17 +223,19 @@ export const PaymentsPage: React.FC = () => {
               items-center
               gap-1
               rounded-lg
-              bg-blue-100
+              bg-[#FAF0F2]
               px-2 py-1
               text-[10px]
               font-bold
-              text-blue-800
+              text-[#5A0B1C]
+              border border-[#F0D5DC]
               transition-all
 
               hover:scale-105
 
-              dark:bg-blue-950
-              dark:text-blue-300
+              dark:bg-[#5A0B1C]/20
+              dark:border-[#5A0B1C]/30
+              dark:text-[#D9A62E]
             "
           >
             <CheckCircle2
@@ -547,9 +549,9 @@ export const PaymentsPage: React.FC = () => {
 
                 placeholder:text-slate-400
 
-                focus:border-[#007AFF]/40
+                focus:border-[#5A0B1C]
                 focus:ring-2
-                focus:ring-[#007AFF]/10
+                focus:ring-[#5A0B1C]/15
 
                 dark:border-slate-700
                 dark:bg-slate-800
@@ -1060,7 +1062,7 @@ export const PaymentsPage: React.FC = () => {
                             mt-0.5
                             text-[11px]
                             font-semibold
-                            text-[#007AFF]
+                            text-[#5A0B1C] dark:text-[#D9A62E]
                           "
                         >
                           {MONTH_NAMES_UZ[activeMonthFilter] || activeMonthFilter}
@@ -1122,7 +1124,7 @@ export const PaymentsPage: React.FC = () => {
                           px-3 py-2.5
                           text-[10px]
                           font-bold
-                          text-[#007AFF]
+                          text-[#5A0B1C] dark:text-[#D9A62E]
                           transition-colors
 
                           hover:bg-slate-200
@@ -1289,11 +1291,12 @@ export const PaymentsPage: React.FC = () => {
                           month ===
                           activeMonthFilter
                             ? `
-                              bg-blue-50/80
+                              bg-[#FAF0F2]/80
                               font-extrabold
-                              text-[#007AFF]
+                              text-[#5A0B1C]
 
-                              dark:bg-blue-950/60
+                              dark:bg-[#5A0B1C]/20
+                              dark:text-[#D9A62E]
                             `
                             : ''
                         }
@@ -1445,9 +1448,9 @@ export const PaymentsPage: React.FC = () => {
                               month ===
                               activeMonthFilter
                                 ? `
-                                  bg-blue-50/30
+                                  bg-[#FAF0F2]/40
 
-                                  dark:bg-blue-950/20
+                                  dark:bg-[#5A0B1C]/10
                                 `
                                 : ''
                             }

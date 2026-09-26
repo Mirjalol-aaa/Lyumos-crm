@@ -363,9 +363,9 @@ export const ExpensesPage: React.FC = () => {
 
     hover:border-slate-300
 
-    focus:border-[#007AFF]
+    focus:border-[#5A0B1C]
     focus:ring-4
-    focus:ring-[#007AFF]/10
+    focus:ring-[#5A0B1C]/15
 
     dark:border-slate-700
     dark:bg-slate-800/80
@@ -373,7 +373,7 @@ export const ExpensesPage: React.FC = () => {
 
     dark:hover:border-slate-600
 
-    dark:focus:border-[#007AFF]
+    dark:focus:border-[#5A0B1C]
     dark:focus:bg-slate-800
   `;
 
@@ -436,7 +436,7 @@ export const ExpensesPage: React.FC = () => {
 
               text-[11px]
               font-semibold
-              text-[#007AFF]
+              text-[#5A0B1C] dark:text-[#D9A62E]
             "
           >
             <span
@@ -444,7 +444,7 @@ export const ExpensesPage: React.FC = () => {
                 h-1.5
                 w-1.5
                 rounded-full
-                bg-[#007AFF]
+                bg-[#5A0B1C] dark:bg-[#D9A62E]
               "
             />
 
@@ -505,7 +505,7 @@ export const ExpensesPage: React.FC = () => {
             gap-2
 
             rounded-xl
-            bg-[#007AFF]
+            bg-[#5A0B1C]
 
             px-5
 
@@ -513,14 +513,11 @@ export const ExpensesPage: React.FC = () => {
             font-semibold
             text-white
 
-            shadow-lg
-            shadow-blue-500/20
+            shadow-sm
 
             transition-all
 
-            hover:bg-[#006EE6]
-            hover:shadow-xl
-            hover:shadow-blue-500/20
+            hover:bg-[#450815]
 
             active:scale-[0.98]
 
@@ -758,8 +755,11 @@ export const ExpensesPage: React.FC = () => {
 
                 rounded-xl
 
-                bg-blue-500/10
-                text-[#007AFF]
+                bg-[#FAF0F2]
+                text-[#5A0B1C]
+
+                dark:bg-[#5A0B1C]/20
+                dark:text-[#D9A62E]
               "
             >
               <ReceiptText
@@ -1307,16 +1307,16 @@ export const ExpensesPage: React.FC = () => {
 
                         transition-all
 
-                        hover:border-blue-200
-                        hover:bg-blue-50
-                        hover:text-[#007AFF]
+                        hover:border-[#F0D5DC]
+                        hover:bg-[#FAF0F2]
+                        hover:text-[#5A0B1C]
 
                         dark:border-slate-700
                         dark:text-slate-300
 
-                        dark:hover:border-blue-900
-                        dark:hover:bg-blue-950/30
-                        dark:hover:text-blue-400
+                        dark:hover:border-[#5A0B1C]/40
+                        dark:hover:bg-[#5A0B1C]/20
+                        dark:hover:text-[#D9A62E]
                       "
                     >
                       <Pencil
@@ -1752,11 +1752,11 @@ export const ExpensesPage: React.FC = () => {
 
                               transition-all
 
-                              hover:bg-blue-50
-                              hover:text-[#007AFF]
+                              hover:bg-[#FAF0F2]
+                              hover:text-[#5A0B1C]
 
-                              dark:hover:bg-blue-950/30
-                              dark:hover:text-blue-400
+                              dark:hover:bg-[#5A0B1C]/20
+                              dark:hover:text-[#D9A62E]
                             "
                             title="Edit expense"
                             aria-label="Edit expense"
@@ -1911,8 +1911,11 @@ export const ExpensesPage: React.FC = () => {
 
                     rounded-xl
 
-                    bg-blue-500/10
-                    text-[#007AFF]
+                    bg-[#FAF0F2]
+                    text-[#5A0B1C]
+
+                    dark:bg-[#5A0B1C]/20
+                    dark:text-[#D9A62E]
                   "
                 >
                   <Pencil
@@ -2442,7 +2445,7 @@ export const ExpensesPage: React.FC = () => {
 
                     rounded-xl
 
-                    bg-[#007AFF]
+                    bg-[#5A0B1C]
 
                     px-4
 
@@ -2450,12 +2453,11 @@ export const ExpensesPage: React.FC = () => {
                     font-semibold
                     text-white
 
-                    shadow-md
-                    shadow-blue-500/20
+                    shadow-sm
 
                     transition-all
 
-                    hover:bg-[#006EE6]
+                    hover:bg-[#450815]
 
                     active:scale-[0.98]
                   "

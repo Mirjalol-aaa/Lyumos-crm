@@ -324,7 +324,7 @@ export const DashboardPage: React.FC = () => {
           bg-gradient-to-r
           from-slate-900
           via-slate-800
-          to-blue-950
+          to-[#3D0A18]
           p-5
           text-white
           shadow-xl
@@ -344,7 +344,7 @@ export const DashboardPage: React.FC = () => {
             -top-24
             h-64 w-64
             rounded-full
-            bg-blue-500/10
+            bg-[#D9A62E]/10
             blur-3xl
           "
         />
@@ -375,12 +375,12 @@ export const DashboardPage: React.FC = () => {
                 gap-2
                 rounded-full
                 border
-                border-blue-500/30
-                bg-blue-500/20
+                border-[#D9A62E]/30
+                bg-[#D9A62E]/20
                 px-3 py-1
                 text-[10px]
                 font-semibold
-                text-blue-300
+                text-[#F4D27A]
 
                 sm:text-xs
               "
@@ -502,17 +502,16 @@ export const DashboardPage: React.FC = () => {
                 justify-center
                 gap-2
                 rounded-xl
-                bg-[#007AFF]
+                bg-[#5A0B1C]
                 px-4
                 py-2.5
                 text-xs
                 font-bold
                 text-white
-                shadow-lg
-                shadow-blue-500/20
+                shadow-sm
                 transition-all
 
-                hover:bg-blue-600
+                hover:bg-[#450815]
 
                 active:scale-[0.98]
               "
@@ -635,11 +634,12 @@ export const DashboardPage: React.FC = () => {
             <div
               className="
                 rounded-xl
-                bg-blue-50
+                bg-[#FAF0F2]
                 p-2.5
-                text-[#007AFF]
+                text-[#5A0B1C]
 
-                dark:bg-blue-950/60
+                dark:bg-[#5A0B1C]/20
+                dark:text-[#D9A62E]
               "
             >
               <Users
@@ -1201,7 +1201,7 @@ export const DashboardPage: React.FC = () => {
                 cursor-pointer
                 text-xs
                 font-bold
-                text-[#007AFF]
+                text-[#5A0B1C] dark:text-[#D9A62E]
 
                 hover:underline
               "
@@ -1243,7 +1243,7 @@ export const DashboardPage: React.FC = () => {
                   >
                     <stop
                       offset="5%"
-                      stopColor="#007AFF"
+                      stopColor="#5A0B1C"
                       stopOpacity={
                         0.3
                       }
@@ -1251,7 +1251,7 @@ export const DashboardPage: React.FC = () => {
 
                     <stop
                       offset="95%"
-                      stopColor="#007AFF"
+                      stopColor="#5A0B1C"
                       stopOpacity={
                         0
                       }
@@ -1343,7 +1343,7 @@ export const DashboardPage: React.FC = () => {
                   type="monotone"
                   dataKey="revenue"
                   name="Revenue"
-                  stroke="#007AFF"
+                  stroke="#5A0B1C"
                   strokeWidth={3}
                   fillOpacity={1}
                   fill="url(#colorRev)"
@@ -1581,7 +1581,7 @@ export const DashboardPage: React.FC = () => {
                 cursor-pointer
                 text-xs
                 font-bold
-                text-[#007AFF]
+                text-[#5A0B1C] dark:text-[#D9A62E]
 
                 hover:underline
               "
@@ -1797,7 +1797,7 @@ export const DashboardPage: React.FC = () => {
                               px-3 py-2
                               text-[10px]
                               font-bold
-                              text-[#007AFF]
+                              text-[#5A0B1C] dark:text-[#D9A62E]
                               transition-colors
 
                               hover:bg-slate-200
@@ -2043,7 +2043,7 @@ export const DashboardPage: React.FC = () => {
                               bg-slate-100
                               px-3 py-1.5
                               font-bold
-                              text-[#007AFF]
+                              text-[#5A0B1C] dark:text-[#D9A62E]
                               transition-colors
 
                               hover:bg-slate-200
@@ -2280,7 +2280,7 @@ export const DashboardPage: React.FC = () => {
                 className="
                   h-4 w-4
                   shrink-0
-                  text-[#007AFF]
+                  text-[#5A0B1C] dark:text-[#D9A62E]
                 "
               />
 
@@ -2360,7 +2360,7 @@ export const DashboardPage: React.FC = () => {
                             shrink-0
                             text-[9px]
                             font-semibold
-                            text-[#007AFF]
+                            text-[#5A0B1C] dark:text-[#D9A62E]
                           "
                         >
                           {

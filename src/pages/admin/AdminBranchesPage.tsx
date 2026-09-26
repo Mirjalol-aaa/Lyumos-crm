@@ -181,7 +181,7 @@ export const AdminBranchesPage: React.FC = () => {
       align: 'center',
       render: (b) => (
         <span className="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 dark:text-[#D8D0C5]">
-          <GraduationCap className="h-3 w-3 text-blue-500" />
+          <GraduationCap className="h-3 w-3 text-[#5A0B1C] dark:text-[#D9A62E]" />
           {b.teacherCount} ustoz
         </span>
       ),

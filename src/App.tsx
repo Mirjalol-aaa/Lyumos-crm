@@ -204,7 +204,7 @@ function TeacherPortalContent() {
 
   return (
     <div
-      className="min-h-screen flex font-sans antialiased selection:bg-indigo-600 selection:text-white bg-[#F8F9FC] dark:bg-slate-950 text-slate-900 dark:text-slate-100"
+      className="min-h-screen flex font-sans antialiased selection:bg-[#5A0B1C] selection:text-white bg-[#F8F9FC] dark:bg-slate-950 text-slate-900 dark:text-slate-100"
     >
       <TeacherSidebar
         activePage={teacherPage}
@@ -228,7 +228,7 @@ function TeacherPortalContent() {
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="text-sm font-black text-slate-900 dark:text-white font-serif">LUMOS</span>
-                <span className="rounded-md bg-indigo-500/10 px-1.5 py-0.5 text-[9px] font-black uppercase text-indigo-600 dark:text-indigo-400">
+                <span className="rounded-md bg-[#FAF0F2] px-1.5 py-0.5 text-[9px] font-black uppercase text-[#5A0B1C] dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E]">
                   Ustoz
                 </span>
               </div>

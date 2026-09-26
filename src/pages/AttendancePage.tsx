@@ -622,11 +622,11 @@ export const AttendancePage: React.FC = () => {
       default:
         return `
           border
-          border-blue-600
-          bg-blue-600
+          border-[#5A0B1C]
+          bg-[#5A0B1C]
           text-white
           shadow-sm
-          shadow-blue-600/20
+          shadow-[#5A0B1C]/20
         `;
     }
   };
@@ -714,15 +714,18 @@ export const AttendancePage: React.FC = () => {
               justify-center
               gap-2
               rounded-xl
-              border border-sky-500/30
-              bg-sky-500/10
-              hover:bg-sky-500/20
+              border border-[#5A0B1C]/20
+              bg-[#FAF0F2]
+              hover:bg-[#F3E2E6]
+              dark:border-[#5A0B1C]/40
+              dark:bg-[#5A0B1C]/20
+              dark:hover:bg-[#5A0B1C]/30
               active:scale-[0.98]
               px-4 py-2.5
               text-xs
               font-bold
-              text-sky-700
-              dark:text-sky-400
+              text-[#5A0B1C]
+              dark:text-[#D9A62E]
               transition-all
               shadow-sm
               disabled:cursor-not-allowed
@@ -730,7 +733,7 @@ export const AttendancePage: React.FC = () => {
             "
             title="Davomat hisobotini va kelmaganlar xabarini Telegramga yuborish"
           >
-            <Send className="h-4 w-4 shrink-0 text-sky-500" />
+            <Send className="h-4 w-4 shrink-0 text-[#5A0B1C] dark:text-[#D9A62E]" />
             <span>
               {isSendingTelegram
                 ? 'Yuborilmoqda...'
@@ -946,9 +949,9 @@ export const AttendancePage: React.FC = () => {
                   outline-none
                   transition-all
 
-                  focus:border-[#007AFF]/40
+                  focus:border-[#5A0B1C]
                   focus:ring-2
-                  focus:ring-[#007AFF]/10
+                  focus:ring-[#5A0B1C]/15
 
                   dark:border-slate-700
                   dark:bg-slate-800
@@ -1020,9 +1023,9 @@ export const AttendancePage: React.FC = () => {
                   outline-none
                   transition-all
 
-                  focus:border-[#007AFF]/40
+                  focus:border-[#5A0B1C]
                   focus:ring-2
-                  focus:ring-[#007AFF]/10
+                  focus:ring-[#5A0B1C]/15
 
                   dark:border-slate-700
                   dark:bg-slate-800
@@ -1096,12 +1099,12 @@ export const AttendancePage: React.FC = () => {
             gap-3
             rounded-2xl
             border
-            border-blue-200/50
-            bg-blue-50/50
+            border-[#F0D5DC]
+            bg-[#FAF0F2]
             px-4 py-3
 
-            dark:border-blue-900/40
-            dark:bg-blue-950/20
+            dark:border-[#5A0B1C]/40
+            dark:bg-[#5A0B1C]/15
 
             sm:flex-row
             sm:items-center
@@ -1123,7 +1126,7 @@ export const AttendancePage: React.FC = () => {
                 items-center
                 justify-center
                 rounded-xl
-                bg-[#007AFF]
+                bg-[#5A0B1C]
                 text-white
               "
             >
@@ -1182,7 +1185,7 @@ export const AttendancePage: React.FC = () => {
             <CalendarDays
               className="
                 h-4 w-4
-                text-[#007AFF]
+                text-[#5A0B1C] dark:text-[#D9A62E]
               "
             />
 
@@ -1430,9 +1433,9 @@ export const AttendancePage: React.FC = () => {
               mt-1
               text-xl
               font-black
-              text-blue-600
+              text-[#5A0B1C]
 
-              dark:text-blue-400
+              dark:text-[#D9A62E]
 
               sm:text-2xl
             "
@@ -1617,11 +1620,13 @@ export const AttendancePage: React.FC = () => {
                               dark:text-amber-300
                             `
                             : `
-                              bg-blue-100
-                              text-blue-700
+                              bg-[#FAF0F2]
+                              text-[#5A0B1C]
+                              border border-[#F0D5DC]
 
-                              dark:bg-blue-950
-                              dark:text-blue-300
+                              dark:bg-[#5A0B1C]/20
+                              dark:border-[#5A0B1C]/30
+                              dark:text-[#D9A62E]
                             `
                         }
                       `}

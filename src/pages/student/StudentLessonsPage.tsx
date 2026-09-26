@@ -89,7 +89,7 @@ export const StudentLessonsPage: React.FC = () => {
                         href={lesson.materialsUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-600 transition-colors hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-400"
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-[#FAF0F2] px-3 py-1.5 text-xs font-bold text-[#5A0B1C] transition-colors hover:bg-[#F3E2E6] dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E] dark:hover:bg-[#5A0B1C]/30"
                       >
                         <FileText className="h-4 w-4" />
                         Dars Taqdimoti / Qo‘llanma

@@ -58,7 +58,7 @@ export const AdminCoursesGroupsPage: React.FC = () => {
       sortable: true,
       render: (g) => (
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-50 text-[11px] font-bold text-indigo-600 dark:bg-indigo-950 dark:text-indigo-300">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#FAF0F2] text-[11px] font-bold text-[#5A0B1C] dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E]">
             {g.teacherName?.slice(0, 2) || 'UT'}
           </div>
           <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
@@ -178,7 +178,7 @@ export const AdminCoursesGroupsPage: React.FC = () => {
           onClick={() => setActiveView('groups')}
           className={`rounded-xl px-4 py-2 text-xs font-bold transition-all ${
             activeView === 'groups'
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+              ? 'bg-[#5A0B1C] text-white shadow-sm'
               : 'bg-white text-slate-600 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800'
           }`}
         >
@@ -190,7 +190,7 @@ export const AdminCoursesGroupsPage: React.FC = () => {
           onClick={() => setActiveView('courses')}
           className={`rounded-xl px-4 py-2 text-xs font-bold transition-all ${
             activeView === 'courses'
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+              ? 'bg-[#5A0B1C] text-white shadow-sm'
               : 'bg-white text-slate-600 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800'
           }`}
         >
@@ -234,7 +234,7 @@ export const AdminCoursesGroupsPage: React.FC = () => {
                     <ul className="mt-1.5 space-y-1 text-xs text-slate-600 dark:text-slate-300">
                       {course.syllabus.map((item, i) => (
                         <li key={i} className="flex items-center gap-1.5">
-                          <span className="h-1.5 w-1.5 rounded-full bg-blue-500 shrink-0" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-[#D9A62E] shrink-0" />
                           <span className="truncate">{item}</span>
                         </li>
                       ))}

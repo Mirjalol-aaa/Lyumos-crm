@@ -128,7 +128,7 @@ export const AdminTeacherLogin: React.FC<AdminTeacherLoginProps> = ({ onSwitchTo
             <button
               type="button"
               onClick={onSwitchToStudent}
-              className="text-[11px] sm:text-xs font-bold text-blue-300 hover:text-blue-200 flex items-center gap-1 sm:gap-1.5 cursor-pointer bg-blue-950/70 px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border border-blue-800 hover:border-blue-700 transition-all shadow-xs"
+              className="text-[11px] sm:text-xs font-bold text-amber-300 hover:text-amber-200 flex items-center gap-1 sm:gap-1.5 cursor-pointer bg-amber-950/40 px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border border-amber-800/60 hover:border-amber-700 transition-all shadow-xs"
             >
               <span>Talaba Paneli</span>
               <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />

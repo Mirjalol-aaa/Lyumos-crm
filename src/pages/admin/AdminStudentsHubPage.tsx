@@ -63,7 +63,7 @@ export const AdminStudentsHubPage: React.FC = () => {
           <img
             src={s.avatar}
             alt={s.fullName}
-            className="h-9 w-9 rounded-full object-cover ring-2 ring-blue-500/20"
+            className="h-9 w-9 rounded-full object-cover ring-2 ring-[#5A0B1C]/20"
           />
           <div>
             <span className="font-bold text-slate-900 dark:text-white">
@@ -170,7 +170,7 @@ export const AdminStudentsHubPage: React.FC = () => {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <span className="rounded-lg bg-blue-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+            <span className="rounded-lg bg-[#FAF0F2] px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-[#5A0B1C] dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E] border border-[#F0D5DC] dark:border-[#5A0B1C]/30">
               Student Information System
             </span>
             <span className="text-xs text-slate-400">Jami {students.length} nafar o‘quvchi</span>
@@ -274,7 +274,7 @@ export const AdminStudentsHubPage: React.FC = () => {
               <img
                 src={activeStudentDrawer.avatar}
                 alt={activeStudentDrawer.fullName}
-                className="h-16 w-16 rounded-full object-cover ring-4 ring-blue-500/20"
+                className="h-16 w-16 rounded-full object-cover ring-4 ring-[#5A0B1C]/20"
               />
               <div>
                 <h3 className="text-lg font-black text-slate-900 dark:text-white">
@@ -295,7 +295,7 @@ export const AdminStudentsHubPage: React.FC = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Guruh:</span>
-                  <span className="font-bold text-blue-600 dark:text-blue-400">{activeStudentDrawer.groupName}</span>
+                  <span className="font-bold text-[#5A0B1C] dark:text-[#D9A62E]">{activeStudentDrawer.groupName}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Ustoz:</span>

@@ -165,7 +165,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({ onSwitchToAdmin, onB
         <div className="my-auto py-6 sm:py-8 space-y-5 sm:space-y-6">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/80 text-[11px] font-bold text-slate-300 mb-3">
-              <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
               <span>O‘quvchi Shaxsiy Kabineti</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">

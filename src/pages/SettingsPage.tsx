@@ -478,15 +478,15 @@ export const SettingsPage:
 
       placeholder:text-slate-400
 
-      focus:border-[#007AFF]/50
+      focus:border-[#5A0B1C]
       focus:bg-white
       focus:ring-2
-      focus:ring-[#007AFF]/10
+      focus:ring-[#5A0B1C]/15
 
       dark:border-slate-700
       dark:bg-slate-800
       dark:text-white
-      dark:focus:border-[#007AFF]/60
+      dark:focus:border-[#5A0B1C]
       dark:focus:bg-slate-800
     `;
 
@@ -705,10 +705,11 @@ export const SettingsPage:
                     items-center
                     justify-center
                     rounded-xl
-                    bg-blue-50
-                    text-[#007AFF]
+                    bg-[#FAF0F2]
+                    text-[#5A0B1C]
 
-                    dark:bg-blue-950/40
+                    dark:bg-[#5A0B1C]/20
+                    dark:text-[#D9A62E]
                   "
                 >
                   <Building
@@ -1355,12 +1356,12 @@ export const SettingsPage:
                   p-3
                   transition-all
 
-                  hover:border-blue-200
-                  hover:bg-blue-50/50
+                  hover:border-[#F0D5DC]
+                  hover:bg-[#FAF0F2]/50
 
                   dark:bg-slate-800/50
-                  dark:hover:border-blue-900
-                  dark:hover:bg-blue-950/20
+                  dark:hover:border-[#5A0B1C]/40
+                  dark:hover:bg-[#5A0B1C]/15
 
                   sm:p-4
                 "
@@ -1382,11 +1383,11 @@ export const SettingsPage:
                       items-center
                       justify-center
                       rounded-xl
-                      bg-blue-100
-                      text-blue-600
+                      bg-[#FAF0F2]
+                      text-[#5A0B1C]
 
-                      dark:bg-blue-950/50
-                      dark:text-blue-400
+                      dark:bg-[#5A0B1C]/20
+                      dark:text-[#D9A62E]
                     "
                   >
                     <MessageSquareText
@@ -1453,7 +1454,7 @@ export const SettingsPage:
                     w-5
                     shrink-0
                     cursor-pointer
-                    accent-[#007AFF]
+                    accent-[#5A0B1C]
                   "
                 />
               </label>
@@ -1574,7 +1575,7 @@ export const SettingsPage:
                     w-5
                     shrink-0
                     cursor-pointer
-                    accent-[#007AFF]
+                    accent-[#5A0B1C]
                   "
                 />
               </label>
@@ -1585,13 +1586,13 @@ export const SettingsPage:
               <div className="mt-6 pt-6 border-t border-slate-200/80 dark:border-slate-800 space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="flex items-center gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600 dark:bg-sky-500/20 dark:text-sky-400">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#FAF0F2] text-[#5A0B1C] dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E]">
                       <Send className="h-4 w-4" />
                     </div>
                     <div>
                       <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                         <span>Telegram Bot Integratsiyasi</span>
-                        <span className="rounded bg-sky-500/10 px-1.5 py-0.2 text-[9px] font-bold text-sky-600 dark:text-sky-400">
+                        <span className="rounded bg-emerald-500/10 px-1.5 py-0.2 text-[9px] font-bold text-emerald-600 dark:text-emerald-400">
                           Bepul
                         </span>
                       </h3>
@@ -1604,7 +1605,7 @@ export const SettingsPage:
                   <button
                     type="button"
                     onClick={() => setShowTelegramGuide(!showTelegramGuide)}
-                    className="flex items-center gap-1 text-[11px] font-bold text-sky-600 hover:text-sky-700 dark:text-sky-400 cursor-pointer self-start sm:self-auto"
+                    className="flex items-center gap-1 text-[11px] font-bold text-[#5A0B1C] hover:text-[#450815] dark:text-[#D9A62E] cursor-pointer self-start sm:self-auto"
                   >
                     <HelpCircle className="h-3.5 w-3.5" />
                     <span>Qanday ulanadi?</span>
@@ -1613,13 +1614,13 @@ export const SettingsPage:
 
                 {/* Step by step guide accordion */}
                 {showTelegramGuide && (
-                  <div className="p-4 rounded-2xl bg-sky-50/60 dark:bg-sky-950/30 border border-sky-200/60 dark:border-sky-800/50 text-xs space-y-2 text-slate-700 dark:text-slate-300 animate-in fade-in duration-200">
-                    <p className="font-bold text-sky-800 dark:text-sky-300">
+                  <div className="p-4 rounded-2xl bg-[#FAF0F2]/60 dark:bg-slate-900/60 border border-[#5A0B1C]/15 dark:border-slate-800 text-xs space-y-2 text-slate-700 dark:text-slate-300 animate-in fade-in duration-200">
+                    <p className="font-bold text-[#5A0B1C] dark:text-[#D9A62E]">
                       Telegram botni ulash bo‘yicha 3 ta oson qadam:
                     </p>
                     <ol className="list-decimal list-inside space-y-1 text-[11px] leading-relaxed">
                       <li>
-                        Telegramda <a href="https://t.me/BotFather" target="_blank" rel="noreferrer" className="font-bold text-sky-600 underline">@BotFather</a> ga kiring va <code>/newbot</code> buyrug‘ini bering.
+                        Telegramda <a href="https://t.me/BotFather" target="_blank" rel="noreferrer" className="font-bold text-[#5A0B1C] dark:text-[#D9A62E] underline">@BotFather</a> ga kiring va <code>/newbot</code> buyrug‘ini bering.
                       </li>
                       <li>
                         Botingizga nom va username bering, berilgan <b>API Token</b> ni quyidagi birinchi qatorga nusxalang.
@@ -1657,7 +1658,7 @@ export const SettingsPage:
                         type="button"
                         onClick={handleDetectChatId}
                         disabled={isDetectingChatId}
-                        className="text-[10px] font-bold text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 flex items-center gap-1 cursor-pointer disabled:opacity-50 transition-colors"
+                        className="text-[10px] font-bold text-[#5A0B1C] dark:text-[#D9A62E] hover:text-[#450815] dark:hover:text-amber-300 flex items-center gap-1 cursor-pointer disabled:opacity-50 transition-colors"
                         title="Botga yozilgan oxirgi xabardan Chat ID ni avtomatik topish"
                       >
                         {isDetectingChatId ? (
@@ -1699,7 +1700,7 @@ export const SettingsPage:
                       type="checkbox"
                       checked={enableTelegramPayments}
                       onChange={(e) => setEnableTelegramPayments(e.target.checked)}
-                      className="h-4 w-4 accent-[#007AFF] cursor-pointer"
+                      className="h-4 w-4 accent-[#5A0B1C] cursor-pointer"
                     />
                   </label>
 
@@ -1716,7 +1717,7 @@ export const SettingsPage:
                       type="checkbox"
                       checked={enableTelegramAttendance}
                       onChange={(e) => setEnableTelegramAttendance(e.target.checked)}
-                      className="h-4 w-4 accent-[#007AFF] cursor-pointer"
+                      className="h-4 w-4 accent-[#5A0B1C] cursor-pointer"
                     />
                   </label>
                 </div>
@@ -1728,7 +1729,7 @@ export const SettingsPage:
                       type="button"
                       onClick={handleTestTelegram}
                       disabled={isTestingTelegram}
-                      className="flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl border border-sky-500/40 bg-sky-500/10 hover:bg-sky-500/20 active:scale-[0.98] text-xs font-bold text-sky-700 dark:text-sky-400 transition-all cursor-pointer disabled:opacity-50"
+                      className="flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl border border-[#5A0B1C]/30 bg-[#FAF0F2] hover:bg-[#F3E2E6] dark:border-[#5A0B1C]/40 dark:bg-[#5A0B1C]/20 dark:hover:bg-[#5A0B1C]/30 active:scale-[0.98] text-xs font-bold text-[#5A0B1C] dark:text-[#D9A62E] transition-all cursor-pointer disabled:opacity-50"
                     >
                       {isTestingTelegram ? (
                         <RefreshCw className="h-3.5 w-3.5 animate-spin" />
@@ -1742,7 +1743,7 @@ export const SettingsPage:
                       type="button"
                       onClick={handleSetupTelegramMenu}
                       disabled={isSettingUpMenu}
-                      className="flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl border border-indigo-500/40 bg-indigo-500/10 hover:bg-indigo-500/20 active:scale-[0.98] text-xs font-bold text-indigo-700 dark:text-indigo-400 transition-all cursor-pointer disabled:opacity-50"
+                      className="flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl border border-[#F0D5DC] bg-[#FAF0F2] hover:bg-[#F5E6EA] active:scale-[0.98] text-xs font-bold text-[#5A0B1C] dark:border-[#5A0B1C]/40 dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E] transition-all cursor-pointer disabled:opacity-50"
                     >
                       {isSettingUpMenu ? (
                         <RefreshCw className="h-3.5 w-3.5 animate-spin" />
@@ -2026,10 +2027,10 @@ export const SettingsPage:
                       shadow-emerald-500/25
                     `
                     : `
-                      bg-[#007AFF]
-                      shadow-blue-500/20
+                      bg-[#5A0B1C]
+                      shadow-sm
 
-                      hover:bg-blue-600
+                      hover:bg-[#450815]
                     `
                 }
               `}

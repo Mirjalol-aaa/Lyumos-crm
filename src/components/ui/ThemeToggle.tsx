@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Sun, Moon, Laptop, Check } from 'lucide-react';
 import { useCRM } from '../../context/CRMContext';
 
@@ -47,7 +47,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
       >
         {currentTheme === 'dark' && <Moon className="h-4 w-4 text-amber-400" />}
         {currentTheme === 'light' && <Sun className="h-4 w-4 text-amber-500" />}
-        {currentTheme === 'system' && <Laptop className="h-4 w-4 text-blue-400" />}
+        {currentTheme === 'system' && <Laptop className="h-4 w-4 text-slate-500" />}
       </button>
     );
   }
@@ -63,7 +63,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
         >
           {currentTheme === 'dark' && <Moon className="h-4 w-4 text-amber-400" />}
           {currentTheme === 'light' && <Sun className="h-4 w-4 text-amber-500" />}
-          {currentTheme === 'system' && <Laptop className="h-4 w-4 text-blue-400" />}
+          {currentTheme === 'system' && <Laptop className="h-4 w-4 text-slate-500" />}
           <span className="capitalize">{currentTheme}</span>
         </button>
 
@@ -71,8 +71,8 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
           <div className="absolute right-0 mt-2 w-36 rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900 z-50 animate-in fade-in-50 zoom-in-95 duration-150">
             {[
               { id: 'light', label: 'Yorug‘', icon: Sun, color: 'text-amber-500' },
-              { id: 'dark', label: 'Qorong‘i', icon: Moon, color: 'text-indigo-400' },
-              { id: 'system', label: 'Tizim', icon: Laptop, color: 'text-blue-400' },
+              { id: 'dark', label: 'Qorong‘i', icon: Moon, color: 'text-amber-400' },
+              { id: 'system', label: 'Tizim', icon: Laptop, color: 'text-slate-500' },
             ].map(({ id, label, icon: Icon, color }) => (
               <button
                 key={id}

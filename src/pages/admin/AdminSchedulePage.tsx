@@ -69,7 +69,7 @@ export const AdminSchedulePage: React.FC = () => {
         time: '15:30 - 17:30',
         room: '102-xona',
         studentsCount: 8,
-        color: 'border-blue-400 bg-blue-500/10 text-blue-900 dark:text-blue-200',
+        color: 'border-[#F0D5DC] bg-[#FAF0F2] text-[#5A0B1C] dark:border-[#5A0B1C]/40 dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E]',
       },
     ];
   }, []);
@@ -170,7 +170,7 @@ export const AdminSchedulePage: React.FC = () => {
               onClick={() => setTeacherFilter('Hasanboy')}
               className={`px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition-colors cursor-pointer ${
                 teacherFilter === 'Hasanboy'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-[#5A0B1C] text-white'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'
               }`}
             >

@@ -265,8 +265,8 @@ const GroupEditModal:
                 pointer-events-none
                 absolute inset-0
                 bg-gradient-to-r
-                from-purple-600/10
-                via-blue-500/5
+                from-[#5A0B1C]/10
+                via-[#D9A62E]/5
                 to-transparent
               "
             />
@@ -296,11 +296,11 @@ const GroupEditModal:
                     justify-center
                     rounded-xl
                     bg-gradient-to-br
-                    from-purple-600
-                    to-blue-600
+                    from-[#5A0B1C]
+                    to-[#7D1228]
                     text-white
                     shadow-lg
-                    shadow-purple-600/20
+                    shadow-[#5A0B1C]/20
 
                     sm:h-12
                     sm:w-12
@@ -907,14 +907,14 @@ const GroupEditModal:
                 gap-2
                 rounded-xl
                 bg-gradient-to-r
-                from-purple-600
-                to-blue-600
+                from-[#5A0B1C]
+                to-[#7D1228]
                 px-4 py-2.5
                 text-xs
                 font-black
                 text-white
-                shadow-lg
-                shadow-purple-600/20
+                shadow-sm
+                shadow-[#5A0B1C]/20
                 transition-all
 
                 hover:shadow-xl
@@ -1131,7 +1131,7 @@ export const GroupsPage:
               right-40
               h-40 w-40
               rounded-full
-              bg-blue-500/10
+              bg-[#D9A62E]/10
               blur-3xl
             "
           />
@@ -1347,10 +1347,11 @@ export const GroupsPage:
                 items-center
                 justify-center
                 rounded-2xl
-                bg-blue-50
-                text-blue-600
+                bg-[#FAF0F2]
+                text-[#5A0B1C]
 
-                dark:bg-blue-500/10
+                dark:bg-[#5A0B1C]/20
+                dark:text-[#D9A62E]
               "
             >
               <Users
@@ -1608,9 +1609,9 @@ export const GroupsPage:
                         top-0
                         h-[3px]
                         bg-gradient-to-r
-                        from-purple-600
-                        via-blue-500
-                        to-cyan-400
+                        from-[#5A0B1C]
+                        via-[#8B142F]
+                        to-[#D9A62E]
                         opacity-0
                         transition-opacity
 
@@ -1785,10 +1786,11 @@ export const GroupsPage:
                             items-center
                             justify-center
                             rounded-xl
-                            bg-blue-50
-                            text-blue-600
+                            bg-[#FAF0F2]
+                            text-[#5A0B1C]
 
-                            dark:bg-blue-500/10
+                            dark:bg-[#5A0B1C]/20
+                            dark:text-[#D9A62E]
                           "
                         >
                           <GraduationCap
@@ -2067,8 +2069,8 @@ export const GroupsPage:
                                 `
                                 : `
                                   bg-gradient-to-r
-                                  from-purple-600
-                                  to-blue-500
+                                  from-[#5A0B1C]
+                                  to-[#8B142F]
                                 `
                             }
                           `}

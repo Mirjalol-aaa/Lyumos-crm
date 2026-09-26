@@ -81,7 +81,7 @@ export const StudentHomeworkPage: React.FC = () => {
                 isGraded
                   ? 'border-emerald-200 bg-emerald-50/20 dark:border-emerald-950 dark:bg-emerald-950/10'
                   : isSubmitted
-                  ? 'border-indigo-200 bg-indigo-50/20 dark:border-indigo-950 dark:bg-indigo-950/10'
+                  ? 'border-amber-200 bg-amber-50/20 dark:border-amber-950 dark:bg-amber-950/10'
                   : 'border-slate-200/80 bg-white dark:border-slate-800 dark:bg-slate-900'
               }`}
             >
@@ -98,7 +98,7 @@ export const StudentHomeworkPage: React.FC = () => {
                       {submission?.score} / {task.maxScore} ball
                     </span>
                   ) : isSubmitted ? (
-                    <span className="flex items-center gap-1 rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-bold text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300">
+                    <span className="flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-800 dark:bg-amber-950 dark:text-amber-300">
                       <Clock className="h-3.5 w-3.5" />
                       Topshirildi (Tekshirilmoqda)
                     </span>
@@ -125,7 +125,7 @@ export const StudentHomeworkPage: React.FC = () => {
                       href={task.attachmentUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:underline"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-[#5A0B1C] dark:text-[#D9A62E] hover:underline"
                     >
                       Topshiriq materialini ko‘rish
                       <ExternalLink className="h-3 w-3" />

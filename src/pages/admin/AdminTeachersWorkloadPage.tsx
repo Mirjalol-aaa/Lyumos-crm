@@ -184,7 +184,7 @@ export const AdminTeachersWorkloadPage: React.FC = () => {
                 t.workloadPercentage >= 90
                   ? 'text-rose-600'
                   : t.workloadPercentage <= 50
-                  ? 'text-blue-600'
+                  ? 'text-amber-600 dark:text-amber-400'
                   : 'text-emerald-600'
               }
             >
@@ -197,7 +197,7 @@ export const AdminTeachersWorkloadPage: React.FC = () => {
                 t.workloadPercentage >= 90
                   ? 'bg-rose-500'
                   : t.workloadPercentage <= 50
-                  ? 'bg-blue-500'
+                  ? 'bg-amber-500'
                   : 'bg-emerald-500'
               }`}
               style={{ width: `${t.workloadPercentage}%` }}
@@ -296,7 +296,7 @@ export const AdminTeachersWorkloadPage: React.FC = () => {
           <button
             type="button"
             onClick={() => handleOpenEdit(t.rawTeacher)}
-            className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-slate-500 hover:text-[#5A0B1C] hover:bg-[#FAF0F2] dark:hover:bg-slate-800 dark:hover:text-[#D9A62E] dark:text-slate-400 transition-colors cursor-pointer"
             title="Tahrirlash"
           >
             <Edit2 className="h-4 w-4" />
@@ -374,12 +374,12 @@ export const AdminTeachersWorkloadPage: React.FC = () => {
 
         <Card>
           <CardContent className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FAF0F2] text-[#5A0B1C] dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E]">
               <Award className="h-6 w-6" />
             </div>
             <div>
               <span className="text-xs font-bold text-slate-400 uppercase">O‘rtacha KPI</span>
-              <p className="text-2xl font-black text-blue-600 dark:text-blue-400">5.0 / 5.0</p>
+              <p className="text-2xl font-black text-[#5A0B1C] dark:text-[#D9A62E]">5.0 / 5.0</p>
               <span className="text-[11px] text-slate-400">O‘quvchilar saqlanishi: ~96%</span>
             </div>
           </CardContent>

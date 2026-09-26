@@ -494,7 +494,7 @@ export const ImportStudentsModal: React.FC = () => {
                 </p>
                 <div className="flex justify-between text-slate-600 dark:text-slate-400">
                   <span>Login:</span>
-                  <span className="font-mono font-bold text-blue-600 dark:text-blue-400">Telefon raqam yoki STU-ID</span>
+                  <span className="font-mono font-bold text-[#5A0B1C] dark:text-[#D9A62E]">Telefon raqam yoki STU-ID</span>
                 </div>
                 <div className="flex justify-between text-slate-600 dark:text-slate-400">
                   <span>Standart parol:</span>
@@ -513,7 +513,7 @@ export const ImportStudentsModal: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="px-6 py-2.5 rounded-xl bg-[#007AFF] text-xs font-bold text-white shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl bg-[#5A0B1C] text-xs font-bold text-white shadow-sm hover:bg-[#450815] transition-all cursor-pointer"
                 >
                   O‘quvchilar ro‘yxatiga o‘tish
                 </button>
@@ -552,7 +552,7 @@ export const ImportStudentsModal: React.FC = () => {
                 {/* Group selector */}
                 <div className="flex flex-col justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800">
                   <div className="space-y-1 mb-3">
-                    <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[#5A0B1C] dark:text-[#D9A62E]">
                       <Users className="h-3.5 w-3.5" />
                       Guruhga biriktirish
                     </span>
@@ -567,7 +567,7 @@ export const ImportStudentsModal: React.FC = () => {
                   <select
                     value={defaultGroupId}
                     onChange={(e) => setDefaultGroupId(e.target.value)}
-                    className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-xs font-bold text-slate-800 dark:text-slate-100 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
+                    className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-xs font-bold text-slate-800 dark:text-slate-100 outline-none focus:border-[#5A0B1C] focus:ring-2 focus:ring-[#5A0B1C]/15 cursor-pointer"
                   >
                     <option value="auto">🔍 Fayldagi guruh bo‘yicha avtomatik aniqlash</option>
                     {groups.map((g) => (
@@ -588,8 +588,8 @@ export const ImportStudentsModal: React.FC = () => {
                 onClick={() => fileInputRef.current?.click()}
                 className={`relative flex flex-col items-center justify-center p-8 rounded-3xl border-2 border-dashed transition-all cursor-pointer ${
                   isDragging
-                    ? 'border-[#007AFF] bg-blue-50/50 dark:bg-blue-950/20 scale-[1.01]'
-                    : 'border-slate-300 hover:border-blue-400 dark:border-slate-700 dark:hover:border-slate-600 bg-slate-50/40 dark:bg-slate-900/40'
+                    ? 'border-[#5A0B1C] bg-[#FAF0F2]/50 dark:bg-[#5A0B1C]/10 scale-[1.01]'
+                    : 'border-slate-300 hover:border-[#5A0B1C]/50 dark:border-slate-700 dark:hover:border-slate-600 bg-slate-50/40 dark:bg-slate-900/40'
                 }`}
               >
                 <input
@@ -600,7 +600,7 @@ export const ImportStudentsModal: React.FC = () => {
                   className="hidden"
                 />
 
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#007AFF]/10 text-[#007AFF] dark:bg-blue-500/20 dark:text-blue-400 mb-3 shadow-inner">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#FAF0F2] text-[#5A0B1C] dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E] mb-3 shadow-inner">
                   {isReadingFile ? (
                     <Loader2 className="h-8 w-8 animate-spin" />
                   ) : (
@@ -613,7 +613,7 @@ export const ImportStudentsModal: React.FC = () => {
                     {file ? file.name : 'Excel yoki CSV faylni shu yerga tashlang'}
                   </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    yoki kompyuterdan tanlash uchun <span className="text-[#007AFF] font-bold underline">bosing</span>
+                    yoki kompyuterdan tanlash uchun <span className="text-[#5A0B1C] dark:text-[#D9A62E] font-bold underline">bosing</span>
                   </p>
                   <p className="text-[10px] text-slate-400 dark:text-slate-500 pt-1">
                     Qo‘llab-quvvatlanadigan formatlar: .xlsx, .xls, .csv (Cheksiz o‘quvchilar)
@@ -686,7 +686,7 @@ export const ImportStudentsModal: React.FC = () => {
                                 {row.phone}
                               </td>
                               <td className="py-2.5 px-3">
-                                <span className="inline-flex rounded-lg bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:text-blue-300 border border-blue-200/50 dark:border-blue-800/50">
+                                <span className="inline-flex rounded-lg bg-[#FAF0F2] dark:bg-[#5A0B1C]/20 px-2 py-0.5 text-[10px] font-bold text-[#5A0B1C] dark:text-[#D9A62E] border border-[#F0D5DC] dark:border-[#5A0B1C]/40">
                                   {row.groupName}
                                 </span>
                               </td>

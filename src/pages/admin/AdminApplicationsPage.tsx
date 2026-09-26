@@ -130,9 +130,9 @@ export const AdminApplicationsPage: React.FC = () => {
             {applications.filter((a) => a.status === 'Yangi').length} ta
           </span>
         </div>
-        <div className="p-5 rounded-2xl border border-blue-400/30 bg-blue-500/5 dark:bg-slate-900 shadow-xs">
-          <span className="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase block">Sinov darsida</span>
-          <span className="text-2xl font-black text-blue-600 dark:text-blue-400 mt-1 block">
+        <div className="p-5 rounded-2xl border border-[#F0D5DC] bg-[#FAF0F2] dark:border-[#5A0B1C]/40 dark:bg-slate-900 shadow-xs">
+          <span className="text-xs text-[#5A0B1C] dark:text-[#D9A62E] font-bold uppercase block">Sinov darsida</span>
+          <span className="text-2xl font-black text-[#5A0B1C] dark:text-[#D9A62E] mt-1 block">
             {applications.filter((a) => a.status === 'Sinov darsida').length} ta
           </span>
         </div>
@@ -209,7 +209,7 @@ export const AdminApplicationsPage: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-5 py-4 font-mono font-medium">
-                    <a href={`tel:${app.phone}`} className="text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                    <a href={`tel:${app.phone}`} className="text-[#5A0B1C] dark:text-[#D9A62E] hover:underline flex items-center gap-1">
                       <Phone className="h-3 w-3" />
                       <span>{app.phone}</span>
                     </a>
@@ -226,7 +226,7 @@ export const AdminApplicationsPage: React.FC = () => {
                         app.status === 'Yangi'
                           ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
                           : app.status === 'Sinov darsida'
-                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300'
+                          ? 'bg-[#FAF0F2] text-[#5A0B1C] dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E] border border-[#F0D5DC] dark:border-[#5A0B1C]/30'
                           : app.status === 'Qabul qilindi'
                           ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
                           : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
@@ -241,7 +241,7 @@ export const AdminApplicationsPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleUpdateStatus(app.id, 'Bog‘lanildi')}
-                          className="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-950/40 dark:text-blue-300 text-[11px] font-bold cursor-pointer"
+                          className="px-2.5 py-1 rounded-lg bg-[#FAF0F2] text-[#5A0B1C] hover:bg-[#F5E6EA] dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E] text-[11px] font-bold cursor-pointer"
                         >
                           Bog‘lanildi
                         </button>

@@ -126,7 +126,7 @@ export const TeacherHomeworkPage: React.FC = () => {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <span className="rounded-lg bg-indigo-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+            <span className="rounded-lg bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">
               Fast-Grading Studio
             </span>
             <span className="text-xs text-slate-400">100 ballik baholash tizimi</span>
@@ -141,7 +141,7 @@ export const TeacherHomeworkPage: React.FC = () => {
 
         <div className="flex flex-wrap items-center gap-2">
           <Button
-            variant="indigo"
+            variant="primary"
             leftIcon={<Plus className="h-4 w-4" />}
             onClick={() => setIsNewTaskModalOpen(true)}
           >
@@ -158,7 +158,7 @@ export const TeacherHomeworkPage: React.FC = () => {
             onClick={() => setActiveTab('submissions')}
             className={`rounded-xl px-4 py-2 text-xs font-bold transition-all ${
               activeTab === 'submissions'
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
+                ? 'bg-[#5A0B1C] text-white shadow-md shadow-[#5A0B1C]/20'
                 : 'bg-white text-slate-600 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800'
             }`}
           >
@@ -170,7 +170,7 @@ export const TeacherHomeworkPage: React.FC = () => {
             onClick={() => setActiveTab('tasks')}
             className={`rounded-xl px-4 py-2 text-xs font-bold transition-all ${
               activeTab === 'tasks'
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
+                ? 'bg-[#5A0B1C] text-white shadow-md shadow-[#5A0B1C]/20'
                 : 'bg-white text-slate-600 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800'
             }`}
           >
@@ -216,7 +216,7 @@ export const TeacherHomeworkPage: React.FC = () => {
               {pendingSubmissions.map((sub) => (
                 <div
                   key={sub.id}
-                  className="flex flex-col justify-between rounded-2xl border border-indigo-100 bg-white p-5 shadow-sm transition-all hover:border-indigo-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+                  className="flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all hover:border-[#5A0B1C]/30 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
                 >
                   <div>
                     <div className="flex items-center justify-between">
@@ -258,7 +258,7 @@ export const TeacherHomeworkPage: React.FC = () => {
 
                     <Button
                       size="sm"
-                      variant="indigo"
+                      variant="primary"
                       leftIcon={<Zap className="h-3.5 w-3.5" />}
                       onClick={() => handleOpenGradingStudio(sub)}
                     >
@@ -338,7 +338,7 @@ export const TeacherHomeworkPage: React.FC = () => {
                 <img
                   src={gradingSubmission.studentAvatar || 'https://randomuser.me/api/portraits/men/1.jpg'}
                   alt={gradingSubmission.studentName}
-                  className="h-10 w-10 rounded-full object-cover ring-2 ring-indigo-500/20"
+                  className="h-10 w-10 rounded-full object-cover ring-2 ring-[#5A0B1C]/20 dark:ring-amber-500/20"
                 />
                 <div>
                   <h3 className="text-base font-black text-slate-900 dark:text-white">
@@ -382,7 +382,7 @@ export const TeacherHomeworkPage: React.FC = () => {
                     max={100}
                     value={gradeScore}
                     onChange={(e) => setGradeScore(Number(e.target.value))}
-                    className="w-16 rounded-xl border border-indigo-300 px-2.5 py-1 text-center text-sm font-black text-indigo-600 dark:bg-slate-800 dark:text-indigo-400 focus:outline-none"
+                    className="w-16 rounded-xl border border-[#5A0B1C]/40 px-2.5 py-1 text-center text-sm font-black text-[#5A0B1C] dark:bg-slate-800 dark:text-[#D9A62E] focus:outline-none focus:ring-2 focus:ring-[#5A0B1C]/20"
                   />
                   <span className="text-xs font-bold text-slate-400">/ 100</span>
                 </div>
@@ -394,7 +394,7 @@ export const TeacherHomeworkPage: React.FC = () => {
                 max={100}
                 value={gradeScore}
                 onChange={(e) => setGradeScore(Number(e.target.value))}
-                className="h-2 w-full accent-indigo-600 rounded-lg cursor-pointer"
+                className="h-2 w-full accent-[#5A0B1C] rounded-lg cursor-pointer"
               />
             </div>
 
@@ -409,7 +409,7 @@ export const TeacherHomeworkPage: React.FC = () => {
                     key={i}
                     type="button"
                     onClick={() => setGradeFeedback(preset)}
-                    className="rounded-xl border border-slate-200 bg-slate-50/50 p-2 text-left text-[11px] text-slate-700 hover:border-indigo-400 hover:bg-indigo-50/30 transition-colors dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                    className="rounded-xl border border-slate-200 bg-slate-50/50 p-2 text-left text-[11px] text-slate-700 hover:border-[#5A0B1C]/40 hover:bg-[#FAF0F2] transition-colors dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-800/80 dark:text-slate-300"
                   >
                     {preset}
                   </button>
@@ -424,7 +424,7 @@ export const TeacherHomeworkPage: React.FC = () => {
                 placeholder="Ustozning shaxsiy fikri va xatolar tahlili..."
                 value={gradeFeedback}
                 onChange={(e) => setGradeFeedback(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 p-3 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:border-indigo-500"
+                className="w-full rounded-xl border border-slate-200 p-3 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:border-[#5A0B1C] focus:ring-2 focus:ring-[#5A0B1C]/10"
               />
             </div>
 
@@ -443,7 +443,7 @@ export const TeacherHomeworkPage: React.FC = () => {
                 </Button>
 
                 <Button
-                  variant="indigo"
+                  variant="primary"
                   isLoading={isGrading}
                   leftIcon={<Send className="h-4 w-4" />}
                   onClick={handleSaveGrade}
@@ -552,7 +552,7 @@ export const TeacherHomeworkPage: React.FC = () => {
                 >
                   Bekor qilish
                 </Button>
-                <Button type="submit" variant="indigo">
+                <Button type="submit" variant="primary">
                   Vazifani E’lon Qilish
                 </Button>
               </div>

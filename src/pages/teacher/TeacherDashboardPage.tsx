@@ -45,13 +45,13 @@ export const TeacherDashboardPage: React.FC<TeacherDashboardPageProps> = ({
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
       {/* Teacher Switcher for Demo / Multi-Teacher testing */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4 dark:border-indigo-950 dark:bg-indigo-950/30">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-amber-200/60 bg-amber-50/40 p-4 dark:border-amber-950 dark:bg-amber-950/20">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-600/20">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#5A0B1C] text-white shadow-md shadow-[#5A0B1C]/20">
             <Sparkles className="h-5 w-5" />
           </div>
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#5A0B1C] dark:text-[#D9A62E]">
               Faol Ustoz Profili
             </h4>
             <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
@@ -68,7 +68,7 @@ export const TeacherDashboardPage: React.FC<TeacherDashboardPageProps> = ({
           <select
             value={activeTeacherId}
             onChange={(e) => setActiveTeacherId(e.target.value)}
-            className="w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-800 shadow-sm focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            className="w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-800 shadow-sm focus:border-[#5A0B1C] focus:ring-2 focus:ring-[#5A0B1C]/10 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
           >
             {teachers.map(t => (
               <option key={t.id} value={t.id}>
@@ -80,10 +80,10 @@ export const TeacherDashboardPage: React.FC<TeacherDashboardPageProps> = ({
       </div>
 
       {/* Hero Welcome Banner */}
-      <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-950 p-5 sm:p-8 text-white shadow-xl">
+      <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-r from-[#23040C] via-[#3D0A18] to-slate-900 p-5 sm:p-8 text-white shadow-xl">
         <div className="relative z-10 flex flex-col gap-5 sm:gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/20 px-3 py-1 text-xs font-semibold text-indigo-300">
+            <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-500/20 px-3 py-1 text-xs font-semibold text-amber-300">
               <Sparkles className="h-3.5 w-3.5" />
               <span>Ustoz Boshqaruv Markazi</span>
             </div>
@@ -92,8 +92,8 @@ export const TeacherDashboardPage: React.FC<TeacherDashboardPageProps> = ({
               Xush kelibsiz, {currentTeacher?.fullName}!
             </h1>
             <p className="mt-2 text-xs sm:text-sm leading-relaxed text-slate-300">
-              Sizda hozirda <strong className="text-indigo-300">{myGroups.length} ta faol guruh</strong> va{' '}
-              <strong className="text-indigo-300">{myStudents.length} nafar o‘quvchi</strong> mavjud. Darslar o‘tib, video yuklang va o‘quvchilar uyga vazifalarini 100 ballik tizimda baholang.
+              Sizda hozirda <strong className="text-amber-300">{myGroups.length} ta faol guruh</strong> va{' '}
+              <strong className="text-amber-300">{myStudents.length} nafar o‘quvchi</strong> mavjud. Darslar o‘tib, video yuklang va o‘quvchilar uyga vazifalarini 100 ballik tizimda baholang.
             </p>
           </div>
 
@@ -102,7 +102,7 @@ export const TeacherDashboardPage: React.FC<TeacherDashboardPageProps> = ({
             <button
               type="button"
               onClick={() => (onOpenAddLesson ? onOpenAddLesson() : onNavigate('lessons'))}
-              className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 sm:py-3 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 transition-all hover:bg-indigo-700 active:scale-95"
+              className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#D9A62E] hover:bg-[#C49220] px-4 py-2.5 sm:py-3 text-xs font-bold text-slate-950 shadow-lg shadow-amber-900/20 transition-all active:scale-95"
             >
               <Video className="h-4 w-4" />
               <span>Dars & Video Qo‘shish</span>
@@ -125,7 +125,7 @@ export const TeacherDashboardPage: React.FC<TeacherDashboardPageProps> = ({
         <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Mening Guruhlarim</span>
-            <div className="rounded-xl bg-indigo-50 p-2.5 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400">
+            <div className="rounded-xl bg-[#FAF0F2] p-2.5 text-[#5A0B1C] dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E]">
               <BookOpen className="h-5 w-5" />
             </div>
           </div>
@@ -138,7 +138,7 @@ export const TeacherDashboardPage: React.FC<TeacherDashboardPageProps> = ({
         <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">O‘quvchilar Soni</span>
-            <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
+            <div className="rounded-xl bg-amber-50 p-2.5 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400">
               <Users className="h-5 w-5" />
             </div>
           </div>
@@ -186,7 +186,7 @@ export const TeacherDashboardPage: React.FC<TeacherDashboardPageProps> = ({
             <button
               type="button"
               onClick={() => onNavigate('lessons')}
-              className="flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
+              className="flex items-center gap-1 text-xs font-bold text-[#5A0B1C] hover:text-[#450815] dark:text-[#D9A62E]"
             >
               Barcha darslar <ArrowRight className="h-3.5 w-3.5" />
             </button>
@@ -204,7 +204,7 @@ export const TeacherDashboardPage: React.FC<TeacherDashboardPageProps> = ({
                 >
                   <div>
                     <div className="flex items-center justify-between gap-2">
-                      <span className="rounded-lg bg-indigo-50 px-2.5 py-1 text-[11px] font-bold text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">
+                      <span className="rounded-lg bg-[#FAF0F2] px-2.5 py-1 text-[11px] font-bold text-[#5A0B1C] dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E]">
                         {group.subject}
                       </span>
                       <span className="text-xs font-semibold text-slate-400">{group.level}</span>
@@ -233,7 +233,7 @@ export const TeacherDashboardPage: React.FC<TeacherDashboardPageProps> = ({
                     <button
                       type="button"
                       onClick={() => onNavigate('lessons')}
-                      className="rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-700 transition-colors hover:bg-indigo-100 dark:bg-indigo-950/60 dark:text-indigo-300"
+                      className="rounded-lg bg-[#FAF0F2] px-3 py-1.5 text-xs font-bold text-[#5A0B1C] transition-colors hover:bg-[#F3E2E6] dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E]"
                     >
                       Darslarni ochish
                     </button>
@@ -253,7 +253,7 @@ export const TeacherDashboardPage: React.FC<TeacherDashboardPageProps> = ({
             <button
               type="button"
               onClick={() => onNavigate('homework')}
-              className="text-xs font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
+              className="text-xs font-bold text-[#5A0B1C] hover:text-[#450815] dark:text-[#D9A62E]"
             >
               Barchasi ({submissions.length})
             </button>
@@ -277,7 +277,7 @@ export const TeacherDashboardPage: React.FC<TeacherDashboardPageProps> = ({
                 {pendingSubmissions.slice(0, 4).map((sub) => (
                   <div
                     key={sub.id}
-                    className="flex flex-col gap-2 rounded-xl border border-slate-100 bg-slate-50/70 p-3 transition-colors hover:border-indigo-200 dark:border-slate-800 dark:bg-slate-800/50"
+                    className="flex flex-col gap-2 rounded-xl border border-slate-100 bg-slate-50/70 p-3 transition-colors hover:border-[#5A0B1C]/30 dark:border-slate-800 dark:bg-slate-800/50"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -306,7 +306,7 @@ export const TeacherDashboardPage: React.FC<TeacherDashboardPageProps> = ({
                       <button
                         type="button"
                         onClick={() => onNavigate('homework')}
-                        className="rounded-lg bg-indigo-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm hover:bg-indigo-700"
+                        className="rounded-lg bg-[#5A0B1C] px-2.5 py-1 text-[11px] font-bold text-white shadow-sm hover:bg-[#450815]"
                       >
                         Baholash (100 ball)
                       </button>

@@ -95,7 +95,7 @@ export const TeacherProfileModal: React.FC<TeacherProfileModalProps> = ({
                 onClose();
                 onEdit(teacher);
               }}
-              className="p-2.5 rounded-xl border border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 transition-colors cursor-pointer"
+              className="p-2.5 rounded-xl border border-[#F0D5DC] bg-[#FAF0F2] text-[#5A0B1C] dark:border-[#5A0B1C]/40 dark:bg-[#5A0B1C]/20 dark:text-[#D9A62E] hover:bg-[#F5E6EA] dark:hover:bg-[#5A0B1C]/30 transition-colors cursor-pointer"
               title="Tahrirlash"
             >
               <Edit2 className="w-4 h-4" />

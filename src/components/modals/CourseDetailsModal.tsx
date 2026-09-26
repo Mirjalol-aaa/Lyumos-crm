@@ -135,7 +135,7 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
                 {t.lessons}
               </span>
               <p className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-1.5">
-                <BookOpen className="h-4 w-4 text-blue-500" />
+                <BookOpen className="h-4 w-4 text-[#5A0B1C] dark:text-[#D9A62E]" />
                 <span>{course.lessonsCount} {t.hours}</span>
               </p>
             </div>

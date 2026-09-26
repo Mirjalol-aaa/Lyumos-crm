@@ -311,9 +311,9 @@ const TeacherDetailsModal:
                   text-slate-900
                   outline-none
 
-                  focus:border-[#007AFF]/50
+                  focus:border-[#5A0B1C]
                   focus:ring-2
-                  focus:ring-[#007AFF]/10
+                  focus:ring-[#5A0B1C]/15
 
                   dark:border-slate-700
                   dark:bg-slate-800
@@ -371,9 +371,9 @@ const TeacherDetailsModal:
                     text-slate-900
                     outline-none
 
-                    focus:border-[#007AFF]/50
+                    focus:border-[#5A0B1C]
                     focus:ring-2
-                    focus:ring-[#007AFF]/10
+                    focus:ring-[#5A0B1C]/15
 
                     dark:border-slate-700
                     dark:bg-slate-800
@@ -420,9 +420,9 @@ const TeacherDetailsModal:
                     text-slate-900
                     outline-none
 
-                    focus:border-[#007AFF]/50
+                    focus:border-[#5A0B1C]
                     focus:ring-2
-                    focus:ring-[#007AFF]/10
+                    focus:ring-[#5A0B1C]/15
 
                     dark:border-slate-700
                     dark:bg-slate-800
@@ -473,9 +473,9 @@ const TeacherDetailsModal:
                   text-slate-900
                   outline-none
 
-                  focus:border-[#007AFF]/50
+                  focus:border-[#5A0B1C]
                   focus:ring-2
-                  focus:ring-[#007AFF]/10
+                  focus:ring-[#5A0B1C]/15
 
                   dark:border-slate-700
                   dark:bg-slate-800
@@ -537,9 +537,9 @@ const TeacherDetailsModal:
                     text-slate-900
                     outline-none
 
-                    focus:border-[#007AFF]/50
+                    focus:border-[#5A0B1C]
                     focus:ring-2
-                    focus:ring-[#007AFF]/10
+                    focus:ring-[#5A0B1C]/15
 
                     dark:border-slate-700
                     dark:bg-slate-800
@@ -590,9 +590,9 @@ const TeacherDetailsModal:
                     text-slate-900
                     outline-none
 
-                    focus:border-[#007AFF]/50
+                    focus:border-[#5A0B1C]
                     focus:ring-2
-                    focus:ring-[#007AFF]/10
+                    focus:ring-[#5A0B1C]/15
 
                     dark:border-slate-700
                     dark:bg-slate-800
@@ -642,9 +642,9 @@ const TeacherDetailsModal:
                   text-slate-900
                   outline-none
 
-                  focus:border-[#007AFF]/50
+                  focus:border-[#5A0B1C]
                   focus:ring-2
-                  focus:ring-[#007AFF]/10
+                  focus:ring-[#5A0B1C]/15
 
                   dark:border-slate-700
                   dark:bg-slate-800
@@ -742,14 +742,14 @@ const TeacherDetailsModal:
                 justify-center
                 gap-2
                 rounded-xl
-                bg-[#007AFF]
+                bg-[#5A0B1C]
                 px-5 py-2.5
                 text-xs
                 font-bold
                 text-white
                 transition-all
 
-                hover:bg-blue-600
+                hover:bg-[#450815]
                 active:scale-[0.98]
               "
             >
@@ -986,9 +986,9 @@ export const TeachersPage:
 
                 placeholder:text-slate-400
 
-                focus:border-[#007AFF]/40
+                focus:border-[#5A0B1C]
                 focus:ring-2
-                focus:ring-[#007AFF]/10
+                focus:ring-[#5A0B1C]/15
 
                 dark:border-slate-700
                 dark:bg-slate-800
@@ -1135,7 +1135,7 @@ export const TeachersPage:
                             rounded-full
                             object-cover
                             ring-2
-                            ring-[#007AFF]/10
+                            ring-[#5A0B1C]/10
 
                             sm:h-14
                             sm:w-14
@@ -1230,14 +1230,14 @@ export const TeachersPage:
                               }
                               className="
                                 rounded-lg
-                                bg-blue-50
+                                bg-[#FAF0F2]
                                 px-2.5 py-1
                                 text-[9px]
                                 font-bold
-                                text-[#007AFF]
+                                text-[#5A0B1C]
 
-                                dark:bg-blue-950/40
-                                dark:text-blue-300
+                                dark:bg-[#5A0B1C]/20
+                                dark:text-[#D9A62E]
 
                                 sm:text-[10px]
                               "
@@ -1507,7 +1507,7 @@ export const TeachersPage:
                           px-3 py-2.5
                           text-xs
                           font-bold
-                          text-[#007AFF]
+                          text-[#5A0B1C] dark:text-[#D9A62E]
                           transition-colors
 
                           hover:bg-slate-200

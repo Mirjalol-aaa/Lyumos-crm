@@ -126,7 +126,7 @@ export const GlobalSearchModal: React.FC = () => {
             <div>
               <div className="flex items-center justify-between mb-2 px-2">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <GraduationCap className="w-3.5 h-3.5 text-blue-500" /> O‘qituvchilar ({matchedTeachers.length})
+                  <GraduationCap className="w-3.5 h-3.5 text-[#5A0B1C]" /> O‘qituvchilar ({matchedTeachers.length})
                 </span>
               </div>
               <div className="space-y-1">
@@ -138,14 +138,14 @@ export const GlobalSearchModal: React.FC = () => {
                       setIsGlobalSearchOpen(false);
                       setActivePage('teachers_workload');
                     }}
-                    className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all text-left group"
+                    className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-[#FAF0F2]/50 transition-all text-left group cursor-pointer"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold flex items-center justify-center text-xs">
+                      <div className="w-9 h-9 rounded-full bg-[#FAF0F2] text-[#5A0B1C] font-bold flex items-center justify-center text-xs">
                         {teacher.fullName.charAt(0)}
                       </div>
                       <div>
-                        <h4 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        <h4 className="text-sm font-bold text-slate-900 group-hover:text-[#5A0B1C] transition-colors">
                           {teacher.fullName}
                         </h4>
                         <p className="text-xs text-slate-400">
@@ -153,7 +153,7 @@ export const GlobalSearchModal: React.FC = () => {
                         </p>
                       </div>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all text-blue-500" />
+                    <ArrowRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all text-[#5A0B1C]" />
                   </button>
                 ))}
               </div>
