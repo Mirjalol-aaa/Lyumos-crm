@@ -34,44 +34,44 @@ export const Badge: React.FC<BadgeProps> = ({
 
   const variantStyles: Record<BadgeVariant, { bg: string; dot: string }> = {
     default: {
-      bg: 'bg-[#FAF0F2] text-[#5A0B1C] border border-[#F0D5DC]',
-      dot: 'bg-[#5A0B1C]',
+      bg: 'bg-[#F7E9ED] text-[#6F1028] border border-[#6F1028]/20',
+      dot: 'bg-[#6F1028]',
     },
     burgundy: {
-      bg: 'bg-[#FAF0F2] text-[#5A0B1C] border border-[#F0D5DC]',
-      dot: 'bg-[#5A0B1C]',
+      bg: 'bg-[#F7E9ED] text-[#6F1028] border border-[#6F1028]/20',
+      dot: 'bg-[#6F1028]',
     },
     gold: {
-      bg: 'bg-[#FDF8EE] text-[#C49220] border border-[#F6E5BC]',
-      dot: 'bg-[#D9A62E]',
+      bg: 'bg-[#F7F0E2] text-[#8A641C] border border-[#C89B3C]/30',
+      dot: 'bg-[#C89B3C]',
     },
     amber: {
-      bg: 'bg-[#FDF8EE] text-[#C49220] border border-[#F6E5BC]',
-      dot: 'bg-[#D9A62E]',
+      bg: 'bg-[#F7F0E2] text-[#8A641C] border border-[#C89B3C]/30',
+      dot: 'bg-[#C89B3C]',
     },
     success: {
-      bg: 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-400/25',
-      dot: 'bg-emerald-500',
+      bg: 'bg-[#E8F7F0] text-[#16A36A] border border-[#16A36A]/20',
+      dot: 'bg-[#16A36A]',
     },
     warning: {
-      bg: 'bg-amber-500/10 text-amber-800 border border-amber-500/25 dark:bg-amber-500/20 dark:text-amber-200 dark:border-amber-400/30',
-      dot: 'bg-amber-500',
+      bg: 'bg-[#F7F0E2] text-[#8A641C] border border-[#C89B3C]/30',
+      dot: 'bg-[#C89B3C]',
     },
     danger: {
-      bg: 'bg-rose-500/10 text-rose-700 border border-rose-500/20 dark:bg-rose-500/15 dark:text-rose-300 dark:border-rose-400/25',
-      dot: 'bg-rose-500',
+      bg: 'bg-[#FDECEC] text-[#C0392B] border border-[#C0392B]/20',
+      dot: 'bg-[#C0392B]',
     },
     info: {
-      bg: 'bg-[#FAF0F2] text-[#5A0B1C] border border-[#F0D5DC]',
-      dot: 'bg-[#5A0B1C]',
+      bg: 'bg-[#F7E9ED] text-[#6F1028] border border-[#6F1028]/20',
+      dot: 'bg-[#6F1028]',
     },
     purple: {
-      bg: 'bg-[#FAF0F2] text-[#5A0B1C] border border-[#F0D5DC]',
-      dot: 'bg-[#5A0B1C]',
+      bg: 'bg-[#F7E9ED] text-[#6F1028] border border-[#6F1028]/20',
+      dot: 'bg-[#6F1028]',
     },
     neutral: {
-      bg: 'bg-slate-500/10 text-slate-700 border border-slate-500/20 dark:bg-slate-500/15 dark:text-slate-300 dark:border-slate-400/25',
-      dot: 'bg-slate-400',
+      bg: 'bg-[#F2F4F7] text-[#667085] border border-[#E7E1D8]',
+      dot: 'bg-[#98A2B3]',
     },
   };
 

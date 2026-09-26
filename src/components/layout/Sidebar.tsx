@@ -119,14 +119,14 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
           collapsed
             ? '-translate-x-full w-72 lg:w-[86px] lg:translate-x-0'
             : 'translate-x-0 w-72 lg:w-64'
-        } border-[#3A0714] bg-[#23040C] text-[#F3D5DC] shadow-2xl overflow-hidden`}
+        } border-[#3A0714] bg-[#4A0B1B] text-[#F7F0E2] shadow-2xl overflow-hidden`}
       >
         {/* ========================================================================= */}
         {/* TOP HEADER: LUMOS LOGO + HAMBURGER (NO OVERLAP, SEPARATE HIT TARGETS)     */}
         {/* ========================================================================= */}
         {!collapsed ? (
           /* EXPANDED HEADER: Logo on left, Hamburger button on right */
-          <div className="flex h-20 shrink-0 items-center justify-between px-4 border-b border-white/5">
+          <div className="flex h-20 shrink-0 items-center justify-between px-4 border-b border-[#F7E9ED]/10">
             {/* Left: Logo + LUMOS (Clicking strictly opens public homepage) */}
             <button
               type="button"
@@ -138,12 +138,12 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
                 <img
                   src={lumosLogoMark}
                   alt="Lumos Logo"
-                  className="h-full w-full object-contain filter drop-shadow-[0_2px_10px_rgba(217,166,46,0.45)]"
+                  className="h-full w-full object-contain filter drop-shadow-[0_2px_10px_rgba(200,155,60,0.45)]"
                 />
               </div>
 
               {/* ONLY LUMOS Text - NO subtitle below */}
-              <span className="text-xl font-black tracking-wider text-[#E8B849] font-serif uppercase group-hover:text-[#F3CC70] transition-colors">
+              <span className="text-xl font-black tracking-wider text-[#C89B3C] font-serif uppercase group-hover:text-[#F7F0E2] transition-colors">
                 LUMOS
               </span>
             </button>
@@ -156,7 +156,7 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
                   e.stopPropagation();
                   setCollapsed(true);
                 }}
-                className="hidden lg:flex h-9 w-9 items-center justify-center rounded-xl text-[#E2C4CB] hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
+                className="hidden lg:flex h-9 w-9 items-center justify-center rounded-xl text-[#F7F0E2] hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
                 title="Sidebar yig‘ish (Collapse)"
                 aria-label="Sidebar yig‘ish"
               >
@@ -167,7 +167,7 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
               <button
                 type="button"
                 onClick={() => setCollapsed(true)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-white/70 hover:bg-white/10 lg:hidden cursor-pointer"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-[#F7F0E2] hover:bg-white/10 lg:hidden cursor-pointer"
                 aria-label="Yopish"
               >
                 <X className="h-5 w-5" />
@@ -188,10 +188,10 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
               <img
                 src={lumosLogoMark}
                 alt="Lumos Logo"
-                className="h-full w-full object-contain filter drop-shadow-[0_2px_10px_rgba(217,166,46,0.45)]"
+                className="h-full w-full object-contain filter drop-shadow-[0_2px_10px_rgba(200,155,60,0.45)]"
               />
               {/* Tooltip on right */}
-              <div className="pointer-events-none fixed left-[96px] z-50 hidden rounded-lg border border-amber-500/20 bg-[#1D030A] px-2.5 py-1.5 text-xs font-bold text-[#E8B849] shadow-xl backdrop-blur-md group-hover:lg:block whitespace-nowrap">
+              <div className="pointer-events-none fixed left-[96px] z-50 hidden rounded-lg border border-[#C89B3C]/20 bg-[#4A0B1B] px-2.5 py-1.5 text-xs font-bold text-[#C89B3C] shadow-xl backdrop-blur-md group-hover:lg:block whitespace-nowrap">
                 LUMOS — Bosh sahifa
               </div>
             </button>
@@ -203,13 +203,13 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
                 e.stopPropagation();
                 setCollapsed(false);
               }}
-              className="group relative flex h-8 w-8 items-center justify-center rounded-lg text-[#E2C4CB] hover:bg-white/15 hover:text-white transition-colors cursor-pointer"
+              className="group relative flex h-8 w-8 items-center justify-center rounded-lg text-[#F7F0E2] hover:bg-white/15 hover:text-white transition-colors cursor-pointer"
               title="Sidebar kengaytirish (Expand)"
               aria-label="Sidebar kengaytirish"
             >
               <Menu className="h-4.5 w-4.5" />
               {/* Tooltip on right */}
-              <div className="pointer-events-none fixed left-[96px] z-50 hidden rounded-lg border border-white/10 bg-[#1D030A] px-2.5 py-1.5 text-xs font-semibold text-white shadow-xl backdrop-blur-md group-hover:lg:block whitespace-nowrap">
+              <div className="pointer-events-none fixed left-[96px] z-50 hidden rounded-lg border border-white/10 bg-[#4A0B1B] px-2.5 py-1.5 text-xs font-semibold text-white shadow-xl backdrop-blur-md group-hover:lg:block whitespace-nowrap">
                 Kengaytirish (Expand)
               </div>
             </button>
@@ -245,14 +245,14 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
                       : 'w-full gap-3.5 px-3.5 py-3'
                   } ${
                     isActive
-                      ? 'bg-[#3D0A18] font-bold text-white shadow-md border border-[#5A0F24]'
-                      : 'text-[#E2C4CB] hover:bg-white/5 hover:text-white'
+                      ? 'bg-[#6F1028] font-bold text-white shadow-md border border-[#C89B3C]/30'
+                      : 'text-[#F7F0E2]/85 hover:bg-white/10 hover:text-white'
                   }`}
                   aria-label={item.label}
                 >
                   <Icon
                     className={`h-5 w-5 shrink-0 transition-colors ${
-                      isActive ? 'text-white' : 'text-[#E2C4CB] group-hover:text-white'
+                      isActive ? 'text-white' : 'text-[#F7F0E2]/80 group-hover:text-white'
                     }`}
                   />
 

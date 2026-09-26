@@ -29,12 +29,12 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   const getIcon = () => {
     switch (variant) {
       case 'danger':
-        return <Trash2 className="h-5 w-5 text-rose-600 dark:text-rose-400" />;
+        return <Trash2 className="h-5 w-5 text-[#C0392B]" />;
       case 'warning':
-        return <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />;
+        return <AlertTriangle className="h-5 w-5 text-[#C89B3C]" />;
       case 'info':
       default:
-        return <Info className="h-5 w-5 text-[#5A0B1C]" />;
+        return <Info className="h-5 w-5 text-[#6F1028]" />;
     }
   };
 
@@ -43,7 +43,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       case 'danger':
         return 'danger';
       case 'warning':
-        return 'primary';
+        return 'gold';
       default:
         return 'primary';
     }
@@ -58,7 +58,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       icon={getIcon()}
       footer={
         <>
-          <Button variant="ghost" size="sm" onClick={onClose} disabled={isLoading}>
+          <Button variant="secondary" size="sm" onClick={onClose} disabled={isLoading}>
             {cancelLabel}
           </Button>
           <Button
@@ -72,7 +72,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         </>
       }
     >
-      <div className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{message}</div>
+      <div className="text-xs text-[#667085] leading-relaxed">{message}</div>
     </Modal>
   );
 };

@@ -25,6 +25,7 @@ import {
   Clock,
   Sparkles,
   Lock,
+  Crown,
 } from 'lucide-react';
 
 export const AdminCredentialsPage: React.FC = () => {
@@ -151,8 +152,9 @@ export const AdminCredentialsPage: React.FC = () => {
       key: 'id',
       header: '№',
       align: 'center',
+      width: '60px',
       render: (_, index) => (
-        <span className="text-xs font-bold text-slate-400">
+        <span className="text-xs font-semibold text-[#667085]">
           {(index ?? 0) + 1}
         </span>
       ),
@@ -162,20 +164,31 @@ export const AdminCredentialsPage: React.FC = () => {
       header: 'F.I.O',
       sortable: true,
       render: (a) => (
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-[#5A0B1C] to-[#3A0712] text-xs font-bold text-[#E7B83F] border border-amber-500/30">
-            {a.role === 'super_admin' ? '👑' : a.fullName.charAt(0)}
+        <div className="flex items-center gap-3">
+          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#6F1028] text-xs font-bold text-white shadow-xs">
+            {a.fullName.charAt(0).toUpperCase()}
+            {a.role === 'super_admin' && (
+              <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#F7F0E2] border border-[#C89B3C]/40 text-[#C89B3C] shadow-xs">
+                <Crown className="h-2.5 w-2.5 fill-[#C89B3C]" />
+              </span>
+            )}
           </div>
           <div>
-            <span className="font-bold text-slate-900 dark:text-[#F8F4EA] flex items-center gap-1.5">
-              {a.fullName}
-              {a.role === 'super_admin' && (
-                <span className="rounded bg-amber-500/20 px-1 py-0.2 text-[9px] font-black uppercase text-amber-500">
-                  Super
+            <div className="flex items-center gap-1.5">
+              <span className="font-bold text-[#1F2937]">
+                {a.fullName}
+              </span>
+              {a.role === 'super_admin' ? (
+                <span className="rounded-md bg-[#F7F0E2] border border-[#C89B3C]/30 px-1.5 py-0.5 text-[9px] font-black uppercase text-[#8A641C]">
+                  Super Admin
+                </span>
+              ) : (
+                <span className="rounded-md bg-[#F7E9ED] border border-[#6F1028]/20 px-1.5 py-0.5 text-[9px] font-bold uppercase text-[#6F1028]">
+                  Filial Admini
                 </span>
               )}
-            </span>
-            <span className="text-[10px] text-slate-400 dark:text-[#9D958C]">
+            </div>
+            <span className="text-[11px] text-[#667085]">
               {a.role === 'super_admin' ? 'Boshqaruvchi' : 'Filial Admini'}
             </span>
           </div>
@@ -187,8 +200,8 @@ export const AdminCredentialsPage: React.FC = () => {
       header: 'Email / Login',
       sortable: true,
       render: (a) => (
-        <span className="text-xs font-semibold text-slate-700 dark:text-[#D8D0C5] flex items-center gap-1.5">
-          <Mail className="h-3 w-3 text-amber-500/70" />
+        <span className="text-xs font-semibold text-[#1F2937] flex items-center gap-2">
+          <Mail className="h-3.5 w-3.5 text-[#C89B3C] shrink-0" />
           {a.email}
         </span>
       ),
@@ -197,8 +210,8 @@ export const AdminCredentialsPage: React.FC = () => {
       key: 'phone',
       header: 'Telefon',
       render: (a) => (
-        <span className="text-xs text-slate-600 dark:text-[#D8D0C5] flex items-center gap-1.5">
-          <Phone className="h-3 w-3 text-slate-400" />
+        <span className="text-xs text-[#667085] flex items-center gap-2">
+          <Phone className="h-3.5 w-3.5 text-[#667085] shrink-0" />
           {a.phone}
         </span>
       ),
@@ -208,8 +221,8 @@ export const AdminCredentialsPage: React.FC = () => {
       header: 'Biriktirilgan Markaz',
       sortable: true,
       render: (a) => (
-        <span className="rounded-lg bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 text-xs font-bold text-amber-600 dark:text-[#E7B83F] flex items-center gap-1 w-fit">
-          <Building2 className="h-3 w-3 text-amber-500" />
+        <span className="rounded-lg bg-[#F7F0E2] border border-[#E8D8B8] px-2.5 py-1 text-xs font-bold text-[#6F1028] flex items-center gap-1.5 w-fit">
+          <Building2 className="h-3.5 w-3.5 text-[#C89B3C] shrink-0" />
           {a.branchName}
         </span>
       ),
@@ -221,9 +234,21 @@ export const AdminCredentialsPage: React.FC = () => {
       render: (a) => {
         const isFaol = a.status === 'active';
         return (
-          <Badge variant={isFaol ? 'success' : 'neutral'} hasDot>
+          <span
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold tracking-tight border ${
+              isFaol
+                ? 'bg-[#E8F7F0] border-[#16A36A]/20 text-[#16A36A]'
+                : 'bg-[#F2F4F7] border-[#E7E1D8] text-[#667085]'
+            }`}
+          >
+            <span className="relative flex h-1.5 w-1.5 shrink-0">
+              {isFaol && (
+                <span className="absolute inline-flex h-full w-full rounded-full bg-[#16A36A] opacity-75 animate-ping" />
+              )}
+              <span className={`relative inline-flex h-1.5 w-1.5 rounded-full ${isFaol ? 'bg-[#16A36A]' : 'bg-[#98A2B3]'}`} />
+            </span>
             {isFaol ? 'Faol' : 'Nofaol'}
-          </Badge>
+          </span>
         );
       },
     },
@@ -231,8 +256,8 @@ export const AdminCredentialsPage: React.FC = () => {
       key: 'lastActive',
       header: 'Oxirgi Faollik',
       render: (a) => (
-        <span className="text-xs text-slate-500 dark:text-[#9D958C] flex items-center gap-1">
-          <Clock className="h-3 w-3 text-slate-400" />
+        <span className="text-xs text-[#667085] flex items-center gap-1.5">
+          <Clock className="h-3.5 w-3.5 text-[#667085] shrink-0" />
           {a.lastActive}
         </span>
       ),
@@ -278,10 +303,10 @@ export const AdminCredentialsPage: React.FC = () => {
       {/* Top Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1F2937] tracking-tight">
             Adminlar
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-[#667085] mt-1">
             Markaz administratorlarini boshqarish
           </p>
         </div>
@@ -289,7 +314,7 @@ export const AdminCredentialsPage: React.FC = () => {
         <button
           type="button"
           onClick={handleOpenAddModal}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#5A0B1C] px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-[#450815] transition-all cursor-pointer shrink-0"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#6F1028] px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-[#4A0B1B] transition-all cursor-pointer shrink-0"
         >
           <Plus className="h-4 w-4" />
           Admin qo‘shish
@@ -297,7 +322,7 @@ export const AdminCredentialsPage: React.FC = () => {
       </div>
 
       {/* Table Container */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs p-4 sm:p-5 overflow-x-auto">
+      <div className="rounded-2xl border border-[#E7E1D8] bg-white shadow-xs p-4 sm:p-5 overflow-x-auto">
         <DataTable
           data={admins}
           columns={columns}
@@ -314,7 +339,7 @@ export const AdminCredentialsPage: React.FC = () => {
       >
         <form onSubmit={handleSaveAdd} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-[#D8D0C5] mb-1">
+            <label className="block text-xs font-bold text-[#1F2937] mb-1">
               F.I.O *
             </label>
             <Input
@@ -327,7 +352,7 @@ export const AdminCredentialsPage: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-[#D8D0C5] mb-1">
+              <label className="block text-xs font-bold text-[#1F2937] mb-1">
                 Email / Login *
               </label>
               <Input
@@ -339,7 +364,7 @@ export const AdminCredentialsPage: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-[#D8D0C5] mb-1">
+              <label className="block text-xs font-bold text-[#1F2937] mb-1">
                 Telefon Raqami
               </label>
               <Input
@@ -352,7 +377,7 @@ export const AdminCredentialsPage: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-[#D8D0C5] mb-1">
+              <label className="block text-xs font-bold text-[#1F2937] mb-1">
                 Biriktiriladigan Markaz *
               </label>
               <Select
@@ -367,7 +392,7 @@ export const AdminCredentialsPage: React.FC = () => {
               </Select>
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-[#D8D0C5] mb-1">
+              <label className="block text-xs font-bold text-[#1F2937] mb-1">
                 Rol
               </label>
               <Select
@@ -381,15 +406,15 @@ export const AdminCredentialsPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="p-3 rounded-xl border border-amber-500/20 bg-amber-500/5 text-xs text-[#D8D0C5] flex items-start gap-2">
-            <Sparkles className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-            <span>
+          <div className="p-3 rounded-xl border border-[#C89B3C]/30 bg-[#F7F0E2] text-xs text-[#8A641C] flex items-start gap-2.5">
+            <Sparkles className="h-4 w-4 text-[#C89B3C] shrink-0 mt-0.5" />
+            <span className="leading-relaxed">
               Admin saqlangach, unga xavfsiz vaqtinchalik parol taqdim etiladi. Table ichida ochiq parollar saqlanmaydi.
             </span>
           </div>
 
-          <div className="flex justify-end gap-2 pt-4 border-t border-slate-200 dark:border-amber-500/20">
-            <Button variant="ghost" type="button" onClick={() => setIsAddModalOpen(false)}>
+          <div className="flex justify-end gap-2.5 pt-4 border-t border-[#E7E1D8]">
+            <Button variant="secondary" type="button" onClick={() => setIsAddModalOpen(false)}>
               Bekor qilish
             </Button>
             <Button variant="primary" type="submit">
@@ -408,7 +433,7 @@ export const AdminCredentialsPage: React.FC = () => {
       >
         <form onSubmit={handleSaveEdit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-[#D8D0C5] mb-1">
+            <label className="block text-xs font-bold text-[#1F2937] mb-1">
               F.I.O *
             </label>
             <Input
@@ -420,7 +445,7 @@ export const AdminCredentialsPage: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-[#D8D0C5] mb-1">
+              <label className="block text-xs font-bold text-[#1F2937] mb-1">
                 Email / Login *
               </label>
               <Input
@@ -431,7 +456,7 @@ export const AdminCredentialsPage: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-[#D8D0C5] mb-1">
+              <label className="block text-xs font-bold text-[#1F2937] mb-1">
                 Telefon Raqami
               </label>
               <Input
@@ -443,7 +468,7 @@ export const AdminCredentialsPage: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-[#D8D0C5] mb-1">
+              <label className="block text-xs font-bold text-[#1F2937] mb-1">
                 Biriktirilgan Markaz *
               </label>
               <Select
@@ -458,7 +483,7 @@ export const AdminCredentialsPage: React.FC = () => {
               </Select>
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-[#D8D0C5] mb-1">
+              <label className="block text-xs font-bold text-[#1F2937] mb-1">
                 Status
               </label>
               <Select
@@ -473,8 +498,8 @@ export const AdminCredentialsPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-4 border-t border-slate-200 dark:border-amber-500/20">
-            <Button variant="ghost" type="button" onClick={() => setEditingAdmin(null)}>
+          <div className="flex justify-end gap-2.5 pt-4 border-t border-[#E7E1D8]">
+            <Button variant="secondary" type="button" onClick={() => setEditingAdmin(null)}>
               Bekor qilish
             </Button>
             <Button variant="primary" type="submit">
@@ -493,14 +518,14 @@ export const AdminCredentialsPage: React.FC = () => {
           maxWidth="sm"
         >
           <div className="space-y-4">
-            <p className="text-xs text-slate-600 dark:text-[#D8D0C5] leading-relaxed">
-              <strong>{resettingPasswordAdmin.fullName}</strong> uchun yangi xavfsiz vaqtinchalik parol yaratildi. Xavfsizlik maqsadida ushbu parol faqat bir marta ko‘rsatiladi.
+            <p className="text-xs text-[#667085] leading-relaxed">
+              <strong className="text-[#1F2937]">{resettingPasswordAdmin.fullName}</strong> uchun yangi xavfsiz vaqtinchalik parol yaratildi. Xavfsizlik maqsadida ushbu parol faqat bir marta ko‘rsatiladi.
             </p>
 
-            <div className="rounded-xl border border-amber-500/30 bg-[#1A0E14] p-4 flex items-center justify-between">
+            <div className="rounded-xl border border-[#C89B3C]/30 bg-[#F7F0E2] p-4 flex items-center justify-between">
               <div>
-                <span className="text-[10px] uppercase font-bold text-[#9D958C]">Yangi Parol:</span>
-                <p className="text-lg font-mono font-black text-[#E7B83F] tracking-wider mt-0.5">
+                <span className="text-[10px] uppercase font-bold text-[#8A641C] tracking-wider">Yangi Parol:</span>
+                <p className="text-lg font-mono font-black text-[#6F1028] tracking-widest mt-0.5 select-all">
                   {generatedPassword}
                 </p>
               </div>
@@ -508,12 +533,12 @@ export const AdminCredentialsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleCopyPassword}
-                className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs font-bold text-[#E7B83F] hover:bg-amber-500/20 transition-all cursor-pointer"
+                className="flex items-center gap-1.5 rounded-lg border border-[#E7E1D8] bg-white px-3 py-2 text-xs font-bold text-[#1F2937] hover:bg-[#F7E9ED] hover:border-[#6F1028]/30 hover:text-[#6F1028] transition-all cursor-pointer shadow-xs"
               >
                 {isCopied ? (
                   <>
-                    <Check className="h-4 w-4 text-emerald-400" />
-                    <span className="text-emerald-400">Nusxalandi</span>
+                    <Check className="h-4 w-4 text-[#16A36A]" />
+                    <span className="text-[#16A36A]">Nusxalandi</span>
                   </>
                 ) : (
                   <>
@@ -524,7 +549,7 @@ export const AdminCredentialsPage: React.FC = () => {
               </button>
             </div>
 
-            <div className="flex justify-end pt-3 border-t border-slate-200 dark:border-amber-500/15">
+            <div className="flex justify-end pt-3 border-t border-[#E7E1D8]">
               <Button variant="primary" onClick={() => setResettingPasswordAdmin(null)}>
                 Tushunarli, yopish
               </Button>

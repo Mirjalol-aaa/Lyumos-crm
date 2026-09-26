@@ -63,7 +63,7 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({
           e.stopPropagation();
           setIsOpen(!isOpen);
         }}
-        className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200/70 bg-white/80 text-slate-500 shadow-xs transition-all hover:border-amber-400/40 hover:bg-amber-50/50 hover:text-amber-700 dark:border-amber-500/20 dark:bg-[#1A0E14]/90 dark:text-slate-400 dark:hover:border-amber-500/40 dark:hover:bg-amber-500/10 dark:hover:text-amber-300"
+        className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#E7E1D8] bg-white text-[#667085] shadow-xs transition-all hover:border-[#6F1028]/30 hover:bg-[#F7E9ED] hover:text-[#6F1028] cursor-pointer"
       >
         <Icon className="h-4 w-4" />
       </button>
@@ -72,7 +72,7 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({
         <div
           className={`absolute ${
             align === 'right' ? 'right-0' : 'left-0'
-          } z-50 mt-1.5 w-44 origin-top-right rounded-xl border border-slate-200/80 bg-white/95 p-1.5 shadow-xl shadow-slate-900/10 backdrop-blur-xl dark:border-amber-500/20 dark:bg-[#1A0E14]/95 dark:shadow-black/50`}
+          } z-50 mt-1.5 w-48 origin-top-right rounded-xl border border-[#E7E1D8] bg-white p-1.5 shadow-xl shadow-black/5 backdrop-blur-xl`}
         >
           {items.map((item, idx) => {
             const ItemIcon = item.icon;
@@ -81,16 +81,16 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({
             const isSuccess = item.variant === 'success';
 
             let itemColorClasses =
-              'text-slate-700 hover:bg-slate-100 dark:text-[#D8D0C5] dark:hover:bg-amber-500/10 dark:hover:text-white';
+              'text-[#1F2937] hover:bg-[#F7E9ED] hover:text-[#6F1028]';
             if (isDanger) {
               itemColorClasses =
-                'text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40 dark:hover:text-rose-300';
+                'text-[#C0392B] hover:bg-[#FDECEC] hover:text-[#C0392B]';
             } else if (isWarning) {
               itemColorClasses =
-                'text-amber-600 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-950/40 dark:hover:text-amber-300';
+                'text-[#8A641C] hover:bg-[#F7F0E2] hover:text-[#8A641C]';
             } else if (isSuccess) {
               itemColorClasses =
-                'text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-300';
+                'text-[#16A36A] hover:bg-[#E8F7F0] hover:text-[#16A36A]';
             }
 
             return (

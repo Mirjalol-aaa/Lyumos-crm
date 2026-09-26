@@ -18,15 +18,15 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-xs font-bold text-slate-700 dark:text-slate-200 tracking-tight"
+            className="block text-xs font-bold text-[#1F2937] tracking-tight"
           >
-            {label} {required && <span className="text-rose-500 font-black">*</span>}
+            {label} {required && <span className="text-[#C0392B] font-black">*</span>}
           </label>
         )}
 
         <div className="relative flex items-center">
           {leftIcon && (
-            <div className="pointer-events-none absolute left-3 flex items-center justify-center text-slate-400 dark:text-slate-500">
+            <div className="pointer-events-none absolute left-3 flex items-center justify-center text-[#667085]">
               {leftIcon}
             </div>
           )}
@@ -35,27 +35,27 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             required={required}
-            className={`h-10 w-full rounded-xl border bg-white px-3.5 py-2 text-xs text-slate-900 placeholder:text-slate-400 shadow-2xs transition-all duration-150 hover:bg-slate-50/80 focus:bg-white focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-900/80 dark:hover:bg-slate-900 dark:focus:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 ${
+            className={`h-10 w-full rounded-xl border bg-white px-3.5 py-2 text-xs text-[#1F2937] placeholder:text-[#98A2B3] shadow-2xs transition-all duration-150 hover:bg-[#FCF8F5] focus:bg-white focus:outline-none focus:ring-1 disabled:cursor-not-allowed disabled:opacity-50 ${
               leftIcon ? 'pl-9.5' : ''
             } ${rightIcon ? 'pr-9.5' : ''} ${
               error
-                ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/15 dark:border-rose-600'
-                : 'border-slate-200/90 focus:border-[#5A0B1C] focus:ring-[#5A0B1C]/15 dark:border-slate-800 dark:focus:border-[#5A0B1C]'
+                ? 'border-[#C0392B] focus:border-[#C0392B] focus:ring-[#C0392B]/20'
+                : 'border-[#E7E1D8] focus:border-[#6F1028] focus:ring-[#6F1028]'
             } ${className}`}
             {...props}
           />
 
           {rightIcon && (
-            <div className="absolute right-3 flex items-center justify-center text-slate-400 dark:text-slate-500">
+            <div className="absolute right-3 flex items-center justify-center text-[#667085]">
               {rightIcon}
             </div>
           )}
         </div>
 
         {error ? (
-          <p className="text-[11px] font-semibold text-rose-500 tracking-tight">{error}</p>
+          <p className="text-[11px] font-semibold text-[#C0392B] tracking-tight">{error}</p>
         ) : helperText ? (
-          <p className="text-[11px] text-slate-400 dark:text-slate-500">{helperText}</p>
+          <p className="text-[11px] text-[#667085]">{helperText}</p>
         ) : null}
       </div>
     );

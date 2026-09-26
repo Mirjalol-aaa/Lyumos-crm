@@ -58,7 +58,7 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
@@ -66,25 +66,25 @@ export const Modal: React.FC<ModalProps> = ({
         role="dialog"
         aria-modal="true"
         onClick={(e) => e.stopPropagation()}
-        className={`w-full ${maxWidthClasses[maxWidth]} rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-0 shadow-2xl ring-1 ring-slate-900/[0.04] transition-all duration-200 animate-in zoom-in-95 dark:border-slate-800/90 dark:bg-slate-900 dark:ring-white/[0.06] flex flex-col max-h-[94vh] overflow-hidden ${className}`}
+        className={`w-full ${maxWidthClasses[maxWidth]} rounded-2xl sm:rounded-3xl border border-[#E7E1D8] bg-white p-0 shadow-2xl transition-all duration-200 animate-in zoom-in-95 flex flex-col max-h-[94vh] overflow-hidden ${className}`}
       >
         {/* Header */}
         {(title || subtitle || icon) && (
-          <div className="flex items-center justify-between border-b border-slate-100 p-3.5 sm:p-5 dark:border-slate-800/80">
+          <div className="flex items-center justify-between border-b border-[#E7E1D8] p-3.5 sm:p-5 bg-[#FFFFFF]">
             <div className="flex items-center gap-2.5 sm:gap-3">
               {icon && (
-                <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400">
+                <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-[#F7F0E2] text-[#8A641C] border border-[#C89B3C]/30">
                   {icon}
                 </div>
               )}
               <div>
                 {title && (
-                  <h3 className="text-xs sm:text-sm font-black tracking-tight text-slate-900 dark:text-white">
+                  <h3 className="text-sm sm:text-base font-extrabold tracking-tight text-[#1F2937]">
                     {title}
                   </h3>
                 )}
                 {subtitle && (
-                  <p className="text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500">{subtitle}</p>
+                  <p className="text-[11px] sm:text-xs text-[#667085]">{subtitle}</p>
                 )}
               </div>
             </div>
@@ -92,7 +92,7 @@ export const Modal: React.FC<ModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition-colors"
+              className="rounded-xl p-1.5 text-[#98A2B3] hover:bg-[#F7E9ED] hover:text-[#6F1028] transition-colors cursor-pointer"
             >
               <X className="h-4 w-4" />
             </button>
@@ -100,11 +100,11 @@ export const Modal: React.FC<ModalProps> = ({
         )}
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto p-3.5 sm:p-5 scrollbar-thin">{children}</div>
+        <div className="flex-1 overflow-y-auto p-3.5 sm:p-5 scrollbar-thin text-[#1F2937]">{children}</div>
 
         {/* Footer */}
         {footer && (
-          <div className="flex items-center justify-end gap-2 sm:gap-2.5 border-t border-slate-100 bg-slate-50/50 p-3 sm:p-4 dark:border-slate-800/80 dark:bg-slate-900/40">
+          <div className="flex items-center justify-end gap-2 sm:gap-2.5 border-t border-[#E7E1D8] bg-[#F8F6F2] p-3 sm:p-4">
             {footer}
           </div>
         )}

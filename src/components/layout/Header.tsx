@@ -72,21 +72,21 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-20 shrink-0 items-center justify-between gap-2 sm:gap-4 border-b border-slate-200/80 bg-white/95 px-3 sm:px-6 backdrop-blur-md transition-colors">
+      <header className="sticky top-0 z-30 flex h-20 shrink-0 items-center justify-between gap-2 sm:gap-4 border-b border-[#E7E1D8] bg-[#FFFFFF] px-3 sm:px-6 transition-colors">
         {/* Left Side: Mobile Hamburger & Search input */}
         <div className="flex items-center gap-2 sm:gap-3 flex-1 max-w-md min-w-0">
           {/* Mobile hamburger button */}
           <button
             type="button"
             onClick={() => setCollapsed(false)}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-slate-700 hover:bg-slate-100 lg:hidden cursor-pointer"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-[#1F2937] hover:bg-[#F8F6F2] lg:hidden cursor-pointer"
             aria-label="Menyu ochish"
           >
             <Menu className="h-5 w-5" />
           </button>
 
           <form onSubmit={handleSearchSubmit} className="relative flex-1 min-w-0">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#667085] pointer-events-none" />
             <input
               type="text"
               placeholder="Qidiruv..."
@@ -97,13 +97,13 @@ export const Header: React.FC<HeaderProps> = ({
                   setIsGlobalSearchOpen(true);
                 }
               }}
-              className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-4 text-xs text-slate-800 placeholder-slate-400 shadow-2xs focus:border-[#5A0B1C] focus:outline-hidden focus:ring-1 focus:ring-[#5A0B1C] transition-all"
+              className="w-full rounded-xl border border-[#E7E1D8] bg-[#FFFFFF] py-2 pl-10 pr-4 text-xs text-[#1F2937] placeholder-[#98A2B3] shadow-xs focus:border-[#6F1028] focus:outline-none focus:ring-1 focus:ring-[#6F1028] transition-all"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#98A2B3] hover:text-[#1F2937]"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -117,12 +117,12 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={onOpenNotifications}
-            className="relative flex h-10 w-10 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+            className="relative flex h-10 w-10 items-center justify-center rounded-xl text-[#667085] hover:bg-[#F8F6F2] transition-colors cursor-pointer"
             title="Bildirishnomalar"
           >
-            <Bell className="h-5 w-5 text-slate-600" />
+            <Bell className="h-5 w-5 text-[#667085]" />
             {unreadCount > 0 && (
-              <span className="absolute top-2 right-2.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+              <span className="absolute top-2 right-2.5 h-2 w-2 rounded-full bg-[#C0392B] ring-2 ring-white" />
             )}
           </button>
 
@@ -131,34 +131,34 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-              className="flex items-center gap-3 rounded-xl p-1.5 hover:bg-slate-100/80 transition-all cursor-pointer"
+              className="flex items-center gap-3 rounded-xl p-1.5 hover:bg-[#F8F6F2] transition-all cursor-pointer"
             >
               {/* SA Avatar Circle */}
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#520C1F] text-xs font-bold text-white shadow-xs">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#6F1028] text-xs font-bold text-white shadow-xs">
                 SA
               </div>
 
               {/* User text */}
               <div className="hidden sm:flex flex-col text-left">
-                <span className="text-xs font-bold text-slate-900 leading-tight">
+                <span className="text-xs font-bold text-[#1F2937] leading-tight">
                   {currentUser?.name || 'Super Admin'}
                 </span>
-                <span className="text-[11px] text-slate-400 leading-tight mt-0.5">
+                <span className="text-[11px] text-[#667085] leading-tight mt-0.5">
                   {currentUser?.email || 'super@lumos.uz'}
                 </span>
               </div>
 
-              <ChevronDown className="h-4 w-4 text-slate-400 ml-0.5" />
+              <ChevronDown className="h-4 w-4 text-[#98A2B3] ml-0.5" />
             </button>
 
             {/* Profile Dropdown Menu */}
             {isProfileDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-2xl border border-slate-200 bg-white p-1.5 shadow-xl z-50 animate-in fade-in zoom-in-95 duration-100">
-                <div className="px-3 py-2 border-b border-slate-100">
-                  <p className="text-xs font-bold text-slate-900">
+              <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-2xl border border-[#E7E1D8] bg-[#FFFFFF] p-1.5 shadow-xl z-50 animate-in fade-in zoom-in-95 duration-100">
+                <div className="px-3 py-2 border-b border-[#E7E1D8]">
+                  <p className="text-xs font-bold text-[#1F2937]">
                     {currentUser?.name || 'Super Admin'}
                   </p>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[11px] text-[#667085]">
                     {currentUser?.email || 'super@lumos.uz'}
                   </p>
                 </div>
@@ -170,9 +170,9 @@ export const Header: React.FC<HeaderProps> = ({
                       setActivePage('settings');
                       setIsProfileDropdownOpen(false);
                     }}
-                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 transition-colors"
+                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-[#1F2937] hover:bg-[#F7E9ED] hover:text-[#6F1028] transition-colors"
                   >
-                    <User className="h-3.5 w-3.5 text-slate-500" />
+                    <User className="h-3.5 w-3.5 text-[#667085]" />
                     Profil
                   </button>
 
@@ -182,9 +182,9 @@ export const Header: React.FC<HeaderProps> = ({
                       setActivePage('settings');
                       setIsProfileDropdownOpen(false);
                     }}
-                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 transition-colors"
+                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-[#1F2937] hover:bg-[#F7E9ED] hover:text-[#6F1028] transition-colors"
                   >
-                    <Settings className="h-3.5 w-3.5 text-slate-500" />
+                    <Settings className="h-3.5 w-3.5 text-[#667085]" />
                     Sozlamalar
                   </button>
 
@@ -194,9 +194,9 @@ export const Header: React.FC<HeaderProps> = ({
                       setIsProfileDropdownOpen(false);
                       setIsLogoutModalOpen(true);
                     }}
-                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors"
+                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-[#C0392B] hover:bg-rose-50 transition-colors"
                   >
-                    <LogOut className="h-3.5 w-3.5 text-rose-500" />
+                    <LogOut className="h-3.5 w-3.5 text-[#C0392B]" />
                     Chiqish
                   </button>
                 </div>

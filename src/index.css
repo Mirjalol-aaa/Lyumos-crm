@@ -21,20 +21,22 @@ html.theme-transitioning *::after {
 
 
 @theme {
-  --color-lumos-burgundy: #5A0B1C;
-  --color-lumos-burgundy-hover: #450815;
-  --color-lumos-burgundy-dark: #3D0A18;
-  --color-lumos-burgundy-deep: #23040C;
-  --color-lumos-burgundy-light: #FAF0F2;
-  --color-lumos-gold: #D9A62E;
-  --color-lumos-gold-light: #FDF8EE;
-  --color-lumos-gold-hover: #C49220;
-  --color-lumos-background: #F6F4F2;
+  --color-lumos-burgundy: #6F1028;
+  --color-lumos-burgundy-hover: #4A0B1B;
+  --color-lumos-burgundy-dark: #4A0B1B;
+  --color-lumos-burgundy-light: #F7E9ED;
+  --color-lumos-gold: #C89B3C;
+  --color-lumos-gold-light: #F7F0E2;
+  --color-lumos-gold-hover: #B3872F;
+  --color-lumos-background: #F8F6F2;
   --color-lumos-surface: #FFFFFF;
-  --color-lumos-text: #0F172A;
-  --color-lumos-text-secondary: #64748B;
-  --color-lumos-text-muted: #94A3B8;
-  --color-lumos-border: #E2E8F0;
+  --color-lumos-table-header: #F3EEE7;
+  --color-lumos-text: #1F2937;
+  --color-lumos-text-secondary: #667085;
+  --color-lumos-text-muted: #98A2B3;
+  --color-lumos-border: #E7E1D8;
+  --color-lumos-success: #16A36A;
+  --color-lumos-danger: #C0392B;
 }
 
 /* ==========================================================================
@@ -43,29 +45,31 @@ html.theme-transitioning *::after {
 
 :root {
   /* LUMOS Brand Color System */
-  --lumos-burgundy: #5A0B1C;
-  --lumos-burgundy-hover: #450815;
-  --lumos-burgundy-dark: #3D0A18;
-  --lumos-burgundy-deep: #23040C;
-  --lumos-burgundy-light: #FAF0F2;
-  --lumos-burgundy-soft: rgba(90, 11, 28, 0.08);
+  --lumos-burgundy: #6F1028;
+  --lumos-burgundy-dark: #4A0B1B;
+  --lumos-burgundy-hover: #4A0B1B;
+  --lumos-burgundy-light: #F7E9ED;
+  --lumos-burgundy-soft: rgba(111, 16, 40, 0.08);
 
-  --lumos-gold: #D9A62E;
-  --lumos-gold-light: #FDF8EE;
-  --lumos-gold-hover: #C49220;
+  --lumos-gold: #C89B3C;
+  --lumos-gold-light: #F7F0E2;
+  --lumos-gold-hover: #B3872F;
 
-  --lumos-background: #F6F4F2;
+  --lumos-background: #F8F6F2;
   --lumos-surface: #FFFFFF;
-  --lumos-text: #0F172A;
-  --lumos-text-secondary: #64748B;
-  --lumos-text-muted: #94A3B8;
-  --lumos-border: #E2E8F0;
+  --lumos-table-header: #F3EEE7;
+  --lumos-text: #1F2937;
+  --lumos-text-secondary: #667085;
+  --lumos-text-muted: #98A2B3;
+  --lumos-border: #E7E1D8;
+  --lumos-success: #16A36A;
+  --lumos-danger: #C0392B;
 
   /* Legacy primary aliases mapped strictly to Lumos Burgundy */
-  --ly-primary: #5A0B1C;
-  --ly-primary-hover: #450815;
-  --ly-primary-active: #3D0A18;
-  --ly-primary-soft: rgba(90, 11, 28, 0.1);
+  --ly-primary: #6F1028;
+  --ly-primary-hover: #4A0B1B;
+  --ly-primary-active: #4A0B1B;
+  --ly-primary-soft: rgba(111, 16, 40, 0.1);
 
   /* Success Emerald */
   --ly-success: #10b981;
@@ -75,25 +79,25 @@ html.theme-transitioning *::after {
   --ly-warning: #f59e0b;
   --ly-warning-soft: rgba(245, 158, 11, 0.12);
 
-  /* Danger Rose */
-  --ly-danger: #e11d48;
-  --ly-danger-hover: #be123c;
-  --ly-danger-soft: rgba(225, 29, 72, 0.12);
+  /* Danger Rose / Lumos Danger */
+  --ly-danger: #C0392B;
+  --ly-danger-hover: #A93226;
+  --ly-danger-soft: rgba(192, 57, 43, 0.12);
 
   /* Light surfaces */
-  --ly-bg: #F6F4F2;
+  --ly-bg: #F8F6F2;
   --ly-surface: #ffffff;
-  --ly-surface-soft: #FAF0F2;
-  --ly-surface-muted: #e2e8f0;
+  --ly-surface-soft: #F7E9ED;
+  --ly-surface-muted: #E7E1D8;
 
   /* Light borders */
-  --ly-border: #e2e8f0;
-  --ly-border-strong: #cbd5e1;
+  --ly-border: #E7E1D8;
+  --ly-border-strong: #D5CEBF;
 
   /* Light text */
-  --ly-text: #0f172a;
-  --ly-text-secondary: #475569;
-  --ly-text-muted: #94a3b8;
+  --ly-text: #1F2937;
+  --ly-text-secondary: #667085;
+  --ly-text-muted: #98A2B3;
 
   /* Shadows */
   --ly-shadow-sm:

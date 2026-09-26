@@ -44,21 +44,21 @@ export const Button: React.FC<ButtonProps> = ({
 
   const variantStyles: Record<ButtonVariant, string> = {
     primary:
-      'bg-[#5A0B1C] hover:bg-[#450815] text-white shadow-xs border border-[#480816] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#5A0B1C]/40',
+      'bg-[#6F1028] hover:bg-[#4A0B1B] text-white shadow-xs border border-[#4A0B1B] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#6F1028]/40',
     gold:
-      'bg-gradient-to-r from-[#D9A62E] to-[#C49220] hover:brightness-105 text-white font-black shadow-md shadow-amber-500/20 border border-amber-400/40 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-amber-500',
+      'bg-[#C89B3C] hover:bg-[#B3872F] text-white font-bold shadow-xs border border-[#B3872F] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-[#C89B3C]/40',
     secondary:
-      'bg-white hover:bg-[#FAF0F2] text-[#0F172A] border border-slate-200 shadow-xs hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-[#5A0B1C]/30',
+      'bg-white hover:bg-[#F7E9ED] text-[#1F2937] border border-[#E7E1D8] shadow-xs hover:border-[#6F1028]/30 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-[#6F1028]/30',
     outline:
-      'bg-transparent hover:bg-[#FAF0F2] text-[#0F172A] border border-slate-300 hover:border-[#5A0B1C]/50 focus-visible:ring-[#5A0B1C]/30 active:scale-[0.98]',
+      'bg-transparent hover:bg-[#F7E9ED] text-[#1F2937] border border-[#E7E1D8] hover:border-[#6F1028]/40 focus-visible:ring-[#6F1028]/30 active:scale-[0.98]',
     ghost:
-      'bg-transparent hover:bg-[#FAF0F2] text-slate-600 hover:text-[#5A0B1C] focus-visible:ring-[#5A0B1C]/30 active:scale-[0.98]',
+      'bg-transparent hover:bg-[#F7E9ED] text-[#667085] hover:text-[#6F1028] focus-visible:ring-[#6F1028]/30 active:scale-[0.98]',
     danger:
-      'bg-rose-600 hover:bg-rose-700 text-white shadow-xs border border-rose-700 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-rose-500',
+      'bg-[#C0392B] hover:bg-[#A93226] text-white shadow-xs border border-[#A93226] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-[#C0392B]/40',
     success:
-      'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs border border-emerald-700 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-emerald-500',
+      'bg-[#16A36A] hover:bg-[#128656] text-white shadow-xs border border-[#128656] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-[#16A36A]/40',
     indigo:
-      'bg-[#5A0B1C] hover:bg-[#450815] text-white shadow-xs border border-[#480816] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#5A0B1C]/40',
+      'bg-[#6F1028] hover:bg-[#4A0B1B] text-white shadow-xs border border-[#4A0B1B] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#6F1028]/40',
   };
 
   return (

@@ -136,7 +136,7 @@ function AdminPortalContent() {
 
   return (
     <div
-      className="min-h-screen flex font-sans antialiased selection:bg-[#5A0B1C] selection:text-white bg-[#F6F4F2] text-slate-900"
+      className="min-h-screen flex font-sans antialiased selection:bg-[#6F1028] selection:text-white bg-[#F8F6F2] text-[#1F2937]"
     >
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
