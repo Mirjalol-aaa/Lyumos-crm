@@ -274,7 +274,35 @@ export const Sidebar: React.FC<SidebarNavProps> = ({
           })}
         </nav>
 
-        {/* Note: Bottom profile card & decorative watermark completely removed per user request */}
+        {/* ========================================================================= */}
+        {/* BOTTOM SIDEBAR: SUPER ADMIN PROFILE CARD                                  */}
+        {/* ========================================================================= */}
+        <div className="shrink-0 p-3 border-t border-white/10 bg-[#3B0815]/60">
+          <div
+            onClick={() => handleNavigation('credentials')}
+            className={`flex items-center ${
+              collapsed ? 'justify-center p-1.5' : 'justify-between px-3 py-2.5'
+            } gap-2.5 rounded-xl hover:bg-white/10 transition-colors cursor-pointer group`}
+            title="Super Admin profili"
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#6F1028] text-xs font-bold text-white border border-[#C89B3C]/40 shadow-xs group-hover:border-[#C89B3C] transition-colors">
+                SA
+              </div>
+              {!collapsed && (
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold text-[#F7F0E2] truncate">Super Admin</p>
+                  <p className="text-[10px] text-[#F7F0E2]/70 truncate">super@lumos.uz</p>
+                </div>
+              )}
+            </div>
+            {!collapsed && (
+              <span className="text-[#F7F0E2]/50 group-hover:text-[#F7F0E2] text-xs transition-colors shrink-0">
+                ›
+              </span>
+            )}
+          </div>
+        </div>
       </aside>
     </>
   );

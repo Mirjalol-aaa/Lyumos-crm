@@ -100,7 +100,7 @@ function AdminPortalContent() {
       case 'applications':
         return <AdminApplicationsPage />;
       case 'teachers_workload':
-        return <AdminTeachersWorkloadPage />;
+        return <TeachersPage />;
       case 'courses_groups':
         return <AdminCoursesGroupsPage />;
       case 'students_hub':
