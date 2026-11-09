@@ -1,0 +1,547 @@
+import{c as u,d as N,j as r,D as w,a4 as k,_ as f,L as v}from"./index-ogCbkc4q.js";import{b as y}from"./vendor-charts-DNtThECR.js";import{E as S,u as d,w as P}from"./vendor-export-bL1p6LmG.js";import{T as D}from"./trending-up-BR8XEZwc.js";import"./vendor-supabase-BLTfs_0E.js";/**
+ * @license lucide-react v0.546.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const F=[["path",{d:"M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2",key:"143wyd"}],["path",{d:"M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6",key:"1itne7"}],["rect",{x:"6",y:"14",width:"12",height:"8",rx:"1",key:"1ue0tg"}]],M=u("printer",F),A=()=>{const{financials:e,students:m,expenses:s,settings:i}=N(),[l,p]=y.useState("Monthly"),a=n=>`${Number(n||0).toLocaleString()} so‘m`,h=()=>{const n=new S;n.setFont("helvetica","bold"),n.setFontSize(20),n.text(i.centerName,14,20),n.setFontSize(12),n.setFont("helvetica","normal"),n.text(`Financial & Academic Report (${l})`,14,28),n.text(`Date: ${new Date().toLocaleDateString()}`,14,34),n.line(14,38,196,38),n.setFontSize(14),n.setFont("helvetica","bold"),n.text("Executive Summary Metrics:",14,48),n.setFontSize(11),n.setFont("helvetica","normal"),n.text(`Total Active Students: ${e.activeStudents} / ${e.totalStudents}`,14,58),n.text(`Paid Revenue Collected: ${e.paidIncome.toLocaleString()} so‘m`,14,66),n.text(`Unpaid Fee Pending: ${e.unpaidIncome.toLocaleString()} so‘m`,14,74),n.text(`Total Operational Expenses: ${e.expensesTotal.toLocaleString()} so‘m`,14,82),n.text(`Net Center Profit: ${e.netProfit.toLocaleString()} so‘m`,14,90),n.text(`Overall Class Attendance Rate: ${e.overallAttendancePercentage}%`,14,98),n.save(`LUMOS_CRM_Report_${l}_${new Date().toISOString().split("T")[0]}.pdf`)},b=()=>{const n=m.map(t=>{var c,x;return{ID:t.id,Name:t.fullName,Group:t.groupName,Teacher:t.teacherName,Phone:t.phone,ParentPhone:t.parentPhone,MonthlyFee:t.monthlyFee,Status:t.status,AugustPaid:((c=t.payments.August)==null?void 0:c.amountPaid)||0,AugustStatus:((x=t.payments.August)==null?void 0:x.status)||"Unpaid"}}),j=d.json_to_sheet(n),o=d.book_new();d.book_append_sheet(o,j,"Students & Payments"),P(o,`LUMOS_Students_Report_${new Date().toISOString().split("T")[0]}.xlsx`)},g=()=>{window.print()};return r.jsxs("div",{className:`\r
+          mx-auto\r
+          w-full\r
+          max-w-7xl\r
+          space-y-4\r
+          px-3\r
+          py-4\r
+\r
+          sm:space-y-5\r
+          sm:px-5\r
+          sm:py-5\r
+\r
+          lg:space-y-6\r
+          lg:px-6\r
+          lg:py-6\r
+\r
+          xl:px-8\r
+          xl:py-8\r
+\r
+          print:max-w-none\r
+          print:p-0\r
+        `,children:[r.jsxs("div",{className:`\r
+            flex\r
+            flex-col\r
+            gap-4\r
+\r
+            print:hidden\r
+\r
+            lg:flex-row\r
+            lg:items-center\r
+            lg:justify-between\r
+          `,children:[r.jsxs("div",{className:"min-w-0",children:[r.jsx("h1",{className:"text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight",children:"Hisobot"}),r.jsx("p",{className:"text-xs sm:text-sm text-slate-500 mt-1",children:"Markazlar bo‘yicha umumiy hisobotlar"})]}),r.jsxs("div",{className:`\r
+              grid\r
+              w-full\r
+              grid-cols-1\r
+              gap-2\r
+\r
+              sm:grid-cols-3\r
+\r
+              lg:w-auto\r
+            `,children:[r.jsxs("button",{type:"button",onClick:h,className:`\r
+                flex\r
+                cursor-pointer\r
+                items-center\r
+                justify-center\r
+                gap-2\r
+                rounded-xl\r
+                bg-rose-600\r
+                px-4 py-2.5\r
+                text-xs\r
+                font-bold\r
+                text-white\r
+                shadow-md\r
+                shadow-rose-600/20\r
+                transition-all\r
+\r
+                hover:bg-rose-700\r
+\r
+                active:scale-[0.98]\r
+              `,children:[r.jsx(w,{className:`\r
+                  h-4 w-4\r
+                  shrink-0\r
+                `}),"Export PDF"]}),r.jsxs("button",{type:"button",onClick:b,className:`\r
+                flex\r
+                cursor-pointer\r
+                items-center\r
+                justify-center\r
+                gap-2\r
+                rounded-xl\r
+                bg-emerald-600\r
+                px-4 py-2.5\r
+                text-xs\r
+                font-bold\r
+                text-white\r
+                shadow-md\r
+                shadow-emerald-600/20\r
+                transition-all\r
+\r
+                hover:bg-emerald-700\r
+\r
+                active:scale-[0.98]\r
+              `,children:[r.jsx(k,{className:`\r
+                  h-4 w-4\r
+                  shrink-0\r
+                `}),"Export Excel"]}),r.jsxs("button",{type:"button",onClick:g,className:`\r
+                flex\r
+                cursor-pointer\r
+                items-center\r
+                justify-center\r
+                gap-2\r
+                rounded-xl\r
+                bg-slate-800\r
+                px-4 py-2.5\r
+                text-xs\r
+                font-bold\r
+                text-white\r
+                transition-all\r
+\r
+                hover:bg-slate-900\r
+\r
+                active:scale-[0.98]\r
+\r
+                dark:bg-slate-700\r
+                dark:hover:bg-slate-600\r
+              `,children:[r.jsx(M,{className:`\r
+                  h-4 w-4\r
+                  shrink-0\r
+                `}),"Print"]})]})]}),r.jsxs("div",{className:`\r
+            hidden\r
+\r
+            print:block\r
+          `,children:[r.jsx("h1",{className:`\r
+              text-2xl\r
+              font-bold\r
+            `,children:i.centerName}),r.jsxs("p",{className:`\r
+              mt-1\r
+              text-sm\r
+            `,children:["Financial & Academic Report (",l,")"]}),r.jsx("p",{className:`\r
+              mt-1\r
+              text-xs\r
+            `,children:new Date().toLocaleDateString()})]}),r.jsx("div",{className:`\r
+            rounded-2xl\r
+            border\r
+            border-slate-200/60\r
+            bg-white\r
+            p-2\r
+            shadow-sm\r
+\r
+            dark:border-slate-800\r
+            dark:bg-slate-900\r
+\r
+            print:hidden\r
+          `,children:r.jsx("div",{className:`\r
+              grid\r
+              grid-cols-2\r
+              gap-1.5\r
+\r
+              sm:grid-cols-4\r
+\r
+              md:w-fit\r
+            `,children:["Daily","Weekly","Monthly","Yearly"].map(n=>r.jsxs("button",{type:"button",onClick:()=>p(n),className:`
+                    cursor-pointer
+                    rounded-xl
+                    px-3 py-2.5
+                    text-[10px]
+                    font-bold
+                    transition-all
+
+                    sm:px-4
+                    sm:text-xs
+
+                    ${l===n?`
+                          bg-[#5A0B1C]
+                          text-white
+                          shadow-sm
+                        `:`
+                          text-slate-500
+
+                          hover:bg-slate-100
+
+                          dark:hover:bg-slate-800
+                        `}
+                  `,children:[n,r.jsx("span",{className:`\r
+                      hidden\r
+\r
+                      sm:inline\r
+                    `,children:" Report"})]},n))})}),r.jsxs("div",{className:`\r
+            grid\r
+            grid-cols-1\r
+            gap-3\r
+\r
+            sm:grid-cols-2\r
+\r
+            lg:grid-cols-3\r
+            lg:gap-5\r
+          `,children:[r.jsxs("div",{className:`\r
+              rounded-2xl\r
+              border\r
+              border-slate-200/60\r
+              bg-white\r
+              p-4\r
+              shadow-sm\r
+\r
+              dark:border-slate-800\r
+              dark:bg-slate-900\r
+\r
+              sm:p-5\r
+\r
+              lg:p-6\r
+            `,children:[r.jsxs("div",{className:`\r
+                flex\r
+                items-start\r
+                justify-between\r
+                gap-3\r
+              `,children:[r.jsxs("div",{className:`\r
+                  min-w-0\r
+                `,children:[r.jsx("span",{className:`\r
+                    text-[9px]\r
+                    font-bold\r
+                    uppercase\r
+                    tracking-wider\r
+                    text-slate-400\r
+\r
+                    sm:text-xs\r
+                  `,children:"Gross Revenue Collected"}),r.jsx("p",{className:`\r
+                    mt-2\r
+                    truncate\r
+                    text-2xl\r
+                    font-black\r
+                    text-emerald-600\r
+\r
+                    dark:text-emerald-400\r
+\r
+                    sm:text-3xl\r
+                  `,children:a(e.paidIncome)})]}),r.jsx("div",{className:`\r
+                  flex h-10 w-10\r
+                  shrink-0\r
+                  items-center\r
+                  justify-center\r
+                  rounded-xl\r
+                  bg-emerald-50\r
+                  text-emerald-600\r
+\r
+                  dark:bg-emerald-950/50\r
+                `,children:r.jsx(f,{className:`\r
+                    h-5 w-5\r
+                  `})})]}),r.jsx("span",{className:`\r
+                mt-3\r
+                block\r
+                text-[10px]\r
+                text-slate-400\r
+\r
+                sm:text-xs\r
+              `,children:"+18.4% compared to last period"})]}),r.jsxs("div",{className:`\r
+              rounded-2xl\r
+              border\r
+              border-slate-200/60\r
+              bg-white\r
+              p-4\r
+              shadow-sm\r
+\r
+              dark:border-slate-800\r
+              dark:bg-slate-900\r
+\r
+              sm:p-5\r
+\r
+              lg:p-6\r
+            `,children:[r.jsxs("div",{className:`\r
+                flex\r
+                items-start\r
+                justify-between\r
+                gap-3\r
+              `,children:[r.jsxs("div",{className:`\r
+                  min-w-0\r
+                `,children:[r.jsx("span",{className:`\r
+                    text-[9px]\r
+                    font-bold\r
+                    uppercase\r
+                    tracking-wider\r
+                    text-slate-400\r
+\r
+                    sm:text-xs\r
+                  `,children:"Center Expenses"}),r.jsx("p",{className:`\r
+                    mt-2\r
+                    truncate\r
+                    text-2xl\r
+                    font-black\r
+                    text-rose-600\r
+\r
+                    dark:text-rose-400\r
+\r
+                    sm:text-3xl\r
+                  `,children:a(e.expensesTotal)})]}),r.jsx("div",{className:`\r
+                  flex h-10 w-10\r
+                  shrink-0\r
+                  items-center\r
+                  justify-center\r
+                  rounded-xl\r
+                  bg-rose-50\r
+                  text-rose-600\r
+\r
+                  dark:bg-rose-950/50\r
+                `,children:r.jsx(v,{className:`\r
+                    h-5 w-5\r
+                  `})})]}),r.jsx("span",{className:`\r
+                mt-3\r
+                block\r
+                text-[10px]\r
+                leading-relaxed\r
+                text-slate-400\r
+\r
+                sm:text-xs\r
+              `,children:"Includes rent, teacher salaries and equipment"})]}),r.jsxs("div",{className:`\r
+              rounded-2xl\r
+              border\r
+              border-slate-200/60\r
+              bg-white\r
+              p-4\r
+              shadow-sm\r
+\r
+              dark:border-slate-800\r
+              dark:bg-slate-900\r
+\r
+              sm:col-span-2\r
+              sm:p-5\r
+\r
+              lg:col-span-1\r
+              lg:p-6\r
+            `,children:[r.jsxs("div",{className:`\r
+                flex\r
+                items-start\r
+                justify-between\r
+                gap-3\r
+              `,children:[r.jsxs("div",{className:`\r
+                  min-w-0\r
+                `,children:[r.jsx("span",{className:`\r
+                    text-[9px]\r
+                    font-bold\r
+                    uppercase\r
+                    tracking-wider\r
+                    text-slate-400\r
+\r
+                    sm:text-xs\r
+                  `,children:"Net Margin Profit"}),r.jsx("p",{className:`\r
+                    mt-2\r
+                    truncate\r
+                    text-2xl\r
+                    font-black\r
+                    text-slate-900\r
+\r
+                    dark:text-white\r
+\r
+                    sm:text-3xl\r
+                  `,children:a(e.netProfit)})]}),r.jsx("div",{className:`\r
+                  flex h-10 w-10\r
+                  shrink-0\r
+                  items-center\r
+                  justify-center\r
+                  rounded-xl\r
+                  bg-purple-50\r
+                  text-purple-600\r
+\r
+                  dark:bg-purple-950/50\r
+                `,children:r.jsx(D,{className:`\r
+                    h-5 w-5\r
+                  `})})]}),r.jsx("span",{className:`\r
+                mt-3\r
+                block\r
+                text-[10px]\r
+                font-bold\r
+                text-emerald-600\r
+\r
+                sm:text-xs\r
+              `,children:"Profitability Rate: 62%"})]})]}),r.jsxs("section",{className:`\r
+            rounded-2xl\r
+            border\r
+            border-slate-200/60\r
+            bg-white\r
+            p-4\r
+            shadow-sm\r
+\r
+            dark:border-slate-800\r
+            dark:bg-slate-900\r
+\r
+            sm:p-5\r
+\r
+            lg:p-6\r
+          `,children:[r.jsxs("div",{className:`\r
+              mb-4\r
+            `,children:[r.jsx("h3",{className:`\r
+                text-sm\r
+                font-bold\r
+                text-slate-900\r
+\r
+                dark:text-white\r
+\r
+                sm:text-base\r
+              `,children:"Recent Operating Expenses Audit"}),r.jsxs("p",{className:`\r
+                mt-1\r
+                text-[10px]\r
+                text-slate-400\r
+\r
+                sm:text-xs\r
+              `,children:[s.length," ","expense records"]})]}),r.jsx("div",{className:`\r
+              space-y-3\r
+\r
+              md:hidden\r
+\r
+              print:hidden\r
+            `,children:s.length===0?r.jsx("div",{className:`\r
+                  rounded-xl\r
+                  border\r
+                  border-dashed\r
+                  border-slate-300\r
+                  px-4 py-10\r
+                  text-center\r
+                  text-xs\r
+                  text-slate-400\r
+\r
+                  dark:border-slate-700\r
+                `,children:"No expense records."}):s.map(n=>r.jsxs("div",{className:`\r
+                      rounded-xl\r
+                      border\r
+                      border-slate-200/70\r
+                      bg-slate-50/70\r
+                      p-3\r
+\r
+                      dark:border-slate-800\r
+                      dark:bg-slate-800/30\r
+                    `,children:[r.jsxs("div",{className:`\r
+                        flex\r
+                        items-start\r
+                        justify-between\r
+                        gap-3\r
+                      `,children:[r.jsxs("div",{className:`\r
+                          min-w-0\r
+                          flex-1\r
+                        `,children:[r.jsx("p",{className:`\r
+                            truncate\r
+                            text-xs\r
+                            font-bold\r
+                            text-slate-900\r
+\r
+                            dark:text-white\r
+                          `,children:n.title}),r.jsx("p",{className:`\r
+                            mt-1\r
+                            text-[10px]\r
+                            text-slate-400\r
+                          `,children:n.category})]}),r.jsx("span",{className:`\r
+                          shrink-0\r
+                          text-xs\r
+                          font-black\r
+                          text-rose-600\r
+\r
+                          dark:text-rose-400\r
+                        `,children:a(n.amount)})]}),r.jsxs("div",{className:`\r
+                        mt-3\r
+                        grid\r
+                        grid-cols-2\r
+                        gap-3\r
+                        border-t\r
+                        border-slate-200/70\r
+                        pt-3\r
+\r
+                        dark:border-slate-700\r
+                      `,children:[r.jsxs("div",{children:[r.jsx("p",{className:`\r
+                            text-[9px]\r
+                            font-semibold\r
+                            uppercase\r
+                            tracking-wider\r
+                            text-slate-400\r
+                          `,children:"Date"}),r.jsx("p",{className:`\r
+                            mt-0.5\r
+                            text-[10px]\r
+                            font-semibold\r
+                            text-slate-700\r
+\r
+                            dark:text-slate-300\r
+                          `,children:n.date})]}),r.jsxs("div",{children:[r.jsx("p",{className:`\r
+                            text-[9px]\r
+                            font-semibold\r
+                            uppercase\r
+                            tracking-wider\r
+                            text-slate-400\r
+                          `,children:"Method"}),r.jsx("p",{className:`\r
+                            mt-0.5\r
+                            truncate\r
+                            text-[10px]\r
+                            font-semibold\r
+                            text-slate-700\r
+\r
+                            dark:text-slate-300\r
+                          `,children:n.paymentMethod})]})]})]},n.id))}),r.jsx("div",{className:`\r
+              hidden\r
+              overflow-x-auto\r
+\r
+              md:block\r
+\r
+              print:block\r
+            `,children:r.jsxs("table",{className:`\r
+                w-full\r
+                min-w-[720px]\r
+                text-left\r
+                text-xs\r
+              `,children:[r.jsx("thead",{className:`\r
+                  bg-slate-50\r
+                  font-bold\r
+                  uppercase\r
+                  tracking-wider\r
+                  text-slate-500\r
+\r
+                  dark:bg-slate-800\r
+                `,children:r.jsxs("tr",{children:[r.jsx("th",{className:`\r
+                      p-3\r
+                    `,children:"Title"}),r.jsx("th",{className:`\r
+                      p-3\r
+                    `,children:"Category"}),r.jsx("th",{className:`\r
+                      p-3\r
+                    `,children:"Amount"}),r.jsx("th",{className:`\r
+                      p-3\r
+                    `,children:"Date"}),r.jsx("th",{className:`\r
+                      p-3\r
+                    `,children:"Method"})]})}),r.jsxs("tbody",{className:`\r
+                  divide-y\r
+                  divide-slate-100\r
+\r
+                  dark:divide-slate-800\r
+                `,children:[s.map(n=>r.jsxs("tr",{className:`\r
+                        transition-colors\r
+\r
+                        hover:bg-slate-50\r
+\r
+                        dark:hover:bg-slate-800/40\r
+                      `,children:[r.jsx("td",{className:`\r
+                          p-3\r
+                          font-bold\r
+                          text-slate-900\r
+\r
+                          dark:text-white\r
+                        `,children:n.title}),r.jsx("td",{className:`\r
+                          p-3\r
+                          text-slate-500\r
+                        `,children:n.category}),r.jsx("td",{className:`\r
+                          whitespace-nowrap\r
+                          p-3\r
+                          font-bold\r
+                          text-rose-600\r
+\r
+                          dark:text-rose-400\r
+                        `,children:a(n.amount)}),r.jsx("td",{className:`\r
+                          whitespace-nowrap\r
+                          p-3\r
+                          text-slate-400\r
+                        `,children:n.date}),r.jsx("td",{className:`\r
+                          p-3\r
+                          text-slate-500\r
+                        `,children:n.paymentMethod})]},n.id)),s.length===0&&r.jsx("tr",{children:r.jsx("td",{colSpan:5,className:`\r
+                        p-10\r
+                        text-center\r
+                        font-medium\r
+                        text-slate-400\r
+                      `,children:"No expense records."})})]})]})})]})]})};export{A as ReportsPage};

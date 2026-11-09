@@ -1,0 +1,630 @@
+import{d as F,j as r,_ as M,$ as S,J as O,a as D,K as P,C as N}from"./index-ogCbkc4q.js";import{b as m}from"./vendor-charts-DNtThECR.js";import"./vendor-export-bL1p6LmG.js";import"./vendor-supabase-BLTfs_0E.js";const p={August:"Avgust",September:"Sentabr",October:"Oktyabr",November:"Noyabr",December:"Dekabr",January:"Yanvar",February:"Fevral",March:"Mart",April:"Aprel",May:"May",June:"Iyun",July:"Iyul"},z=()=>{const{students:d,financials:f,setIsReceivePaymentModalOpen:k,setPaymentModalDefaultStudentId:w,setPaymentModalDefaultMonth:v,setSelectedStudentId:b,settings:T}=F(),[h,y]=m.useState(""),[t,C]=m.useState(f.currentAcademicMonth),i=O,o=m.useMemo(()=>{const n=h.trim().toLowerCase();return d.filter(e=>n?e.fullName.toLowerCase().includes(n)||e.id.toLowerCase().includes(n)||e.groupName.toLowerCase().includes(n):!0)},[d,h]),x=(n,e)=>{w(n),v(e),k(!0)},u=(n,e)=>n.payments[e]||{status:"Unpaid",amountPaid:0},a=n=>`${Number(n||0).toLocaleString()} so‘m`,g=(n,e)=>{const l=u(n,e);switch(l.status){case"Paid":return r.jsxs("button",{type:"button",onClick:()=>b(n.id),className:`\r
+              inline-flex\r
+              cursor-pointer\r
+              items-center\r
+              gap-1\r
+              rounded-lg\r
+              bg-emerald-100\r
+              px-2 py-1\r
+              text-[10px]\r
+              font-bold\r
+              text-emerald-800\r
+              transition-all\r
+\r
+              hover:scale-105\r
+\r
+              dark:bg-emerald-950\r
+              dark:text-emerald-300\r
+            `,children:[r.jsx(N,{className:`\r
+                h-3 w-3\r
+                shrink-0\r
+              `}),a(l.amountPaid)]});case"Discount":return r.jsxs("button",{type:"button",onClick:()=>b(n.id),className:`\r
+              inline-flex\r
+              cursor-pointer\r
+              items-center\r
+              gap-1\r
+              rounded-lg\r
+              bg-[#FAF0F2]\r
+              px-2 py-1\r
+              text-[10px]\r
+              font-bold\r
+              text-[#5A0B1C]\r
+              border border-[#F0D5DC]\r
+              transition-all\r
+\r
+              hover:scale-105\r
+\r
+              dark:bg-[#5A0B1C]/20\r
+              dark:border-[#5A0B1C]/30\r
+              dark:text-[#D9A62E]\r
+            `,children:[r.jsx(N,{className:`\r
+                h-3 w-3\r
+                shrink-0\r
+              `}),a(l.amountPaid)]});case"Overdue":return r.jsxs("button",{type:"button",onClick:()=>x(n.id,e),className:`\r
+              inline-flex\r
+              cursor-pointer\r
+              items-center\r
+              gap-1\r
+              rounded-lg\r
+              bg-rose-100\r
+              px-2 py-1\r
+              text-[10px]\r
+              font-bold\r
+              text-rose-800\r
+              transition-all\r
+\r
+              hover:scale-105\r
+\r
+              dark:bg-rose-950\r
+              dark:text-rose-300\r
+            `,children:[r.jsx(P,{className:`\r
+                h-3 w-3\r
+                shrink-0\r
+              `}),"Due"]});case"Frozen":return r.jsx("span",{className:`\r
+              inline-flex\r
+              rounded-lg\r
+              bg-slate-100\r
+              px-2 py-1\r
+              text-[10px]\r
+              font-semibold\r
+              text-slate-500\r
+\r
+              dark:bg-slate-800\r
+              dark:text-slate-400\r
+            `,children:"Frozen"});default:return r.jsxs("button",{type:"button",onClick:()=>x(n.id,e),className:`\r
+              inline-flex\r
+              cursor-pointer\r
+              items-center\r
+              gap-1\r
+              rounded-lg\r
+              border\r
+              border-amber-200/60\r
+              bg-amber-50\r
+              px-2 py-1\r
+              text-[10px]\r
+              font-bold\r
+              text-amber-700\r
+              transition-all\r
+\r
+              hover:scale-105\r
+              hover:bg-amber-100\r
+\r
+              dark:border-amber-900/50\r
+              dark:bg-amber-950/40\r
+              dark:text-amber-300\r
+              dark:hover:bg-amber-950/70\r
+            `,children:[r.jsx(D,{className:`\r
+                h-3 w-3\r
+                shrink-0\r
+              `}),"To‘lash"]})}},c=m.useMemo(()=>{let n=0,e=0,l=0,j=0;return d.forEach(A=>{const s=A.payments[t];(s==null?void 0:s.status)==="Paid"||(s==null?void 0:s.status)==="Discount"?(n+=1,j+=s.amountPaid||0):(s==null?void 0:s.status)==="Overdue"?l+=1:(s==null?void 0:s.status)!=="Frozen"&&(e+=1)}),{paid:n,unpaid:e,overdue:l,collected:j}},[d,t]);return r.jsxs("div",{className:`\r
+        mx-auto\r
+        w-full\r
+        max-w-7xl\r
+        space-y-4\r
+        px-3\r
+        py-4\r
+\r
+        sm:space-y-5\r
+        sm:px-5\r
+        sm:py-5\r
+\r
+        lg:space-y-6\r
+        lg:px-6\r
+        lg:py-6\r
+\r
+        xl:px-8\r
+        xl:py-8\r
+      `,children:[r.jsxs("div",{className:`\r
+          flex\r
+          flex-col\r
+          gap-4\r
+\r
+          sm:flex-row\r
+          sm:items-center\r
+          sm:justify-between\r
+        `,children:[r.jsxs("div",{className:"min-w-0",children:[r.jsx("h1",{className:"text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight",children:"To‘lovlar"}),r.jsx("p",{className:"text-xs sm:text-sm text-slate-500 mt-1",children:"O‘quvchilar to‘lovlarini boshqarish"})]}),r.jsxs("button",{type:"button",onClick:()=>x(null,t),className:"inline-flex items-center justify-center gap-2 rounded-xl bg-[#5A0B1C] px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-[#450815] transition-all cursor-pointer shrink-0",children:[r.jsx(M,{className:"h-4 w-4 shrink-0"}),"To‘lov qabul qilish"]})]}),r.jsx("div",{className:`\r
+          rounded-2xl\r
+          border\r
+          border-slate-200/60\r
+          bg-white\r
+          p-3\r
+          shadow-sm\r
+\r
+          dark:border-slate-800\r
+          dark:bg-slate-900\r
+\r
+          sm:p-4\r
+        `,children:r.jsxs("div",{className:`\r
+            flex\r
+            flex-col\r
+            gap-3\r
+\r
+            sm:flex-row\r
+            sm:items-center\r
+            sm:justify-between\r
+          `,children:[r.jsxs("div",{className:`\r
+              relative\r
+              w-full\r
+              min-w-0\r
+              flex-1\r
+\r
+              sm:max-w-md\r
+            `,children:[r.jsx(S,{className:`\r
+                absolute\r
+                left-3.5\r
+                top-1/2\r
+                h-4 w-4\r
+                -translate-y-1/2\r
+                text-slate-400\r
+              `}),r.jsx("input",{type:"text",value:h,onChange:n=>y(n.target.value),placeholder:"O‘quvchi FISH, ID yoki guruh bo‘yicha qidiruv...",className:`\r
+                h-10\r
+                w-full\r
+                rounded-xl\r
+                border\r
+                border-slate-200/80\r
+                bg-slate-50\r
+                pl-10 pr-4\r
+                text-xs\r
+                text-slate-900\r
+                outline-none\r
+                transition-all\r
+\r
+                placeholder:text-slate-400\r
+\r
+                focus:border-[#5A0B1C]\r
+                focus:ring-2\r
+                focus:ring-[#5A0B1C]/15\r
+\r
+                dark:border-slate-700\r
+                dark:bg-slate-800\r
+                dark:text-white\r
+              `})]}),r.jsxs("div",{className:`\r
+              flex w-full\r
+              items-center\r
+              justify-between\r
+              gap-3\r
+\r
+              sm:w-auto\r
+              sm:justify-start\r
+            `,children:[r.jsx("span",{className:`\r
+                text-[10px]\r
+                font-bold\r
+                text-slate-500\r
+\r
+                sm:text-xs\r
+              `,children:"Faol Oy:"}),r.jsx("select",{value:t,onChange:n=>C(n.target.value),className:`\r
+                h-10\r
+                min-w-[130px]\r
+                cursor-pointer\r
+                rounded-xl\r
+                border\r
+                border-slate-200/80\r
+                bg-slate-100\r
+                px-3\r
+                text-xs\r
+                font-bold\r
+                text-slate-900\r
+                outline-none\r
+\r
+                dark:border-slate-700\r
+                dark:bg-slate-800\r
+                dark:text-white\r
+              `,children:i.map(n=>r.jsx("option",{value:n,children:p[n]||n},n))})]})]})}),r.jsxs("div",{className:`\r
+          grid\r
+          grid-cols-2\r
+          gap-3\r
+\r
+          lg:grid-cols-4\r
+        `,children:[r.jsxs("div",{className:`\r
+            rounded-2xl\r
+            border\r
+            border-slate-200/60\r
+            bg-white\r
+            p-4\r
+            shadow-sm\r
+\r
+            dark:border-slate-800\r
+            dark:bg-slate-900\r
+          `,children:[r.jsx("p",{className:`\r
+              text-[9px]\r
+              font-bold\r
+              uppercase\r
+              tracking-wider\r
+              text-slate-400\r
+\r
+              sm:text-[10px]\r
+            `,children:"To‘langan"}),r.jsx("p",{className:`\r
+              mt-1\r
+              text-xl\r
+              font-black\r
+              text-emerald-600\r
+\r
+              sm:text-2xl\r
+            `,children:c.paid}),r.jsx("p",{className:`\r
+              mt-1\r
+              text-[10px]\r
+              text-slate-400\r
+            `,children:p[t]||t})]}),r.jsxs("div",{className:`\r
+            rounded-2xl\r
+            border\r
+            border-slate-200/60\r
+            bg-white\r
+            p-4\r
+            shadow-sm\r
+\r
+            dark:border-slate-800\r
+            dark:bg-slate-900\r
+          `,children:[r.jsx("p",{className:`\r
+              text-[9px]\r
+              font-bold\r
+              uppercase\r
+              tracking-wider\r
+              text-slate-400\r
+\r
+              sm:text-[10px]\r
+            `,children:"Kutilmoqda"}),r.jsx("p",{className:`\r
+              mt-1\r
+              text-xl\r
+              font-black\r
+              text-amber-600\r
+\r
+              sm:text-2xl\r
+            `,children:c.unpaid}),r.jsx("p",{className:`\r
+              mt-1\r
+              text-[10px]\r
+              text-slate-400\r
+            `,children:"To‘lanmagan"})]}),r.jsxs("div",{className:`\r
+            rounded-2xl\r
+            border\r
+            border-slate-200/60\r
+            bg-white\r
+            p-4\r
+            shadow-sm\r
+\r
+            dark:border-slate-800\r
+            dark:bg-slate-900\r
+          `,children:[r.jsx("p",{className:`\r
+              text-[9px]\r
+              font-bold\r
+              uppercase\r
+              tracking-wider\r
+              text-slate-400\r
+\r
+              sm:text-[10px]\r
+            `,children:"Muddati O‘tgan"}),r.jsx("p",{className:`\r
+              mt-1\r
+              text-xl\r
+              font-black\r
+              text-rose-600\r
+\r
+              sm:text-2xl\r
+            `,children:c.overdue}),r.jsx("p",{className:`\r
+              mt-1\r
+              text-[10px]\r
+              text-slate-400\r
+            `,children:"E’tibor talab"})]}),r.jsxs("div",{className:`\r
+            rounded-2xl\r
+            border\r
+            border-slate-200/60\r
+            bg-white\r
+            p-4\r
+            shadow-sm\r
+\r
+            dark:border-slate-800\r
+            dark:bg-slate-900\r
+          `,children:[r.jsx("p",{className:`\r
+              text-[9px]\r
+              font-bold\r
+              uppercase\r
+              tracking-wider\r
+              text-slate-400\r
+\r
+              sm:text-[10px]\r
+            `,children:"Yig‘ilgan Tushum"}),r.jsx("p",{className:`\r
+              mt-1\r
+              truncate\r
+              text-lg\r
+              font-black\r
+              text-slate-900\r
+\r
+              dark:text-white\r
+\r
+              sm:text-xl\r
+            `,children:a(c.collected)}),r.jsx("p",{className:`\r
+              mt-1\r
+              text-[10px]\r
+              text-slate-400\r
+            `,children:"Jami qabul qilingan"})]})]}),r.jsxs("div",{className:`\r
+          space-y-3\r
+\r
+          lg:hidden\r
+        `,children:[o.map(n=>{const e=u(n,t);return r.jsx("div",{className:`\r
+                  rounded-2xl\r
+                  border\r
+                  border-slate-200/60\r
+                  bg-white\r
+                  p-4\r
+                  shadow-sm\r
+\r
+                  dark:border-slate-800\r
+                  dark:bg-slate-900\r
+                `,children:r.jsxs("div",{className:`\r
+                    flex\r
+                    items-start\r
+                    gap-3\r
+                  `,children:[r.jsx("img",{src:n.avatar,alt:n.fullName,className:`\r
+                      h-11 w-11\r
+                      shrink-0\r
+                      rounded-full\r
+                      object-cover\r
+                    `}),r.jsxs("div",{className:`\r
+                      min-w-0\r
+                      flex-1\r
+                    `,children:[r.jsxs("div",{className:`\r
+                        flex\r
+                        items-start\r
+                        justify-between\r
+                        gap-2\r
+                      `,children:[r.jsxs("div",{className:`\r
+                          min-w-0\r
+                        `,children:[r.jsx("h3",{className:`\r
+                            truncate\r
+                            text-sm\r
+                            font-bold\r
+                            text-slate-900\r
+\r
+                            dark:text-white\r
+                          `,children:n.fullName}),r.jsx("p",{className:`\r
+                            mt-0.5\r
+                            truncate\r
+                            text-[10px]\r
+                            text-slate-400\r
+                          `,children:n.id})]}),r.jsx("div",{className:`\r
+                          shrink-0\r
+                        `,children:g(n,t)})]}),r.jsxs("div",{className:`\r
+                        mt-3\r
+                        grid\r
+                        grid-cols-2\r
+                        gap-3\r
+                        border-t\r
+                        border-slate-100\r
+                        pt-3\r
+\r
+                        dark:border-slate-800\r
+                      `,children:[r.jsxs("div",{className:`\r
+                          min-w-0\r
+                        `,children:[r.jsx("p",{className:`\r
+                            text-[9px]\r
+                            font-semibold\r
+                            uppercase\r
+                            tracking-wider\r
+                            text-slate-400\r
+                          `,children:"Guruh"}),r.jsx("p",{className:`\r
+                            mt-0.5\r
+                            truncate\r
+                            text-[11px]\r
+                            font-semibold\r
+                            text-slate-700\r
+\r
+                            dark:text-slate-300\r
+                          `,children:n.groupName})]}),r.jsxs("div",{children:[r.jsx("p",{className:`\r
+                            text-[9px]\r
+                            font-semibold\r
+                            uppercase\r
+                            tracking-wider\r
+                            text-slate-400\r
+                          `,children:"Oylik To‘lov"}),r.jsx("p",{className:`\r
+                            mt-0.5\r
+                            text-[11px]\r
+                            font-bold\r
+                            text-slate-900\r
+\r
+                            dark:text-white\r
+                          `,children:a(n.monthlyFee)})]}),r.jsxs("div",{children:[r.jsx("p",{className:`\r
+                            text-[9px]\r
+                            font-semibold\r
+                            uppercase\r
+                            tracking-wider\r
+                            text-slate-400\r
+                          `,children:"Oy"}),r.jsx("p",{className:`\r
+                            mt-0.5\r
+                            text-[11px]\r
+                            font-semibold\r
+                            text-[#5A0B1C] dark:text-[#D9A62E]\r
+                          `,children:p[t]||t})]}),r.jsxs("div",{children:[r.jsx("p",{className:`\r
+                            text-[9px]\r
+                            font-semibold\r
+                            uppercase\r
+                            tracking-wider\r
+                            text-slate-400\r
+                          `,children:"To‘langan Summa"}),r.jsx("p",{className:`\r
+                            mt-0.5\r
+                            text-[11px]\r
+                            font-bold\r
+                            text-slate-900\r
+\r
+                            dark:text-white\r
+                          `,children:a(e.amountPaid||0)})]})]}),r.jsxs("div",{className:`\r
+                        mt-3\r
+                        grid\r
+                        grid-cols-2\r
+                        gap-2\r
+                      `,children:[r.jsx("button",{type:"button",onClick:()=>b(n.id),className:`\r
+                          cursor-pointer\r
+                          rounded-xl\r
+                          bg-slate-100\r
+                          px-3 py-2.5\r
+                          text-[10px]\r
+                          font-bold\r
+                          text-[#5A0B1C] dark:text-[#D9A62E]\r
+                          transition-colors\r
+\r
+                          hover:bg-slate-200\r
+\r
+                          dark:bg-slate-800\r
+                          dark:hover:bg-slate-700\r
+                        `,children:"Profil"}),r.jsx("button",{type:"button",onClick:()=>x(n.id,t),className:`\r
+                          cursor-pointer\r
+                          rounded-xl\r
+                          bg-emerald-600\r
+                          px-3 py-2.5\r
+                          text-[10px]\r
+                          font-bold\r
+                          text-white\r
+                          transition-all\r
+\r
+                          hover:bg-emerald-700\r
+\r
+                          active:scale-[0.98]\r
+                        `,children:"To‘lov Qabul Qilish"})]})]})]})},n.id)}),o.length===0&&r.jsx("div",{className:`\r
+              rounded-2xl\r
+              border\r
+              border-dashed\r
+              border-slate-300\r
+              bg-white\r
+              px-4 py-12\r
+              text-center\r
+              text-xs\r
+              font-medium\r
+              text-slate-400\r
+\r
+              dark:border-slate-700\r
+              dark:bg-slate-900\r
+            `,children:"O‘quvchilar topilmadi."})]}),r.jsx("div",{className:`\r
+          hidden\r
+          overflow-hidden\r
+          rounded-2xl\r
+          border\r
+          border-slate-200/60\r
+          bg-white\r
+          p-2\r
+          shadow-sm\r
+\r
+          dark:border-slate-800\r
+          dark:bg-slate-900\r
+\r
+          lg:block\r
+        `,children:r.jsx("div",{className:`\r
+            overflow-x-auto\r
+            scrollbar-thin\r
+          `,children:r.jsxs("table",{className:`\r
+              w-full\r
+              min-w-[1100px]\r
+              text-left\r
+              text-xs\r
+            `,children:[r.jsx("thead",{className:`\r
+                border-b\r
+                border-slate-200/60\r
+                bg-slate-50\r
+                font-bold\r
+                uppercase\r
+                tracking-wider\r
+                text-slate-500\r
+\r
+                dark:border-slate-800\r
+                dark:bg-slate-800/80\r
+              `,children:r.jsxs("tr",{children:[r.jsx("th",{className:`\r
+                    sticky\r
+                    left-0\r
+                    z-20\r
+                    w-48\r
+                    bg-slate-50\r
+                    p-3.5\r
+                    shadow-sm\r
+\r
+                    dark:bg-slate-800\r
+                  `,children:"O‘quvchi FISH"}),r.jsx("th",{className:`\r
+                    p-3.5\r
+                  `,children:"Guruh"}),r.jsx("th",{className:`\r
+                    p-3.5\r
+                  `,children:"Oylik Narx"}),i.map(n=>{var e;return r.jsx("th",{className:`
+                        p-3.5
+                        text-center
+
+                        ${n===t?`
+                              bg-[#FAF0F2]/80
+                              font-extrabold
+                              text-[#5A0B1C]
+
+                              dark:bg-[#5A0B1C]/20
+                              dark:text-[#D9A62E]
+                            `:""}
+                      `,children:((e=p[n])==null?void 0:e.slice(0,3))||n.slice(0,3)},n)})]})}),r.jsxs("tbody",{className:`\r
+                divide-y\r
+                divide-slate-100\r
+\r
+                dark:divide-slate-800\r
+              `,children:[o.map(n=>r.jsxs("tr",{className:`\r
+                      transition-colors\r
+\r
+                      hover:bg-slate-50/80\r
+\r
+                      dark:hover:bg-slate-800/40\r
+                    `,children:[r.jsx("td",{className:`\r
+                        sticky\r
+                        left-0\r
+                        z-10\r
+                        bg-white\r
+                        p-3.5\r
+                        shadow-sm\r
+\r
+                        dark:bg-slate-900\r
+                      `,children:r.jsxs("div",{className:`\r
+                          flex\r
+                          items-center\r
+                          gap-2.5\r
+                        `,children:[r.jsx("img",{src:n.avatar,alt:n.fullName,className:`\r
+                            h-7 w-7\r
+                            shrink-0\r
+                            rounded-full\r
+                            object-cover\r
+                          `}),r.jsxs("div",{className:`\r
+                            min-w-0\r
+                          `,children:[r.jsx("span",{className:`\r
+                              block\r
+                              max-w-[130px]\r
+                              truncate\r
+                              font-bold\r
+                              text-slate-900\r
+\r
+                              dark:text-white\r
+                            `,children:n.fullName}),r.jsx("span",{className:`\r
+                              block\r
+                              max-w-[130px]\r
+                              truncate\r
+                              text-[9px]\r
+                              font-mono\r
+                              text-slate-400\r
+                            `,children:n.id})]})]})}),r.jsx("td",{className:`\r
+                        max-w-[130px]\r
+                        truncate\r
+                        p-3.5\r
+                        font-medium\r
+                        text-slate-600\r
+\r
+                        dark:text-slate-300\r
+                      `,children:n.groupName}),r.jsx("td",{className:`\r
+                        whitespace-nowrap\r
+                        p-3.5\r
+                        font-bold\r
+                        text-slate-900\r
+\r
+                        dark:text-white\r
+                      `,children:a(n.monthlyFee)}),i.map(e=>r.jsx("td",{className:`
+                            p-2
+                            text-center
+
+                            ${e===t?`
+                                  bg-[#FAF0F2]/40
+
+                                  dark:bg-[#5A0B1C]/10
+                                `:""}
+                          `,children:r.jsx("div",{className:`\r
+                              flex\r
+                              justify-center\r
+                            `,children:g(n,e)})},e))]},n.id)),o.length===0&&r.jsx("tr",{children:r.jsx("td",{colSpan:i.length+3,className:`\r
+                      py-12\r
+                      text-center\r
+                      font-medium\r
+                      text-slate-400\r
+                    `,children:"No students found."})})]})]})})})]})};export{z as PaymentsPage};

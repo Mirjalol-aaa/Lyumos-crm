@@ -1,0 +1,939 @@
+import{c as M,d as R,j as r,a4 as $,p as U,$ as y,_ as C,T as A,C as H}from"./index-ogCbkc4q.js";import{b as a}from"./vendor-charts-DNtThECR.js";import{F as J}from"./funnel-DPJeS6Qq.js";import{E as S}from"./eye-BgKtsjj0.js";import"./vendor-export-bL1p6LmG.js";import"./vendor-supabase-BLTfs_0E.js";/**
+ * @license lucide-react v0.546.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const K=[["rect",{width:"7",height:"7",x:"3",y:"3",rx:"1",key:"1g98yp"}],["rect",{width:"7",height:"7",x:"14",y:"3",rx:"1",key:"6d4xhi"}],["rect",{width:"7",height:"7",x:"14",y:"14",rx:"1",key:"nxv5o0"}],["rect",{width:"7",height:"7",x:"3",y:"14",rx:"1",key:"1bb6yr"}]],Q=M("layout-grid",K);/**
+ * @license lucide-react v0.546.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const W=[["path",{d:"M3 5h.01",key:"18ugdj"}],["path",{d:"M3 12h.01",key:"nlz23k"}],["path",{d:"M3 19h.01",key:"noohij"}],["path",{d:"M8 5h13",key:"1pao27"}],["path",{d:"M8 12h13",key:"1za7za"}],["path",{d:"M8 19h13",key:"m83p4d"}]],X=M("list",W),ar=()=>{const{students:j,groups:N,deleteStudent:F,setSelectedStudentId:m,setIsAddStudentModalOpen:L,setIsImportStudentsModalOpen:P,setIsReceivePaymentModalOpen:B,setPaymentModalDefaultStudentId:D,setPaymentModalDefaultMonth:E,financials:T,settings:Y}=R(),[h,G]=a.useState(""),[o,I]=a.useState("ALL"),[c,z]=a.useState("ALL"),[p,k]=a.useState("table"),[t,l]=a.useState(1),i=12,d=T.currentAcademicMonth,s=a.useMemo(()=>{const n=h.trim().toLowerCase();return j.filter(e=>{const v=!n||e.fullName.toLowerCase().includes(n)||e.id.toLowerCase().includes(n)||e.phone.toLowerCase().includes(n)||e.parentName.toLowerCase().includes(n),V=o==="ALL"||e.groupId===o,O=c==="ALL"||e.status===c;return v&&V&&O})},[j,h,o,c]),b=Math.ceil(s.length/i)||1,x=s.slice((t-1)*i,t*i),_=s.length===0?0:(t-1)*i+1,q=Math.min(t*i,s.length),u=n=>{switch(n){case"Active":return r.jsx("span",{className:`\r
+              inline-flex\r
+              rounded-full\r
+              bg-emerald-100\r
+              px-2.5 py-1\r
+              text-[10px]\r
+              font-bold\r
+              text-emerald-800\r
+\r
+              dark:bg-emerald-950\r
+              dark:text-emerald-300\r
+            `,children:"Active"});case"Frozen":return r.jsx("span",{className:`\r
+              inline-flex\r
+              rounded-full\r
+              bg-slate-100\r
+              px-2.5 py-1\r
+              text-[10px]\r
+              font-bold\r
+              text-slate-700\r
+\r
+              dark:bg-slate-800\r
+              dark:text-slate-300\r
+            `,children:"Frozen"});case"Trial":return r.jsx("span",{className:`\r
+              inline-flex\r
+              rounded-full\r
+              bg-amber-100\r
+              px-2.5 py-1\r
+              text-[10px]\r
+              font-bold\r
+              text-amber-800\r
+\r
+              dark:bg-amber-950\r
+              dark:text-amber-300\r
+            `,children:"Trial"});default:return r.jsx("span",{className:`\r
+              inline-flex\r
+              rounded-full\r
+              bg-[#FAF0F2]\r
+              px-2.5 py-1\r
+              text-[10px]\r
+              font-bold\r
+              text-[#5A0B1C]\r
+\r
+              dark:bg-[#5A0B1C]/20\r
+              dark:text-[#D9A62E]\r
+            `,children:"Graduated"})}},f=n=>{const e=n.payments[d]||{status:"Unpaid"};return e.status==="Paid"||e.status==="Discount"?r.jsxs("span",{className:`\r
+            inline-flex\r
+            items-center\r
+            gap-1\r
+            rounded-full\r
+            bg-emerald-100\r
+            px-2 py-1\r
+            text-[10px]\r
+            font-bold\r
+            text-emerald-800\r
+\r
+            dark:bg-emerald-950\r
+            dark:text-emerald-300\r
+          `,children:[r.jsx(H,{className:`\r
+              h-3 w-3\r
+            `}),"Paid"]}):r.jsx("span",{className:`\r
+          inline-flex\r
+          rounded-full\r
+          bg-amber-100\r
+          px-2 py-1\r
+          text-[10px]\r
+          font-bold\r
+          text-amber-800\r
+\r
+          dark:bg-amber-950\r
+          dark:text-amber-300\r
+        `,children:"Unpaid"})},g=n=>{D(n),E(d),B(!0)},w=(n,e)=>{window.confirm(`Delete ${e}?`)&&F(n)};return r.jsxs("div",{className:`\r
+        mx-auto\r
+        w-full\r
+        max-w-7xl\r
+        space-y-4\r
+        px-3\r
+        py-4\r
+\r
+        sm:space-y-5\r
+        sm:px-5\r
+        sm:py-5\r
+\r
+        lg:space-y-6\r
+        lg:px-6\r
+        lg:py-6\r
+\r
+        xl:px-8\r
+        xl:py-8\r
+      `,children:[r.jsxs("div",{className:`\r
+          flex\r
+          flex-col\r
+          gap-4\r
+\r
+          sm:flex-row\r
+          sm:items-center\r
+          sm:justify-between\r
+        `,children:[r.jsxs("div",{className:"min-w-0",children:[r.jsxs("h1",{className:"text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight",children:["O‘quvchilar",r.jsxs("span",{className:"ml-2 text-base font-bold text-slate-400 sm:text-lg",children:["(",s.length,")"]})]}),r.jsx("p",{className:"text-xs sm:text-sm text-slate-500 mt-1",children:"Barcha o‘quvchilarni boshqarish"})]}),r.jsxs("div",{className:"flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto",children:[r.jsxs("button",{type:"button",onClick:()=>P(!0),className:"flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 active:scale-[0.98] px-4 py-2.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 transition-all shadow-xs sm:w-auto",title:"Excel yoki CSV fayldan o‘quvchilarni avtomatik yuklash",children:[r.jsx($,{className:"h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"}),r.jsx("span",{children:"Excel orqali yuklash"})]}),r.jsxs("button",{type:"button",onClick:()=>L(!0),className:"inline-flex items-center justify-center gap-2 rounded-xl bg-[#5A0B1C] px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-[#450815] transition-all cursor-pointer shrink-0",children:[r.jsx(U,{className:"h-4 w-4"}),"O‘quvchi qo‘shish"]})]})]}),r.jsx("div",{className:`\r
+          rounded-2xl\r
+          border\r
+          border-slate-200/60\r
+          bg-white\r
+          p-3\r
+          shadow-sm\r
+\r
+          dark:border-slate-800\r
+          dark:bg-slate-900\r
+\r
+          sm:p-4\r
+        `,children:r.jsxs("div",{className:`\r
+            flex\r
+            flex-col\r
+            gap-3\r
+\r
+            lg:flex-row\r
+            lg:items-center\r
+            lg:justify-between\r
+          `,children:[r.jsxs("div",{className:`\r
+              relative\r
+              w-full\r
+              min-w-0\r
+              flex-1\r
+            `,children:[r.jsx(y,{className:`\r
+                absolute\r
+                left-3.5\r
+                top-1/2\r
+                h-4 w-4\r
+                -translate-y-1/2\r
+                text-slate-400\r
+              `}),r.jsx("input",{type:"text",value:h,onChange:n=>{G(n.target.value),l(1)},placeholder:"Search name, ID, phone or parent...",className:`\r
+                h-10\r
+                w-full\r
+                rounded-xl\r
+                border\r
+                border-slate-200/80\r
+                bg-slate-50\r
+                pl-10 pr-4\r
+                text-xs\r
+                text-slate-900\r
+                outline-none\r
+                transition-all\r
+\r
+                placeholder:text-slate-400\r
+\r
+                focus:border-[#5A0B1C]\r
+                focus:ring-2\r
+                focus:ring-[#5A0B1C]/15\r
+\r
+                dark:border-slate-700\r
+                dark:bg-slate-800\r
+                dark:text-white\r
+              `})]}),r.jsxs("div",{className:`\r
+              grid\r
+              w-full\r
+              grid-cols-1\r
+              gap-2\r
+\r
+              sm:grid-cols-2\r
+\r
+              lg:flex\r
+              lg:w-auto\r
+              lg:items-center\r
+            `,children:[r.jsxs("div",{className:`\r
+                flex\r
+                min-w-0\r
+                items-center\r
+                gap-2\r
+                rounded-xl\r
+                border\r
+                border-slate-200/80\r
+                bg-slate-50\r
+                px-3\r
+\r
+                dark:border-slate-700\r
+                dark:bg-slate-800\r
+              `,children:[r.jsx(J,{className:`\r
+                  h-3.5 w-3.5\r
+                  shrink-0\r
+                  text-slate-400\r
+                `}),r.jsxs("select",{value:o,onChange:n=>{I(n.target.value),l(1)},className:`\r
+                  h-10\r
+                  min-w-0\r
+                  flex-1\r
+                  cursor-pointer\r
+                  bg-transparent\r
+                  text-xs\r
+                  font-semibold\r
+                  text-slate-700\r
+                  outline-none\r
+\r
+                  dark:text-slate-300\r
+\r
+                  lg:w-[155px]\r
+                `,children:[r.jsxs("option",{value:"ALL",children:["All Groups (",N.length,")"]}),N.map(n=>r.jsx("option",{value:n.id,children:n.name},n.id))]})]}),r.jsx("div",{className:`\r
+                flex\r
+                min-w-0\r
+                items-center\r
+                rounded-xl\r
+                border\r
+                border-slate-200/80\r
+                bg-slate-50\r
+                px-3\r
+\r
+                dark:border-slate-700\r
+                dark:bg-slate-800\r
+              `,children:r.jsxs("select",{value:c,onChange:n=>{z(n.target.value),l(1)},className:`\r
+                  h-10\r
+                  min-w-0\r
+                  flex-1\r
+                  cursor-pointer\r
+                  bg-transparent\r
+                  text-xs\r
+                  font-semibold\r
+                  text-slate-700\r
+                  outline-none\r
+\r
+                  dark:text-slate-300\r
+\r
+                  lg:w-[130px]\r
+                `,children:[r.jsx("option",{value:"ALL",children:"All Statuses"}),r.jsx("option",{value:"Active",children:"Active"}),r.jsx("option",{value:"Frozen",children:"Frozen"}),r.jsx("option",{value:"Trial",children:"Trial"}),r.jsx("option",{value:"Graduated",children:"Graduated"})]})}),r.jsxs("div",{className:`\r
+                col-span-1\r
+                flex\r
+                h-10\r
+                items-center\r
+                rounded-xl\r
+                bg-slate-100\r
+                p-1\r
+\r
+                dark:bg-slate-800\r
+\r
+                sm:col-span-2\r
+                sm:w-fit\r
+\r
+                lg:col-span-1\r
+              `,children:[r.jsxs("button",{type:"button",onClick:()=>k("table"),title:"Table View",className:`
+                  flex h-8
+                  flex-1
+                  cursor-pointer
+                  items-center
+                  justify-center
+                  gap-2
+                  rounded-lg
+                  px-3
+                  text-[10px]
+                  font-bold
+                  transition-all
+
+                  sm:flex-none
+
+                  ${p==="table"?`
+                        bg-white
+                        text-[#5A0B1C]
+                        shadow-sm
+
+                        dark:bg-slate-900
+                        dark:text-[#D9A62E]
+                      `:`
+                        text-slate-400
+                        hover:text-slate-700
+
+                        dark:hover:text-slate-200
+                      `}
+                `,children:[r.jsx(X,{className:`\r
+                    h-4 w-4\r
+                  `}),r.jsx("span",{className:`\r
+                    sm:hidden\r
+                  `,children:"List"})]}),r.jsxs("button",{type:"button",onClick:()=>k("grid"),title:"Grid View",className:`
+                  flex h-8
+                  flex-1
+                  cursor-pointer
+                  items-center
+                  justify-center
+                  gap-2
+                  rounded-lg
+                  px-3
+                  text-[10px]
+                  font-bold
+                  transition-all
+
+                  sm:flex-none
+
+                  ${p==="grid"?`
+                        bg-white
+                        text-[#5A0B1C]
+                        shadow-sm
+
+                        dark:bg-slate-900
+                        dark:text-[#D9A62E]
+                      `:`
+                        text-slate-400
+                        hover:text-slate-700
+
+                        dark:hover:text-slate-200
+                      `}
+                `,children:[r.jsx(Q,{className:`\r
+                    h-4 w-4\r
+                  `}),r.jsx("span",{className:`\r
+                    sm:hidden\r
+                  `,children:"Grid"})]})]})]})]})}),x.length===0?r.jsxs("div",{className:`\r
+            flex min-h-[260px]\r
+            flex-col\r
+            items-center\r
+            justify-center\r
+            rounded-2xl\r
+            border\r
+            border-dashed\r
+            border-slate-300\r
+            bg-white\r
+            px-4\r
+            text-center\r
+\r
+            dark:border-slate-700\r
+            dark:bg-slate-900\r
+          `,children:[r.jsx(y,{className:`\r
+              h-8 w-8\r
+              text-slate-300\r
+            `}),r.jsx("p",{className:`\r
+              mt-3\r
+              text-sm\r
+              font-bold\r
+              text-slate-700\r
+\r
+              dark:text-slate-200\r
+            `,children:"No students found"}),r.jsx("p",{className:`\r
+              mt-1\r
+              text-xs\r
+              text-slate-400\r
+            `,children:"Try changing your search or filters."})]}):p==="table"?r.jsxs(r.Fragment,{children:[r.jsx("div",{className:`\r
+              space-y-3\r
+\r
+              md:hidden\r
+            `,children:x.map(n=>r.jsx("div",{className:`\r
+                    rounded-2xl\r
+                    border\r
+                    border-slate-200/60\r
+                    bg-white\r
+                    p-4\r
+                    shadow-sm\r
+\r
+                    dark:border-slate-800\r
+                    dark:bg-slate-900\r
+                  `,children:r.jsxs("div",{className:`\r
+                      flex\r
+                      items-start\r
+                      gap-3\r
+                    `,children:[r.jsx("img",{src:n.avatar,alt:n.fullName,className:`\r
+                        h-12 w-12\r
+                        shrink-0\r
+                        rounded-full\r
+                        object-cover\r
+                        ring-2\r
+                        ring-[#5A0B1C]/10\r
+                      `}),r.jsxs("div",{className:`\r
+                        min-w-0\r
+                        flex-1\r
+                      `,children:[r.jsxs("div",{className:`\r
+                          flex\r
+                          items-start\r
+                          justify-between\r
+                          gap-2\r
+                        `,children:[r.jsxs("div",{className:`\r
+                            min-w-0\r
+                          `,children:[r.jsx("h3",{className:`\r
+                              truncate\r
+                              text-sm\r
+                              font-bold\r
+                              text-slate-900\r
+\r
+                              dark:text-white\r
+                            `,children:n.fullName}),r.jsx("p",{className:`\r
+                              mt-0.5\r
+                              text-[10px]\r
+                              font-mono\r
+                              text-slate-400\r
+                            `,children:n.id})]}),u(n.status)]}),r.jsxs("div",{className:`\r
+                          mt-3\r
+                          grid\r
+                          grid-cols-2\r
+                          gap-x-3\r
+                          gap-y-3\r
+                        `,children:[r.jsxs("div",{className:`\r
+                            min-w-0\r
+                          `,children:[r.jsx("p",{className:`\r
+                              text-[9px]\r
+                              font-semibold\r
+                              uppercase\r
+                              tracking-wider\r
+                              text-slate-400\r
+                            `,children:"Group"}),r.jsx("p",{className:`\r
+                              mt-0.5\r
+                              truncate\r
+                              text-[11px]\r
+                              font-semibold\r
+                              text-slate-700\r
+\r
+                              dark:text-slate-300\r
+                            `,children:n.groupName})]}),r.jsxs("div",{className:`\r
+                            min-w-0\r
+                          `,children:[r.jsx("p",{className:`\r
+                              text-[9px]\r
+                              font-semibold\r
+                              uppercase\r
+                              tracking-wider\r
+                              text-slate-400\r
+                            `,children:"Teacher"}),r.jsx("p",{className:`\r
+                              mt-0.5\r
+                              truncate\r
+                              text-[11px]\r
+                              font-semibold\r
+                              text-slate-700\r
+\r
+                              dark:text-slate-300\r
+                            `,children:n.teacherName})]}),r.jsxs("div",{className:`\r
+                            min-w-0\r
+                          `,children:[r.jsx("p",{className:`\r
+                              text-[9px]\r
+                              font-semibold\r
+                              uppercase\r
+                              tracking-wider\r
+                              text-slate-400\r
+                            `,children:"Parent"}),r.jsx("p",{className:`\r
+                              mt-0.5\r
+                              truncate\r
+                              text-[11px]\r
+                              font-semibold\r
+                              text-slate-700\r
+\r
+                              dark:text-slate-300\r
+                            `,children:n.parentName})]}),r.jsxs("div",{children:[r.jsx("p",{className:`\r
+                              text-[9px]\r
+                              font-semibold\r
+                              uppercase\r
+                              tracking-wider\r
+                              text-slate-400\r
+                            `,children:"Monthly Fee"}),r.jsxs("p",{className:`\r
+                              mt-0.5\r
+                              text-[11px]\r
+                              font-mono\r
+                              font-bold\r
+                              text-slate-900\r
+\r
+                              dark:text-white\r
+                            `,children:[Number(n.monthlyFee||0).toLocaleString()," ",r.jsx("span",{className:"text-[10px] font-semibold text-slate-400",children:"so‘m"})]})]})]}),r.jsxs("div",{className:`\r
+                          mt-3\r
+                          flex\r
+                          items-center\r
+                          justify-between\r
+                          gap-2\r
+                          border-t\r
+                          border-slate-100\r
+                          pt-3\r
+\r
+                          dark:border-slate-800\r
+                        `,children:[r.jsxs("div",{children:[r.jsxs("p",{className:`\r
+                              mb-1\r
+                              text-[9px]\r
+                              text-slate-400\r
+                            `,children:[d," ","fee"]}),f(n)]}),r.jsxs("div",{className:`\r
+                            flex\r
+                            items-center\r
+                            gap-1\r
+                          `,children:[r.jsx("button",{type:"button",onClick:()=>g(n.id),className:`\r
+                              flex h-9 w-9\r
+                              cursor-pointer\r
+                              items-center\r
+                              justify-center\r
+                              rounded-xl\r
+                              text-emerald-600\r
+                              transition-colors\r
+\r
+                              hover:bg-emerald-50\r
+\r
+                              dark:hover:bg-emerald-950/50\r
+                            `,title:"Receive Payment",children:r.jsx(C,{className:`\r
+                                h-4 w-4\r
+                              `})}),r.jsx("button",{type:"button",onClick:()=>m(n.id),className:`\r
+                              flex h-9 w-9\r
+                              cursor-pointer\r
+                              items-center\r
+                              justify-center\r
+                              rounded-xl\r
+                              text-[#5A0B1C]\r
+                              transition-colors\r
+\r
+                              hover:bg-[#FAF0F2]\r
+\r
+                              dark:text-[#D9A62E]\r
+                              dark:hover:bg-[#5A0B1C]/20\r
+                            `,title:"View Profile",children:r.jsx(S,{className:`\r
+                                h-4 w-4\r
+                              `})}),r.jsx("button",{type:"button",onClick:()=>w(n.id,n.fullName),className:`\r
+                              flex h-9 w-9\r
+                              cursor-pointer\r
+                              items-center\r
+                              justify-center\r
+                              rounded-xl\r
+                              text-rose-500\r
+                              transition-colors\r
+\r
+                              hover:bg-rose-50\r
+\r
+                              dark:hover:bg-rose-950/50\r
+                            `,title:"Delete",children:r.jsx(A,{className:`\r
+                                h-4 w-4\r
+                              `})})]})]})]})]})},n.id))}),r.jsx("div",{className:`\r
+              hidden\r
+              overflow-hidden\r
+              rounded-2xl\r
+              border\r
+              border-slate-200/60\r
+              bg-white\r
+              p-2\r
+              shadow-sm\r
+\r
+              dark:border-slate-800\r
+              dark:bg-slate-900\r
+\r
+              md:block\r
+            `,children:r.jsx("div",{className:`\r
+                overflow-x-auto\r
+              `,children:r.jsxs("table",{className:`\r
+                  w-full\r
+                  min-w-[1000px]\r
+                  text-left\r
+                  text-xs\r
+                `,children:[r.jsx("thead",{className:`\r
+                    border-b\r
+                    border-slate-200/60\r
+                    bg-slate-50\r
+                    text-[10px]\r
+                    font-bold\r
+                    uppercase\r
+                    tracking-wider\r
+                    text-slate-500\r
+\r
+                    dark:border-slate-800\r
+                    dark:bg-slate-800/80\r
+                  `,children:r.jsxs("tr",{children:[r.jsx("th",{className:`\r
+                        p-3.5\r
+                      `,children:"Student"}),r.jsx("th",{className:`\r
+                        p-3.5\r
+                      `,children:"Group & Teacher"}),r.jsx("th",{className:`\r
+                        p-3.5\r
+                      `,children:"Parent Contact"}),r.jsx("th",{className:`\r
+                        p-3.5\r
+                      `,children:"Fee / Mo"}),r.jsx("th",{className:`\r
+                        p-3.5\r
+                      `,children:"Status"}),r.jsxs("th",{className:`\r
+                        p-3.5\r
+                      `,children:[d," ","Fee"]}),r.jsx("th",{className:`\r
+                        p-3.5\r
+                        text-right\r
+                      `,children:"Actions"})]})}),r.jsx("tbody",{className:`\r
+                    divide-y\r
+                    divide-slate-100\r
+\r
+                    dark:divide-slate-800\r
+                  `,children:x.map(n=>r.jsxs("tr",{className:`\r
+                          transition-colors\r
+\r
+                          hover:bg-slate-50/80\r
+\r
+                          dark:hover:bg-slate-800/40\r
+                        `,children:[r.jsx("td",{className:`\r
+                            p-3.5\r
+                          `,children:r.jsxs("div",{className:`\r
+                              flex\r
+                              items-center\r
+                              gap-3\r
+                            `,children:[r.jsx("img",{src:n.avatar,alt:n.fullName,className:`\r
+                                h-9 w-9\r
+                                shrink-0\r
+                                rounded-full\r
+                                object-cover\r
+                              `}),r.jsxs("div",{className:`\r
+                                min-w-0\r
+                              `,children:[r.jsx("span",{className:`\r
+                                  block\r
+                                  max-w-[180px]\r
+                                  truncate\r
+                                  font-bold\r
+                                  text-slate-900\r
+\r
+                                  dark:text-white\r
+                                `,children:n.fullName}),r.jsxs("span",{className:`\r
+                                  block\r
+                                  max-w-[200px]\r
+                                  truncate\r
+                                  text-[10px]\r
+                                  font-mono\r
+                                  text-slate-400\r
+                                `,children:[n.id," • ",n.phone]})]})]})}),r.jsxs("td",{className:`\r
+                            p-3.5\r
+                          `,children:[r.jsx("span",{className:`\r
+                              block\r
+                              font-semibold\r
+                              text-slate-900\r
+\r
+                              dark:text-white\r
+                            `,children:n.groupName}),r.jsx("span",{className:`\r
+                              text-[11px]\r
+                              text-slate-400\r
+                            `,children:n.teacherName})]}),r.jsxs("td",{className:`\r
+                            p-3.5\r
+                          `,children:[r.jsx("span",{className:`\r
+                              block\r
+                              font-medium\r
+                              text-slate-800\r
+\r
+                              dark:text-slate-200\r
+                            `,children:n.parentName}),r.jsx("span",{className:`\r
+                              text-[11px]\r
+                              text-slate-400\r
+                            `,children:n.parentPhone})]}),r.jsxs("td",{className:`\r
+                            p-3.5\r
+                            font-mono\r
+                            font-bold\r
+                            text-slate-900\r
+\r
+                            dark:text-white\r
+                          `,children:[Number(n.monthlyFee||0).toLocaleString()," ",r.jsx("span",{className:"text-xs font-semibold text-slate-400",children:"so‘m"})]}),r.jsx("td",{className:`\r
+                            p-3.5\r
+                          `,children:u(n.status)}),r.jsx("td",{className:`\r
+                            p-3.5\r
+                          `,children:f(n)}),r.jsx("td",{className:`\r
+                            p-3.5\r
+                            text-right\r
+                          `,children:r.jsxs("div",{className:`\r
+                              flex\r
+                              items-center\r
+                              justify-end\r
+                              gap-1\r
+                            `,children:[r.jsx("button",{type:"button",onClick:()=>g(n.id),className:`\r
+                                flex h-8 w-8\r
+                                cursor-pointer\r
+                                items-center\r
+                                justify-center\r
+                                rounded-lg\r
+                                text-emerald-600\r
+                                transition-colors\r
+\r
+                                hover:bg-emerald-50\r
+\r
+                                dark:hover:bg-emerald-950/50\r
+                              `,title:"Receive Payment",children:r.jsx(C,{className:`\r
+                                  h-4 w-4\r
+                                `})}),r.jsx("button",{type:"button",onClick:()=>m(n.id),className:`\r
+                                flex h-8 w-8\r
+                                cursor-pointer\r
+                                items-center\r
+                                justify-center\r
+                                rounded-lg\r
+                                text-[#5A0B1C]\r
+                                transition-colors\r
+\r
+                                hover:bg-[#FAF0F2]\r
+\r
+                                dark:text-[#D9A62E]\r
+                                dark:hover:bg-[#5A0B1C]/20\r
+                              `,title:"View Profile",children:r.jsx(S,{className:`\r
+                                  h-4 w-4\r
+                                `})}),r.jsx("button",{type:"button",onClick:()=>w(n.id,n.fullName),className:`\r
+                                flex h-8 w-8\r
+                                cursor-pointer\r
+                                items-center\r
+                                justify-center\r
+                                rounded-lg\r
+                                text-rose-500\r
+                                transition-colors\r
+\r
+                                hover:bg-rose-50\r
+\r
+                                dark:hover:bg-rose-950/50\r
+                              `,title:"Delete",children:r.jsx(A,{className:`\r
+                                  h-4 w-4\r
+                                `})})]})})]},n.id))})]})})})]}):r.jsx("div",{className:`\r
+            grid\r
+            grid-cols-1\r
+            gap-3\r
+\r
+            sm:grid-cols-2\r
+            sm:gap-4\r
+\r
+            xl:grid-cols-3\r
+            xl:gap-5\r
+          `,children:x.map(n=>r.jsxs("div",{className:`\r
+                  flex\r
+                  min-w-0\r
+                  flex-col\r
+                  justify-between\r
+                  rounded-2xl\r
+                  border\r
+                  border-slate-200/60\r
+                  bg-white\r
+                  p-4\r
+                  shadow-sm\r
+                  transition-all\r
+\r
+                  hover:-translate-y-0.5\r
+                  hover:shadow-md\r
+\r
+                  dark:border-slate-800\r
+                  dark:bg-slate-900\r
+\r
+                  sm:p-5\r
+                `,children:[r.jsxs("div",{children:[r.jsxs("div",{className:`\r
+                      flex\r
+                      items-start\r
+                      justify-between\r
+                      gap-3\r
+                    `,children:[r.jsxs("div",{className:`\r
+                        flex\r
+                        min-w-0\r
+                        items-center\r
+                        gap-3\r
+                      `,children:[r.jsx("img",{src:n.avatar,alt:n.fullName,className:`\r
+                          h-12 w-12\r
+                          shrink-0\r
+                          rounded-full\r
+                          object-cover\r
+                          ring-2\r
+                          ring-[#5A0B1C]/20\r
+                        `}),r.jsxs("div",{className:`\r
+                          min-w-0\r
+                        `,children:[r.jsx("h3",{className:`\r
+                            truncate\r
+                            text-sm\r
+                            font-bold\r
+                            text-slate-900\r
+\r
+                            dark:text-white\r
+                          `,children:n.fullName}),r.jsx("p",{className:`\r
+                            mt-0.5\r
+                            truncate\r
+                            text-xs\r
+                            font-medium\r
+                            text-[#5A0B1C] dark:text-[#D9A62E]\r
+                          `,children:n.groupName}),r.jsx("p",{className:`\r
+                            mt-0.5\r
+                            text-[9px]\r
+                            font-mono\r
+                            text-slate-400\r
+                          `,children:n.id})]})]}),r.jsx("div",{className:`\r
+                        shrink-0\r
+                      `,children:u(n.status)})]}),r.jsxs("div",{className:`\r
+                      my-4\r
+                      space-y-2\r
+                      border-y\r
+                      border-slate-100\r
+                      py-3\r
+                      text-xs\r
+\r
+                      dark:border-slate-800\r
+                    `,children:[r.jsxs("div",{className:`\r
+                        flex\r
+                        items-center\r
+                        justify-between\r
+                        gap-3\r
+                      `,children:[r.jsx("span",{className:`\r
+                          text-slate-500\r
+\r
+                          dark:text-slate-400\r
+                        `,children:"Parent"}),r.jsx("span",{className:`\r
+                          min-w-0\r
+                          truncate\r
+                          text-right\r
+                          font-semibold\r
+                          text-slate-800\r
+\r
+                          dark:text-slate-200\r
+                        `,children:n.parentName})]}),r.jsxs("div",{className:`\r
+                        flex\r
+                        items-center\r
+                        justify-between\r
+                        gap-3\r
+                      `,children:[r.jsx("span",{className:`\r
+                          text-slate-500\r
+\r
+                          dark:text-slate-400\r
+                        `,children:"Phone"}),r.jsx("span",{className:`\r
+                          font-mono\r
+                          text-slate-700\r
+\r
+                          dark:text-slate-300\r
+                        `,children:n.phone})]}),r.jsxs("div",{className:`\r
+                        flex\r
+                        items-center\r
+                        justify-between\r
+                        gap-3\r
+                      `,children:[r.jsx("span",{className:`\r
+                          text-slate-500\r
+\r
+                          dark:text-slate-400\r
+                        `,children:"Monthly Fee"}),r.jsxs("span",{className:`\r
+                          font-bold\r
+                          font-mono\r
+                          font-bold\r
+                          text-slate-900\r
+\r
+                          dark:text-white\r
+                        `,children:[Number(n.monthlyFee||0).toLocaleString()," ",r.jsx("span",{className:"text-xs font-semibold text-slate-400",children:"so‘m"})]})]}),r.jsxs("div",{className:`\r
+                        flex\r
+                        items-center\r
+                        justify-between\r
+                        gap-3\r
+                      `,children:[r.jsxs("span",{className:`\r
+                          text-slate-500\r
+\r
+                          dark:text-slate-400\r
+                        `,children:[d," ","Fee"]}),f(n)]})]})]}),r.jsxs("div",{className:`\r
+                    grid\r
+                    grid-cols-[1fr_auto]\r
+                    gap-2\r
+                  `,children:[r.jsx("button",{type:"button",onClick:()=>m(n.id),className:`\r
+                      cursor-pointer\r
+                      rounded-xl\r
+                      bg-slate-100\r
+                      px-3 py-2.5\r
+                      text-xs\r
+                      font-bold\r
+                      text-[#5A0B1C] dark:text-[#D9A62E]\r
+                      transition-colors\r
+\r
+                      hover:bg-slate-200\r
+\r
+                      dark:bg-slate-800\r
+                      dark:hover:bg-slate-700\r
+                    `,children:"View Profile"}),r.jsx("button",{type:"button",onClick:()=>g(n.id),className:`\r
+                      cursor-pointer\r
+                      rounded-xl\r
+                      bg-emerald-600\r
+                      px-4 py-2.5\r
+                      text-xs\r
+                      font-bold\r
+                      text-white\r
+                      transition-all\r
+\r
+                      hover:bg-emerald-700\r
+\r
+                      active:scale-95\r
+                    `,children:"Pay"})]})]},n.id))}),r.jsxs("div",{className:`\r
+          flex\r
+          flex-col\r
+          gap-3\r
+          rounded-2xl\r
+          border\r
+          border-slate-200/60\r
+          bg-white\r
+          p-3\r
+          text-xs\r
+\r
+          dark:border-slate-800\r
+          dark:bg-slate-900\r
+\r
+          sm:flex-row\r
+          sm:items-center\r
+          sm:justify-between\r
+          sm:p-4\r
+        `,children:[r.jsxs("span",{className:`\r
+            text-center\r
+            text-[11px]\r
+            text-slate-500\r
+\r
+            sm:text-left\r
+            sm:text-xs\r
+          `,children:["Showing"," ",r.jsx("span",{className:`\r
+              font-bold\r
+              text-slate-900\r
+\r
+              dark:text-white\r
+            `,children:_})," - ",r.jsx("span",{className:`\r
+              font-bold\r
+              text-slate-900\r
+\r
+              dark:text-white\r
+            `,children:q})," of ",r.jsx("span",{className:`\r
+              font-bold\r
+              text-slate-900\r
+\r
+              dark:text-white\r
+            `,children:s.length})," students"]}),r.jsxs("div",{className:`\r
+            grid\r
+            grid-cols-[1fr_auto_1fr]\r
+            items-center\r
+            gap-2\r
+\r
+            sm:flex\r
+          `,children:[r.jsx("button",{type:"button",disabled:t===1,onClick:()=>l(n=>Math.max(1,n-1)),className:`\r
+              cursor-pointer\r
+              rounded-xl\r
+              border\r
+              border-slate-200\r
+              px-3 py-2\r
+              font-semibold\r
+              text-slate-700\r
+              transition-colors\r
+\r
+              hover:bg-slate-50\r
+\r
+              disabled:cursor-not-allowed\r
+              disabled:opacity-40\r
+\r
+              dark:border-slate-700\r
+              dark:text-slate-300\r
+              dark:hover:bg-slate-800\r
+            `,children:"Prev"}),r.jsxs("span",{className:`\r
+              min-w-[70px]\r
+              px-2\r
+              text-center\r
+              font-bold\r
+              text-[#5A0B1C] dark:text-[#D9A62E]\r
+            `,children:[t," / ",b]}),r.jsx("button",{type:"button",disabled:t===b,onClick:()=>l(n=>Math.min(b,n+1)),className:`\r
+              cursor-pointer\r
+              rounded-xl\r
+              border\r
+              border-slate-200\r
+              px-3 py-2\r
+              font-semibold\r
+              text-slate-700\r
+              transition-colors\r
+\r
+              hover:bg-slate-50\r
+\r
+              disabled:cursor-not-allowed\r
+              disabled:opacity-40\r
+\r
+              dark:border-slate-700\r
+              dark:text-slate-300\r
+              dark:hover:bg-slate-800\r
+            `,children:"Next"})]})]})]})};export{ar as StudentsPage};
