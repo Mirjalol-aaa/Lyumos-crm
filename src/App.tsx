@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Toast } from './components/common/Toast';
 import { Menu, Sun, Moon, Globe } from 'lucide-react';
 
@@ -8,33 +8,57 @@ import { I18nProvider } from './lib/i18n';
 import { DataLoader } from './components/common/DataLoader';
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
+import { PageLoadingFallback } from './components/common/PageLoadingFallback';
 
-// Public & Payment Pages
-import { LandingPage } from './pages/public/LandingPage';
-import { PaymentSuccessPage } from './pages/payment/PaymentSuccessPage';
-import { PaymentFailedPage } from './pages/payment/PaymentFailedPage';
+// ─── Public & Payment Pages (Lazy Loaded) ───────────────────────────────────
+const LandingPage = lazy(() => import('./pages/public/LandingPage').then(m => ({ default: m.LandingPage })));
+const PaymentSuccessPage = lazy(() => import('./pages/payment/PaymentSuccessPage').then(m => ({ default: m.PaymentSuccessPage })));
+const PaymentFailedPage = lazy(() => import('./pages/payment/PaymentFailedPage').then(m => ({ default: m.PaymentFailedPage })));
 
-// Dedicated Authentic Login Pages
-import { AdminTeacherLogin } from './pages/auth/AdminTeacherLogin';
-import { StudentLogin } from './pages/auth/StudentLogin';
+// ─── Authentication Pages (Lazy Loaded) ─────────────────────────────────────
+const AdminTeacherLogin = lazy(() => import('./pages/auth/AdminTeacherLogin').then(m => ({ default: m.AdminTeacherLogin })));
+const StudentLogin = lazy(() => import('./pages/auth/StudentLogin').then(m => ({ default: m.StudentLogin })));
 
-// Teacher Components & Pages
+// ─── Teacher Components & Pages (Lazy Loaded) ───────────────────────────────
 import { TeacherSidebar, TeacherPageType } from './components/teacher/TeacherSidebar';
-import { TeacherDashboardPage } from './pages/teacher/TeacherDashboardPage';
-import { TeacherLessonsPage } from './pages/teacher/TeacherLessonsPage';
-import { TeacherHomeworkPage } from './pages/teacher/TeacherHomeworkPage';
-import { TeacherAttendancePage } from './pages/teacher/TeacherAttendancePage';
+const TeacherDashboardPage = lazy(() => import('./pages/teacher/TeacherDashboardPage').then(m => ({ default: m.TeacherDashboardPage })));
+const TeacherLessonsPage = lazy(() => import('./pages/teacher/TeacherLessonsPage').then(m => ({ default: m.TeacherLessonsPage })));
+const TeacherHomeworkPage = lazy(() => import('./pages/teacher/TeacherHomeworkPage').then(m => ({ default: m.TeacherHomeworkPage })));
+const TeacherAttendancePage = lazy(() => import('./pages/teacher/TeacherAttendancePage').then(m => ({ default: m.TeacherAttendancePage })));
 
-// Student Components & Pages
+// ─── Student Components & Pages (Lazy Loaded) ───────────────────────────────
 import { StudentSidebar, StudentPageType } from './components/student/StudentSidebar';
-import { StudentDashboardPage } from './pages/student/StudentDashboardPage';
-import { StudentLessonsPage } from './pages/student/StudentLessonsPage';
-import { StudentHomeworkPage } from './pages/student/StudentHomeworkPage';
-import { StudentLeaderboardPage } from './pages/student/StudentLeaderboardPage';
-import { StudentRewardsPage } from './pages/student/StudentRewardsPage';
-import { StudentPaymentsPage } from './pages/student/StudentPaymentsPage';
+const StudentDashboardPage = lazy(() => import('./pages/student/StudentDashboardPage').then(m => ({ default: m.StudentDashboardPage })));
+const StudentLessonsPage = lazy(() => import('./pages/student/StudentLessonsPage').then(m => ({ default: m.StudentLessonsPage })));
+const StudentHomeworkPage = lazy(() => import('./pages/student/StudentHomeworkPage').then(m => ({ default: m.StudentHomeworkPage })));
+const StudentLeaderboardPage = lazy(() => import('./pages/student/StudentLeaderboardPage').then(m => ({ default: m.StudentLeaderboardPage })));
+const StudentRewardsPage = lazy(() => import('./pages/student/StudentRewardsPage').then(m => ({ default: m.StudentRewardsPage })));
+const StudentPaymentsPage = lazy(() => import('./pages/student/StudentPaymentsPage').then(m => ({ default: m.StudentPaymentsPage })));
 
-// Admin Modals
+// ─── Super Admin Pages (Lazy Loaded) ────────────────────────────────────────
+const AdminOverviewPage = lazy(() => import('./pages/admin/AdminOverviewPage').then(m => ({ default: m.AdminOverviewPage })));
+const AdminCoursesGroupsPage = lazy(() => import('./pages/admin/AdminCoursesGroupsPage').then(m => ({ default: m.AdminCoursesGroupsPage })));
+const AdminStudentsHubPage = lazy(() => import('./pages/admin/AdminStudentsHubPage').then(m => ({ default: m.AdminStudentsHubPage })));
+const AdminFinancePayrollPage = lazy(() => import('./pages/admin/AdminFinancePayrollPage').then(m => ({ default: m.AdminFinancePayrollPage })));
+const AdminBranchesPage = lazy(() => import('./pages/admin/AdminBranchesPage').then(m => ({ default: m.AdminBranchesPage })));
+const AdminCredentialsPage = lazy(() => import('./pages/admin/AdminCredentialsPage').then(m => ({ default: m.AdminCredentialsPage })));
+const AdminAuditSettingsPage = lazy(() => import('./pages/admin/AdminAuditSettingsPage').then(m => ({ default: m.AdminAuditSettingsPage })));
+const AdminSchedulePage = lazy(() => import('./pages/admin/AdminSchedulePage').then(m => ({ default: m.AdminSchedulePage })));
+const AdminHomeworkPage = lazy(() => import('./pages/admin/AdminHomeworkPage').then(m => ({ default: m.AdminHomeworkPage })));
+const AdminGradesPage = lazy(() => import('./pages/admin/AdminGradesPage').then(m => ({ default: m.AdminGradesPage })));
+const AdminApplicationsPage = lazy(() => import('./pages/admin/AdminApplicationsPage').then(m => ({ default: m.AdminApplicationsPage })));
+
+// ─── Other Admin Core Pages (Lazy Loaded) ───────────────────────────────────
+const StudentsPage = lazy(() => import('./pages/StudentsPage').then(m => ({ default: m.StudentsPage })));
+const PaymentsPage = lazy(() => import('./pages/PaymentsPage').then(m => ({ default: m.PaymentsPage })));
+const AttendancePage = lazy(() => import('./pages/AttendancePage').then(m => ({ default: m.AttendancePage })));
+const TeachersPage = lazy(() => import('./pages/TeachersPage').then(m => ({ default: m.TeachersPage })));
+const GroupsPage = lazy(() => import('./pages/GroupsPage').then(m => ({ default: m.GroupsPage })));
+const ReportsPage = lazy(() => import('./pages/ReportsPage').then(m => ({ default: m.ReportsPage })));
+const ExpensesPage = lazy(() => import('./pages/ExpensesPage').then(m => ({ default: m.ExpensesPage })));
+const SettingsPage = lazy(() => import('./pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
+
+// ─── Admin Modals ───────────────────────────────────────────────────────────
 import { GlobalSearchModal } from './components/common/GlobalSearchModal';
 import { NotificationDrawer } from './components/common/NotificationDrawer';
 import { StudentProfileModal } from './components/common/StudentProfileModal';
@@ -45,30 +69,6 @@ import { ReceivePaymentModal } from './components/modals/ReceivePaymentModal';
 import { AddTeacherModal } from './components/modals/AddTeacherModal';
 import { AddGroupModal } from './components/modals/AddGroupModal';
 import { AddExpenseModal } from './components/modals/AddExpenseModal';
-
-// Super Admin Pages (SaaS Redesign)
-import { AdminOverviewPage } from './pages/admin/AdminOverviewPage';
-import { AdminTeachersWorkloadPage } from './pages/admin/AdminTeachersWorkloadPage';
-import { AdminCoursesGroupsPage } from './pages/admin/AdminCoursesGroupsPage';
-import { AdminStudentsHubPage } from './pages/admin/AdminStudentsHubPage';
-import { AdminFinancePayrollPage } from './pages/admin/AdminFinancePayrollPage';
-import { AdminBranchesPage } from './pages/admin/AdminBranchesPage';
-import { AdminCredentialsPage } from './pages/admin/AdminCredentialsPage';
-import { AdminAuditSettingsPage } from './pages/admin/AdminAuditSettingsPage';
-import { AdminSchedulePage } from './pages/admin/AdminSchedulePage';
-import { AdminHomeworkPage } from './pages/admin/AdminHomeworkPage';
-import { AdminGradesPage } from './pages/admin/AdminGradesPage';
-import { AdminApplicationsPage } from './pages/admin/AdminApplicationsPage';
-
-// Other Admin Pages
-import { StudentsPage } from './pages/StudentsPage';
-import { PaymentsPage } from './pages/PaymentsPage';
-import { AttendancePage } from './pages/AttendancePage';
-import { TeachersPage } from './pages/TeachersPage';
-import { GroupsPage } from './pages/GroupsPage';
-import { ReportsPage } from './pages/ReportsPage';
-import { ExpensesPage } from './pages/ExpensesPage';
-import { SettingsPage } from './pages/SettingsPage';
 import { processTelegramUpdates } from './services/telegramService';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -76,7 +76,7 @@ import { processTelegramUpdates } from './services/telegramService';
 // ─────────────────────────────────────────────────────────────────────────────
 
 function AdminPortalContent() {
-  const { activePage, setActivePage, settings } = useCRM();
+  const { activePage, setActivePage } = useCRM();
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window === 'undefined') return true;
     return window.innerWidth < 1024;
@@ -148,7 +148,9 @@ function AdminPortalContent() {
         />
 
         <main className="flex-1 overflow-y-auto scrollbar-thin">
-          {renderPage()}
+          <Suspense fallback={<PageLoadingFallback />}>
+            {renderPage()}
+          </Suspense>
         </main>
       </div>
 
@@ -261,7 +263,9 @@ function TeacherPortalContent() {
         </header>
 
         <main className="flex-1 overflow-y-auto scrollbar-thin">
-          {renderTeacherPage()}
+          <Suspense fallback={<PageLoadingFallback />}>
+            {renderTeacherPage()}
+          </Suspense>
         </main>
       </div>
 
@@ -366,13 +370,14 @@ function StudentPortalContent() {
         </header>
 
         <main className="flex-1 overflow-y-auto scrollbar-thin">
-          {renderStudentPage()}
+          <Suspense fallback={<PageLoadingFallback />}>
+            {renderStudentPage()}
+          </Suspense>
         </main>
       </div>
     </div>
   );
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // APP CONTENT ROUTER: AUTHENTIC SPLIT LOGIN WITH STRICT PORTAL ROUTING
@@ -395,10 +400,18 @@ function AppContentRouter() {
 
   // 1. Payment Callback Pages
   if (currentHash.includes('payment/success')) {
-    return <PaymentSuccessPage />;
+    return (
+      <Suspense fallback={<PageLoadingFallback />}>
+        <PaymentSuccessPage />
+      </Suspense>
+    );
   }
   if (currentHash.includes('payment/failed')) {
-    return <PaymentFailedPage />;
+    return (
+      <Suspense fallback={<PageLoadingFallback />}>
+        <PaymentFailedPage />
+      </Suspense>
+    );
   }
 
   // 2. Explicit Dedicated Login Pages (ONLY when requested via #/login, #/auth, #/student)
@@ -417,29 +430,33 @@ function AppContentRouter() {
   if (!currentUser) {
     if (isStudentLoginRequested) {
       return (
-        <StudentLogin
-          onSwitchToAdmin={() => {
-            window.location.hash = '#/login';
-          }}
-          onBackToHome={() => {
-            window.location.hash = '#/';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-        />
+        <Suspense fallback={<PageLoadingFallback />}>
+          <StudentLogin
+            onSwitchToAdmin={() => {
+              window.location.hash = '#/login';
+            }}
+            onBackToHome={() => {
+              window.location.hash = '#/';
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        </Suspense>
       );
     }
 
     if (isAdminTeacherLoginRequested) {
       return (
-        <AdminTeacherLogin
-          onSwitchToStudent={() => {
-            window.location.hash = '#/student';
-          }}
-          onBackToHome={() => {
-            window.location.hash = '#/';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-        />
+        <Suspense fallback={<PageLoadingFallback />}>
+          <AdminTeacherLogin
+            onSwitchToStudent={() => {
+              window.location.hash = '#/student';
+            }}
+            onBackToHome={() => {
+              window.location.hash = '#/';
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        </Suspense>
       );
     }
   }
@@ -469,15 +486,12 @@ function AppContentRouter() {
     );
   }
 
-  // 4. Default: ALWAYS Render the Public Landing Page (Bosh sahifa)
-  // Regardless of whether user was previously logged in or not,
-  // opening /, #/, #/home, #/landing, #hero, #courses, #teachers, #benefits, etc.
-  // will ALWAYS show the complete LUMOS Landing Page!
+  // 4. Default: Render the Public Landing Page (Bosh sahifa) via Lazy Loading
   return (
-    <>
+    <Suspense fallback={<PageLoadingFallback />}>
       <LandingPage />
       <PwaInstallPrompt />
-    </>
+    </Suspense>
   );
 }
 
