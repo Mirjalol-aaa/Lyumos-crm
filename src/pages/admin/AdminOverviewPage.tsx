@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { useCRM } from '../../context/CRMContext';
-import { useLMS } from '../../context/LMSContext';
 import {
   Building2,
   ShieldCheck,
@@ -12,11 +11,14 @@ import {
   Layers,
   BookOpen,
   CreditCard,
-  Plus,
   Eye,
   Edit2,
   Trash2,
   Check,
+  TrendingUp,
+  MapPin,
+  Clock,
+  Sparkles,
 } from 'lucide-react';
 import {
   AreaChart,
@@ -38,6 +40,28 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { ActionDropdown } from '../../components/ui/ActionDropdown';
 import { Branch } from '../../types/admin';
 
+// ─── Lumos Design Tokens ─────────────────────────────────────────────────────
+const C = {
+  pageBg:        '#F8F6F2',
+  cardBg:        '#FFFFFF',
+  tableHeader:   '#F3EEE7',
+  border:        '#E7E1D8',
+  rowHover:      '#FCF8F5',
+  primary:       '#6F1028',
+  primaryDark:   '#4A0B1B',
+  burgundyLight: '#F7E9ED',
+  gold:          '#C89B3C',
+  goldBg:        '#F7F0E2',
+  goldText:      '#8A641C',
+  textPrimary:   '#1F2937',
+  textSecondary: '#667085',
+  textMuted:     '#98A2B3',
+  success:       '#16A36A',
+  successBg:     '#E8F7F0',
+  danger:        '#C0392B',
+  dangerBg:      '#FDECEC',
+};
+
 interface AdminOverviewPageProps {
   onNavigateTab: (tabId: string) => void;
 }
@@ -58,8 +82,6 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
     addTeacher,
     addStudent,
   } = useCRM();
-
-  const { currentUser } = useLMS();
 
   // Modals state
   const [isAddBranchOpen, setIsAddBranchOpen] = useState(false);
@@ -119,36 +141,54 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
     monthlyFee: 350000,
   });
 
-  // Exact 5 KPI Counts (Dynamic from CRM)
-  const totalBranchesCount = branches.length || 4;
+  // Exact KPI Counts
+  const totalBranchesCount = branches.length || 6;
   const totalAdminsCount = admins.length || 12;
-  const totalTeachersCount = teachers.length > 20 ? teachers.length : 1248;
-  const totalGroupsCount = groups.length > 20 ? groups.length : 248;
-  const totalStudentsCount = students.length > 100 ? students.length : 28460;
+  const totalTeachersCount = teachers.length > 20 ? teachers.length : 28;
+  const totalGroupsCount = groups.length > 20 ? groups.length : 52;
+  const totalStudentsCount = students.length > 100 ? students.length : 684;
 
-  // Area Chart Data: O‘quvchilar dinamikasi (matching reference image)
+  // Area Chart Data: O‘quvchilar dinamikasi
   const dynamicGrowthData = useMemo(() => {
+    if (growthRange === '3m') {
+      return [
+        { month: 'Iyul', students: 510 },
+        { month: 'Avg', students: 595 },
+        { month: 'Sen', students: 684 },
+      ];
+    }
+    if (growthRange === '1y') {
+      return [
+        { month: 'Okt', students: 280 },
+        { month: 'Dek', students: 340 },
+        { month: 'Fev', students: 410 },
+        { month: 'Apr', students: 480 },
+        { month: 'Iyun', students: 560 },
+        { month: 'Avg', students: 620 },
+        { month: 'Sen', students: 684 },
+      ];
+    }
     return [
       { month: 'Apr', students: 380 },
-      { month: 'May', students: 520 },
-      { month: 'Jun', students: 680 },
-      { month: 'Jul', students: 820 },
-      { month: 'Aug', students: 1050 },
-      { month: 'Sep', students: 1248 },
+      { month: 'May', students: 430 },
+      { month: 'Iyun', students: 495 },
+      { month: 'Iyul', students: 550 },
+      { month: 'Avg', students: 615 },
+      { month: 'Sen', students: 684 },
     ];
-  }, []);
+  }, [growthRange]);
 
-  // Donut Chart Data: Markazlar bo‘yicha o‘quvchilar (matching reference image)
+  // Donut Chart Data: Markazlar bo‘yicha o‘quvchilar (Lumos Palette)
   const donutData = useMemo(() => {
     return [
-      { name: 'Urganch', value: 32, count: 400, color: '#4E0818' },
-      { name: 'Xiva', value: 24, count: 300, color: '#8E2135' },
-      { name: 'Toshkent', value: 26, count: 324, color: '#C88F28' },
-      { name: 'Buxoro', value: 18, count: 224, color: '#DFBC76' },
+      { name: 'Toshkent', value: 36, count: 246, color: C.primary },
+      { name: 'Urganch', value: 28, count: 192, color: C.gold },
+      { name: 'Xiva', value: 20, count: 137, color: C.primaryDark },
+      { name: 'Buxoro', value: 16, count: 109, color: '#DFBC76' },
     ];
   }, []);
 
-  // Recent Activity Feed (matching reference image)
+  // Recent Activity Feed
   const recentActivities = [
     {
       id: 'act-1',
@@ -224,7 +264,6 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
       role: adminForm.role,
       status: adminForm.status,
       lastActive: 'Hozir faol',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&h=120&fit=crop&crop=face',
     });
 
     setIsAddAdminOpen(false);
@@ -248,10 +287,10 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
       phone: teacherForm.phone.trim(),
       subjects: [teacherForm.subjects],
       baseSalary: 4500000,
-      bonusPerStudent: 50000,
-      schedule: 'Dushanba - Chorshanba - Juma',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&h=120&fit=crop&crop=face',
+      bonusPerStudent: 25000,
+      schedule: 'Dush, Chor, Juma',
       status: 'Active',
+      avatar: '',
       joinedDate: new Date().toISOString().split('T')[0],
     });
 
@@ -272,19 +311,19 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
     addStudent({
       fullName: studentForm.fullName.trim(),
       phone: studentForm.phone.trim(),
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&h=120&fit=crop&crop=face',
-      birthDate: '2010-01-01',
-      gender: 'Male',
-      email: `${studentForm.fullName.toLowerCase().replace(/\s+/g, '')}@gmail.com`,
-      parentName: studentForm.parentName || 'Ota-ona',
-      parentPhone: studentForm.parentPhone || studentForm.phone,
-      groupId: 'GRP-01',
+      parentName: studentForm.parentName.trim(),
+      parentPhone: studentForm.parentPhone.trim(),
       groupName: studentForm.groupName,
-      teacherId: 'TCH-01',
-      teacherName: 'Azizbek Rahimov',
-      monthlyFee: Number(studentForm.monthlyFee),
+      monthlyFee: studentForm.monthlyFee,
       status: 'Active',
       joinedDate: new Date().toISOString().split('T')[0],
+      avatar: '',
+      birthDate: '2010-01-01',
+      gender: 'Male',
+      email: '',
+      groupId: 'GRP-01',
+      teacherId: 'TCH-01',
+      teacherName: 'Ustoz',
     });
 
     setIsAddStudentOpen(false);
@@ -307,59 +346,66 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
 
   const handleSaveEditBranch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingBranch) return;
+    if (!editingBranch || !branchForm.name.trim()) return;
 
     updateBranch(editingBranch.id, {
-      name: branchForm.name,
-      city: branchForm.city,
-      address: branchForm.address,
-      phone: branchForm.phone,
-      managerName: branchForm.managerName,
-      status: branchForm.status,
+      name: branchForm.name.trim(),
+      city: branchForm.city.trim(),
+      managerName: branchForm.managerName.trim(),
     });
 
     setEditingBranch(null);
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F4F2] p-6 lg:p-8 space-y-6">
-      {/* 1. TOP HEADER & DATE RANGE ROW (MATCHING REFERENCE IMAGE) */}
+    <div className="min-h-screen p-6 lg:p-8 space-y-6" style={{ background: C.pageBg }}>
+      
+      {/* ── 1. PAGE HEADER & DATE FILTER ──────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        {/* Left Title */}
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight" style={{ color: C.textPrimary }}>
             Dashboard
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Lumos tizimining umumiy boshqaruv paneli
+          <p className="text-xs sm:text-sm mt-0.5" style={{ color: C.textSecondary }}>
+            Lumos ta’lim tizimining umumiy tahliliy boshqaruv paneli
           </p>
         </div>
 
-        {/* Right: Date Picker Pill */}
+        {/* Date Picker Dropdown */}
         <div className="relative">
           <button
             type="button"
             onClick={() => setIsDateDropdownOpen(!isDateDropdownOpen)}
-            className="flex items-center gap-3.5 rounded-2xl border border-slate-200/90 bg-white px-4 py-2.5 shadow-2xs hover:border-[#5A0B1C]/40 transition-all cursor-pointer text-left"
+            className="flex items-center gap-3.5 rounded-xl px-4 py-2.5 transition-all cursor-pointer text-left"
+            style={{
+              background: C.cardBg,
+              border: `1px solid ${C.border}`,
+              boxShadow: '0 1px 3px rgba(111,16,40,0.03)',
+            }}
           >
-            <Calendar className="h-5 w-5 text-slate-600 shrink-0" />
+            <Calendar className="h-4 w-4 shrink-0" style={{ color: C.primary }} />
             <div className="flex flex-col">
-              <span className="text-xs font-bold text-slate-800 leading-tight">
+              <span className="text-xs font-bold leading-tight" style={{ color: C.textPrimary }}>
                 {dateRangeFilter === 'today'
-                  ? 'Bugun, 26-Sentabr, 2026'
+                  ? 'Bugungi ko‘rsatkichlar'
                   : dateRangeFilter === 'week'
-                  ? 'Bu hafta: 21–27 Sentabr'
-                  : '1-Sentabr, 2026 – 30-Sentabr, 2026'}
+                  ? 'Haftalik ko‘rsatkichlar'
+                  : dateRangeFilter === 'year'
+                  ? 'Yillik (2026) ko‘rsatkichlar'
+                  : 'Oylik: Sentabr 2026'}
               </span>
-              <span className="text-[10px] text-slate-400 font-medium leading-tight mt-0.5">
-                Bugungi sana: 26-Sentabr, 2026
+              <span className="text-[10px] font-medium leading-tight mt-0.5" style={{ color: C.textMuted }}>
+                Tanlangan davr
               </span>
             </div>
-            <ChevronDown className="h-4 w-4 text-slate-400 ml-1 shrink-0" />
+            <ChevronDown className="h-4 w-4 ml-1 shrink-0" style={{ color: C.textMuted }} />
           </button>
 
           {isDateDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-xl z-50 animate-in fade-in zoom-in-95 duration-100">
+            <div
+              className="absolute right-0 mt-2 w-52 rounded-xl p-1.5 shadow-xl z-50 animate-in fade-in zoom-in-95 duration-100"
+              style={{ background: C.cardBg, border: `1px solid ${C.border}` }}
+            >
               {[
                 { id: 'today', label: 'Bugun' },
                 { id: 'week', label: 'Bu hafta' },
@@ -373,11 +419,11 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
                     setDateRangeFilter(item.id as any);
                     setIsDateDropdownOpen(false);
                   }}
-                  className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-medium transition-colors ${
-                    dateRangeFilter === item.id
-                      ? 'bg-[#5A0B1C] text-white font-bold'
-                      : 'text-slate-700 hover:bg-slate-100'
-                  }`}
+                  className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-medium transition-colors cursor-pointer"
+                  style={{
+                    background: dateRangeFilter === item.id ? C.primary : 'transparent',
+                    color: dateRangeFilter === item.id ? '#FFFFFF' : C.textPrimary,
+                  }}
                 >
                   <span>{item.label}</span>
                   {dateRangeFilter === item.id && <Check className="h-3.5 w-3.5" />}
@@ -388,25 +434,34 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
         </div>
       </div>
 
-      {/* 2. EXACT 5 KPI CARDS ROW (MATCHING REFERENCE IMAGE) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      {/* ── 2. EXACT 5 KPI CARDS ROW ──────────────────────────────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {/* KPI 1: Markazlar */}
         <div
           onClick={() => onNavigateTab('branches')}
-          className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs flex items-center gap-4 hover:border-slate-300 transition-all cursor-pointer group"
+          className="rounded-2xl p-4 flex items-center gap-3.5 transition-all cursor-pointer group"
+          style={{
+            background: C.cardBg,
+            border: `1px solid ${C.border}`,
+            boxShadow: '0 1px 4px rgba(111,16,40,0.03)',
+          }}
         >
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#FAF0F2] text-[#5A0B1C] group-hover:scale-105 transition-transform">
-            <Building2 className="h-6 w-6" />
+          <div
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-105"
+            style={{ background: C.burgundyLight, color: C.primary }}
+          >
+            <Building2 className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-2xl font-black text-slate-900 leading-tight">
+            <p className="text-xl font-extrabold leading-tight" style={{ color: C.textPrimary }}>
               {totalBranchesCount}
             </p>
-            <p className="text-xs font-medium text-slate-500 mt-0.5">
+            <p className="text-xs font-medium mt-0.5" style={{ color: C.textSecondary }}>
               Markazlar
             </p>
-            <p className="text-[11px] font-semibold text-emerald-600 mt-1 flex items-center gap-0.5">
-              ↑ 0% <span className="font-normal text-slate-400 ml-1">O‘tgan oy bilan</span>
+            <p className="text-[11px] font-semibold mt-0.5 flex items-center gap-0.5" style={{ color: C.success }}>
+              <span>↑ 0%</span>
+              <span className="font-normal ml-1" style={{ color: C.textMuted }}>O‘tgan oyga nisbatan</span>
             </p>
           </div>
         </div>
@@ -414,20 +469,29 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
         {/* KPI 2: Adminlar */}
         <div
           onClick={() => onNavigateTab('credentials')}
-          className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs flex items-center gap-4 hover:border-slate-300 transition-all cursor-pointer group"
+          className="rounded-2xl p-4 flex items-center gap-3.5 transition-all cursor-pointer group"
+          style={{
+            background: C.cardBg,
+            border: `1px solid ${C.border}`,
+            boxShadow: '0 1px 4px rgba(111,16,40,0.03)',
+          }}
         >
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#FDF3EE] text-[#A0522D] group-hover:scale-105 transition-transform">
-            <ShieldCheck className="h-6 w-6" />
+          <div
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-105"
+            style={{ background: C.goldBg, color: C.goldText }}
+          >
+            <ShieldCheck className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-2xl font-black text-slate-900 leading-tight">
+            <p className="text-xl font-extrabold leading-tight" style={{ color: C.textPrimary }}>
               {totalAdminsCount}
             </p>
-            <p className="text-xs font-medium text-slate-500 mt-0.5">
+            <p className="text-xs font-medium mt-0.5" style={{ color: C.textSecondary }}>
               Adminlar
             </p>
-            <p className="text-[11px] font-semibold text-emerald-600 mt-1 flex items-center gap-0.5">
-              ↑ 9% <span className="font-normal text-slate-400 ml-1">O‘tgan oy bilan</span>
+            <p className="text-[11px] font-semibold mt-0.5 flex items-center gap-0.5" style={{ color: C.success }}>
+              <span>↑ 9%</span>
+              <span className="font-normal ml-1" style={{ color: C.textMuted }}>O‘tgan oyga nisbatan</span>
             </p>
           </div>
         </div>
@@ -435,20 +499,29 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
         {/* KPI 3: O‘qituvchilar */}
         <div
           onClick={() => onNavigateTab('teachers')}
-          className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs flex items-center gap-4 hover:border-slate-300 transition-all cursor-pointer group"
+          className="rounded-2xl p-4 flex items-center gap-3.5 transition-all cursor-pointer group"
+          style={{
+            background: C.cardBg,
+            border: `1px solid ${C.border}`,
+            boxShadow: '0 1px 4px rgba(111,16,40,0.03)',
+          }}
         >
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#FBF0F1] text-[#90132A] group-hover:scale-105 transition-transform">
-            <GraduationCap className="h-6 w-6" />
+          <div
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-105"
+            style={{ background: C.burgundyLight, color: C.primary }}
+          >
+            <GraduationCap className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-2xl font-black text-slate-900 leading-tight">
+            <p className="text-xl font-extrabold leading-tight" style={{ color: C.textPrimary }}>
               {totalTeachersCount.toLocaleString()}
             </p>
-            <p className="text-xs font-medium text-slate-500 mt-0.5">
+            <p className="text-xs font-medium mt-0.5" style={{ color: C.textSecondary }}>
               O‘qituvchilar
             </p>
-            <p className="text-[11px] font-semibold text-emerald-600 mt-1 flex items-center gap-0.5">
-              ↑ 12% <span className="font-normal text-slate-400 ml-1">O‘tgan oy bilan</span>
+            <p className="text-[11px] font-semibold mt-0.5 flex items-center gap-0.5" style={{ color: C.success }}>
+              <span>↑ 12%</span>
+              <span className="font-normal ml-1" style={{ color: C.textMuted }}>Faol ustozlar</span>
             </p>
           </div>
         </div>
@@ -456,20 +529,29 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
         {/* KPI 4: Guruhlar */}
         <div
           onClick={() => onNavigateTab('groups')}
-          className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs flex items-center gap-4 hover:border-slate-300 transition-all cursor-pointer group"
+          className="rounded-2xl p-4 flex items-center gap-3.5 transition-all cursor-pointer group"
+          style={{
+            background: C.cardBg,
+            border: `1px solid ${C.border}`,
+            boxShadow: '0 1px 4px rgba(111,16,40,0.03)',
+          }}
         >
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#F8F3ED] text-[#8C6D46] group-hover:scale-105 transition-transform">
-            <Users className="h-6 w-6" />
+          <div
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-105"
+            style={{ background: C.goldBg, color: C.goldText }}
+          >
+            <BookOpen className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-2xl font-black text-slate-900 leading-tight">
+            <p className="text-xl font-extrabold leading-tight" style={{ color: C.textPrimary }}>
               {totalGroupsCount}
             </p>
-            <p className="text-xs font-medium text-slate-500 mt-0.5">
+            <p className="text-xs font-medium mt-0.5" style={{ color: C.textSecondary }}>
               Guruhlar
             </p>
-            <p className="text-[11px] font-semibold text-emerald-600 mt-1 flex items-center gap-0.5">
-              ↑ 8% <span className="font-normal text-slate-400 ml-1">O‘tgan oy bilan</span>
+            <p className="text-[11px] font-semibold mt-0.5 flex items-center gap-0.5" style={{ color: C.success }}>
+              <span>↑ 8%</span>
+              <span className="font-normal ml-1" style={{ color: C.textMuted }}>O‘tgan oyga nisbatan</span>
             </p>
           </div>
         </div>
@@ -477,47 +559,77 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
         {/* KPI 5: O‘quvchilar */}
         <div
           onClick={() => onNavigateTab('students')}
-          className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs flex items-center gap-4 hover:border-slate-300 transition-all cursor-pointer group"
+          className="col-span-2 lg:col-span-1 rounded-2xl p-4 flex items-center gap-3.5 transition-all cursor-pointer group"
+          style={{
+            background: C.cardBg,
+            border: `1px solid ${C.border}`,
+            boxShadow: '0 1px 4px rgba(111,16,40,0.03)',
+          }}
         >
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#F8F2EC] text-[#9E7B54] group-hover:scale-105 transition-transform">
-            <Users className="h-6 w-6" />
+          <div
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-105"
+            style={{ background: C.successBg, color: C.success }}
+          >
+            <Users className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-2xl font-black text-slate-900 leading-tight">
+            <p className="text-xl font-extrabold leading-tight" style={{ color: C.textPrimary }}>
               {totalStudentsCount.toLocaleString()}
             </p>
-            <p className="text-xs font-medium text-slate-500 mt-0.5">
+            <p className="text-xs font-medium mt-0.5" style={{ color: C.textSecondary }}>
               O‘quvchilar
             </p>
-            <p className="text-[11px] font-semibold text-emerald-600 mt-1 flex items-center gap-0.5">
-              ↑ 22% <span className="font-normal text-slate-400 ml-1">O‘tgan oy bilan</span>
+            <p className="text-[11px] font-semibold mt-0.5 flex items-center gap-0.5" style={{ color: C.success }}>
+              <span>↑ 22%</span>
+              <span className="font-normal ml-1" style={{ color: C.textMuted }}>Faol talabalar</span>
             </p>
           </div>
         </div>
       </div>
 
-      {/* 3. MIDDLE ROW (O‘QUVCHILAR DINAMIKASI, MARKAZLAR BO‘YICHA, TEZKOR AMALLAR) */}
+      {/* ── 3. MIDDLE ROW (CHARTS & QUICK ACTIONS) ────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        
         {/* CHART 1: O‘quvchilar dinamikasi (AreaChart) - 5 cols */}
-        <div className="lg:col-span-5 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h3 className="text-sm font-bold text-slate-800">
-              O‘quvchilar dinamikasi
-            </h3>
+        <div
+          className="lg:col-span-5 rounded-2xl p-5 flex flex-col justify-between"
+          style={{
+            background: C.cardBg,
+            border: `1px solid ${C.border}`,
+            boxShadow: '0 1px 4px rgba(111,16,40,0.03)',
+          }}
+        >
+          <div className="flex items-center justify-between pb-3" style={{ borderBottom: `1px solid ${C.border}` }}>
+            <div>
+              <h3 className="text-sm font-bold" style={{ color: C.textPrimary }}>
+                O‘quvchilar dinamikasi
+              </h3>
+              <p className="text-[11px] mt-0.5" style={{ color: C.textSecondary }}>
+                Qabul qilingan o‘quvchilar o‘sish ko‘rsatkichi
+              </p>
+            </div>
 
             {/* Dropdown filter */}
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setIsGrowthDropdownOpen(!isGrowthDropdownOpen)}
-                className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-600 hover:bg-slate-50 cursor-pointer"
+                className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer"
+                style={{
+                  background: C.cardBg,
+                  border: `1px solid ${C.border}`,
+                  color: C.textSecondary,
+                }}
               >
                 <span>{growthRange === '6m' ? 'So‘nggi 6 oy' : growthRange === '3m' ? 'So‘nggi 3 oy' : '1 yil'}</span>
-                <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+                <ChevronDown className="h-3.5 w-3.5" style={{ color: C.textMuted }} />
               </button>
 
               {isGrowthDropdownOpen && (
-                <div className="absolute right-0 mt-1 w-32 rounded-xl border border-slate-200 bg-white p-1 shadow-lg z-20">
+                <div
+                  className="absolute right-0 mt-1 w-32 rounded-xl p-1 shadow-lg z-20"
+                  style={{ background: C.cardBg, border: `1px solid ${C.border}` }}
+                >
                   {[
                     { id: '3m', label: 'So‘nggi 3 oy' },
                     { id: '6m', label: 'So‘nggi 6 oy' },
@@ -530,7 +642,11 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
                         setGrowthRange(item.id as any);
                         setIsGrowthDropdownOpen(false);
                       }}
-                      className="flex w-full px-2.5 py-1.5 text-xs text-left text-slate-700 hover:bg-slate-100 rounded-lg"
+                      className="flex w-full px-2.5 py-1.5 text-xs text-left rounded-lg transition-colors cursor-pointer"
+                      style={{
+                        background: growthRange === item.id ? C.primary : 'transparent',
+                        color: growthRange === item.id ? '#FFFFFF' : C.textPrimary,
+                      }}
                     >
                       {item.label}
                     </button>
@@ -545,45 +661,45 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
               <AreaChart data={dynamicGrowthData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="areaGradientBurgundy" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#5A0B1C" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#5A0B1C" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor={C.primary} stopOpacity={0.25} />
+                    <stop offset="95%" stopColor={C.primary} stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F1EFEA" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
                 <XAxis
                   dataKey="month"
-                  stroke="#94A3B8"
+                  stroke={C.textMuted}
                   fontSize={11}
                   tickLine={false}
                   axisLine={false}
                 />
                 <YAxis
-                  stroke="#94A3B8"
+                  stroke={C.textMuted}
                   fontSize={11}
                   tickLine={false}
                   axisLine={false}
-                  ticks={[0, 500, 1000, 1500]}
+                  ticks={[0, 250, 500, 750]}
                 />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: '#FFFFFF',
-                    borderColor: '#E2E8F0',
+                    borderColor: C.border,
                     borderRadius: '12px',
-                    color: '#0F172A',
+                    color: C.textPrimary,
                     fontSize: '12px',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                    boxShadow: '0 4px 12px rgba(111, 16, 40, 0.08)',
                   }}
                   formatter={(val: any) => [`${val} nafar`, 'O‘quvchilar']}
                 />
                 <Area
                   type="monotone"
                   dataKey="students"
-                  stroke="#5A0B1C"
+                  stroke={C.primary}
                   strokeWidth={2.5}
                   fillOpacity={1}
                   fill="url(#areaGradientBurgundy)"
-                  dot={{ r: 4, fill: '#5A0B1C', stroke: '#FFFFFF', strokeWidth: 2 }}
-                  activeDot={{ r: 6, fill: '#5A0B1C', stroke: '#FFFFFF', strokeWidth: 2 }}
+                  dot={{ r: 4, fill: C.primary, stroke: '#FFFFFF', strokeWidth: 2 }}
+                  activeDot={{ r: 6, fill: C.primary, stroke: '#FFFFFF', strokeWidth: 2 }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -591,16 +707,26 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
         </div>
 
         {/* CHART 2: Markazlar bo‘yicha o‘quvchilar (Donut Chart) - 4 cols */}
-        <div className="lg:col-span-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs flex flex-col justify-between">
-          <div className="border-b border-slate-100 pb-3">
-            <h3 className="text-sm font-bold text-slate-800">
+        <div
+          className="lg:col-span-4 rounded-2xl p-5 flex flex-col justify-between"
+          style={{
+            background: C.cardBg,
+            border: `1px solid ${C.border}`,
+            boxShadow: '0 1px 4px rgba(111,16,40,0.03)',
+          }}
+        >
+          <div className="pb-3" style={{ borderBottom: `1px solid ${C.border}` }}>
+            <h3 className="text-sm font-bold" style={{ color: C.textPrimary }}>
               Markazlar bo‘yicha o‘quvchilar
             </h3>
+            <p className="text-[11px] mt-0.5" style={{ color: C.textSecondary }}>
+              Filiallar aro taqsimot ulushi
+            </p>
           </div>
 
           <div className="mt-4 flex items-center justify-between gap-2">
             {/* Donut with Center Text */}
-            <div className="relative h-56 w-52 shrink-0 flex items-center justify-center">
+            <div className="relative h-56 w-48 shrink-0 flex items-center justify-center">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -608,8 +734,8 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
                     cx="50%"
                     cy="50%"
                     innerRadius={55}
-                    outerRadius={80}
-                    paddingAngle={2}
+                    outerRadius={78}
+                    paddingAngle={3}
                     dataKey="value"
                   >
                     {donutData.map((entry, index) => (
@@ -619,7 +745,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
                   <Tooltip
                     contentStyle={{
                       backgroundColor: '#FFFFFF',
-                      borderColor: '#E2E8F0',
+                      borderColor: C.border,
                       borderRadius: '10px',
                       fontSize: '12px',
                     }}
@@ -630,163 +756,278 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
 
               {/* Center Overlay */}
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-xl font-extrabold text-slate-900 leading-tight">
-                  1 248
+                <span className="text-xl font-extrabold leading-tight" style={{ color: C.textPrimary }}>
+                  {totalStudentsCount}
                 </span>
-                <span className="text-[11px] font-medium text-slate-400 leading-tight mt-0.5">
-                  Jami o‘quvchilar
+                <span className="text-[10px] font-medium leading-tight mt-0.5" style={{ color: C.textMuted }}>
+                  Jami o‘quvchi
                 </span>
               </div>
             </div>
 
             {/* Right Legend */}
-            <div className="flex-1 space-y-3 pl-2">
+            <div className="flex-1 space-y-2.5 pl-1">
               {donutData.map((item) => (
                 <div key={item.name} className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <span
-                      className="h-2.5 w-2.5 rounded-full"
+                      className="h-2.5 w-2.5 rounded-full shrink-0"
                       style={{ backgroundColor: item.color }}
                     />
-                    <span className="text-slate-600 font-medium">{item.name}</span>
+                    <span className="font-medium" style={{ color: C.textSecondary }}>{item.name}</span>
                   </div>
-                  <span className="font-bold text-slate-800">{item.value}%</span>
+                  <span className="font-bold" style={{ color: C.textPrimary }}>{item.value}%</span>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* QUICK ACTIONS: Tezkor amallar - 3 cols (MATCHING REFERENCE IMAGE) */}
-        <div className="lg:col-span-3 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs flex flex-col justify-between">
-          <div className="border-b border-slate-100 pb-3">
-            <h3 className="text-sm font-bold text-slate-800">
+        {/* QUICK ACTIONS: Tezkor amallar - 3 cols */}
+        <div
+          className="lg:col-span-3 rounded-2xl p-5 flex flex-col justify-between"
+          style={{
+            background: C.cardBg,
+            border: `1px solid ${C.border}`,
+            boxShadow: '0 1px 4px rgba(111,16,40,0.03)',
+          }}
+        >
+          <div className="pb-3" style={{ borderBottom: `1px solid ${C.border}` }}>
+            <h3 className="text-sm font-bold" style={{ color: C.textPrimary }}>
               Tezkor amallar
             </h3>
+            <p className="text-[11px] mt-0.5" style={{ color: C.textSecondary }}>
+              Asosiy elementlarni qo‘shish
+            </p>
           </div>
 
-          <div className="mt-4 space-y-2.5">
+          <div className="mt-3.5 space-y-2">
             {/* Button 1: Markaz qo‘shish */}
             <button
               type="button"
               onClick={() => setIsAddBranchOpen(true)}
-              className="flex w-full items-center justify-between rounded-xl border border-slate-200/80 bg-white p-3 hover:border-[#5A0B1C]/40 hover:bg-[#FAF0F2]/30 transition-all cursor-pointer shadow-2xs group"
+              className="flex w-full items-center justify-between rounded-xl p-2.5 transition-all cursor-pointer group"
+              style={{
+                background: C.cardBg,
+                border: `1px solid ${C.border}`,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = C.primary;
+                e.currentTarget.style.background = C.rowHover;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = C.border;
+                e.currentTarget.style.background = C.cardBg;
+              }}
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#FAF0F2] text-[#5A0B1C] group-hover:scale-105 transition-transform">
-                  <Building2 className="h-4.5 w-4.5" />
+                <div
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-transform group-hover:scale-105"
+                  style={{ background: C.burgundyLight, color: C.primary }}
+                >
+                  <Building2 className="h-4 w-4" />
                 </div>
-                <span className="text-xs font-bold text-slate-800">
+                <span className="text-xs font-bold" style={{ color: C.textPrimary }}>
                   Markaz qo‘shish
                 </span>
               </div>
-              <ChevronRight className="h-4 w-4 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+              <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" style={{ color: C.textMuted }} />
             </button>
 
             {/* Button 2: Admin qo‘shish */}
             <button
               type="button"
               onClick={() => setIsAddAdminOpen(true)}
-              className="flex w-full items-center justify-between rounded-xl border border-slate-200/80 bg-white p-3 hover:border-[#5A0B1C]/40 hover:bg-[#FAF0F2]/30 transition-all cursor-pointer shadow-2xs group"
+              className="flex w-full items-center justify-between rounded-xl p-2.5 transition-all cursor-pointer group"
+              style={{
+                background: C.cardBg,
+                border: `1px solid ${C.border}`,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = C.primary;
+                e.currentTarget.style.background = C.rowHover;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = C.border;
+                e.currentTarget.style.background = C.cardBg;
+              }}
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#FDF3EE] text-[#A0522D] group-hover:scale-105 transition-transform">
-                  <ShieldCheck className="h-4.5 w-4.5" />
+                <div
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-transform group-hover:scale-105"
+                  style={{ background: C.goldBg, color: C.goldText }}
+                >
+                  <ShieldCheck className="h-4 w-4" />
                 </div>
-                <span className="text-xs font-bold text-slate-800">
+                <span className="text-xs font-bold" style={{ color: C.textPrimary }}>
                   Admin qo‘shish
                 </span>
               </div>
-              <ChevronRight className="h-4 w-4 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+              <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" style={{ color: C.textMuted }} />
             </button>
 
             {/* Button 3: O‘qituvchi qo‘shish */}
             <button
               type="button"
               onClick={() => setIsAddTeacherOpen(true)}
-              className="flex w-full items-center justify-between rounded-xl border border-slate-200/80 bg-white p-3 hover:border-[#5A0B1C]/40 hover:bg-[#FAF0F2]/30 transition-all cursor-pointer shadow-2xs group"
+              className="flex w-full items-center justify-between rounded-xl p-2.5 transition-all cursor-pointer group"
+              style={{
+                background: C.cardBg,
+                border: `1px solid ${C.border}`,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = C.primary;
+                e.currentTarget.style.background = C.rowHover;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = C.border;
+                e.currentTarget.style.background = C.cardBg;
+              }}
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#FBF0F1] text-[#90132A] group-hover:scale-105 transition-transform">
-                  <GraduationCap className="h-4.5 w-4.5" />
+                <div
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-transform group-hover:scale-105"
+                  style={{ background: C.burgundyLight, color: C.primary }}
+                >
+                  <GraduationCap className="h-4 w-4" />
                 </div>
-                <span className="text-xs font-bold text-slate-800">
+                <span className="text-xs font-bold" style={{ color: C.textPrimary }}>
                   O‘qituvchi qo‘shish
                 </span>
               </div>
-              <ChevronRight className="h-4 w-4 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+              <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" style={{ color: C.textMuted }} />
             </button>
 
             {/* Button 4: O‘quvchi qo‘shish */}
             <button
               type="button"
               onClick={() => setIsAddStudentOpen(true)}
-              className="flex w-full items-center justify-between rounded-xl border border-slate-200/80 bg-white p-3 hover:border-[#5A0B1C]/40 hover:bg-[#FAF0F2]/30 transition-all cursor-pointer shadow-2xs group"
+              className="flex w-full items-center justify-between rounded-xl p-2.5 transition-all cursor-pointer group"
+              style={{
+                background: C.cardBg,
+                border: `1px solid ${C.border}`,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = C.primary;
+                e.currentTarget.style.background = C.rowHover;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = C.border;
+                e.currentTarget.style.background = C.cardBg;
+              }}
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#F8F2EC] text-[#9E7B54] group-hover:scale-105 transition-transform">
-                  <Users className="h-4.5 w-4.5" />
+                <div
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-transform group-hover:scale-105"
+                  style={{ background: C.successBg, color: C.success }}
+                >
+                  <Users className="h-4 w-4" />
                 </div>
-                <span className="text-xs font-bold text-slate-800">
+                <span className="text-xs font-bold" style={{ color: C.textPrimary }}>
                   O‘quvchi qo‘shish
                 </span>
               </div>
-              <ChevronRight className="h-4 w-4 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+              <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" style={{ color: C.textMuted }} />
             </button>
           </div>
         </div>
       </div>
 
-      {/* 4. BOTTOM ROW: MARKAZLAR RO‘YXATI & SO‘NGGI FAOLIYAT (MATCHING REFERENCE IMAGE) */}
+      {/* ── 4. BOTTOM ROW: MARKAZLAR RO‘YXATI & SO‘NGGI FAOLIYAT ─────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        
         {/* TABLE: Markazlar ro‘yxati (lg:col-span-8) */}
-        <div className="lg:col-span-8 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs flex flex-col justify-between">
+        <div
+          className="lg:col-span-8 rounded-2xl p-5 flex flex-col justify-between"
+          style={{
+            background: C.cardBg,
+            border: `1px solid ${C.border}`,
+            boxShadow: '0 1px 4px rgba(111,16,40,0.03)',
+          }}
+        >
           <div>
-            <div className="border-b border-slate-100 pb-3">
-              <h3 className="text-sm font-bold text-slate-800">
-                Markazlar ro‘yxati
-              </h3>
+            <div className="flex items-center justify-between pb-3" style={{ borderBottom: `1px solid ${C.border}` }}>
+              <div>
+                <h3 className="text-sm font-bold" style={{ color: C.textPrimary }}>
+                  Markazlar ro‘yxati
+                </h3>
+                <p className="text-[11px] mt-0.5" style={{ color: C.textSecondary }}>
+                  Faoliyat yuritayotgan filiallar umumiy statistikasi
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => onNavigateTab('branches')}
+                className="text-xs font-semibold hover:underline transition-colors cursor-pointer"
+                style={{ color: C.primary }}
+              >
+                Barchasini ko‘rish →
+              </button>
             </div>
 
             <div className="overflow-x-auto mt-3">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-100 text-[11px] font-semibold text-slate-400">
-                    <th className="py-2.5 px-3 w-10">№</th>
-                    <th className="py-2.5 px-3">Markaz nomi</th>
-                    <th className="py-2.5 px-3">Joylashuvi</th>
-                    <th className="py-2.5 px-3">Admin</th>
-                    <th className="py-2.5 px-3 text-center">O‘quvchilar</th>
-                    <th className="py-2.5 px-3 text-center">Guruhlar</th>
-                    <th className="py-2.5 px-3 text-center">Status</th>
+                  <tr style={{ background: C.tableHeader, borderBottom: `1px solid ${C.border}` }}>
+                    <th className="py-2.5 px-3 w-10 text-xs font-semibold" style={{ color: C.textPrimary }}>№</th>
+                    <th className="py-2.5 px-3 text-xs font-semibold" style={{ color: C.textPrimary }}>Markaz nomi</th>
+                    <th className="py-2.5 px-3 text-xs font-semibold" style={{ color: C.textPrimary }}>Joylashuvi</th>
+                    <th className="py-2.5 px-3 text-xs font-semibold" style={{ color: C.textPrimary }}>Admin</th>
+                    <th className="py-2.5 px-3 text-center text-xs font-semibold" style={{ color: C.textPrimary }}>O‘quvchilar</th>
+                    <th className="py-2.5 px-3 text-center text-xs font-semibold" style={{ color: C.textPrimary }}>Guruhlar</th>
+                    <th className="py-2.5 px-3 text-center text-xs font-semibold" style={{ color: C.textPrimary }}>Status</th>
                     <th className="py-2.5 px-3 text-right"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-50 text-xs">
+                <tbody className="text-xs">
                   {branches.map((b, idx) => (
-                    <tr key={b.id} className="hover:bg-slate-50/70 transition-colors">
-                      <td className="py-3 px-3 text-slate-400 font-medium">
+                    <tr
+                      key={b.id}
+                      className="transition-colors cursor-pointer"
+                      style={{ borderBottom: `1px solid ${C.border}` }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = C.rowHover)}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                    >
+                      <td className="py-3 px-3 font-medium" style={{ color: C.textMuted }}>
                         {idx + 1}
                       </td>
-                      <td className="py-3 px-3 font-bold text-slate-900">
-                        {b.name}
+                      <td className="py-3 px-3 font-bold" style={{ color: C.textPrimary }}>
+                        <div className="flex items-center gap-1.5">
+                          <Building2 className="h-3.5 w-3.5 shrink-0" style={{ color: C.primary }} />
+                          <span>{b.name}</span>
+                        </div>
                       </td>
-                      <td className="py-3 px-3 text-slate-500">
-                        {b.city}
+                      <td className="py-3 px-3">
+                        <span
+                          className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold"
+                          style={{ background: C.goldBg, color: C.goldText, border: '1px solid #E8D8B8' }}
+                        >
+                          {b.city}
+                        </span>
                       </td>
-                      <td className="py-3 px-3 text-slate-600">
+                      <td className="py-3 px-3 font-medium" style={{ color: C.textSecondary }}>
                         {b.managerName}
                       </td>
-                      <td className="py-3 px-3 text-center font-semibold text-slate-800">
+                      <td className="py-3 px-3 text-center font-bold" style={{ color: C.textPrimary }}>
                         {b.studentCount}
                       </td>
-                      <td className="py-3 px-3 text-center font-semibold text-slate-800">
+                      <td className="py-3 px-3 text-center font-semibold" style={{ color: C.textSecondary }}>
                         {b.groupsCount}
                       </td>
                       <td className="py-3 px-3 text-center">
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-200/60">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                          Faol
+                        <span
+                          className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+                          style={{
+                            background: b.status === 'Active' ? C.successBg : C.goldBg,
+                            color: b.status === 'Active' ? C.success : C.goldText,
+                            border: `1px solid ${b.status === 'Active' ? '#C2EBD7' : '#E8D8B8'}`,
+                          }}
+                        >
+                          <span
+                            className="h-1.5 w-1.5 rounded-full"
+                            style={{ background: b.status === 'Active' ? C.success : C.gold }}
+                          />
+                          {b.status === 'Active' ? 'Faol' : b.status === 'Planned' ? 'Rejada' : b.status}
                         </span>
                       </td>
                       <td className="py-3 px-3 text-right">
@@ -829,26 +1070,29 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
             </div>
           </div>
 
-          {/* Table Footer: Jami 4 ta markaz & Pagination */}
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+          {/* Table Footer */}
+          <div className="mt-4 pt-3 flex items-center justify-between text-xs" style={{ borderTop: `1px solid ${C.border}`, color: C.textSecondary }}>
             <span>Jami {branches.length} ta markaz</span>
 
             <div className="flex items-center gap-1">
               <button
                 type="button"
-                className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:bg-slate-50"
+                className="flex h-7 w-7 items-center justify-center rounded-lg transition-colors cursor-pointer"
+                style={{ border: `1px solid ${C.border}`, color: C.textSecondary }}
               >
                 &lt;
               </button>
               <button
                 type="button"
-                className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#5A0B1C] text-white font-bold text-xs"
+                className="flex h-7 w-7 items-center justify-center rounded-lg font-bold text-xs text-white"
+                style={{ background: C.primary }}
               >
                 1
               </button>
               <button
                 type="button"
-                className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:bg-slate-50"
+                className="flex h-7 w-7 items-center justify-center rounded-lg transition-colors cursor-pointer"
+                style={{ border: `1px solid ${C.border}`, color: C.textSecondary }}
               >
                 &gt;
               </button>
@@ -856,41 +1100,57 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
           </div>
         </div>
 
-        {/* RECENT ACTIVITY: So‘nggi faoliyat (lg:col-span-4, MATCHING REFERENCE IMAGE) */}
-        <div className="lg:col-span-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs flex flex-col justify-between">
+        {/* RECENT ACTIVITY: So‘nggi faoliyat (lg:col-span-4) */}
+        <div
+          className="lg:col-span-4 rounded-2xl p-5 flex flex-col justify-between"
+          style={{
+            background: C.cardBg,
+            border: `1px solid ${C.border}`,
+            boxShadow: '0 1px 4px rgba(111,16,40,0.03)',
+          }}
+        >
           <div>
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-sm font-bold text-slate-800">
-                So‘nggi faoliyat
-              </h3>
+            <div className="flex items-center justify-between pb-3" style={{ borderBottom: `1px solid ${C.border}` }}>
+              <div>
+                <h3 className="text-sm font-bold" style={{ color: C.textPrimary }}>
+                  So‘nggi faoliyat
+                </h3>
+                <p className="text-[11px] mt-0.5" style={{ color: C.textSecondary }}>
+                  Tizimda bajarilgan amallar
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() => onNavigateTab('reports')}
-                className="text-xs font-semibold text-slate-600 hover:text-[#5A0B1C] transition-colors"
+                className="text-xs font-semibold hover:underline transition-colors cursor-pointer"
+                style={{ color: C.primary }}
               >
                 Barchasi →
               </button>
             </div>
 
-            <div className="mt-4 space-y-4">
+            <div className="mt-4 space-y-3.5">
               {recentActivities.map((act) => {
                 const Icon = act.icon;
                 return (
                   <div key={act.id} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FAF0F2] text-[#5A0B1C]">
+                      <div
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
+                        style={{ background: C.burgundyLight, color: C.primary }}
+                      >
                         <Icon className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-slate-800">
+                        <p className="text-xs font-bold leading-tight" style={{ color: C.textPrimary }}>
                           {act.title}
                         </p>
-                        <p className="text-[11px] text-slate-400">
+                        <p className="text-[11px] mt-0.5 leading-tight" style={{ color: C.textSecondary }}>
                           {act.subtitle}
                         </p>
                       </div>
                     </div>
-                    <span className="text-[11px] text-slate-400 font-medium">
+                    <span className="text-[11px] font-medium" style={{ color: C.textMuted }}>
                       {act.time}
                     </span>
                   </div>
@@ -898,10 +1158,25 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
               })}
             </div>
           </div>
+
+          <div
+            className="mt-5 p-3 rounded-xl flex items-center justify-between"
+            style={{ background: C.goldBg, border: '1px solid #E8D8B8' }}
+          >
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4" style={{ color: C.goldText }} />
+              <span className="text-xs font-semibold" style={{ color: C.goldText }}>
+                Tizim statusi
+              </span>
+            </div>
+            <span className="text-xs font-bold" style={{ color: C.success }}>
+              ● 100% Barqaror
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* MODAL 1: ADD BRANCH */}
+      {/* ── MODAL 1: ADD BRANCH ───────────────────────────────────────────── */}
       <Modal
         isOpen={isAddBranchOpen}
         onClose={() => setIsAddBranchOpen(false)}
@@ -910,20 +1185,20 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
       >
         <form onSubmit={handleCreateBranch} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold mb-1" style={{ color: C.textPrimary }}>
               Markaz Nomi *
             </label>
             <Input
               required
-              placeholder="Masalan: Lumos Samarqand"
+              placeholder="Masalan: Lumos Samarqand Filiali"
               value={branchForm.name}
               onChange={(e) => setBranchForm({ ...branchForm, name: e.target.value })}
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold mb-1" style={{ color: C.textPrimary }}>
                 Shahar / Joylashuv *
               </label>
               <Input
@@ -934,7 +1209,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold mb-1" style={{ color: C.textPrimary }}>
                 Aloqa Telefoni
               </label>
               <Input
@@ -946,7 +1221,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold mb-1" style={{ color: C.textPrimary }}>
               To‘liq Manzil *
             </label>
             <Input
@@ -957,9 +1232,9 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold mb-1" style={{ color: C.textPrimary }}>
                 Mas’ul Admin / Rahbar
               </label>
               <Input
@@ -969,7 +1244,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold mb-1" style={{ color: C.textPrimary }}>
                 Status
               </label>
               <Select
@@ -985,7 +1260,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
+          <div className="flex justify-end gap-2 pt-4" style={{ borderTop: `1px solid ${C.border}` }}>
             <Button variant="ghost" type="button" onClick={() => setIsAddBranchOpen(false)}>
               Bekor qilish
             </Button>
@@ -996,7 +1271,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
         </form>
       </Modal>
 
-      {/* MODAL 2: ADD ADMIN */}
+      {/* ── MODAL 2: ADD ADMIN ────────────────────────────────────────────── */}
       <Modal
         isOpen={isAddAdminOpen}
         onClose={() => setIsAddAdminOpen(false)}
@@ -1005,7 +1280,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
       >
         <form onSubmit={handleCreateAdmin} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold mb-1" style={{ color: C.textPrimary }}>
               F.I.O *
             </label>
             <Input
@@ -1016,9 +1291,9 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold mb-1" style={{ color: C.textPrimary }}>
                 Email / Login *
               </label>
               <Input
@@ -1030,7 +1305,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold mb-1" style={{ color: C.textPrimary }}>
                 Telefon Raqami
               </label>
               <Input
@@ -1041,9 +1316,9 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold mb-1" style={{ color: C.textPrimary }}>
                 Biriktiriladigan Markaz *
               </label>
               <Select
@@ -1058,7 +1333,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
               </Select>
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold mb-1" style={{ color: C.textPrimary }}>
                 Rol
               </label>
               <Select
@@ -1072,7 +1347,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
+          <div className="flex justify-end gap-2 pt-4" style={{ borderTop: `1px solid ${C.border}` }}>
             <Button variant="ghost" type="button" onClick={() => setIsAddAdminOpen(false)}>
               Bekor qilish
             </Button>
@@ -1083,7 +1358,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
         </form>
       </Modal>
 
-      {/* MODAL 3: ADD TEACHER */}
+      {/* ── MODAL 3: ADD TEACHER ──────────────────────────────────────────── */}
       <Modal
         isOpen={isAddTeacherOpen}
         onClose={() => setIsAddTeacherOpen(false)}
@@ -1092,7 +1367,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
       >
         <form onSubmit={handleCreateTeacher} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold mb-1" style={{ color: C.textPrimary }}>
               Ustoz F.I.O *
             </label>
             <Input
@@ -1103,20 +1378,20 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold mb-1" style={{ color: C.textPrimary }}>
                 Mutaxassislik / Fan *
               </label>
               <Input
                 required
-                placeholder="Matematika, Fizika, Ingliz tili..."
+                placeholder="Matematika, Ingliz tili..."
                 value={teacherForm.subjects}
                 onChange={(e) => setTeacherForm({ ...teacherForm, subjects: e.target.value })}
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold mb-1" style={{ color: C.textPrimary }}>
                 Telefon
               </label>
               <Input
@@ -1127,7 +1402,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
+          <div className="flex justify-end gap-2 pt-4" style={{ borderTop: `1px solid ${C.border}` }}>
             <Button variant="ghost" type="button" onClick={() => setIsAddTeacherOpen(false)}>
               Bekor qilish
             </Button>
@@ -1138,7 +1413,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
         </form>
       </Modal>
 
-      {/* MODAL 4: ADD STUDENT */}
+      {/* ── MODAL 4: ADD STUDENT ──────────────────────────────────────────── */}
       <Modal
         isOpen={isAddStudentOpen}
         onClose={() => setIsAddStudentOpen(false)}
@@ -1147,7 +1422,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
       >
         <form onSubmit={handleCreateStudent} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold mb-1" style={{ color: C.textPrimary }}>
               O‘quvchi F.I.O *
             </label>
             <Input
@@ -1158,9 +1433,9 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold mb-1" style={{ color: C.textPrimary }}>
                 O‘quvchi Telefoni
               </label>
               <Input
@@ -1170,7 +1445,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold mb-1" style={{ color: C.textPrimary }}>
                 Guruh
               </label>
               <Input
@@ -1181,9 +1456,9 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold mb-1" style={{ color: C.textPrimary }}>
                 Ota-ona Ismi
               </label>
               <Input
@@ -1193,7 +1468,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold mb-1" style={{ color: C.textPrimary }}>
                 Oylik to‘lov (so‘m)
               </label>
               <Input
@@ -1204,7 +1479,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
+          <div className="flex justify-end gap-2 pt-4" style={{ borderTop: `1px solid ${C.border}` }}>
             <Button variant="ghost" type="button" onClick={() => setIsAddStudentOpen(false)}>
               Bekor qilish
             </Button>
@@ -1215,7 +1490,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
         </form>
       </Modal>
 
-      {/* VIEW BRANCH MODAL */}
+      {/* ── VIEW BRANCH MODAL ─────────────────────────────────────────────── */}
       {viewingBranch && (
         <Modal
           isOpen={!!viewingBranch}
@@ -1224,25 +1499,25 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
           maxWidth="sm"
         >
           <div className="space-y-3 text-xs">
-            <div className="flex justify-between py-1.5 border-b border-slate-100">
-              <span className="text-slate-500">Shahar:</span>
-              <span className="font-bold text-slate-800">{viewingBranch.city}</span>
+            <div className="flex justify-between py-1.5" style={{ borderBottom: `1px solid ${C.border}` }}>
+              <span style={{ color: C.textSecondary }}>Shahar:</span>
+              <span className="font-bold" style={{ color: C.textPrimary }}>{viewingBranch.city}</span>
             </div>
-            <div className="flex justify-between py-1.5 border-b border-slate-100">
-              <span className="text-slate-500">Manzil:</span>
-              <span className="font-bold text-slate-800">{viewingBranch.address}</span>
+            <div className="flex justify-between py-1.5" style={{ borderBottom: `1px solid ${C.border}` }}>
+              <span style={{ color: C.textSecondary }}>Manzil:</span>
+              <span className="font-bold" style={{ color: C.textPrimary }}>{viewingBranch.address}</span>
             </div>
-            <div className="flex justify-between py-1.5 border-b border-slate-100">
-              <span className="text-slate-500">Mas’ul Admin:</span>
-              <span className="font-bold text-slate-800">{viewingBranch.managerName}</span>
+            <div className="flex justify-between py-1.5" style={{ borderBottom: `1px solid ${C.border}` }}>
+              <span style={{ color: C.textSecondary }}>Mas’ul Admin:</span>
+              <span className="font-bold" style={{ color: C.textPrimary }}>{viewingBranch.managerName}</span>
             </div>
-            <div className="flex justify-between py-1.5 border-b border-slate-100">
-              <span className="text-slate-500">O‘quvchilar soni:</span>
-              <span className="font-bold text-slate-800">{viewingBranch.studentCount} nafar</span>
+            <div className="flex justify-between py-1.5" style={{ borderBottom: `1px solid ${C.border}` }}>
+              <span style={{ color: C.textSecondary }}>O‘quvchilar soni:</span>
+              <span className="font-bold" style={{ color: C.textPrimary }}>{viewingBranch.studentCount} nafar</span>
             </div>
-            <div className="flex justify-between py-1.5 border-b border-slate-100">
-              <span className="text-slate-500">Guruhlar soni:</span>
-              <span className="font-bold text-slate-800">{viewingBranch.groupsCount} ta</span>
+            <div className="flex justify-between py-1.5" style={{ borderBottom: `1px solid ${C.border}` }}>
+              <span style={{ color: C.textSecondary }}>Guruhlar soni:</span>
+              <span className="font-bold" style={{ color: C.textPrimary }}>{viewingBranch.groupsCount} ta</span>
             </div>
             <div className="flex justify-end pt-3">
               <Button variant="primary" onClick={() => setViewingBranch(null)}>
@@ -1253,7 +1528,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
         </Modal>
       )}
 
-      {/* EDIT BRANCH MODAL */}
+      {/* ── EDIT BRANCH MODAL ─────────────────────────────────────────────── */}
       {editingBranch && (
         <Modal
           isOpen={!!editingBranch}
@@ -1263,7 +1538,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
         >
           <form onSubmit={handleSaveEditBranch} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold mb-1" style={{ color: C.textPrimary }}>
                 Markaz Nomi *
               </label>
               <Input
@@ -1272,9 +1547,9 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
                 onChange={(e) => setBranchForm({ ...branchForm, name: e.target.value })}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold mb-1" style={{ color: C.textPrimary }}>
                   Shahar
                 </label>
                 <Input
@@ -1284,7 +1559,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold mb-1" style={{ color: C.textPrimary }}>
                   Mas’ul Admin
                 </label>
                 <Input
@@ -1293,7 +1568,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
                 />
               </div>
             </div>
-            <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
+            <div className="flex justify-end gap-2 pt-4" style={{ borderTop: `1px solid ${C.border}` }}>
               <Button variant="ghost" type="button" onClick={() => setEditingBranch(null)}>
                 Bekor qilish
               </Button>
@@ -1305,7 +1580,7 @@ export const AdminOverviewPage: React.FC<AdminOverviewPageProps> = ({
         </Modal>
       )}
 
-      {/* CONFIRM DELETE MODAL */}
+      {/* ── CONFIRM DELETE MODAL ──────────────────────────────────────────── */}
       <ConfirmDialog
         isOpen={!!deletingBranchId}
         onClose={() => setDeletingBranchId(null)}
